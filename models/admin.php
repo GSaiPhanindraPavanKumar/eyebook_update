@@ -120,5 +120,84 @@ class AdminModel {
             return "Error creating table: " . $this->conn->error;
         }
     }
+
+    public function createStudentsProgressTable() {
+        $sql = "CREATE TABLE IF NOT EXISTS students_progress (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            student_id INT NOT NULL,
+            course_id INT NOT NULL,
+            progress INT NOT NULL,
+            grade VARCHAR(10),
+            FOREIGN KEY (course_id) REFERENCES courses(id) ON DELETE CASCADE
+        )";
+        if ($this->conn->query($sql) === TRUE) {
+            return "Table 'students_progress' created successfully or already exists";
+        } else {
+            return "Error creating table: " . $this->conn->error;
+        }
+    }
+
+    public function createAssessmentsTable() {
+        $sql = "CREATE TABLE IF NOT EXISTS assessments (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            course_id INT NOT NULL,
+            title VARCHAR(255) NOT NULL,
+            date DATE NOT NULL,
+            max_marks INT NOT NULL,
+            FOREIGN KEY (course_id) REFERENCES courses(id) ON DELETE CASCADE
+        )";
+        if ($this->conn->query($sql) === TRUE) {
+            return "Table 'assessments' created successfully or already exists";
+        } else {
+            return "Error creating table: " . $this->conn->error;
+        }
+    }
+
+    public function createAssignmentsTable() {
+        $sql = "CREATE TABLE IF NOT EXISTS assignments (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            course_id INT NOT NULL,
+            title VARCHAR(255) NOT NULL,
+            due_date DATE NOT NULL,
+            status VARCHAR(50),
+            FOREIGN KEY (course_id) REFERENCES courses(id) ON DELETE CASCADE
+        )";
+        if ($this->conn->query($sql) === TRUE) {
+            return "Table 'assignments' created successfully or already exists";
+        } else {
+            return "Error creating table: " . $this->conn->error;
+        }
+    }
+
+    public function createVirtualMeetingsTable() {
+        $sql = "CREATE TABLE IF NOT EXISTS virtual_meetings (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            course_id INT NOT NULL,
+            topic VARCHAR(255) NOT NULL,
+            date DATE NOT NULL,
+            meeting_link VARCHAR(255) NOT NULL,
+            FOREIGN KEY (course_id) REFERENCES courses(id) ON DELETE CASCADE
+        )";
+        if ($this->conn->query($sql) === TRUE) {
+            return "Table 'virtual_meetings' created successfully or already exists";
+        } else {
+            return "Error creating table: " . $this->conn->error;
+        }
+    }
+
+    public function createAttendanceTable() {
+        $sql = "CREATE TABLE IF NOT EXISTS attendance (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            student_id INT NOT NULL,
+            course_id INT NOT NULL,
+            attendance_percentage INT NOT NULL,
+            FOREIGN KEY (course_id) REFERENCES courses(id) ON DELETE CASCADE
+        )";
+        if ($this->conn->query($sql) === TRUE) {
+            return "Table 'attendance' created successfully or already exists";
+        } else {
+            return "Error creating table: " . $this->conn->error;
+        }
+    }
 }
 ?>

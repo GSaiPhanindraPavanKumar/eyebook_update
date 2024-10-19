@@ -16,6 +16,9 @@ $tableCreationMessageCourses = $adminModel->createCoursesTable();
 $tableCreationMessageSpocs = $adminModel->createSpocsTable();
 $tableCreationMessageStudents = $adminModel->createStudentsTable();
 $tableCreationMessageStudents = $adminModel->createFacultyTable();
+$tableCreationMessageStudents = $adminModel->createVirtualMeetingsTable();
+$tableCreationMessageStudents = $adminModel->createAttendanceTable();
+
 
 
 // echo $tableCreationMessage;

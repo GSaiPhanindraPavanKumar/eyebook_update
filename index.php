@@ -23,6 +23,8 @@ $router->mount('/admin', function() use ($router) {
         require __DIR__ . '/views/admin/dashboard.php';
     });
 
+    
+
     $router->get('/profile', function() {
         require __DIR__ . '/views/admin/profile.php';
     });
@@ -140,11 +142,37 @@ $router->mount('/faculty', function() use ($router) {
         require __DIR__ . '/views/faculty/profile.php';
     });
 
-    $router->get('/add_faculty', function(){
-        require __DIR__ . '/views/faculty/addFaculty.php';
+    $router->get('/view_virtual_meetings', function() {
+        require __DIR__ . '/views/faculty/view_virtual_meetings.php';
+    });
+    
+    $router->post('/view_virtual_meetings', function() {
+        require __DIR__ . '/views/faculty/view_virtual_meetings.php';
+    });
+    
+    $router->get('/edit_meeting', function() {
+        require __DIR__ . '/views/faculty/edit_meeting.php';
+    });
+    
+    $router->post('/edit_meeting', function() {
+        require __DIR__ . '/views/faculty/edit_meeting.php';
+    });
+    
+    $router->post('/delete_meeting', function() {
+        require __DIR__ . '/views/faculty/delete_meeting.php';
+    });
+
+    $router->get('/view_course', function(){
+        require __DIR__ . '/views/faculty/view_course.php';
     });
     $router->post('/add_faculty', function(){
         require __DIR__ . '/views/faculty/addFaculty.php';
+    });
+
+
+
+    $router->get('/courses', function(){
+        require __DIR__ . '/views/faculty/my_courses.php';
     });
 
 

@@ -133,20 +133,6 @@ $stmt->close();
                 <li class="nav-item"><hr></li>
 
                 <li class="nav-item">
-                    <a class="nav-link" data-toggle="collapse" href="#faculty" aria-expanded="false" aria-controls="faculty">
-                        <i class="icon-layout menu-icon"></i>
-                        <span class="menu-title">Faculty</span>
-                        <i class="menu-arrow"></i>
-                    </a>
-                    <div class="collapse" id="faculty">
-                        <ul class="nav flex-column sub-menu">
-                            <li class="nav-item"> <a class="nav-link" href="#">Upload Faculty</a></li>
-                            <li class="nav-item"> <a class="nav-link" href="add_faculty">Add Faculty</a></li>
-                           <li class="nav-item"> <a class="nav-link" href="#">Manage Faculty</a></li>
-                        </ul>
-                    </div>
-                </li>
-
 
                 <li class="nav-item">
                     <a class="nav-link" data-toggle="collapse" href="#courses" aria-expanded="false" aria-controls="courses">
@@ -156,9 +142,9 @@ $stmt->close();
                     </a>
                     <div class="collapse" id="courses">
                         <ul class="nav flex-column sub-menu">
-                            <li class="nav-item"><a class="nav-link" href="#">Manage Courses</a></li>
-                            <!-- <li class="nav-item"><a class="nav-link" href="#">Manage Courses</a></li> -->
-                            <!-- <li class="nav-item"><a class="nav-link" href="courses">Submission</a></li> -->
+                            <li class="nav-item"><a class="nav-link" href="courses">My Courses</a></li>
+                            <li class="nav-item"><a class="nav-link" href="meetings">Meetings</a></li>
+                            <li class="nav-item"><a class="nav-link" href="assessments">Assessments</a></li>
                         </ul>
                     </div>
                 </li>
