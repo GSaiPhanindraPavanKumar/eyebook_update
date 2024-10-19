@@ -28,6 +28,6 @@ if (ini_get("session.use_cookies")) {
 }
 
 // Redirect to the login page
-header("Location: login?timestamp=" . time());
+header("Location: login.php?timestamp=" . time());
 exit();
 ?>

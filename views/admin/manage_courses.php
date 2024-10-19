@@ -54,7 +54,7 @@ $conn->close();
                                             <td><?php echo htmlspecialchars($course['description']); ?></td>
                                             <td><?php echo htmlspecialchars($course['long_name']); ?></td>
                                             <td>
-                                                <a href="view_course?id=<?php echo $course['id']; ?>" class="btn btn-primary btn-sm">View</a>
+                                                <a href="view_course.php?id=<?php echo $course['id']; ?>" class="btn btn-primary btn-sm">View</a>
                                             </td>
                                         </tr>
                                     <?php endforeach; ?>

@@ -107,7 +107,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
                         <script>
                             <?php if (isset($message)): ?>
-                                toastr.success("<?php echo htmlspecialchars($message); ?>");
+                                <script>
+                                    toastr.success("<?php echo htmlspecialchars($message); ?>");
+                                    setTimeout(function() {
+                                        window.location.href = 'manage_university.php';
+                                    }, 2000); // Redirect after 2 seconds
+                                </script>
                             <?php endif; ?>
                         </script>
                     </div>

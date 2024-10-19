@@ -132,7 +132,7 @@ $stmt->close();
 
                 <li class="nav-item"><hr></li>
 
-                <li class="nav-item">
+                <!-- <li class="nav-item">
                     <a class="nav-link" data-toggle="collapse" href="#faculty" aria-expanded="false" aria-controls="faculty">
                         <i class="icon-layout menu-icon"></i>
                         <span class="menu-title">Faculty</span>
@@ -145,7 +145,7 @@ $stmt->close();
                            <li class="nav-item"> <a class="nav-link" href="#">Manage Faculty</a></li>
                         </ul>
                     </div>
-                </li>
+                </li> -->
 
 
                 <li class="nav-item">
@@ -156,9 +156,9 @@ $stmt->close();
                     </a>
                     <div class="collapse" id="courses">
                         <ul class="nav flex-column sub-menu">
-                            <li class="nav-item"><a class="nav-link" href="#">Manage Courses</a></li>
-                            <!-- <li class="nav-item"><a class="nav-link" href="#">Manage Courses</a></li> -->
-                            <!-- <li class="nav-item"><a class="nav-link" href="courses">Submission</a></li> -->
+                            <li class="nav-item"><a class="nav-link" href="courses">my Courses</a></li>
+                            <li class="nav-item"><a class="nav-link" href="#">Assessments</a></li> 
+                            <li class="nav-item"><a class="nav-link" href="#">Meetings</a></li> 
                         </ul>
                     </div>
                 </li>

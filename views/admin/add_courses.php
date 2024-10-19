@@ -42,6 +42,11 @@ $conn->close();
                         <h5 class="card-title">Create Course</h5>
                         <?php if ($message): ?>
                             <div class="alert alert-info"><?php echo $message; ?></div>
+                            <script>
+                                setTimeout(function() {
+                                    window.location.href = 'add_courses.php';
+                                }, 3000); // Redirect after 3 seconds
+                            </script>
                         <?php endif; ?>
                         <form method="POST" action="">
                             <div class="mb-3">

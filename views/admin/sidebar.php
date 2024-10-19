@@ -45,27 +45,27 @@ $stmt->close();
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <title>Student</title>
     <!-- plugins:css -->
-    <link rel="stylesheet" href="../views\public/vendors/feather/feather.css">
-    <link rel="stylesheet" href="../views\public/vendors/ti-icons/css/themify-icons.css">
-    <link rel="stylesheet" href="../views\public/vendors/css/vendor.bundle.base.css">
+    <link rel="stylesheet" href="../../views/public/vendors/feather/feather.css">
+    <link rel="stylesheet" href="../../views/public/vendors/ti-icons/css/themify-icons.css">
+    <link rel="stylesheet" href="../../views/public/vendors/css/vendor.bundle.base.css">
     <!-- endinject -->
     <!-- Plugin css for this page -->
-    <link rel="stylesheet" href="../views\public/vendors/datatables.net-bs4/dataTables.bootstrap4.css">
-    <link rel="stylesheet" href="../views\public/vendors/ti-icons/css/themify-icons.css">
-    <link rel="stylesheet" type="text/css" href="../views\public/js/select.dataTables.min.css">
+    <link rel="stylesheet" href="../../views/public/vendors/datatables.net-bs4/dataTables.bootstrap4.css">
+    <link rel="stylesheet" href="../../views/public/vendors/ti-icons/css/themify-icons.css">
+    <link rel="stylesheet" type="text/css" href="../../views/public/js/select.dataTables.min.css">
     <!-- End plugin css for this page -->
     <!-- inject:css -->
-    <link rel="stylesheet" href="../views\public/css/vertical-layout-light/style.css">
+    <link rel="stylesheet" href="../../views/public/css/vertical-layout-light/style.css">
     <!-- endinject -->
-    <link rel="shortcut icon" href="../views\public\assets\images\android-chrome-512x512.png" />
+    <link rel="shortcut icon" href="../../views/public\assets\images\android-chrome-512x512.png" />
 </head>
 <body>
 <div class="container-scroller">
     <!-- partial:partials/_navbar.html -->
     <nav class="navbar col-lg-12 col-12 p-0 fixed-top d-flex flex-row">
         <div class="text-center navbar-brand-wrapper d-flex align-items-center justify-content-center">
-            <a class="navbar-brand brand-logo mr-5" href="#"><img src="../views\public\assets\images\logo1.png" class="mr-2" alt="logo" height="50">EyeBook</a>
-            <a class="navbar-brand brand-logo-mini" href="#"><img src="../views\public\assets\images\logo1.png" alt="logo"/></a>
+            <a class="navbar-brand brand-logo mr-5" href="#"><img src="../../views/public\assets\images\logo1.png" class="mr-2" alt="logo" height="50">EyeBook</a>
+            <a class="navbar-brand brand-logo-mini" href="#"><img src="../../views/public\assets\images\logo1.png" alt="logo"/></a>
         </div>
         <div class="navbar-menu-wrapper d-flex align-items-center justify-content-end">
             <button class="navbar-toggler navbar-toggler align-self-center" type="button" data-toggle="minimize">
@@ -76,7 +76,7 @@ $stmt->close();
 
                 <li class="nav-item nav-profile dropdown">
                     <a class="nav-link dropdown-toggle" href="#" data-toggle="dropdown" id="profileDropdown">
-                        <img src="../views\public\images\user.jpg" alt="profile"/>
+                        <img src="../../views/public\images\user.jpg" alt="profile"/>
                     </a>
                     <div class="dropdown-menu dropdown-menu-right navbar-dropdown" aria-labelledby="profileDropdown">
                         <a class="dropdown-item" href="profile">
@@ -123,7 +123,7 @@ $stmt->close();
         <nav class="sidebar sidebar-offcanvas" id="sidebar">
             <ul class="nav">
                 <li class="nav-item">
-                    <a class="nav-link" href="dashboard">
+                    <a class="nav-link" href="dashboard.php">
                         <i class="icon-grid menu-icon"></i>
                         <span class="menu-title">Dashboard</span>
                     </a>
@@ -139,8 +139,8 @@ $stmt->close();
                     </a>
                     <div class="collapse" id="university">
                         <ul class="nav flex-column sub-menu">
-                            <li class="nav-item"> <a class="nav-link" href="add_university">Create University</a></li>
-                            <li class="nav-item"> <a class="nav-link" href="#">Manage University</a></li>
+                            <li class="nav-item"> <a class="nav-link" href="addUniversity.php">Create University</a></li>
+                            <li class="nav-item"> <a class="nav-link" href="manage_university.php">Manage University</a></li>
 <!--                            <li class="nav-item"> <a class="nav-link" href="#">Typography</a></li>-->
                         </ul>
                     </div>
@@ -155,8 +155,8 @@ $stmt->close();
                     </a>
                     <div class="collapse" id="courses">
                         <ul class="nav flex-column sub-menu">
-                            <li class="nav-item"><a class="nav-link" href="create_course">Add Courses</a></li>
-                            <li class="nav-item"><a class="nav-link" href="manage_courses">Manage Courses</a></li>
+                            <li class="nav-item"><a class="nav-link" href="add_courses.php">Add Courses</a></li>
+                            <li class="nav-item"><a class="nav-link" href="manage_courses.php">Manage Courses</a></li>
                             <!-- <li class="nav-item"><a class="nav-link" href="courses">Submission</a></li> -->
                         </ul>
                     </div>
@@ -169,7 +169,7 @@ $stmt->close();
                     </a>
                     <div class="collapse" id="student">
                         <ul class="nav flex-column sub-menu">
-                        <li class="nav-item"> <a class="nav-link" href="upload_students">Upload Students</a></li>
+                        <li class="nav-item"> <a class="nav-link" href="uploadStudents.php">Upload Students</a></li>
                             <li class="nav-item"> <a class="nav-link" href="#">Manage Student</a></li>
                         </ul>
                     </div>
@@ -236,13 +236,13 @@ $stmt->close();
 
                 <li class="nav-item"><hr></li>
                 <li class="nav-item">
-                    <a class="nav-link" href="change_password">
+                    <a class="nav-link" href="updatePassword.php">
                         <i class="ti-settings menu-icon"></i>
                         <span class="menu-title">Change Password</span>
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="logout">
+                    <a class="nav-link" href="logout.php">
                         <i class="ti-power-off menu-icon"></i>
                         <span class="menu-title">Logout</span>
                 </a>

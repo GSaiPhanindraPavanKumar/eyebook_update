@@ -17,13 +17,10 @@ $course['universities'] = isset($course['universities']) ? json_decode($course['
 
 // Fetch universities details
 $universities = [];
-if (!empty($course['universities'])) {
-    $university_ids = implode(',', array_map('intval', $course['universities']));
-    $sql_universities = "SELECT id, long_name FROM universities WHERE id IN ($university_ids)";
-    $result_universities = $conn->query($sql_universities);
-    while ($row = $result_universities->fetch_assoc()) {
-        $universities[] = $row;
-    }
+$sql_universities = "SELECT id, long_name FROM universities";
+$result_universities = $conn->query($sql_universities);
+while ($row = $result_universities->fetch_assoc()) {
+    $universities[] = $row;
 }
 
 $conn->close();
@@ -77,8 +74,14 @@ $conn->close();
                                 <p><?php echo htmlspecialchars($course['description']); ?></p>
                                 <h5 class="mt-3">Assigned Universities</h5>
                                 <ul>
-                                    <?php if (!empty($universities)): ?>
-                                        <?php foreach ($universities as $university): ?>
+                                    <?php if (!empty($course['universities'])): ?>
+                                        <?php foreach ($course['universities'] as $university_id): ?>
+                                            <?php
+                                            $university = array_filter($universities, function($u) use ($university_id) {
+                                                return $u['id'] == $university_id;
+                                            });
+                                            $university = array_shift($university);
+                                            ?>
                                             <li><?php echo htmlspecialchars($university['long_name']); ?></li>
                                         <?php endforeach; ?>
                                     <?php else: ?>
@@ -118,6 +121,14 @@ $conn->close();
                                 </form>
                             </div>
                         </div>
+                        <?php if (isset($message)): ?>
+                            <div class="alert alert-info"><?php echo $message; ?></div>
+                            <script>
+                                setTimeout(function() {
+                                    window.location.href = 'add_courses.php';
+                                }, 3000); // Redirect after 3 seconds
+                            </script>
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>

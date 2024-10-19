@@ -24,10 +24,29 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         exit;
     }
 
-    // Extract the SCORM package
-    $scorm_dir = 'uploads/' . time() . '-' . basename($scorm_file['name']);
+    // Decode the existing content or initialize an empty array
+    $course_content = json_decode($course['content'], true);
+    if (!is_array($course_content)) {
+        $course_content = [];
+    }
+
+    // Create a directory for the SCORM package
+    $scorm_dir = 'uploads/' . time() . '-' . basename($scorm_file['name'], '.zip');
     mkdir($scorm_dir, 0777, true);
-    move_uploaded_file($scorm_file['tmp_name'], $scorm_dir . '/' . basename($scorm_file['name']));
+
+    // Move the uploaded file to the created directory
+    $scorm_file_path = $scorm_dir . '/' . basename($scorm_file['name']);
+    move_uploaded_file($scorm_file['tmp_name'], $scorm_file_path);
+
+    // Unzip the SCORM package
+    $zip = new ZipArchive;
+    if ($zip->open($scorm_file_path) === TRUE) {
+        $zip->extractTo($scorm_dir);
+        $zip->close();
+    } else {
+        echo json_encode(['message' => 'Failed to unzip SCORM package']);
+        exit;
+    }
 
     // Verify that the index.html file exists
     $index_path = $scorm_dir . '/index.html';
@@ -36,17 +55,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         exit;
     }
 
-    // Add the new unit to the course
+    // Add the new unit to the course content
     $new_unit = [
         'unitTitle' => $unit_name,
         'materials' => [['scormDir' => $scorm_dir, 'indexPath' => $index_path]]
     ];
-    $course['content'][] = $new_unit;
+    $course_content[] = $new_unit;
 
     // Update the course in the database
     $sql = "UPDATE courses SET content = ? WHERE id = ?";
     $stmt = $conn->prepare($sql);
-    $content_json = json_encode($course['content']);
+    $content_json = json_encode($course_content);
     $stmt->bind_param("si", $content_json, $course_id);
     $stmt->execute();
 

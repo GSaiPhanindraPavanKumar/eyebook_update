@@ -38,6 +38,25 @@ if ($result3->num_rows > 0) {
     $course_count = $row['course_count'];
 }
 
+$sql_spoc = "SELECT name, email, phone, university_id FROM spocs";
+$result4 = $conn->query($sql_spoc);
+
+// $university_id = $row['university_id'];
+// $sql = "SELECT long_name FROM universities WHERE university_id = $university_id";
+// $stmt = $conn->prepare($sql);
+// $stmt->bind_param("i", $university_id);
+// $stmt->execute();
+// $stmt->bind_result($university_name);
+// $stmt->fetch();
+
+$sql_universities = "SELECT * FROM universities";
+$result5 = $conn->query($sql_universities);
+
+
+$sql_courses = "SELECT * FROM courses";
+$result6 = $conn->query($sql_courses);
+
+
 $conn->close();
 ?>
 
@@ -127,7 +146,7 @@ $conn->close();
                 </div>
             </div>
         </div>
-        <div class="row">
+        <!-- <div class="row">
             <div class="col-md-6 grid-margin stretch-card">
                 <div class="card">
                     <div class="card-body">
@@ -168,8 +187,8 @@ $conn->close();
                     </div>
                 </div>
             </div>
-        </div>
-        <div class="row">
+        </div> -->
+        <!-- <div class="row">
             <div class="col-md-12 grid-margin stretch-card">
                 <div class="card position-relative">
                     <div class="card-body">
@@ -372,81 +391,41 @@ $conn->close();
                     </div>
                 </div>
             </div>
-        </div>
+        </div> -->
         <div class="row">
             <div class="col-md-7 grid-margin stretch-card">
                 <div class="card">
                     <div class="card-body">
-                        <p class="card-title mb-0">Top Products</p>
+                        <p class="card-title mb-0">SPOC</p>
                         <div class="table-responsive">
-                            <table class="table table-striped table-borderless">
-                                <thead>
-                                    <tr>
-                                        <th>Product</th>
-                                        <th>Price</th>
-                                        <th>Date</th>
-                                        <th>Status</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td>Search Engine Marketing</td>
-                                        <td class="font-weight-bold">$362</td>
-                                        <td>21 Sep 2018</td>
-                                        <td class="font-weight-medium">
-                                            <div class="badge badge-success">Completed</div>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>Search Engine Optimization</td>
-                                        <td class="font-weight-bold">$116</td>
-                                        <td>13 Jun 2018</td>
-                                        <td class="font-weight-medium">
-                                            <div class="badge badge-success">Completed</div>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>Display Advertising</td>
-                                        <td class="font-weight-bold">$551</td>
-                                        <td>28 Sep 2018</td>
-                                        <td class="font-weight-medium">
-                                            <div class="badge badge-warning">Pending</div>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>Pay Per Click Advertising</td>
-                                        <td class="font-weight-bold">$523</td>
-                                        <td>30 Jun 2018</td>
-                                        <td class="font-weight-medium">
-                                            <div class="badge badge-warning">Pending</div>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>E-Mail Marketing</td>
-                                        <td class="font-weight-bold">$781</td>
-                                        <td>01 Nov 2018</td>
-                                        <td class="font-weight-medium">
-                                            <div class="badge badge-danger">Cancelled</div>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>Referral Marketing</td>
-                                        <td class="font-weight-bold">$283</td>
-                                        <td>20 Mar 2018</td>
-                                        <td class="font-weight-medium">
-                                            <div class="badge badge-warning">Pending</div>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>Social media marketing</td>
-                                        <td class="font-weight-bold">$897</td>
-                                        <td>26 Oct 2018</td>
-                                        <td class="font-weight-medium">
-                                            <div class="badge badge-success">Completed</div>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                        <table class="table table-striped table-borderless">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Phone</th>
+                                    <!-- <th>University ID</th> -->
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php
+                                if ($result4->num_rows > 0) {
+                                    // Output data of each row
+                                    while($row = $result4->fetch_assoc()) {
+                                        echo "<tr>";
+                                        echo "<td>" . htmlspecialchars($row['name']) . "</td>";
+                                        echo "<td>" . htmlspecialchars($row['email']) . "</td>";
+                                        echo "<td>" . htmlspecialchars($row['phone']) . "</td>";
+                                        // echo "<td>" . htmlspecialchars($university_name) . "</td>";
+                                        echo "</tr>";
+                                    }
+                                } else {
+                                    echo "<tr><td colspan='4'>No data available</td></tr>";
+                                }
+                                ?>
+                            </tbody>
+                        </table>
+
                         </div>
                     </div>
                 </div>
@@ -466,7 +445,7 @@ $conn->close();
                                     </div>
                                     <i class="remove ti-close"></i>
                                 </li>
-                                <li class="completed">
+                                <!-- <li class="completed">
                                     <div class="form-check form-check-flat">
                                         <label class="form-check-label">
                                             <input class="checkbox" type="checkbox" checked>
@@ -492,16 +471,7 @@ $conn->close();
                                         </label>
                                     </div>
                                     <i class="remove ti-close"></i>
-                                </li>
-                                <li>
-                                    <div class="form-check form-check-flat">
-                                        <label class="form-check-label">
-                                            <input class="checkbox" type="checkbox">
-                                            Level up for Antony
-                                        </label>
-                                    </div>
-                                    <i class="remove ti-close"></i>
-                                </li>
+                                </li> --> 
                             </ul>
                         </div>
                         <div class="add-items d-flex mb-0 mt-2">
@@ -516,68 +486,30 @@ $conn->close();
             <div class="col-md-4 stretch-card grid-margin">
                 <div class="card">
                     <div class="card-body">
-                        <p class="card-title mb-0">Projects</p>
+                        <p class="card-title mb-0">Universities</p>
                         <div class="table-responsive">
-                            <table class="table table-borderless">
-                                <thead>
-                                    <tr>
-                                        <th class="pl-0  pb-2 border-bottom">Places</th>
-                                        <th class="border-bottom pb-2">Orders</th>
-                                        <th class="border-bottom pb-2">Users</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td class="pl-0">Kentucky</td>
-                                        <td>
-                                            <p class="mb-0"><span class="font-weight-bold mr-2">65</span>(2.15%)</p>
-                                        </td>
-                                        <td class="text-muted">65</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="pl-0">Ohio</td>
-                                        <td>
-                                            <p class="mb-0"><span class="font-weight-bold mr-2">54</span>(3.25%)</p>
-                                        </td>
-                                        <td class="text-muted">51</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="pl-0">Nevada</td>
-                                        <td>
-                                            <p class="mb-0"><span class="font-weight-bold mr-2">22</span>(2.22%)</p>
-                                        </td>
-                                        <td class="text-muted">32</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="pl-0">North Carolina</td>
-                                        <td>
-                                            <p class="mb-0"><span class="font-weight-bold mr-2">46</span>(3.27%)</p>
-                                        </td>
-                                        <td class="text-muted">15</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="pl-0">Montana</td>
-                                        <td>
-                                            <p class="mb-0"><span class="font-weight-bold mr-2">17</span>(1.25%)</p>
-                                        </td>
-                                        <td class="text-muted">25</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="pl-0">Nevada</td>
-                                        <td>
-                                            <p class="mb-0"><span class="font-weight-bold mr-2">52</span>(3.11%)</p>
-                                        </td>
-                                        <td class="text-muted">71</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="pl-0 pb-0">Louisiana</td>
-                                        <td class="pb-0">
-                                            <p class="mb-0"><span class="font-weight-bold mr-2">25</span>(1.32%)</p>
-                                        </td>
-                                        <td class="pb-0">14</td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                        <table class="table table-borderless">
+    <thead>
+        <tr>
+            <th class="pl-0 pb-2 border-bottom">University Name</th>
+            <th class="border-bottom pb-2">Short Name</th>
+        </tr>
+    </thead>
+    <tbody>
+        <?php
+        if ($result5->num_rows > 0) {
+            while($row = $result5->fetch_assoc()) {
+                echo "<tr>";
+                echo "<td class='pl-0'>" . htmlspecialchars($row['long_name']) . "</td>";
+                echo "<td><p class='mb-0'><span class='font-weight-bold mr-2'>" . htmlspecialchars($row['short_name']) . "</span></p></td>";
+                echo "</tr>";
+            }
+        } else {
+            echo "<tr><td colspan='3'>No data available</td></tr>";
+        }
+        ?>
+    </tbody>
+</table>
                         </div>
                     </div>
                 </div>
@@ -635,10 +567,8 @@ $conn->close();
                                 <p class="card-title text-white">Number of Meetings</p>
                                 <div class="row">
                                     <div class="col-8 text-white">
-                                        <h3>34040</h3>
-                                        <p class="text-white font-weight-500 mb-0">The total number of sessions within the date range.It is calculated as the sum . </p>
-                                    </div>
-                                    <div class="col-4 background-icon">
+                                        <h3>0</h3>
+                                        <!-- <p class="text-white font-weight-500 mb-0">The total number of sessions within the date range.It is calculated as the sum . </p> -->
                                     </div>
                                 </div>
                             </div>
@@ -647,64 +577,32 @@ $conn->close();
                 </div>
             </div>
             <div class="col-md-4 stretch-card grid-margin">
-                <div class="card">
-                    <div class="card-body">
-                        <p class="card-title">Notifications</p>
-                        <ul class="icon-data-list">
-                            <li>
-                                <div class="d-flex">
-                                    <img src="images/faces/face1.jpg" alt="user">
-                                    <div>
-                                        <p class="text-info mb-1">Isabella Becker</p>
-                                        <p class="mb-0">Sales dashboard have been created</p>
-                                        <small>9:30 am</small>
-                                    </div>
-                                </div>
-                            </li>
-                            <li>
-                                <div class="d-flex">
-                                    <img src="images/faces/face2.jpg" alt="user">
-                                    <div>
-                                        <p class="text-info mb-1">Adam Warren</p>
-                                        <p class="mb-0">You have done a great job #TW111</p>
-                                        <small>10:30 am</small>
-                                    </div>
-                                </div>
-                            </li>
-                            <li>
-                                <div class="d-flex">
-                                    <img src="images/faces/face3.jpg" alt="user">
-                                    <div>
-                                        <p class="text-info mb-1">Leonard Thornton</p>
-                                        <p class="mb-0">Sales dashboard have been created</p>
-                                        <small>11:30 am</small>
-                                    </div>
-                                </div>
-                            </li>
-                            <li>
-                                <div class="d-flex">
-                                    <img src="images/faces/face4.jpg" alt="user">
-                                    <div>
-                                        <p class="text-info mb-1">George Morrison</p>
-                                        <p class="mb-0">Sales dashboard have been created</p>
-                                        <small>8:50 am</small>
-                                    </div>
-                                </div>
-                            </li>
-                            <li>
-                                <div class="d-flex">
-                                    <img src="images/faces/face5.jpg" alt="user">
-                                    <div>
-                                        <p class="text-info mb-1">Ryan Cortez</p>
-                                        <p class="mb-0">Herbs are fun and easy to grow.</p>
-                                        <small>9:00 am</small>
-                                    </div>
-                                </div>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
+    <div class="card">
+        <div class="card-body">
+            <p class="card-title">Courses</p>
+            <table class="table table-borderless">
+                <thead>
+                    <tr>
+                        <th class="pl-0 pb-2 border-bottom">Course Name</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php
+                    if ($result6->num_rows > 0) {
+                        while($row = $result6->fetch_assoc()) {
+                            echo "<tr>";
+                            echo "<td class='pl-0'>" . htmlspecialchars($row['name']) . "</td>";
+                            echo "</tr>";
+                        }
+                    } else {
+                        echo "<tr><td colspan='3'>No courses available</td></tr>";
+                    }
+                    ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
         </div>
 
     </div>
