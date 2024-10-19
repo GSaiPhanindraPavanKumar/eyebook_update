@@ -37,22 +37,6 @@ class AdminModel {
         }
     }
 
-    public function createCoursesTable() {
-        $sql = "CREATE TABLE IF NOT EXISTS courses (
-            id INT AUTO_INCREMENT PRIMARY KEY,
-            name VARCHAR(255) NOT NULL,
-            university_id INT,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-            FOREIGN KEY (university_id) REFERENCES universities(id) ON DELETE CASCADE
-        )";
-        if ($this->conn->query($sql) === TRUE) {
-            return "Table 'courses' created successfully or already exists";
-        } else {
-            return "Error creating table: " . $this->conn->error;
-        }
-    }
-
     public function createSpocsTable() {
         $sql = "CREATE TABLE IF NOT EXISTS spocs (
             id INT AUTO_INCREMENT PRIMARY KEY,
@@ -115,6 +99,23 @@ class AdminModel {
         )";
         if ($this->conn->query($sql) === TRUE) {
             return "Table 'faculty' created successfully or already exists";
+        } else {
+            return "Error creating table: " . $this->conn->error;
+        }
+    }
+
+    public function createCoursesTable() {
+        $sql = "CREATE TABLE IF NOT EXISTS courses (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            name VARCHAR(255) NOT NULL,
+            description TEXT NOT NULL,
+            university_id INT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            FOREIGN KEY (university_id) REFERENCES universities(id) ON DELETE CASCADE
+        )";
+        if ($this->conn->query($sql) === TRUE) {
+            return "Table 'courses' created successfully or already exists";
         } else {
             return "Error creating table: " . $this->conn->error;
         }
