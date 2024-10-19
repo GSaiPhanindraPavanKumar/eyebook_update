@@ -34,6 +34,30 @@ $router->mount('/admin', function() use ($router) {
         require __DIR__ . '/views/admin/addUniversity.php';
     });
 
+    $router->get('/create_course', function(){
+        require __DIR__ . '/views/admin/add_courses.php';
+    });
+
+    $router->post('/create_course', function(){
+        require __DIR__ . '/views/admin/add_courses.php';
+    });
+
+    $router->post('/assign_course', function() {
+        require 'views/admin/assign_course.php';
+    });
+
+    $router->get('/manage_courses', function(){
+        require __DIR__ . '/views/admin/manage_courses.php';
+    });
+
+    $router->post('/manage_courses', function(){
+        require __DIR__ . '/views/admin/manage_courses.php';
+    });
+
+    $router->get('/view_course', function() {
+        require __DIR__ . '/views/admin/view_course.php';
+    });
+
     $router->post('/add_university', function(){
         require __DIR__ . '/views/admin/addUniversity.php';
     });

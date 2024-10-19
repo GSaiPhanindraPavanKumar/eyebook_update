@@ -51,7 +51,7 @@ $stmt->close();
     <!-- endinject -->
     <!-- Plugin css for this page -->
     <link rel="stylesheet" href="../views\public/vendors/datatables.net-bs4/dataTables.bootstrap4.css">
-    <link rel="stylesheet" href="../views\public//vendors/ti-icons/css/themify-icons.css">
+    <link rel="stylesheet" href="../views\public/vendors/ti-icons/css/themify-icons.css">
     <link rel="stylesheet" type="text/css" href="../views\public/js/select.dataTables.min.css">
     <!-- End plugin css for this page -->
     <!-- inject:css -->
@@ -155,8 +155,8 @@ $stmt->close();
                     </a>
                     <div class="collapse" id="courses">
                         <ul class="nav flex-column sub-menu">
-                            <li class="nav-item"><a class="nav-link" href="#">Add Courses</a></li>
-                            <li class="nav-item"><a class="nav-link" href="#">Manage Courses</a></li>
+                            <li class="nav-item"><a class="nav-link" href="create_course">Add Courses</a></li>
+                            <li class="nav-item"><a class="nav-link" href="manage_courses">Manage Courses</a></li>
                             <!-- <li class="nav-item"><a class="nav-link" href="courses">Submission</a></li> -->
                         </ul>
                     </div>

@@ -1,5 +1,5 @@
 <?php
-// session_start();
+session_start();
 
 include  'config/connection.php';
 include  'models/admin.php';
