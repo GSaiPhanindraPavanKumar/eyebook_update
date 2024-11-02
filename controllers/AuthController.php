@@ -18,7 +18,7 @@ class AuthController {
                 if ($admin) {
                     $_SESSION['admin'] = $admin;
                     $_SESSION['admin']['username'] = $admin['username']; // Store username in session
-                    header('Location: admin/dashboard');
+                    header('Location: /admin/dashboard');
                 } else {
                     echo 'Invalid username or password';
                 }
