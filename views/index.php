@@ -1,5 +1,5 @@
 <?php
-session_start();
+// session_start();
 
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
@@ -43,7 +43,7 @@ $message = '';
     <div class="container">
         <div class="row align-items-center">
             <div class="col-md-6 col-lg-7">
-                <img src="/eye_final/views/public/assets/images/login-page-img.webp" alt="">
+                <img src="/views/public/assets/images/login-page-img.webp" alt="">
             </div>
             <div class="col-md-6 col-lg-5">
                 <div class="login-box bg-light box-shadow border-radius-12">
