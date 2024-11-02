@@ -19,8 +19,11 @@ class Database {
         $this->host = 'localhost';
         $this->db_name = 'eyebook';
         $this->username = 'root';
-        $this->password = '#*Eyebook@123*#';
-        // $this->password = '';
+        if (getenv('APP_ENV') === 'production') {
+            $this->password = '#*Eyebook@123*#';
+        } else {
+            $this->password = '';
+        }
     }
 
     public function connect() {
