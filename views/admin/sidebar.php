@@ -7,7 +7,7 @@ require __DIR__ . '/../../vendor/autoload.php';
 
 // Check if the user is not logged in
 if (!isset($_SESSION['admin'])) {
-    header("Location: login");
+    header("Location: /login");
     exit;
 }
 
