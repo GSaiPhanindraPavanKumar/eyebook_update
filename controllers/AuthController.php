@@ -9,6 +9,7 @@ class AuthController {
         $this->adminModel = $adminModel ?: new Admin();
     }
 
+
     public function login() {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if (isset($_POST['username']) && isset($_POST['password'])) {
@@ -17,8 +18,8 @@ class AuthController {
                 $admin = $this->adminModel->login($username, $password);
                 if ($admin) {
                     $_SESSION['admin'] = $admin;
-                    $_SESSION['admin']['username'] = $admin['username']; // Store username in session
                     header('Location: /admin/dashboard');
+                    exit();
                 } else {
                     echo 'Invalid username or password';
                 }
