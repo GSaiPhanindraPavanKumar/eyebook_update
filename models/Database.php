@@ -19,7 +19,7 @@ class Database {
         $this->host = 'localhost';
         $this->db_name = 'eyebook';
         $this->username = 'root';
-        $this->password = '';
+        $this->password = '#*Eyebook@123*#';
     }
 
     public function connect() {
