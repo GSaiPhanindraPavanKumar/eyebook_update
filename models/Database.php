@@ -18,8 +18,8 @@ class Database {
         // $this->password = getenv('DB_PASSWORD') ?: '#*Admin123*#';
         $this->host = 'localhost';
         $this->db_name = 'eyebook';
-        $this->username = 'eyebook_user';
-        $this->password = '#*Admin123*#';
+        $this->username = 'root';
+        $this->password = '';
     }
 
     public function connect() {
