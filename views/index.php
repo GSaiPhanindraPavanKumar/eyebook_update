@@ -14,13 +14,13 @@ $message = '';
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>EyeBook</title>
-    <link rel="apple-touch-icon" sizes="180x180" href="/eye_final/views/public/assets/images/apple-touch-icon.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="/eye_final/views/public/assets/images/android-chrome-512x512.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="/eye_final/views/public/assets/images/android-chrome-192x192.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/views/public/assets/images/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/views/public/assets/images/android-chrome-512x512.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/views/public/assets/images/android-chrome-192x192.png">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" type="text/css" href="/eye_final/views/public/assets/styles/core.css">
-    <link rel="stylesheet" type="text/css" href="/eye_final/views/public/assets/styles/icon-font.min.css">
-    <link rel="stylesheet" type="text/css" href="/eye_final/views/public/assets/styles/style.css">
+    <link rel="stylesheet" type="text/css" href="/views/public/assets/styles/core.css">
+    <link rel="stylesheet" type="text/css" href="/views/public/assets/styles/icon-font.min.css">
+    <link rel="stylesheet" type="text/css" href="/views/public/assets/styles/style.css">
     <style>
         h5 {
             color: blue;
@@ -79,9 +79,9 @@ $message = '';
 <div style="bottom:0; background-color: #ffffff; color: #7b09df; text-align: center; padding: 10px 0; font-size: 0.8em;">
     <p>Developed and maintained by <br> <a href="about.html">Phemesoft</a></p>
 </div>
-<script src="/eye_final/views/public/assets/scripts/core.js"></script>
-<script src="/eye_final/views/public/assets/scripts/script.min.js"></script>
-<script src="/eye_final/views/public/assets/scripts/process.js"></script>
-<script src="/eye_final/views/public/assets/scripts/layout-settings.js"></script>
+<script src="/views/public/assets/scripts/core.js"></script>
+<script src="/views/public/assets/scripts/script.min.js"></script>
+<script src="/views/public/assets/scripts/process.js"></script>
+<script src="/views/public/assets/scripts/layout-settings.js"></script>
 </body>
 </html>
