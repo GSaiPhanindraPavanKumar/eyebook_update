@@ -24,6 +24,15 @@ class Admin {
         }
     }
 
+    public function getUserProfile($conn) {
+        $query = 'SELECT * FROM admins WHERE id = :id';
+        $stmt = $conn->prepare($query);
+        $stmt->execute(['id' => $_SESSION['admin']['id']]);
+        $user = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $user;
+    }
+
+
     public static function updatePassword($conn, $admin_id, $new_password) {
         $stmt = $conn->prepare("UPDATE admins SET password = :new_password WHERE id = :admin_id");
         $stmt->execute([

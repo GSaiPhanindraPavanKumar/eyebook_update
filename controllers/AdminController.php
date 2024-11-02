@@ -14,6 +14,14 @@ class AdminController {
         require 'views/admin/index.php';
     }
 
+
+    public function userProfile(){
+        $conn = Database::getConnection();
+        $adminModel = new AdminModel();
+        $admin = $adminModel->getUserProfile($conn);
+        require 'views/admin/userProfile.php';
+    }
+
     public function dashboard() {
         $conn = Database::getConnection();
 

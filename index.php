@@ -22,6 +22,7 @@ $router->post('/login', 'AuthController@login');
 $router->get('/logout', 'AuthController@logout');
 
 $router->get('/admin/dashboard', 'AdminController@dashboard');
+$router->get('/admin/profile', 'AdminController@userProfile');
 $router->get('/admin/addUniversity', 'AdminController@addUniversity');
 $router->post('/admin/addUniversity', 'AdminController@addUniversity');
 $router->get('/admin/manage_university', 'AdminController@manageUniversity');
