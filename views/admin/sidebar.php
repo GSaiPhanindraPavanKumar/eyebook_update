@@ -1,6 +1,6 @@
 <?php
 // Start the session
-session_start();
+// session_start();
 
 // Include the autoload file
 require __DIR__ . '/../../vendor/autoload.php';
