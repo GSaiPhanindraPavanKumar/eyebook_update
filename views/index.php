@@ -50,7 +50,7 @@ $message = '';
                     <div class="login-title">
                         <h2 class="text-center text-primary" style="font-family: cursive;">Admin Login</h2>
                     </div>
-                    <form id="loginForm" action="" method="POST">
+                    <form id="loginForm" action="login" method="POST">
                         <div class="input-group custom">
                             <input type="text" class="form-control form-control-lg" placeholder="Username" name="username" id="username" required>
                         </div>
