@@ -1,0 +1,5 @@
+test
+.phpunit.result.cache
+dash
+phpunit.xml
+.vscode
