@@ -12,10 +12,14 @@ class Database {
     private $conn;
 
     public function __construct() {
-        $this->host = getenv('DB_HOST') ?: 'localhost';
-        $this->db_name = getenv('DB_NAME') ?: 'eyebook';
-        $this->username = getenv('DB_USERNAME') ?: 'eyebook_user';
-        $this->password = getenv('DB_PASSWORD') ?: '#*Admin123*#';
+        // $this->host = getenv('DB_HOST') ?: 'localhost';
+        // $this->db_name = getenv('DB_NAME') ?: 'eyebook';
+        // $this->username = getenv('DB_USERNAME') ?: 'eyebook_user';
+        // $this->password = getenv('DB_PASSWORD') ?: '#*Admin123*#';
+        $this->host = 'localhost';
+        $this->db_name = 'eyebook';
+        $this->username = 'eyebook_user';
+        $this->password = '#*Admin123*#';
     }
 
     public function connect() {
