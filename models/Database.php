@@ -14,8 +14,8 @@ class Database {
     public function __construct() {
         $this->host = getenv('DB_HOST') ?: 'localhost';
         $this->db_name = getenv('DB_NAME') ?: 'eyebook';
-        $this->username = getenv('DB_USERNAME') ?: 'root';
-        $this->password = getenv('DB_PASSWORD') ?: '';
+        $this->username = getenv('DB_USERNAME') ?: 'eyebook_user';
+        $this->password = getenv('DB_PASSWORD') ?: '#*Admin123*#';
     }
 
     public function connect() {
