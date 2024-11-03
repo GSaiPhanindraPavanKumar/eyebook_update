@@ -7,13 +7,13 @@ use Models\Spoc;
 use Models\Course;
 use Models\University;
 use Models\Database;
+use PhpOffice\PhpSpreadsheet\IOFactory;
 
 class AdminController {
     public function index() {
         $admin = new AdminModel();
         require 'views/admin/index.php';
     }
-
 
     public function userProfile(){
         $conn = Database::getConnection();
@@ -117,6 +117,73 @@ class AdminController {
         }
 
         require 'views/admin/updatePassword.php';
+    }
+
+    
+    
+    public function uploadStudents() {
+        $conn = Database::getConnection();
+        $message = '';
+        $message_type = '';
+    
+        // Allowed file types
+        $allowed_file_types = ['text/csv', 'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'];
+    
+        // Handle form submission
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $university_id = filter_input(INPUT_POST, 'university_id', FILTER_SANITIZE_NUMBER_INT);
+            $file = $_FILES['file'];
+    
+            if ($file['error'] === UPLOAD_ERR_OK) {
+                $file_tmp = $file['tmp_name'];
+                $file_name = basename($file['name']);
+                $file_size = $file['size'];
+                $file_type = $file['type'];
+    
+                // Validate file type
+                if (!in_array($file_type, $allowed_file_types)) {
+                    $message = "Invalid file type. Only CSV and Excel files are allowed.";
+                    $message_type = "error";
+                } elseif ($file_size > 5000000) { // Limit file size to 5MB
+                    $message = "File size exceeds the limit of 5MB.";
+                    $message_type = "error";
+                } else {
+                    try {
+                        Student::addStudentsFromExcel($conn, $file_tmp, $university_id);
+                        $message = "File uploaded and students added successfully";
+                        $message_type = "success";
+                    } catch (\Exception $e) {
+                        $message = "Error processing file: " . $e->getMessage();
+                        $message_type = "error";
+                    }
+                }
+            } else {
+                $message = "Error uploading file: " . $file['error'];
+                $message_type = "error";
+            }
+        }    
+        // Fetch universities from the database
+        $universities = University::getAll($conn);
+    
+        require 'views/admin/uploadStudents.php';
+    }
+
+    public function addCourse() {
+        $conn = Database::getConnection();
+        require 'views/admin/add_courses.php';
+    }
+
+    public function manageCourse() {
+        require 'views/admin/manage_courses.php';
+    }
+
+
+    public function courseView($id) {
+        $conn = Database::getConnection();
+        $course = Course::getById($conn, $id);
+        $universities = Course::getUniversitiesByCourseId($conn, $course);
+
+        require 'views/admin/view_course.php';
     }
 }
 ?>

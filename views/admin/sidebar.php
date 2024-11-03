@@ -111,7 +111,7 @@ $adminModel = new \Models\Admin();
         <nav class="sidebar sidebar-offcanvas" id="sidebar">
             <ul class="nav">
                 <li class="nav-item">
-                    <a class="nav-link" href="dashboard.php">
+                    <a class="nav-link" href="dashboard">
                         <i class="icon-grid menu-icon"></i>
                         <span class="menu-title">Dashboard</span>
                     </a>
@@ -224,13 +224,13 @@ $adminModel = new \Models\Admin();
 
                 <li class="nav-item"><hr></li>
                 <li class="nav-item">
-                    <a class="nav-link" href="updatePassword.php">
+                    <a class="nav-link" href="updatePassword">
                         <i class="ti-settings menu-icon"></i>
                         <span class="menu-title">Change Password</span>
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="logout.php">
+                    <a class="nav-link" href="logout">
                         <i class="ti-power-off menu-icon"></i>
                         <span class="menu-title">Logout</span>
                 </a>
