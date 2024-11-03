@@ -30,37 +30,43 @@ include "sidebar.php";
                             <?php endif; ?>
                         <?php endif; ?>
                         <form method="POST" action="addUniversity">
-                            <div class="form-group">
-                                <label for="long_name">Long Name</label>
-                                <input type="text" id="long_name" name="long_name" class="form-control" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="short_name">Short Name</label>
-                                <input type="text" id="short_name" name="short_name" class="form-control" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="location">Location</label>
-                                <input type="text" id="location" name="location" class="form-control" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="country">Country</label>
-                                <input type="text" id="country" name="country" class="form-control" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="spoc_name">SPOC Name</label>
-                                <input type="text" id="spoc_name" name="spoc_name" class="form-control" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="spoc_email">SPOC Email</label>
-                                <input type="email" id="spoc_email" name="spoc_email" class="form-control" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="spoc_phone">SPOC Phone</label>
-                                <input type="text" id="spoc_phone" name="spoc_phone" class="form-control" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="spoc_password">SPOC Password</label>
-                                <input type="password" id="spoc_password" name="spoc_password" class="form-control" required>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="long_name">Long Name</label>
+                                        <input type="text" id="long_name" name="long_name" class="form-control" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="short_name">Short Name</label>
+                                        <input type="text" id="short_name" name="short_name" class="form-control" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="location">Location</label>
+                                        <input type="text" id="location" name="location" class="form-control" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="country">Country</label>
+                                        <input type="text" id="country" name="country" class="form-control" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="spoc_name">SPOC Name</label>
+                                        <input type="text" id="spoc_name" name="spoc_name" class="form-control" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="spoc_email">SPOC Email</label>
+                                        <input type="email" id="spoc_email" name="spoc_email" class="form-control" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="spoc_phone">SPOC Phone</label>
+                                        <input type="text" id="spoc_phone" name="spoc_phone" class="form-control" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="spoc_password">SPOC Password</label>
+                                        <input type="password" id="spoc_password" name="spoc_password" class="form-control" required>
+                                    </div>
+                                </div>
                             </div>
                             <div class="form-group">
                                 <button type="submit" class="btn btn-primary">Create University</button>

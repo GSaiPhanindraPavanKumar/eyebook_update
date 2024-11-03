@@ -3,3 +3,4 @@ test
 dash
 phpunit.xml
 .vscode
+models/Database.php

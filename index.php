@@ -21,6 +21,7 @@ $router->get('/login', 'AuthController@login');
 $router->post('/login', 'AuthController@login');
 $router->get('/logout', 'AuthController@logout');
 
+$router->get('/admin', 'AdminController@dashboard');
 $router->get('/admin/dashboard', 'AdminController@dashboard');
 $router->get('/admin/profile', 'AdminController@userProfile');
 $router->get('/admin/addUniversity', 'AdminController@addUniversity');
@@ -30,6 +31,22 @@ $router->post('/admin/updateUniversity', 'AdminController@updateUniversity');
 $router->post('/admin/deleteUniversity', 'AdminController@deleteUniversity');
 $router->get('/admin/updatePassword', 'AdminController@updatePassword');
 $router->post('/admin/updatePassword', 'AdminController@updatePassword');
+$router->get('/admin/uploadStudents', 'AdminController@uploadStudents');
+$router->post('/admin/uploadStudents', 'AdminController@uploadStudents');
+$router->get('/admin/logout', 'AuthController@logout');
+
+$router->get('/admin/add_courses', 'AdminController@addCourse');
+$router->post('/admin/add_courses', 'AdminController@addCourse');
+$router->get('/admin/manage_courses', 'AdminController@manageCourse');
+$router->get('/admin/view_course/(\d+)', 'AdminController@courseView');
+
+
+
+$router->get('/spoc', 'SpocController@dashboard');
+$router->get('/spoc/dashboard', 'SpocController@dashboard');
+
+
+
 
 $router->set404(function() {
     header('HTTP/1.0 404 Not Found');
