@@ -29,10 +29,25 @@ class University {
     }
 
     
+    
     public static function addUniversity($conn, $long_name, $short_name, $location, $country, $spoc_name, $spoc_email, $spoc_phone, $spoc_password) {
         try {
             // Begin transaction
             $conn->beginTransaction();
+    
+            // Check if the university short name already exists
+            $stmt = $conn->prepare("SELECT COUNT(*) FROM universities WHERE short_name = :short_name");
+            $stmt->execute([':short_name' => $short_name]);
+            if ($stmt->fetchColumn() > 0) {
+                return ['message' => 'University short name already exists.', 'message_type' => 'error'];
+            }
+    
+            // Check if the SPOC email already exists
+            $stmt = $conn->prepare("SELECT COUNT(*) FROM spocs WHERE email = :email");
+            $stmt->execute([':email' => $spoc_email]);
+            if ($stmt->fetchColumn() > 0) {
+                return ['message' => 'SPOC email already exists.', 'message_type' => 'error'];
+            }
     
             // Insert into universities table
             $stmt = $conn->prepare("INSERT INTO universities (long_name, short_name, location, country) VALUES (:long_name, :short_name, :location, :country)");
