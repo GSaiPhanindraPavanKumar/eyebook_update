@@ -34,6 +34,8 @@ $router->post('/admin/updatePassword', 'AdminController@updatePassword');
 $router->get('/admin/uploadStudents', 'AdminController@uploadStudents');
 $router->post('/admin/uploadStudents', 'AdminController@uploadStudents');
 $router->get('/admin/logout', 'AuthController@logout');
+$router->get('/spoc/logout', 'AuthController@logout');
+$router->get('/faculty/logout', 'AuthController@logout');
 
 $router->get('/admin/add_courses', 'AdminController@addCourse');
 $router->post('/admin/add_courses', 'AdminController@addCourse');
@@ -42,8 +44,62 @@ $router->get('/admin/view_course/(\d+)', 'AdminController@courseView');
 
 
 
-$router->get('/spoc', 'SpocController@dashboard');
-$router->get('/spoc/dashboard', 'SpocController@dashboard');
+// $router->get('/spoc', 'SpocController@dashboard');
+$router->get('/spoc/dashboard', function() {
+    require 'views/spoc/dashboard.php';
+});
+$router->get('/spoc/udatePassword', function(){
+    require 'views/spoc/updatePassword.php';
+});
+$router->post('/spoc/udatePassword', function(){
+    require 'views/spoc/updatePassword.php';
+});
+$router->get('/spoc/profile', function(){
+    require 'views/spoc/profile.php';
+});
+
+$router->get('/faculty/dashboard', function(){
+    require 'views/faculty/dashboard.php';
+});
+$router->get('/faculty/updatePassword', function(){
+    require 'views/faculty/updatePassword.php';
+});
+$router->post('/faculty/updatePassword', function(){
+    require 'views/faculty/updatePassword.php';
+});
+$router->get('/faculty/profile', function(){
+    require 'views/faculty/profile.php';
+});
+
+
+$router->get('/student/dashboard', function(){
+    require 'views/student/dashboard.php';
+});
+$router->get('/student/updatePassword', function(){
+    require 'views/student/updatePassword.php';
+});
+$router->post('/student/updatePassword', function(){
+    require 'views/student/updatePassword.php';
+});
+
+$router->get('/student/profile', function(){
+    require 'views/student/profile.php';
+});
+
+$router->get('/student/my_courses', function(){
+    require 'views/student/my_courses.php';
+});
+
+$router->get('/student/view_course/(\d+)', function($course_id) {
+    require 'views/student/view_course.php';
+});
+
+
+
+
+
+
+
 
 
 

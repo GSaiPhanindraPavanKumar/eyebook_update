@@ -1,121 +1,35 @@
 <?php
-include("sidebar.php");
+include "sidebar.php";
 ?>
-
 <!-- HTML Content -->
 <div class="main-panel">
     <div class="content-wrapper">
         <div class="row">
             <div class="col-md-12 grid-margin">
-                <div class="row">
-                    <div class="col-12 col-xl-8 mb-4 mb-xl-0">
-                        <!-- <h3 class="font-weight-bold">Hello, <em><?php echo htmlspecialchars($userData['name']); ?></em></h3> -->
-                    </div>
+                <div class="d-flex justify-content-between align-items-center">
+                    <h2 class="font-weight-bold mb-4">Course Management: <?php echo htmlspecialchars($course['name'] ?? ''); ?></h2>
+                    <span class="badge bg-primary text-white">Course ID: <?php echo htmlspecialchars($course['id'] ?? ''); ?></span>
                 </div>
             </div>
         </div>
+        <!-- Overview and Course Control Panel -->
         <div class="row">
             <div class="col-md-12 grid-margin stretch-card">
                 <div class="card">
                     <div class="card-body">
-                        <h4 class="card-title">Course Details</h4>
-                        <?php if ($course): ?>
-                            <p><strong>Course Name:</strong> <?php echo htmlspecialchars($course['name']); ?></p>
-                            <p><strong>Description:</strong> <?php echo htmlspecialchars($course['description']); ?></p>
-                        <?php else: ?>
-                            <p>Course not found.</p>
-                        <?php endif; ?>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-md-12 grid-margin stretch-card">
-                <div class="card">
-                    <div class="card-body">
-                        <ul class="nav nav-tabs" id="myTab" role="tablist">
-                            <li class="nav-item" role="presentation">
-                                <a class="nav-link active" id="details-tab" data-toggle="tab" href="#details" role="tab" aria-controls="details" aria-selected="true">Details</a>
-                            </li>
-                            <li class="nav-item" role="presentation">
-                                <a class="nav-link" id="add-unit-tab" data-toggle="tab" href="#add-unit" role="tab" aria-controls="add-unit" aria-selected="false">Add Course Book</a>
-                            </li>
-                            <li class="nav-item" role="presentation">
-                                <a class="nav-link" id="assign-universities-tab" data-toggle="tab" href="#assign-universities" role="tab" aria-controls="assign-universities" aria-selected="false">Assign to Universities</a>
-                            </li>
-                        </ul>
-                        <div class="tab-content" id="myTabContent">
-                            <div class="tab-pane fade show active" id="details" role="tabpanel" aria-labelledby="details-tab">
-                                <h5 class="mt-3">Course Details</h5>
-                                <p><?php echo htmlspecialchars($course['description']); ?></p>
-                                <h5 class="mt-3">Assigned Universities</h5>
-                                <ul>
-                                    <?php if (!empty($course['universities'])): ?>
-                                        <?php foreach ($course['universities'] as $university_id): ?>
-                                            <?php
-                                            $university = array_filter($universities, function($u) use ($university_id) {
-                                                return $u['id'] == $university_id;
-                                            });
-                                            $university = array_shift($university);
-                                            ?>
-                                            <li><?php echo htmlspecialchars($university['long_name']); ?></li>
-                                        <?php endforeach; ?>
-                                    <?php else: ?>
-                                        <li>No universities assigned.</li>
-                                    <?php endif; ?>
-                                </ul>
-                            </div>
-                            <div class="tab-pane fade" id="add-unit" role="tabpanel" aria-labelledby="add-unit-tab">
-                                <h5 class="mt-3">Add Course Book</h5>
-                                <form method="POST" action="add_unit.php" enctype="multipart/form-data">
-                                    <div class="form-group">
-                                        <label for="unitName">Name</label>
-                                        <input type="text" class="form-control" id="unitName" name="unit_name" required>
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="scormFile">SCORM File</label>
-                                        <input type="file" class="form-control" id="scormFile" name="scorm_file" required>
-                                    </div>
-                                    <input type="hidden" name="course_id" value="<?php echo $course_id; ?>">
-                                    <button type="submit" class="btn btn-primary">Add Course Book</button>
-                                </form>
-                            </div>
-                            <div class="tab-pane fade" id="assign-universities" role="tabpanel" aria-labelledby="assign-universities-tab">
-                                <h5 class="mt-3">Assign Course to Universities</h5>
-                                <form method="POST" action="assign_course.php">
-                                    <div class="form-group">
-                                        <label for="university">Select University</label>
-                                        <select class="form-control" id="university" name="university_id" required>
-                                            <option value="">Select a university</option>
-                                            <?php foreach ($universities as $university): ?>
-                                                <option value="<?php echo $university['id']; ?>"><?php echo htmlspecialchars($university['long_name']); ?></option>
-                                            <?php endforeach; ?>
-                                        </select>
-                                    </div>
-                                    <input type="hidden" name="course_id" value="<?php echo $course_id; ?>">
-                                    <button type="submit" class="btn btn-primary">Assign Course</button>
-                                </form>
-                            </div>
+                        <h4 class="card-title">Course Overview</h4>
+                        
+                        <!-- Course Plan Section -->
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h5>Course Plan</h5>
+                            <?php if (!empty($course['course_plan'])) : ?>
+                                <button class="btn btn-primary" onclick="redirectToCoursePlan()">View</button>
+                            <?php endif; ?>
                         </div>
-                        <?php if (isset($message)): ?>
-                            <div class="alert alert-info"><?php echo $message; ?></div>
-                            <script>
-                                setTimeout(function() {
-                                    window.location.href = 'add_courses.php';
-                                }, 3000); // Redirect after 3 seconds
-                            </script>
-                        <?php endif; ?>
+                        <!-- Other sections... -->
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    <!-- content-wrapper ends -->
-    <?php include 'footer.html'; ?>
 </div>
-
-<!-- Include Bootstrap CSS and JS -->
-<link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>

@@ -7,7 +7,7 @@ class HomeController {
     public function index() {
         $userModel = new UserModel();
         $students = $userModel->getAllStudents();
-        require 'views/homeView.php';
+        require 'views/landing/index.php';
     }
 }
 ?>

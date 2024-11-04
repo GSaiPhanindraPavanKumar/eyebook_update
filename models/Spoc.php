@@ -39,20 +39,22 @@ class Spoc {
         return false;
     }
 
-public function getUserProfile($conn) {
-    $query = 'SELECT * FROM spocs';
-    $stmt = $conn->prepare($query);
-    // $stmt->execute(['id' => $_SESSION['spoc']['id']]);
-    $user = $stmt->fetch(PDO::FETCH_ASSOC);
-    return $user;
-}
-
-    public static function updatePassword($conn, $spoc_id, $new_password) {
-        $sql = "UPDATE spocs SET password = :new_password WHERE id = :spoc_id";
-        $stmt = $conn->prepare($sql);
-        $stmt->execute([
-            ':new_password' => $new_password,
-            ':spoc_id' => $spoc_id
-        ]);
+    public function getUserProfile($conn) {
+        $query = 'SELECT * FROM spocs';
+        $stmt = $conn->prepare($query);
+        // $stmt->execute(['id' => $_SESSION['spoc']['id']]);
+        $user = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $user;
     }
+
+        public static function updatePassword($conn, $spoc_id, $new_password) {
+            $sql = "UPDATE spocs SET password = :new_password WHERE id = :spoc_id";
+            $stmt = $conn->prepare($sql);
+            $stmt->execute([
+                ':new_password' => $new_password,
+                ':spoc_id' => $spoc_id
+            ]);
+        }
+
+        
 }

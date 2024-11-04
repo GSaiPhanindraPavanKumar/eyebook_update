@@ -17,17 +17,17 @@ class Course {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public static function getById($conn, $id) {
-        $query = 'SELECT * FROM courses WHERE id = :id';
-        $stmt = $conn->prepare($query);
-        $stmt->execute(['id' => $id]);
-        $course = $stmt->fetch(PDO::FETCH_ASSOC);
+    // public static function getById($conn, $id) {
+    //     $query = 'SELECT * FROM courses WHERE id = :id';
+    //     $stmt = $conn->prepare($query);
+    //     $stmt->execute(['id' => $id]);
+    //     $course = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        // Ensure universities field is an array
-        $course['universities'] = isset($course['universities']) ? json_decode($course['universities'], true) : [];
+    //     // Ensure universities field is an array
+    //     $course['universities'] = isset($course['universities']) ? json_decode($course['universities'], true) : [];
 
-        return $course;
-    }
+    //     return $course;
+    // }
 
     public static function getUniversitiesByCourseId($conn, $course) {
         $universities = [];
@@ -39,5 +39,33 @@ class Course {
         }
         return $universities;
     }
-}
+
+
+        public static function getById($conn, $id) {
+            $query = 'SELECT * FROM courses WHERE id = :id';
+            $stmt = $conn->prepare($query);
+            $stmt->execute(['id' => $id]);
+            $course = $stmt->fetch(PDO::FETCH_ASSOC);
+    
+            if ($course) {
+                // Decode JSON data
+                $course['course_plan'] = isset($course['course_plan']) ? json_decode($course['course_plan'], true) : [];
+                $course['course_book'] = isset($course['course_book']) ? json_decode($course['course_book'], true) : [];
+                $course['course_materials'] = isset($course['course_materials']) ? json_decode($course['course_materials'], true) : [];
+    
+                // Ensure course_materials is an array
+                if (!is_array($course['course_materials'])) {
+                    $course['course_materials'] = [];
+                }
+    
+                // Sort course materials by unit number in ascending order
+                usort($course['course_materials'], function($a, $b) {
+                    return $a['unitNumber'] <=> $b['unitNumber'];
+                });
+            }
+    
+            return $course;
+        }
+    }
+
 ?>

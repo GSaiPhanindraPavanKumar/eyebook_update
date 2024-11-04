@@ -1,15 +1,23 @@
 <?php
 namespace Controllers;
+
 use Models\Admin;
 use Models\Spoc;
+use Models\Faculty;
+use Models\Student;
 
 class AuthController {
     private $adminModel;
     private $spocModel;
+    private $facultyModel;
+    private $studentModel;
 
-    public function __construct(Admin $adminModel = null, Spoc $spocModel = null) {
+
+    public function __construct(Admin $adminModel = null, Spoc $spocModel = null, Faculty $facultyModel = null) {
         $this->adminModel = $adminModel ?: new Admin();
         $this->spocModel = $spocModel ?: new Spoc();
+        $this->facultyModel = $facultyModel ?: new Faculty();
+        $this->studentModel = new Student();
     }
 
     public function login() {
@@ -29,12 +37,27 @@ class AuthController {
                 // Check spoc credentials
                 $spoc = $this->spocModel->login($username, $password);
                 if ($spoc) {
-                    $_SESSION['spoc'] = $spoc;
+                    $_SESSION['email'] = $username;
                     header('Location: /spoc/dashboard');
                     exit();
                 }
 
-                // If neither admin nor spoc credentials match
+                // Check faculty credentials
+                $faculty = $this->facultyModel->login($username, $password);
+                if ($faculty) {
+                    $_SESSION['email'] = $username;
+                    header('Location: /faculty/dashboard');
+                    exit();
+                }
+
+                $student = $this->studentModel->login($username, $password);
+                if ($student) {
+                    $_SESSION['email'] = $username;
+                    header('Location: /student/dashboard');
+                    exit();
+                }
+
+                // If neither admin, spoc, nor faculty credentials match
                 $message = 'Invalid username or password';
             } else {
                 $message = 'Username and password are required';
@@ -50,3 +73,4 @@ class AuthController {
         exit();
     }
 }
+?>

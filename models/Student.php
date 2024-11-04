@@ -87,4 +87,18 @@ class Student {
             throw $e;
         }
     }
+
+    public function login($username, $password) {
+        $conn = Database::getConnection();
+        $sql = "SELECT * FROM students WHERE email = :username";
+        $stmt = $conn->prepare($sql);
+        $stmt->execute([':username' => $username]);
+        $student = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if ($student && password_verify($password, $student['password'])) {
+            return $student;
+        }
+
+        return false;
+    }
 }
