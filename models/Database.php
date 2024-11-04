@@ -20,8 +20,8 @@ class Database {
         $this->db_name = 'eyebook';
         $this->username = 'root';
         // $this->username = 'user';
-        $this->password = '#*Eyebook@123*#';
-        // $this->password = '';
+        // $this->password = '#*Eyebook@123*#';
+        $this->password = '';
 
     }
 
