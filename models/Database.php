@@ -19,9 +19,10 @@ class Database {
         $this->host = 'localhost';
         $this->db_name = 'eyebook';
         // $this->username = 'root';
+        // $this->password = '';
         $this->username = 'user';
         $this->password = '#*Eyebook@123*#';
-        // $this->password = '';
+
 
     }
 
