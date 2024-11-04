@@ -24,6 +24,9 @@ class AdminController {
 
     public function dashboard() {
         $conn = Database::getConnection();
+        $adminModel = new AdminModel();
+        $user = $adminModel->getUserProfile($conn);
+
 
         $university_count = University::getCount($conn);
         $student_count = Student::getCount($conn);
@@ -126,10 +129,10 @@ class AdminController {
         $message = '';
         $message_type = '';
     
-        // Allowed file types
+
         $allowed_file_types = ['text/csv', 'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'];
     
-        // Handle form submission
+
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $university_id = filter_input(INPUT_POST, 'university_id', FILTER_SANITIZE_NUMBER_INT);
             $file = $_FILES['file'];
@@ -140,11 +143,11 @@ class AdminController {
                 $file_size = $file['size'];
                 $file_type = $file['type'];
     
-                // Validate file type
+
                 if (!in_array($file_type, $allowed_file_types)) {
                     $message = "Invalid file type. Only CSV and Excel files are allowed.";
                     $message_type = "error";
-                } elseif ($file_size > 5000000) { // Limit file size to 5MB
+                } elseif ($file_size > 5000000) { 
                     $message = "File size exceeds the limit of 5MB.";
                     $message_type = "error";
                 } else {
@@ -162,7 +165,7 @@ class AdminController {
                 $message_type = "error";
             }
         }    
-        // Fetch universities from the database
+
         $universities = University::getAll($conn);
     
         require 'views/admin/uploadStudents.php';
