@@ -16,19 +16,19 @@
     <!-- ===============================================-->
     <!--    Favicons-->
     <!-- ===============================================-->
-    <link rel="apple-touch-icon" sizes="180x180" href="/views/public/assets/img/favicons/apple-touch-icon.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="/views/public/assets/img/favicons/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="/views/public/assets/img/favicons/favicon-16x16.png">
-    <link rel="shortcut icon" type="image/x-icon" href="/views/public/assets/img/favicons/favicon.ico">
-    <link rel="manifest" href="/views/public/landing/assets/img/favicons/manifest.json">
-    <meta name="msapplication-TileImage" content="/views/public/assets/img/favicons/mstile-150x150.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/views/public/assets/images/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/public/assets/images/favicons/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/public/assets/imgages/favicons/favicon-16x16.png">
+    <link rel="shortcut icon" type="image/x-icon" href="/public/assets/img/favicons/favicon.ico">
+    <link rel="manifest" href="/public/assets/img/favicons/manifest.json">
+    <meta name="msapplication-TileImage" content="public/assets/img/favicons/mstile-150x150.png">
     <meta name="theme-color" content="#ffffff">
 
 
     <!-- ===============================================-->
     <!--    Stylesheets-->
     <!-- ===============================================-->
-    <link href="/views/public/assets/css/theme.css" rel="stylesheet" />
+    <link href="/views/landing/assets/css/theme.css" rel="stylesheet" />
 
   </head>
 
@@ -40,7 +40,7 @@
     <!-- ===============================================-->
     <main class="main" id="top">
       <nav class="navbar navbar-expand-lg navbar-light fixed-top py-3" data-navbar-on-scroll="data-navbar-on-scroll">
-        <div class="container"><a class="navbar-brand" href="#"><img class="img-fluid" src="assets/img/icons/logo.png" alt="" /></a>
+        <!-- <div class="container"><a class="navbar-brand" href="#"><img class="img-fluid" src="assets/img/icons/logo.png" alt=""  height="10%" width="10%"/></a> -->
           <button class="navbar-toggler collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
           <div class="collapse navbar-collapse" id="navbarSupportedContent">
             <ul class="navbar-nav me-auto ms-lg-4 ms-xl-7 border-bottom border-lg-bottom-0 pt-2 pt-lg-0">
@@ -49,7 +49,7 @@
               <li class="nav-item"><a class="nav-link fw-medium" href="#">Features</a></li>
               <li class="nav-item"><a class="nav-link fw-medium" href="#">Signup</a></li>
             </ul>
-            <form class="d-flex py-3 py-lg-0"><a class="btn btn-light rounded-pill shadow fw-bold" href="#" role="button">Request Demo
+            <form class="d-flex py-3 py-lg-0"><a class="btn btn-light rounded-pill shadow fw-bold" href="login" role="button">Login
                 <svg class="bi bi-arrow-right" xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="#9C69E2" viewBox="0 0 16 16">
                   <path fill-rule="evenodd" d="M1 8a.5.5 0 0 1 .5-.5h11.793l-3.147-3.146a.5.5 0 0 1 .708-.708l4 4a.5.5 0 0 1 0 .708l-4 4a.5.5 0 0 1-.708-.708L13.293 8.5H1.5A.5.5 0 0 1 1 8z"></path>
                 </svg></a></form>
@@ -64,10 +64,10 @@
 
         <div class="container">
           <div class="row align-items-center">
-            <div class="col-md-5 col-lg-7 order-md-1 pt-8"><img class="img-fluid" src="assets/img/illustrations/hero-header.png" alt="" /></div>
+            <div class="col-md-5 col-lg-7 order-md-1 pt-8"><img class="img-fluid" src="/views/landing/assets/img/user1.png" alt="" /></div>
             <div class="col-md-7 col-lg-5 text-center text-md-start pt-5 pt-md-9">
-              <h1 class="mb-4 display-2 fw-bold">Save your data <br class="d-block d-lg-none d-xl-block" />storage here.</h1>
-              <p class="mt-3 mb-4">Data Warehouse is a data storage area that <br />has been tested for security, so you can store<br />your data here safely but not be afraid of <br />being stolen by others.</p><a class="btn btn-lg btn-info rounded-pill" href="#" role="button">Learn more</a>
+              <h1 class="mb-4 display-2 fw-bold">Welcome to the LMS <br class="d-block d-lg-none d-xl-block" />Let's start</h1>
+              <p class="mt-3 mb-4">Elevate Your Learning Experience <br />Access a World of Knowledge at Your Fingertips<br />Empower Yourself with Lifelong Learning. <br /></p><a class="btn btn-lg btn-info rounded-pill" href="#" role="button">Learn more</a>
             </div>
           </div>
         </div>
@@ -89,11 +89,11 @@
             <div class="col-12">
               <div class="card mb-3 bg-soft-danger rounded-3">
                 <div class="row g-0 align-items-center">
-                  <div class="col-md-5 col-lg-6 text-md-center"><img class="img-fluid" src="assets/img/illustrations/about.png" alt="" /></div>
+                  <div class="col-md-5 col-lg-6 text-md-center"><img class="img-fluid" src="/views/landing/assets/img/illustrations/about.png" alt="" /></div>
                   <div class="col-md-7 col-lg-6 px-md-2 px-xl-6 text-center text-md-start">
                     <div class="card-body px-4 py-5 p-lg-3 p-md-4">
-                      <h1 class="mb-4 fw-bold">We are a high-level data<br class="d-md-none d-xxl-block" />storage bank</h1>
-                      <p class="card-text">The place to store various data that you can access at any<br class="d-none d-xxl-block" />time through the internet and where you can carry it. <br class="d-none d-xxl-block" />This very flexible storage area has a high level of security.<br class="d-none d-xxl-block" />To enter into your own data you must enter the password<br class="d-none d-xxl-block" />that you created when you registered in this Data <br class="d-none d-xxl-block" />Warehouse. </p>
+                      <h1 class="mb-4 fw-bold">Highly professional LMS features<br class="d-md-none d-xxl-block" /></h1>
+                      <p class="card-text">Our LMS offers a comprehensive learning experience. With personalized learning paths, you can tailor your journey to your specific goals. Engage with interactive content, including videos, quizzes, and simulations, to enhance your understanding. Collaborate with fellow learners and experts through our vibrant community forums. Track your progress in real-time and stay motivated. Access our platform from any device, anytime, anywhere. Finally, validate your skills and showcase your achievements with certifications and badges.<br class="d-none d-xxl-block" /> <br class="d-none d-xxl-block" /><br class="d-none d-xxl-block" /><br class="d-none d-xxl-block" /> <br class="d-none d-xxl-block" /> </p>
                     </div>
                   </div>
                 </div>
@@ -113,26 +113,26 @@
           <div class="row flex-center mb-5">
             <div class="col-auto text-center my-4">
               <h1 class="mb-4 fw-bold">Features</h1>
-              <p>Some of the features and advantages that we provide for those of you <br />who store data in this Data Warehouse.</p>
+              <p>Our LMS offers personalized learning paths, interactive content, collaborative learning, real-time progress tracking, seamless access, and certification to empower your learning journey. <br /></p>
             </div>
           </div>
           <div class="row">
             <div class="col-md-6 mb-4">
               <div class="card px-5 px-md-3 py-lg-5">
                 <div class="row flex-center">
-                  <div class="bg-holder z-index-1 d-none d-lg-block" style="background-image:url(assets/img/illustrations/feature-bg-1.png);background-position:center;background-size:contain;">
+                  <div class="bg-holder z-index-1 d-none d-lg-block" style="background-image:url(/views/landing/assets/img/illustrations/feature-bg-1.png);background-position:center;background-size:contain;">
                   </div>
                   <!--/.bg-holder-->
 
-                  <div class="bg-holder z-index-1 d-block d-lg-none" style="background-image:url(assets/img/illustrations/feature-bg-1.png);background-position:center;background-size:cover;">
+                  <div class="bg-holder z-index-1 d-block d-lg-none" style="background-image:url(/views/landing/assets/img/illustrations/feature-bg-1.png);background-position:center;background-size:cover;">
                   </div>
                   <!--/.bg-holder-->
 
-                  <div class="col-md-4 pe-0 pe-md-0 text-center"><img class="img-fluid" src="assets/img/illustrations/feature-search.png" alt="" /></div>
+                  <div class="col-md-4 pe-0 pe-md-0 text-center"><img class="img-fluid" src="/views/landing/assets/img/illustrations/feature-search.png" alt="" /></div>
                   <div class="col-md-8 ps-md-3 pe-md-2 text-center text-md-start z-index-2">
                     <div class="card-body px-0">
-                      <h4 class="card-title pt-md-5">Search Data</h4>
-                      <p class="mb-0">Don’t worry if your data is very <br class="d-none d-lg-block"> large, the Data Warehoue <br class="d-none d-lg-block"> provides a search engine, <br class="d-none d-lg-block"> which is useful for making it <br class="d-none d-lg-block"> easier to find data effectively<br class="d-none d-lg-block">saving time. </p>
+                      <h4 class="card-title pt-md-5">Personalized Learning</h4>
+                      <p class="mb-0">Tailor your learning experience to your specific needs and goals <br class="d-none d-lg-block"> Our LMS adapts to your learning style and pace, providing you with customized content and recommendations. <br class="d-none d-lg-block">  <br class="d-none d-lg-block">  <br class="d-none d-lg-block"> <br class="d-none d-lg-block"> </p>
                       <div><a class="btn btn-lg ps-0 pe-3" href="#" role="button">Learn more</a>
                         <svg class="bi bi-arrow-right" xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="#9C69E2" viewBox="0 0 16 16">
                           <path fill-rule="evenodd" d="M1 8a.5.5 0 0 1 .5-.5h11.793l-3.147-3.146a.5.5 0 0 1 .708-.708l4 4a.5.5 0 0 1 0 .708l-4 4a.5.5 0 0 1-.708-.708L13.293 8.5H1.5A.5.5 0 0 1 1 8z"></path>
@@ -146,19 +146,19 @@
             <div class="col-md-6 mb-4">
               <div class="card px-5 px-md-3 py-lg-5">
                 <div class="row flex-center">
-                  <div class="bg-holder z-index-1 d-none d-lg-block" style="background-image:url(assets/img/illustrations/feature-bg-2.png);background-position:center;background-size:contain;">
+                  <div class="bg-holder z-index-1 d-none d-lg-block" style="background-image:url(/views/landing/assets/img/illustrations/feature-bg-2.png);background-position:center;background-size:contain;">
                   </div>
                   <!--/.bg-holder-->
 
-                  <div class="bg-holder z-index-1 d-block d-lg-none" style="background-image:url(assets/img/illustrations/feature-bg-2.png);background-position:center;background-size:cover;">
+                  <div class="bg-holder z-index-1 d-block d-lg-none" style="background-image:url(/views/landing/assets/img/illustrations/feature-bg-2.png);background-position:center;background-size:cover;">
                   </div>
                   <!--/.bg-holder-->
 
-                  <div class="col-md-4 pe-0 pe-md-0 text-center"><img class="img-fluid" src="assets/img/illustrations/feature-hour.png" alt="" /></div>
+                  <div class="col-md-4 pe-0 pe-md-0 text-center"><img class="img-fluid" src="/views/landing/assets/img/illustrations/feature-hour.png" alt="" /></div>
                   <div class="col-md-8 ps-md-3 pe-md-2 text-center text-md-start z-index-2">
                     <div class="card-body px-0">
-                      <h4 class="card-title pt-md-5">24 Hours Access </h4>
-                      <p class="mb-0">Don’t worry if your data is very <br class="d-none d-lg-block"> large, the Data Warehoue <br class="d-none d-lg-block"> provides a search engine, <br class="d-none d-lg-block"> which is useful for making it <br class="d-none d-lg-block"> easier to find data effectively<br class="d-none d-lg-block">saving time. </p>
+                      <h4 class="card-title pt-md-5">Interactive Content </h4>
+                      <p class="mb-0">Engage with a variety of learning materials, including videos, quizzes, and simulations <br class="d-none d-lg-block"> Our interactive content makes learning fun and effective. <br class="d-none d-lg-block">  <br class="d-none d-lg-block">  <br class="d-none d-lg-block"> <br class="d-none d-lg-block"> </p>
                       <div><a class="btn btn-lg ps-0 pe-3" href="#" role="button">Learn more</a>
                         <svg class="bi bi-arrow-right" xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="#9C69E2" viewBox="0 0 16 16">
                           <path fill-rule="evenodd" d="M1 8a.5.5 0 0 1 .5-.5h11.793l-3.147-3.146a.5.5 0 0 1 .708-.708l4 4a.5.5 0 0 1 0 .708l-4 4a.5.5 0 0 1-.708-.708L13.293 8.5H1.5A.5.5 0 0 1 1 8z"></path>
@@ -172,19 +172,19 @@
             <div class="col-md-6 mb-4">
               <div class="card px-5 px-md-3 py-lg-5">
                 <div class="row flex-center">
-                  <div class="bg-holder z-index-1 d-none d-lg-block" style="background-image:url(assets/img/illustrations/feature-bg-3.png);background-position:center;background-size:contain;">
+                  <div class="bg-holder z-index-1 d-none d-lg-block" style="background-image:url(/views/landing/assets/img/illustrations/feature-bg-3.png);background-position:center;background-size:contain;">
                   </div>
                   <!--/.bg-holder-->
 
-                  <div class="bg-holder z-index-1 d-block d-lg-none" style="background-image:url(assets/img/illustrations/feature-bg-3.png);background-position:center;background-size:cover;">
+                  <div class="bg-holder z-index-1 d-block d-lg-none" style="background-image:url(/views/landing/assets/img/illustrations/feature-bg-3.png);background-position:center;background-size:cover;">
                   </div>
                   <!--/.bg-holder-->
 
-                  <div class="col-md-4 pe-0 pe-md-0 text-center"><img class="img-fluid" src="assets/img/illustrations/feature-print.png" alt="" /></div>
+                  <div class="col-md-4 pe-0 pe-md-0 text-center"><img class="img-fluid" src="/views/landing/assets/img/illustrations/feature-print.png" alt="" /></div>
                   <div class="col-md-8 ps-md-3 pe-md-2 text-center text-md-start z-index-2">
                     <div class="card-body px-0">
-                      <h4 class="card-title pt-md-5">Print Out</h4>
-                      <p class="mb-0">Don’t worry if your data is very <br class="d-none d-lg-block"> large, the Data Warehoue <br class="d-none d-lg-block"> provides a search engine, <br class="d-none d-lg-block"> which is useful for making it <br class="d-none d-lg-block"> easier to find data effectively<br class="d-none d-lg-block">saving time. </p>
+                      <h4 class="card-title pt-md-5">Collaborative Learning</h4>
+                      <p class="mb-0">Connect with fellow learners and experts to share knowledge and solve problems together <br class="d-none d-lg-block"> Our platform fosters a supportive learning community where you can collaborate on projects, discuss ideas, and learn from each other. <br class="d-none d-lg-block">  <br class="d-none d-lg-block">  <br class="d-none d-lg-block"> <br class="d-none d-lg-block"> </p>
                       <div><a class="btn btn-lg ps-0 pe-3" href="#" role="button">Learn more</a>
                         <svg class="bi bi-arrow-right" xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="#9C69E2" viewBox="0 0 16 16">
                           <path fill-rule="evenodd" d="M1 8a.5.5 0 0 1 .5-.5h11.793l-3.147-3.146a.5.5 0 0 1 .708-.708l4 4a.5.5 0 0 1 0 .708l-4 4a.5.5 0 0 1-.708-.708L13.293 8.5H1.5A.5.5 0 0 1 1 8z"></path>
@@ -198,19 +198,19 @@
             <div class="col-md-6 mb-4">
               <div class="card px-5 px-md-3 py-lg-5">
                 <div class="row flex-center">
-                  <div class="bg-holder z-index-1 d-none d-lg-block" style="background-image:url(assets/img/illustrations/feature-bg-4.png);background-position:center;background-size:contain;">
+                  <div class="bg-holder z-index-1 d-none d-lg-block" style="background-image:url(/views/landing/assets/img/illustrations/feature-bg-4.png);background-position:center;background-size:contain;">
                   </div>
                   <!--/.bg-holder-->
 
-                  <div class="bg-holder z-index-1 d-block d-lg-none" style="background-image:url(assets/img/illustrations/feature-bg-4.png);background-position:center;background-size:cover;">
+                  <div class="bg-holder z-index-1 d-block d-lg-none" style="background-image:url(/views/landing/assets/img/illustrations/feature-bg-4.png);background-position:center;background-size:cover;">
                   </div>
                   <!--/.bg-holder-->
 
-                  <div class="col-md-4 pe-0 pe-md-0 text-center"><img class="img-fluid" src="assets/img/illustrations/feature-security.png" alt="" /></div>
+                  <div class="col-md-4 pe-0 pe-md-0 text-center"><img class="img-fluid" src="/views/landing/assets/img/illustrations/feature-security.png" alt="" /></div>
                   <div class="col-md-8 ps-md-3 pe-md-2 text-center text-md-start z-index-2">
                     <div class="card-body px-0">
-                      <h4 class="card-title pt-md-5">Security Code</h4>
-                      <p class="mb-0">Don’t worry if your data is very <br class="d-none d-lg-block"> large, the Data Warehoue <br class="d-none d-lg-block"> provides a search engine, <br class="d-none d-lg-block"> which is useful for making it <br class="d-none d-lg-block"> easier to find data effectively<br class="d-none d-lg-block">saving time. </p>
+                      <h4 class="card-title pt-md-5">Certification and Badges</h4>
+                      <p class="mb-0">Showcase your achievements and validate your skills with our certification and badging system <br class="d-none d-lg-block"> Earn digital badges to recognize your accomplishments and share them with your professional network. <br class="d-none d-lg-block">  <br class="d-none d-lg-block">  <br class="d-none d-lg-block"> <br class="d-none d-lg-block"> </p>
                       <div><a class="btn btn-lg ps-0 pe-3" href="#" role="button">Learn more</a>
                         <svg class="bi bi-arrow-right" xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="#9C69E2" viewBox="0 0 16 16">
                           <path fill-rule="evenodd" d="M1 8a.5.5 0 0 1 .5-.5h11.793l-3.147-3.146a.5.5 0 0 1 .708-.708l4 4a.5.5 0 0 1 0 .708l-4 4a.5.5 0 0 1-.708-.708L13.293 8.5H1.5A.5.5 0 0 1 1 8z"></path>
@@ -238,39 +238,39 @@
                   <div class="col-md-4 mb-3 mb-md-0">
                     <div class="card h-100 py-3">
                       <div class="card-body my-2">
-                        <div class="d-flex align-items-center"><img class="img-fluid me-3 me-md-2 me-lg-3" src="assets/img/gallery/1.png" width="70" alt="" />
+                        <div class="d-flex align-items-center"><img class="img-fluid me-3 me-md-2 me-lg-3" src="/views/landing/assets/img/gallery/1.png" width="70" alt="" />
                           <div class="flex-1 align-items-center">
-                            <h6 class="mb-0 fs--1 text-1000 fw-medium">John Fang </h6>
-                            <p class="fs--2 fw-normal text-info mb-0">wordfaang.com</p>
+                            <h6 class="mb-0 fs--1 text-1000 fw-medium"> The Beginner </h6>
+                            <p class="fs--2 fw-normal text-info mb-0"></p>
                           </div>
                         </div>
-                        <p class="card-text ps-7 ps-md-0 ps-xl-7 pt-md-4 pt-lg-3 pt-xl-0">“Wow...I am very happy to use this VPN, it turned out to be more than my expectations and so far there have been no problems. LaslesVPN always the best”.</p>
+                        <p class="card-text ps-7 ps-md-0 ps-xl-7 pt-md-4 pt-lg-3 pt-xl-0">"As a complete novice, I was initially intimidated by the technology. However, the LMS platform's user-friendly interface and clear instructions made it easy to navigate. The interactive courses and supportive community helped me gain confidence and master the skills I needed."</p>
                       </div>
                     </div>
                   </div>
                   <div class="col-md-4 mb-3 mb-md-0">
                     <div class="card h-100 py-3">
                       <div class="card-body my-2">
-                        <div class="d-flex align-items-center"><img class="img-fluid me-3 me-md-2 me-lg-3" src="assets/img/gallery/2.png" width="70" alt="" />
+                        <div class="d-flex align-items-center"><img class="img-fluid me-3 me-md-2 me-lg-3" src="/views/landing/assets/img/gallery/2.png" width="70" alt="" />
                           <div class="flex-1 align-items-center">
-                            <h6 class="mb-0 fs--1 text-1000 fw-medium">Jeny Doe</h6>
-                            <p class="fs--2 fw-normal text-info mb-0">UX Engineer</p>
+                            <h6 class="mb-0 fs--1 text-1000 fw-medium">The Busy Professional</h6>
+                            <p class="fs--2 fw-normal text-info mb-0"></p>
                           </div>
                         </div>
-                        <p class="card-text ps-7 ps-md-0 ps-xl-7 pt-md-4 pt-lg-3 pt-xl-0">“I like it because I like to travel far and still can connect with high speed.”</p>
+                        <p class="card-text ps-7 ps-md-0 ps-xl-7 pt-md-4 pt-lg-3 pt-xl-0">"Balancing work and personal life can be challenging. This LMS platform has been a lifesaver. I can access courses and resources at my own pace, making it easy to fit learning into my busy schedule. The flexibility and convenience have significantly improved my professional development."</p>
                       </div>
                     </div>
                   </div>
                   <div class="col-md-4 mb-3 mb-md-0">
                     <div class="card h-100 py-3">
                       <div class="card-body my-2">
-                        <div class="d-flex align-items-center"><img class="img-fluid me-3 me-md-2 me-lg-3" src="assets/img/gallery/3.png" width="70" alt="" />
+                        <div class="d-flex align-items-center"><img class="img-fluid me-3 me-md-2 me-lg-3" src="/views/landing/assets/img/gallery/3.png" width="70" alt="" />
                           <div class="flex-1 align-items-center">
-                            <h6 class="mb-0 fs--1 text-1000 fw-medium">William</h6>
-                            <p class="fs--2 fw-normal text-info mb-0">Web Designer</p>
+                            <h6 class="mb-0 fs--1 text-1000 fw-medium">The Career-Driven Individual</h6>
+                            <p class="fs--2 fw-normal text-info mb-0"></p>
                           </div>
                         </div>
-                        <p class="card-text ps-7 ps-md-0 ps-xl-7 pt-md-4 pt-lg-3 pt-xl-0">“I like it because I like to travel far and still can connect with high speed.”</p>
+                        <p class="card-text ps-7 ps-md-0 ps-xl-7 pt-md-4 pt-lg-3 pt-xl-0">"I was looking for a platform that would help me advance my career. This LMS exceeded my expectations. The high-quality courses, industry-recognized certifications, and networking opportunities have given me the tools and connections to reach my professional goals."</p>
                       </div>
                     </div>
                   </div>
@@ -281,39 +281,39 @@
                   <div class="col-md-4 mb-3 mb-md-0">
                     <div class="card h-100 py-3">
                       <div class="card-body my-2">
-                        <div class="d-flex align-items-center"><img class="img-fluid me-3 me-md-2 me-lg-3" src="assets/img/gallery/1.png" width="70" alt="" />
+                        <div class="d-flex align-items-center"><img class="img-fluid me-3 me-md-2 me-lg-3" src="/views/landing/assets/img/gallery/1.png" width="70" alt="" />
                           <div class="flex-1 align-items-center">
-                            <h6 class="mb-0 fs--1 text-1000 fw-medium">Viezh Robert</h6>
-                            <p class="fs--2 fw-normal text-info mb-0">arsaw, Poland</p>
+                            <h6 class="mb-0 fs--1 text-1000 fw-medium">The Student</h6>
+                            <p class="fs--2 fw-normal text-info mb-0"></p>
                           </div>
                         </div>
-                        <p class="card-text ps-7 ps-md-0 ps-xl-7 pt-md-4 pt-lg-3 pt-xl-0">“Wow...I am very happy to use this VPN, it turned out to be more than my expectations and so far there have been no problems. LaslesVPN always the best”.</p>
+                        <p class="card-text ps-7 ps-md-0 ps-xl-7 pt-md-4 pt-lg-3 pt-xl-0">"This LMS has revolutionized my learning experience. The interactive quizzes, video lectures, and discussion forums have made learning engaging and effective. The platform's accessibility and support have been invaluable to my academic success."</p>
                       </div>
                     </div>
                   </div>
                   <div class="col-md-4 mb-3 mb-md-0">
                     <div class="card h-100 py-3">
                       <div class="card-body my-2">
-                        <div class="d-flex align-items-center"><img class="img-fluid me-3 me-md-2 me-lg-3" src="assets/img/gallery/2.png" width="70" alt="" />
+                        <div class="d-flex align-items-center"><img class="img-fluid me-3 me-md-2 me-lg-3" src="/views/landing/assets/img/gallery/2.png" width="70" alt="" />
                           <div class="flex-1 align-items-center">
-                            <h6 class="mb-0 fs--1 text-1000 fw-medium">Kim Young Jou</h6>
-                            <p class="fs--2 fw-normal text-info mb-0">UX Engineer</p>
+                            <h6 class="mb-0 fs--1 text-1000 fw-medium">The Lifelong Learner</h6>
+                            <p class="fs--2 fw-normal text-info mb-0"></p>
                           </div>
                         </div>
-                        <p class="card-text ps-7 ps-md-0 ps-xl-7 pt-md-4 pt-lg-3 pt-xl-0">“I like it because I like to travel far and still can connect with high speed.”</p>
+                        <p class="card-text ps-7 ps-md-0 ps-xl-7 pt-md-4 pt-lg-3 pt-xl-0">"I've always been passionate about learning new things. This LMS has provided me with the perfect platform to explore my interests. The wide range of courses and the flexibility to learn at my own pace have made it easy to keep learning throughout my life."</p>
                       </div>
                     </div>
                   </div>
                   <div class="col-md-4 mb-3 mb-md-0">
                     <div class="card h-100 py-3">
                       <div class="card-body my-2">
-                        <div class="d-flex align-items-center"><img class="img-fluid me-3 me-md-2 me-lg-3" src="assets/img/gallery/3.png" width="70" alt="" />
+                        <div class="d-flex align-items-center"><img class="img-fluid me-3 me-md-2 me-lg-3" src="/views/landing/assets/img/gallery/3.png" width="70" alt="" />
                           <div class="flex-1 align-items-center">
-                            <h6 class="mb-0 fs--1 text-1000 fw-medium">Kim Young Jou</h6>
-                            <p class="fs--2 fw-normal text-info mb-0">Web Designer</p>
+                            <h6 class="mb-0 fs--1 text-1000 fw-medium">Remote Worker</h6>
+                            <p class="fs--2 fw-normal text-info mb-0"></p>
                           </div>
                         </div>
-                        <p class="card-text ps-7 ps-md-0 ps-xl-7 pt-md-4 pt-lg-3 pt-xl-0">“I like it because I like to travel far and still can connect with high speed.”</p>
+                        <p class="card-text ps-7 ps-md-0 ps-xl-7 pt-md-4 pt-lg-3 pt-xl-0">"As a remote worker, it can be difficult to stay connected to my team. This LMS has helped bridge the gap. The collaborative features, such as group projects and discussion forums, have made it easy to work with my colleagues and stay up-to-date on the latest developments."</p>
                       </div>
                     </div>
                   </div>
@@ -324,39 +324,39 @@
                   <div class="col-md-4 mb-3 mb-md-0">
                     <div class="card h-100 py-3">
                       <div class="card-body my-2">
-                        <div class="d-flex align-items-center"><img class="img-fluid me-3 me-md-2 me-lg-3" src="assets/img/gallery/1.png" width="70" alt="" />
+                        <div class="d-flex align-items-center"><img class="img-fluid me-3 me-md-2 me-lg-3" src="/views/landing/assets/img/gallery/1.png" width="70" alt="" />
                           <div class="flex-1 align-items-center">
-                            <h6 class="mb-0 fs--1 text-1000 fw-medium">Viezh Robert</h6>
-                            <p class="fs--2 fw-normal text-info mb-0">arsaw, Poland</p>
+                            <h6 class="mb-0 fs--1 text-1000 fw-medium">The Small Business Owner</h6>
+                            <p class="fs--2 fw-normal text-info mb-0"></p>
                           </div>
                         </div>
-                        <p class="card-text ps-7 ps-md-0 ps-xl-7 pt-md-4 pt-lg-3 pt-xl-0">“Wow...I am very happy to use this VPN, it turned out to be more than my expectations and so far there have been no problems. LaslesVPN always the best”.</p>
+                        <p class="card-text ps-7 ps-md-0 ps-xl-7 pt-md-4 pt-lg-3 pt-xl-0">"I needed a cost-effective way to train my employees. This LMS has been a great solution. The easy-to-use authoring tools have allowed me to create custom training programs, and the platform's analytics have helped me track employee progress and identify areas for improvement.</p>
                       </div>
                     </div>
                   </div>
                   <div class="col-md-4 mb-3 mb-md-0">
                     <div class="card h-100 py-3">
                       <div class="card-body my-2">
-                        <div class="d-flex align-items-center"><img class="img-fluid me-3 me-md-2 me-lg-3" src="assets/img/gallery/2.png" width="70" alt="" />
+                        <div class="d-flex align-items-center"><img class="img-fluid me-3 me-md-2 me-lg-3" src="/views/landing/assets/img/gallery/2.png" width="70" alt="" />
                           <div class="flex-1 align-items-center">
-                            <h6 class="mb-0 fs--1 text-1000 fw-medium">Kim Young Jou</h6>
-                            <p class="fs--2 fw-normal text-info mb-0">UX Engineer</p>
+                            <h6 class="mb-0 fs--1 text-1000 fw-medium">The International Student</h6>
+                            <p class="fs--2 fw-normal text-info mb-0"></p>
                           </div>
                         </div>
-                        <p class="card-text ps-7 ps-md-0 ps-xl-7 pt-md-4 pt-lg-3 pt-xl-0">“I like it because I like to travel far and still can connect with high speed.”</p>
+                        <p class="card-text ps-7 ps-md-0 ps-xl-7 pt-md-4 pt-lg-3 pt-xl-0">"As an international student, adapting to a new education system can be challenging. This LMS has made the transition much smoother. The clear explanations, interactive exercises, and 24/7 support have been invaluable."</p>
                       </div>
                     </div>
                   </div>
                   <div class="col-md-4 mb-3 mb-md-0">
                     <div class="card h-100 py-3">
                       <div class="card-body my-2">
-                        <div class="d-flex align-items-center"><img class="img-fluid me-3 me-md-2 me-lg-3" src="assets/img/gallery/3.png" width="70" alt="" />
+                        <div class="d-flex align-items-center"><img class="img-fluid me-3 me-md-2 me-lg-3" src="/views/landing/assets/img/gallery/3.png" width="70" alt="" />
                           <div class="flex-1 align-items-center">
-                            <h6 class="mb-0 fs--1 text-1000 fw-medium">Kim Young Jou</h6>
-                            <p class="fs--2 fw-normal text-info mb-0">Web Designer</p>
+                            <h6 class="mb-0 fs--1 text-1000 fw-medium">The Tech-Savvy Learner</h6>
+                            <p class="fs--2 fw-normal text-info mb-0"></p>
                           </div>
                         </div>
-                        <p class="card-text ps-7 ps-md-0 ps-xl-7 pt-md-4 pt-lg-3 pt-xl-0">“I like it because I like to travel far and still can connect with high speed.”</p>
+                        <p class="card-text ps-7 ps-md-0 ps-xl-7 pt-md-4 pt-lg-3 pt-xl-0">"I appreciate the modern design and intuitive interface of this LMS. The platform's integration with other tools and technologies has made my learning experience even more efficient and enjoyable."</p>
                       </div>
                     </div>
                   </div>
@@ -380,7 +380,7 @@
 
       <!-- ============================================-->
       <!-- <section> begin ============================-->
-      <section class="py-6 pb-0">
+      <!-- <section class="py-6 pb-0">
 
         <div class="container">
           <hr class="text-info opacity-25" />
@@ -394,9 +394,9 @@
                   <path fill-rule="evenodd" d="M1 8a.5.5 0 0 1 .5-.5h11.793l-3.147-3.146a.5.5 0 0 1 .708-.708l4 4a.5.5 0 0 1 0 .708l-4 4a.5.5 0 0 1-.708-.708L13.293 8.5H1.5A.5.5 0 0 1 1 8z"></path>
                 </svg></a></div>
           </div>
-          <div class="row justify-content-lg-around">
-            <div class="col-12 col-sm-12 col-lg-3 mb-4 order-0 order-sm-0"><a class="text-decoration-none" href="#"><img class="img-fluid me-3" src="assets/img/icons/logo.png" alt="" /><span class="fw-bold fs-1 text-1000">DataWarehouse</span></a>
-              <p class="mt-4">Warehouse Society, 234 <br />Bahagia Ave Street PRBW 29281</p>
+          <div class="row justify-content-lg-around"> -->
+            <!-- <div class="col-12 col-sm-12 col-lg-3 mb-4 order-0 order-sm-0"><a class="text-decoration-none" href="#"><img class="img-fluid me-3" src="assets/img/icons/logo.png" alt="" /><span class="fw-bold fs-1 text-1000">DataWarehouse</span></a> -->
+              <!-- <p class="mt-4">Warehouse Society, 234 <br />Bahagia Ave Street PRBW 29281</p>
               <p>info@warehouse.project<br />1-232-3434 (Main) </p>
             </div>
             <div class="col-6 col-sm-4 col-lg-3 mb-3 order-2 order-sm-1">
@@ -427,7 +427,7 @@
               </ul>
             </div>
           </div>
-        </div>
+        </div> -->
         <!-- end of .container-->
 
       </section>
@@ -438,48 +438,107 @@
 
 
       <!-- ============================================-->
-      <!-- <section> begin ============================-->
-      <section class="py-6">
+   <!-- <section> begin ============================-->
+    <!-- <section class="py-6 pb-0">
 
-        <div class="container">
-          <div class="row flex-center px-3">
-            <div class="col-12 col-md-6 px-md-0 order-1 order-md-0">
-              <div class="text-center text-md-start">
-                <p class="mb-0">This template is made with&nbsp;
-                  <svg class="bi bi-suit-heart-fill" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#9C69E2" viewBox="0 0 16 16">
-                    <path d="M4 1c2.21 0 4 1.755 4 3.92C8 2.755 9.79 1 12 1s4 1.755 4 3.92c0 3.263-3.234 4.414-7.608 9.608a.513.513 0 0 1-.784 0C3.234 9.334 0 8.183 0 4.92 0 2.755 1.79 1 4 1z"></path>
-                  </svg>&nbsp;by&nbsp;<a class="text-1000" href="https://themewagon.com/" target="_blank">ThemeWagon </a>
-                </p>
-              </div>
-            </div>
-            <div class="col-12 col-md-6 text-center text-md-end mb-3 mb-md-0"> <a href="#"><img class="img-fluid" src="assets/img/icons/pre-footer.png" height="14" alt="" /></a></div>
+      <div class="container">
+        <hr class="text-info opacity-25" />
+        <div class="row py-7 justify-content-sm-between text-center text-md-start">
+          <div class="col-md-6">
+            <h1 class="fw-bold">Try for free!</h1>
+            <p>Get limited 1 week free try our features!</p>
+          </div>
+          <div class="col-md-6 text-lg-end"><a class="btn btn-lg btn-danger rounded-pill me-4 me-md-3 me-lg-4" href="#" role="button">Learn more</a><a class="btn btn-light rounded-pill shadow fw-bold" href="#" role="button">Request Demo
+              <svg class="bi bi-arrow-right" xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="#9C69E2" viewBox="0 0 16 16">
+                <path fill-rule="evenodd" d="M1 8a.5.5 0 0 1 .5-.5h11.793l-3.147-3.146a.5.5 0 0 1 .708-.708l4 4a.5.5 0 0 1 0 .708l-4 4a.5.5 0 0 1-.708-.708L13.293 8.5H1.5A.5.5 0 0 1 1 8z"></path>
+              </svg></a></div>
+        </div>
+        <div class="row justify-content-lg-around">
+          <div class="col-12 col-sm-12 col-lg-3 mb-4 order-0 order-sm-0"><a class="text-decoration-none" href="#"><img class="img-fluid me-3" src="assets/img/icons/logo.png" alt="" /><span class="fw-bold fs-1 text-1000">DataWarehouse</span></a>
+            <p class="mt-4">Warehouse Society, 234 <br />Bahagia Ave Street PRBW 29281</p>
+            <p>info@warehouse.project<br />1-232-3434 (Main) </p>
+          </div>
+          <div class="col-6 col-sm-4 col-lg-3 mb-3 order-2 order-sm-1">
+            <h6 class="lh-lg fw-bold mb-4">About</h6>
+            <ul class="list-unstyled mb-md-4 mb-lg-0">
+              <li class="lh-lg"><a class="text-dark fs--1 text-decoration-none" href="#!">Profile</a></li>
+              <li class="lh-lg"><a class="text-dark fs--1 text-decoration-none" href="#!">Features</a></li>
+              <li class="lh-lg"><a class="text-dark fs--1 text-decoration-none" href="#!">Careers</a></li>
+              <li class="lh-lg"><a class="text-dark fs--1 text-decoration-none" href="#!">DW News</a></li>
+            </ul>
+          </div>
+          <div class="col-6 col-sm-4 col-lg-3 mb-3 order-3 order-sm-2">
+            <h6 class="lh-lg fw-bold mb-4"> Help </h6>
+            <ul class="list-unstyled mb-md-4 mb-lg-0">
+              <li class="lh-lg"><a class="text-dark fs--1 text-decoration-none" href="#!">Support</a></li>
+              <li class="lh-lg"><a class="text-dark fs--1 text-decoration-none" href="#!">Sign Up </a></li>
+              <li class="lh-lg"><a class="text-dark fs--1 text-decoration-none" href="#!">Guide</a></li>
+              <li class="lh-lg"><a class="text-dark fs--1 text-decoration-none" href="#!">Reports</a></li>
+              <li class="lh-lg"><a class="text-dark fs--1 text-decoration-none" href="#!">Q&amp;A</a></li>
+            </ul>
+          </div>
+          <div class="col-12 col-sm-4 col-lg-3 mb-3 order-1 order-sm-3">
+            <h6 class="lh-lg fw-bold mb-4">Social Media </h6>
+            <ul class="list-unstyled mb-md-4 mb-lg-0">
+              <li class="list-inline-item"><a class="text-dark fs--1 text-decoration-none" href="#!"><img class="img-fluid" src="assets/img/icons/f.png" width="40" alt="" /></a></li>
+              <li class="list-inline-item"><a class="text-dark fs--1 text-decoration-none" href="#!"><img class="img-fluid" src="assets/img/icons/t.png" width="40" alt="" /></a></li>
+              <li class="list-inline-item"><a class="text-dark fs--1 text-decoration-none" href="#!"><img class="img-fluid" src="assets/img/icons/i.png" width="40" alt="" /></a></li>
+            </ul>
           </div>
         </div>
-        <!-- end of .container-->
+      </div> -->
+      <!-- end of .container-->
 
-      </section>
-      <!-- <section> close ============================-->
-      <!-- ============================================-->
-
-
-    </main>
-    <!-- ===============================================-->
-    <!--    End of Main Content-->
-    <!-- ===============================================-->
+    <!-- </section> -->
+    <!-- <section> close ============================-->
+    <!-- ============================================-->
 
 
 
 
-    <!-- ===============================================-->
-    <!--    JavaScripts-->
-    <!-- ===============================================-->
-    <script src="vendors/@popperjs/popper.min.js"></script>
-    <script src="vendors/bootstrap/bootstrap.min.js"></script>
-    <script src="vendors/is/is.min.js"></script>
-    <script src="https://polyfill.io/v3/polyfill.min.js?features=window.scroll"></script>
-    <script src="assets/js/theme.js"></script>
+    <!-- ============================================-->
+    <!-- <section> begin ============================-->
+    <section class="py-6">
 
-    <link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,300;0,400;0,700;0,900;1,300;1,700;1,900&amp;display=swap" rel="stylesheet">
-  </body>
+      <div class="container">
+        <div class="row flex-center px-3">
+          <div class="col-12 col-md-6 px-md-0 order-1 order-md-0">
+            <!-- <div class="text-center text-md-start">
+              <p class="mb-0">This template is made with&nbsp;
+                <svg class="bi bi-suit-heart-fill" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#9C69E2" viewBox="0 0 16 16">
+                  <path d="M4 1c2.21 0 4 1.755 4 3.92C8 2.755 9.79 1 12 1s4 1.755 4 3.92c0 3.263-3.234 4.414-7.608 9.608a.513.513 0 0 1-.784 0C3.234 9.334 0 8.183 0 4.92 0 2.755 1.79 1 4 1z"></path>
+                </svg>&nbsp;by&nbsp;<a class="text-1000" href="https://themewagon.com/" target="_blank">ThemeWagon </a>
+              </p>
+            </div>
+          </div> -->
+          <!-- <div class="col-12 col-md-6 text-center text-md-end mb-3 mb-md-0"> <a href="#"><img class="img-fluid" src="assets/img/icons/pre-footer.png" height="14" alt="" /></a></div> -->
+        </div>
+      </div>
+      <!-- end of .container-->
+
+    </section>
+    <!-- <section> close ============================-->
+    <!-- ============================================-->
+
+
+  </main>
+  <!-- ===============================================-->
+  <!--    End of Main Content-->
+  <!-- ===============================================-->
+
+
+
+
+  <!-- ===============================================-->
+  <!--    JavaScripts-->
+  <!-- ===============================================-->
+  <script src="/views/landing/vendors/@popperjs/popper.min.js"></script>
+  <script src="/views/landing/vendors/bootstrap/bootstrap.min.js"></script>
+  <script src="/views/landing/vendors/is/is.min.js"></script>
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=window.scroll"></script>
+  <script src="/views/landing/assets/js/theme.js"></script>
+
+  <link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,300;0,400;0,700;0,900;1,300;1,700;1,900&amp;display=swap" rel="stylesheet">
+</body>
 
 </html>
