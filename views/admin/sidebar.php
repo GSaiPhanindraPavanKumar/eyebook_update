@@ -143,8 +143,8 @@ $adminModel = new \Models\Admin();
                     </a>
                     <div class="collapse" id="courses">
                         <ul class="nav flex-column sub-menu">
-                            <li class="nav-item"><a class="nav-link" href="add_courses.php">Add Courses</a></li>
-                            <li class="nav-item"><a class="nav-link" href="manage_courses.php">Manage Courses</a></li>
+                            <li class="nav-item"><a class="nav-link" href="add_courses">Add Courses</a></li>
+                            <li class="nav-item"><a class="nav-link" href="manage_courses">Manage Courses</a></li>
                             <!-- <li class="nav-item"><a class="nav-link" href="courses">Submission</a></li> -->
                         </ul>
                     </div>
@@ -157,7 +157,7 @@ $adminModel = new \Models\Admin();
                     </a>
                     <div class="collapse" id="student">
                         <ul class="nav flex-column sub-menu">
-                        <li class="nav-item"> <a class="nav-link" href="uploadStudents.php">Upload Students</a></li>
+                        <li class="nav-item"> <a class="nav-link" href="uploadStudents">Upload Students</a></li>
                             <li class="nav-item"> <a class="nav-link" href="#">Manage Student</a></li>
                         </ul>
                     </div>

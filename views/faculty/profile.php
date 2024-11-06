@@ -1,27 +1,6 @@
 <?php
 include 'sidebar.php';
 
-// Check if the user is not logged in
-if (!isset($_SESSION['email'])) {
-    header("Location: login");
-    exit;
-}
-
-// Get the email from the session
-$email = $_SESSION['email'];
-
-// Use prepared statements to prevent SQL injection
-$stmt = $conn->prepare("SELECT * FROM faculty WHERE email = ?");
-if (!$stmt) {
-    die('Error in preparing statement: ' . $conn->error);
-}
-
-$stmt->bind_param("s", $email);
-$stmt->execute();
-$result = $stmt->get_result();
-
-// Fetch user data
-$userData = $result->fetch_assoc();
 ?>
 
 <!-- HTML Content -->

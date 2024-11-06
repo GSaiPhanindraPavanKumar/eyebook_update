@@ -40,9 +40,9 @@ class Faculty {
     }
 
     public function getUserProfile($conn) {
-        $query = 'SELECT * FROM faculty';
+        $query = 'SELECT * FROM faculty where email = :email';
         $stmt = $conn->prepare($query);
-        // $stmt->execute(['id' => $_SESSION['Faculty']['id']]);
+        $stmt->execute(['email' => $_SESSION['email']]);
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
         return $user;
     }

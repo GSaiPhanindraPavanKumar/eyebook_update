@@ -2,15 +2,6 @@
 
 <div class="main-panel">
     <div class="content-wrapper">
-        <!-- <div class="row">
-            <div class="col-md-12 grid-margin">
-                <div class="row">
-                    <div class="col-12 col-xl-8 mb-4 mb-xl-0">
-                        <h3 class="font-weight-bold">Upload Students</h3>
-                    </div>
-                </div>
-            </div>
-        </div> -->
         <div class="row">
             <div class="col-md-12 grid-margin stretch-card">
                 <div class="card">
@@ -41,6 +32,16 @@
                                 <button type="submit" class="btn btn-primary">Upload Students</button>
                             </div>
                         </form>
+                        <?php if (!empty($duplicateRecords)): ?>
+                            <div class="alert alert-warning" role="alert">
+                                <p>Duplicate records found:</p>
+                                <ul>
+                                    <?php foreach ($duplicateRecords as $record): ?>
+                                        <li><?php echo htmlspecialchars($record['regd_no'] . ' - ' . $record['email'] . ' - ' .$record['name']); ?></li>
+                                    <?php endforeach; ?>
+                                </ul>
+                            </div>
+                        <?php endif; ?>
                         <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
                         <script>
                             <?php if (isset($message)): ?>

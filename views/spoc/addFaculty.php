@@ -1,47 +1,5 @@
 <?php
 include("sidebar.php");
-
-
-$email = $_SESSION['email'];
-
-// Fetch user profile data
-$profile = null;
-$sql = "SELECT university_id FROM spocs WHERE email = ?";
-$stmt = $conn->prepare($sql);
-$stmt->bind_param("s", $email);
-$stmt->execute();
-$result = $stmt->get_result();
-if ($result->num_rows > 0) {
-    $profile = $result->fetch_assoc();
-}
-$stmt->close();
-
-// Handle form submission
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $name = $_POST['name'];
-    $email = $_POST['email'];
-    $phone = $_POST['phone'];
-    $section = $_POST['section'];
-    $stream = $_POST['stream'];
-    $year = $_POST['year'];
-    $department = $_POST['department'];
-    $university_id = $profile['university_id'];
-    $password = password_hash($_POST['password'], PASSWORD_BCRYPT);
-
-    $sql = "INSERT INTO faculty (name, email, phone, section, stream, year, department, university_id, password) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("sssssssis", $name, $email, $phone, $section, $stream, $year, $department, $university_id, $password);
-
-    if ($stmt->execute()) {
-        $message = "Faculty created successfully!";
-    } else {
-        $message = "Error creating faculty: " . $stmt->error;
-    }
-
-    $stmt->close();
-}
-
-$conn->close();
 ?>
 
 <!-- HTML Content -->

@@ -5,6 +5,7 @@ use Models\Admin;
 use Models\Spoc;
 use Models\Faculty;
 use Models\Student;
+use Models\Database;
 
 class AuthController {
     private $adminModel;
@@ -12,12 +13,12 @@ class AuthController {
     private $facultyModel;
     private $studentModel;
 
-
-    public function __construct(Admin $adminModel = null, Spoc $spocModel = null, Faculty $facultyModel = null) {
-        $this->adminModel = $adminModel ?: new Admin();
-        $this->spocModel = $spocModel ?: new Spoc();
-        $this->facultyModel = $facultyModel ?: new Faculty();
-        $this->studentModel = new Student();
+    public function __construct() {
+        $conn = Database::getConnection();
+        $this->adminModel = new Admin($conn);
+        $this->spocModel = new Spoc($conn);
+        $this->facultyModel = new Faculty($conn);
+        $this->studentModel = new Student($conn);
     }
 
     public function login() {
@@ -50,6 +51,7 @@ class AuthController {
                     exit();
                 }
 
+                // Check student credentials
                 $student = $this->studentModel->login($username, $password);
                 if ($student) {
                     $_SESSION['email'] = $username;
@@ -57,7 +59,7 @@ class AuthController {
                     exit();
                 }
 
-                // If neither admin, spoc, nor faculty credentials match
+                // If neither admin, spoc, faculty, nor student credentials match
                 $message = 'Invalid username or password';
             } else {
                 $message = 'Username and password are required';

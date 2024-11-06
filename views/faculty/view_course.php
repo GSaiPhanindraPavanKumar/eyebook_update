@@ -1,47 +1,12 @@
-<?php
-// Database connection and include sidebar
-include "sidebar.php";
-$course_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
+<?php include "sidebar.php"; ?>
 
-if ($course_id == 0) {
-    die("Invalid course ID.");
-}
-
-// Fetch course details
-$sql = "SELECT * FROM courses WHERE id = $course_id";
-$result = $conn->query($sql);
-
-if ($result->num_rows > 0) {
-    $course = $result->fetch_assoc();
-} else {
-    die("Course not found.");
-}
-
-// Decode JSON data
-$course_plan = json_decode($course['course_plan'], true);
-$course_book = json_decode($course['course_book'], true);
-$course_materials = json_decode($course['course_materials'], true);
-
-// Ensure course_materials is an array
-if (!is_array($course_materials)) {
-    $course_materials = [];
-}
-
-// Sort course materials by unit number in ascending order
-usort($course_materials, function($a, $b) {
-    return $a['unitNumber'] <=> $b['unitNumber'];
-});
-
-// Close the DB connection
-$conn->close();
-?>
 <div class="main-panel">
     <div class="content-wrapper">
         <div class="row">
             <div class="col-md-12 grid-margin">
                 <div class="d-flex justify-content-between align-items-center">
                     <h2 class="font-weight-bold mb-4">Course Management: <?php echo htmlspecialchars($course['name']); ?></h2>
-                    <span class="badge bg-primary text-white">Course ID: <?php echo $course_id; ?></span>
+                    <span class="badge bg-primary text-white">Course ID: <?php echo $course['id']; ?></span>
                 </div>
             </div>
         </div>
@@ -58,13 +23,13 @@ $conn->close();
                             <h5>Course Plan</h5>
                             <div>
                                 <button type="button" class="btn btn-primary" onclick="toggleCoursePlanForm()">Upload</button>
-                                <?php if (!empty($course_plan)) : ?>
+                                <?php if (!empty($course['course_plan'])) : ?>
                                     <button class="btn btn-primary" onclick="redirectToCoursePlan()">View</button>
                                 <?php endif; ?>
                             </div>
                         </div>
                         <form id="uploadCoursePlanForm" action="upload_course_plan.php" method="post" enctype="multipart/form-data" style="display: none; margin-top: 10px;">
-                            <input type="hidden" name="course_id" value="<?php echo $course_id; ?>">
+                            <input type="hidden" name="course_id" value="<?php echo $course['id']; ?>">
                             <input type="file" name="course_plan_file" accept="application/pdf" required>
                             <button type="submit" class="btn btn-success">Upload</button>
                             <button type="button" class="btn btn-secondary" onclick="toggleCoursePlanForm()">Cancel</button>
@@ -73,7 +38,7 @@ $conn->close();
                         <!-- Course Book Section -->
                         <div class="d-flex justify-content-between align-items-center mt-4">
                             <h5>Course Book</h5>
-                            <?php if (!empty($course_book)) : ?>
+                            <?php if (!empty($course['course_book'])) : ?>
                                 <button class="btn btn-primary" onclick="redirectToCourseBook()">View</button>
                             <?php endif; ?>
                         </div>
@@ -88,7 +53,7 @@ $conn->close();
                             <button type="button" class="btn btn-warning" onclick="showBulkUpload()">Bulk Upload</button>
                         </div>
                         <form id="uploadCourseMaterialsForm" action="upload_course_materials.php" method="post" enctype="multipart/form-data" style="display: none; margin-top: 10px;">
-                            <input type="hidden" name="course_id" value="<?php echo $course_id; ?>">
+                            <input type="hidden" name="course_id" value="<?php echo $course['id']; ?>">
                             <input type="hidden" name="upload_type" id="uploadType">
                             <div id="singleUpload" style="display: none;">
                                 <div class="form-group">
@@ -131,8 +96,8 @@ $conn->close();
                             </thead>
                             <tbody>
                                 <?php
-                                if (!empty($course_materials)) {
-                                    foreach ($course_materials as $unit) {
+                                if (!empty($course['course_materials'])) {
+                                    foreach ($course['course_materials'] as $unit) {
                                         if (isset($unit['materials'])) {
                                             foreach ($unit['materials'] as $material) {
                                                 echo "<tr>";
@@ -229,7 +194,7 @@ function showBulkUpload() {
 }
 
 function redirectToCoursePlan() {
-    var coursePlan = <?php echo json_encode($course_plan); ?>;
+    var coursePlan = <?php echo json_encode($course['course_plan']); ?>;
     var baseUrl = "http://localhost/eyebook_update/"; // Replace with your actual base URL
     var coursePlanUrl = "";
     if (coursePlan && coursePlan.url) {
@@ -244,7 +209,7 @@ function redirectToCoursePlan() {
 }
 
 function redirectToCourseBook() {
-    var courseMaterials = <?php echo json_encode($course_book); ?>;
+    var courseMaterials = <?php echo json_encode($course['course_book']); ?>;
     var baseUrl = "http://localhost/eyebook_update/"; // Replace with your actual base URL
     var courseBookUrl = "";
 

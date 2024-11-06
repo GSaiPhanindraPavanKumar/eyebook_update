@@ -27,7 +27,6 @@ class AdminController {
         $adminModel = new AdminModel();
         $user = $adminModel->getUserProfile($conn);
 
-
         $university_count = University::getCount($conn);
         $student_count = Student::getCount($conn);
         $spoc_count = Spoc::getCount($conn);
@@ -86,7 +85,7 @@ class AdminController {
             $location = $_POST['location'];
             $country = $_POST['country'];
 
-            University::update($conn, $id, $long_name, $short_name, $location, $country);
+            // University::update($conn, $id, $long_name, $short_name, $location, $country);
 
             header('Location: /admin/manageUniversity');
             exit();
@@ -121,72 +120,44 @@ class AdminController {
 
         require 'views/admin/updatePassword.php';
     }
-
-    
     
     public function uploadStudents() {
         $conn = Database::getConnection();
-        $message = '';
-        $message_type = '';
+        $duplicateRecords = [];
     
-
-        $allowed_file_types = ['text/csv', 'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'];
+        if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['file'])) {
+            $file = $_FILES['file']['tmp_name'];
+            $university_id = $_POST['university_id'];
     
-
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $university_id = filter_input(INPUT_POST, 'university_id', FILTER_SANITIZE_NUMBER_INT);
-            $file = $_FILES['file'];
+            $spreadsheet = IOFactory::load($file);
+            $sheet = $spreadsheet->getActiveSheet();
+            $rows = $sheet->toArray();
     
-            if ($file['error'] === UPLOAD_ERR_OK) {
-                $file_tmp = $file['tmp_name'];
-                $file_name = basename($file['name']);
-                $file_size = $file['size'];
-                $file_type = $file['type'];
+            // Assuming the first row contains headers
+            $headers = array_shift($rows);
     
-
-                if (!in_array($file_type, $allowed_file_types)) {
-                    $message = "Invalid file type. Only CSV and Excel files are allowed.";
-                    $message_type = "error";
-                } elseif ($file_size > 5000000) { 
-                    $message = "File size exceeds the limit of 5MB.";
-                    $message_type = "error";
-                } else {
-                    try {
-                        Student::addStudentsFromExcel($conn, $file_tmp, $university_id);
-                        $message = "File uploaded and students added successfully";
-                        $message_type = "success";
-                    } catch (\Exception $e) {
-                        $message = "Error processing file: " . $e->getMessage();
-                        $message_type = "error";
-                    }
+            foreach ($rows as $row) {
+                $data = array_combine($headers, $row);
+                $result = Student::uploadStudents($conn, $data, $university_id);
+                if ($result['duplicate']) {
+                    $duplicateRecords[] = $result['data'];
                 }
-            } else {
-                $message = "Error uploading file: " . $file['error'];
-                $message_type = "error";
             }
-        }    
-
-        $universities = University::getAll($conn);
     
+            if (empty($duplicateRecords)) {
+                $message = "Students uploaded successfully.";
+                $message_type = "success";
+            } else {
+                $message = "Some records were not uploaded due to duplicates.";
+                $message_type = "warning";
+            }
+        } else {
+            $message = "Failed to upload students.";
+            $message_type = "danger";
+        }
+    
+        $universities = University::getAll($conn);
         require 'views/admin/uploadStudents.php';
-    }
-
-    public function addCourse() {
-        $conn = Database::getConnection();
-        require 'views/admin/add_courses.php';
-    }
-
-    public function manageCourse() {
-        require 'views/admin/manage_courses.php';
-    }
-
-
-    public function courseView($id) {
-        $conn = Database::getConnection();
-        $course = Course::getById($conn, $id);
-        $universities = Course::getUniversitiesByCourseId($conn, $course);
-
-        require 'views/admin/view_course.php';
     }
 }
 ?>

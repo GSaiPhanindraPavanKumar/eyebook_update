@@ -66,6 +66,14 @@ class Course {
     
             return $course;
         }
+
+        public static function getCoursesByFaculty($conn) {
+            $sql = "SELECT * FROM courses";
+            $stmt = $conn->query($sql); // Use query instead of prepare and execute
+            $courses = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+            return $courses;
+        }
     }
 
 ?>

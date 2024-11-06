@@ -4,6 +4,12 @@ namespace Models;
 use PDO;
 
 class Spoc {
+    private $conn;
+
+    public function __construct($conn) {
+        $this->conn = $conn;
+    }
+
     public static function getCount($conn) {
         $sql = "SELECT COUNT(*) as spoc_count FROM spocs";
         $stmt = $conn->query($sql);
@@ -26,9 +32,8 @@ class Spoc {
     }
 
     public function login($username, $password) {
-        $conn = Database::getConnection();
         $sql = "SELECT * FROM spocs WHERE email = :username";
-        $stmt = $conn->prepare($sql);
+        $stmt = $this->conn->prepare($sql);
         $stmt->execute([':username' => $username]);
         $spoc = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -39,22 +44,91 @@ class Spoc {
         return false;
     }
 
-    public function getUserProfile($conn) {
-        $query = 'SELECT * FROM spocs';
-        $stmt = $conn->prepare($query);
-        // $stmt->execute(['id' => $_SESSION['spoc']['id']]);
+    public function getUserProfile() {
+        $query = 'SELECT * FROM spocs WHERE email = :email';
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute(['email' => $_SESSION['email']]);
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
         return $user;
     }
 
-        public static function updatePassword($conn, $spoc_id, $new_password) {
-            $sql = "UPDATE spocs SET password = :new_password WHERE id = :spoc_id";
-            $stmt = $conn->prepare($sql);
-            $stmt->execute([
-                ':new_password' => $new_password,
-                ':spoc_id' => $spoc_id
-            ]);
-        }
+    public static function updatePassword($conn, $spoc_id, $new_password) {
+        $sql = "UPDATE spocs SET password = :new_password WHERE id = :spoc_id";
+        $stmt = $conn->prepare($sql);
+        $stmt->execute([
+            ':new_password' => $new_password,
+            ':spoc_id' => $spoc_id
+        ]);
+    }
 
-        
+    public function getUserData($email) {
+        $sql = "SELECT * FROM spocs WHERE email = :email";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->execute(['email' => $email]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+    public function getFacultyCount($university_id) {
+        $sql = "SELECT COUNT(*) as faculty_count FROM faculty WHERE university_id = :university_id";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->execute(['university_id' => $university_id]);
+        return $stmt->fetch(PDO::FETCH_ASSOC)['faculty_count'];
+    }
+
+    public function getStudentCount($university_id) {
+        $sql = "SELECT COUNT(*) as student_count FROM students WHERE university_id = :university_id";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->execute(['university_id' => $university_id]);
+        return $stmt->fetch(PDO::FETCH_ASSOC)['student_count'];
+    }
+
+    public function getSpocCount() {
+        $sql = "SELECT COUNT(*) as spoc_count FROM spocs";
+        $stmt = $this->conn->query($sql);
+        return $stmt->fetch(PDO::FETCH_ASSOC)['spoc_count'];
+    }
+
+    public function getCourseCount() {
+        $sql = "SELECT COUNT(*) as course_count FROM courses";
+        $stmt = $this->conn->query($sql);
+        return $stmt->fetch(PDO::FETCH_ASSOC)['course_count'];
+    }
+
+    public function getAllSpocs() {
+        $sql = "SELECT name, email, phone, university_id FROM spocs";
+        $stmt = $this->conn->query($sql);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function getAllUniversities() {
+        $sql = "SELECT * FROM universities";
+        $stmt = $this->conn->query($sql);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function getAllCourses() {
+        $sql = "SELECT * FROM courses";
+        $stmt = $this->conn->query($sql);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+
+
+    public function addFaculty($conn,$name, $email, $phone, $section, $stream, $year, $department, $university_id, $password) {
+        $sql = "INSERT INTO faculty (name, email, phone, section, stream, year, department, university_id, password) VALUES (:name, :email, :phone, :section, :stream, :year, :department, :university_id, :password)";
+        $stmt = $conn->prepare($sql);
+        $stmt->execute([
+            ':name' => $name,
+            ':email' => $email,
+            ':phone' => $phone,
+            ':section' => $section,
+            ':stream' => $stream,
+            ':year' => $year,
+            ':department' => $department,
+            ':university_id' => $university_id,
+            ':password' => $password
+        ]);
+        return $this->conn->lastInsertId();
+    }
 }
+?>

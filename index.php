@@ -33,10 +33,7 @@ $router->get('/admin/updatePassword', 'AdminController@updatePassword');
 $router->post('/admin/updatePassword', 'AdminController@updatePassword');
 $router->get('/admin/uploadStudents', 'AdminController@uploadStudents');
 $router->post('/admin/uploadStudents', 'AdminController@uploadStudents');
-$router->get('/admin/logout', 'AuthController@logout');
-$router->get('/spoc/logout', 'AuthController@logout');
-$router->get('/faculty/logout', 'AuthController@logout');
-
+$router->post('/admin/deleteUniversity', 'AdminController@deleteUniversity');
 $router->get('/admin/add_courses', 'AdminController@addCourse');
 $router->post('/admin/add_courses', 'AdminController@addCourse');
 $router->get('/admin/manage_courses', 'AdminController@manageCourse');
@@ -44,34 +41,24 @@ $router->get('/admin/view_course/(\d+)', 'AdminController@courseView');
 
 
 
-// $router->get('/spoc', 'SpocController@dashboard');
-$router->get('/spoc/dashboard', function() {
-    require 'views/spoc/dashboard.php';
-});
-$router->get('/spoc/udatePassword', function(){
-    require 'views/spoc/updatePassword.php';
-});
-$router->post('/spoc/udatePassword', function(){
-    require 'views/spoc/updatePassword.php';
-});
-$router->get('/spoc/profile', function(){
-    require 'views/spoc/profile.php';
-});
+$router->get('/spoc', 'SpocController@dashboard');
+$router->get('/spoc/dashboard', 'SpocController@dashboard');
+$router->get('/spoc/updatePassword', 'SpocController@updatePassword');
+$router->post('/spoc/updatePassword', 'SpocController@updatePassword');
+$router->get('/spoc/profile', 'SpocController@userProfile');
+$router->get('/spoc/addFaculty', 'SpocController@addFaculty');
+$router->post('/spoc/addFaculty', 'SpocController@addFaculty');
 
-$router->get('/faculty/dashboard', function(){
-    require 'views/faculty/dashboard.php';
-});
-$router->get('/faculty/updatePassword', function(){
-    require 'views/faculty/updatePassword.php';
-});
+
+$router->get('/faculty/dashboard', 'FacultyController@dashboard');
+$router->get('/faculty/updatePassword', 'FacultyController@updatePassword');
+$router->get('/faculty/profile', 'FacultyController@userProfile');
+$router->get('/faculty/my_courses', 'FacultyController@myCourses');
+$router->get('/faculty/view_course/(\d+)', 'FacultyController@viewCourse');
+
 $router->post('/faculty/updatePassword', function(){
     require 'views/faculty/updatePassword.php';
 });
-$router->get('/faculty/profile', function(){
-    require 'views/faculty/profile.php';
-});
-
-
 $router->get('/student/dashboard', function(){
     require 'views/student/dashboard.php';
 });
@@ -102,11 +89,14 @@ $router->get('/student/view_course/(\d+)', function($course_id) {
 
 
 
+$router->get('/admin/logout', 'AuthController@logout');
+$router->get('/spoc/logout', 'AuthController@logout');
+$router->get('/faculty/logout', 'AuthController@logout');
 
 
 $router->set404(function() {
     header('HTTP/1.0 404 Not Found');
-    echo '404 Not Found';
+    require 'views/404.html';
 });
 
 $router->run();

@@ -121,7 +121,7 @@ if ($userData) {
         <nav class="sidebar sidebar-offcanvas" id="sidebar">
             <ul class="nav">
                 <li class="nav-item">
-                    <a class="nav-link" href="dashboard.php">
+                    <a class="nav-link" href="dashboard">
                         <i class="icon-grid menu-icon"></i>
                         <span class="menu-title">Dashboard</span>
                     </a>
@@ -131,6 +131,20 @@ if ($userData) {
 
                 <li class="nav-item">
 
+                <!-- <li class="nav-item">
+                    <a class="nav-link" data-toggle="collapse" href="#courses" aria-expanded="false" aria-controls="courses">
+                        <i class="icon-columns menu-icon"></i>
+                        <span class="menu-title">Courses</span>
+                        <i class="menu-arrow"></i>
+                    </a>
+                    <div class="collapse" id="courses">
+                        <ul class="nav flex-column sub-menu">
+                            <li class="nav-item"><a class="nav-link" href="my_courses.php">My Courses</a></li>
+                            <li class="nav-item"><a class="nav-link" href="faculty_dashboard.php">Virtual Classroom</a></li>
+                            <li class="nav-item"><a class="nav-link" href="faculty.php">Assessments</a></li>
+                        </ul>
+                    </div>
+                </li> -->
                 <li class="nav-item">
                     <a class="nav-link" data-toggle="collapse" href="#courses" aria-expanded="false" aria-controls="courses">
                         <i class="icon-columns menu-icon"></i>
@@ -139,9 +153,9 @@ if ($userData) {
                     </a>
                     <div class="collapse" id="courses">
                         <ul class="nav flex-column sub-menu">
-                            <li class="nav-item"><a class="nav-link" href="my_courses.php">My Courses</a></li>
-                            <li class="nav-item"><a class="nav-link" href="faculty_dashboard.php">Virtual Classroom</a></li>
-                            <li class="nav-item"><a class="nav-link" href="faculty.php">Assessments</a></li>
+                            <li class="nav-item"> <a class="nav-link" href="my_courses.php">My Courses</a></li>
+                            <li class="nav-item"> <a class="nav-link" href="virtual_classroom">Virtual Classroom</a></li>
+                            <li class="nav-item"> <a class="nav-link" href="faculty">Assessments</a></li>
                         </ul>
                     </div>
                 </li>
