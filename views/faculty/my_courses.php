@@ -27,7 +27,12 @@ include("sidebar.php");
                                         <p class="card-text"><?php echo htmlspecialchars($course['description']); ?></p>
                                     </div>
                                     <div class="card-body">
-                                        <a href="view_course.php?id=<?php echo $course['id']; ?>" class="card-link">View Course</a>
+                                        <?php 
+                                        $hashedId = base64_encode($course['id']);
+                                        $hashedId = str_replace(['+', '/', '='], ['-', '_', ''], $hashedId);
+                                        ?>
+                                        <a href="view_course/<?php echo $hashedId; ?>" class="card-link">View Course</a>
+                                        <a href="/faculty/discussion_forum/<?php echo $course['id']; ?>" class="card-link">Chat Room</a>
                                     </div>
                                 </div>
                             </div>

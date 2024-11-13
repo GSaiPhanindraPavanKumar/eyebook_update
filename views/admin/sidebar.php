@@ -158,19 +158,20 @@ $adminModel = new \Models\Admin();
                     <div class="collapse" id="student">
                         <ul class="nav flex-column sub-menu">
                         <li class="nav-item"> <a class="nav-link" href="uploadStudents">Upload Students</a></li>
-                            <li class="nav-item"> <a class="nav-link" href="#">Manage Student</a></li>
+                            <li class="nav-item"> <a class="nav-link" href="manage_students">Manage Student</a></li>
                         </ul>
                     </div>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" data-toggle="collapse" href="#streams" aria-expanded="false" aria-controls="streams">
                         <i class="icon-grid-2 menu-icon"></i>
-                        <span class="menu-title">Streams</span>
+                        <span class="menu-title">Public Courses</span>
                         <i class="menu-arrow"></i>
                     </a>
                     <div class="collapse" id="streams">
                         <ul class="nav flex-column sub-menu">
-                            <li class="nav-item"> <a class="nav-link" href="streams_team">Manage Streams</a></li>
+                            <li class="nav-item"> <a class="nav-link" href="streams_team">Create Course</a></li>
+                            <li class="nav-item"> <a class="nav-link" href="streams_team">Manage Course</a></li>
                         </ul>
                     </div>
                 </li>

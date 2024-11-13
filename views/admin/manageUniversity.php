@@ -8,47 +8,57 @@
                         <h3 class="font-weight-bold">Manage Universities</h3>
                     </div>
                     <div class="col-12 col-xl-4 text-right">
-                        <a href="addUniversity.php" class="btn btn-primary">Create University</a>
+                        <a href="addUniversity.php" class="btn btn-primary">
+                            <i class="fas fa-plus-circle"></i> Create University
+                        </a>
                     </div>
                 </div>
             </div>
         </div>
+        
         <div class="row">
             <div class="col-md-12 grid-margin stretch-card">
-                <div class="card">
+                <div class="card shadow">
                     <div class="card-body">
                         <p class="card-title mb-0" style="font-size:larger">Universities</p><br>
                         <div class="table-responsive">
-                            <input class="form-control mb-3" id="searchInput" type="text" placeholder="Search...">
+                            <input class="form-control mb-3" id="searchInput" type="text" placeholder="🔍 Search Universities...">
                             <form id="universityForm" method="post" action="deleteUniversity.php">
-                                <table class="table table-striped table-borderless table-lg">
-                                    <thead>
+                                <table class="table table-hover table-borderless table-striped">
+                                    <thead class="thead-light">
                                         <tr>
                                             <th>Select</th>
-                                            <th>Serial Number</th>
-                                            <th>Long Name</th>
-                                            <th>Short Name</th>
+                                            <th>Serial Number <i class="fas fa-sort"></i></th>
+                                            <th>Long Name <i class="fas fa-sort"></i></th>
+                                            <th>Short Name <i class="fas fa-sort"></i></th>
                                             <th>Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody id="universityTable">
-                                        <?php
-                                        $serialNumber = 1;
-                                        foreach ($universities as $university): ?>
+                                        <?php $serialNumber = 1; foreach ($universities as $university): ?>
                                             <tr>
                                                 <td><input type="checkbox" name="selected[]" value="<?= $university['id'] ?>"></td>
                                                 <td><?= $serialNumber++ ?></td>
                                                 <td><?= $university['long_name'] ?></td>
                                                 <td><?= $university['short_name'] ?></td>
                                                 <td>
-                                                    <button type="button" class="btn btn-primary btn-sm edit-btn" data-id="<?= $university['id'] ?>" data-long_name="<?= $university['long_name'] ?>" data-short_name="<?= $university['short_name'] ?>" data-location="<?= $university['location'] ?>" data-country="<?= $university['country'] ?>">Edit</button>
-                                                    <button type="submit" name="delete" value="<?= $university['id'] ?>" class="btn btn-danger btn-sm">Delete</button>
+                                                    <button type="button" class="btn btn-outline-primary btn-sm edit-btn" 
+                                                            data-id="<?= $university['id'] ?>" 
+                                                            data-long_name="<?= $university['long_name'] ?>" 
+                                                            data-short_name="<?= $university['short_name'] ?>" 
+                                                            data-location="<?= $university['location'] ?>" 
+                                                            data-country="<?= $university['country'] ?>">
+                                                        <i class="fas fa-edit"></i> Edit
+                                                    </button>
+                                                    <button type="submit" name="delete" value="<?= $university['id'] ?>" class="btn btn-outline-danger btn-sm">
+                                                        <i class="fas fa-trash"></i> Delete
+                                                    </button>
                                                 </td>
                                             </tr>
                                         <?php endforeach; ?>
                                     </tbody>
                                 </table>
-                                <div id="noRecords" style="display: none;">No records found</div>
+                                <div id="noRecords" style="display: none;" class="text-center">No records found</div>
                             </form>
                         </div>
                     </div>
@@ -98,9 +108,11 @@
     </div>
 </div>
 
+<!-- Scripts -->
 <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/js/all.min.js"></script>
 <script>
     $(document).ready(function() {
         $('.edit-btn').on('click', function() {

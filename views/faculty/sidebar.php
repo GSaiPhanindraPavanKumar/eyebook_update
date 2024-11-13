@@ -10,7 +10,7 @@ $conn = Database::getConnection();
 
 // Check if the user is not logged in
 if (!isset($_SESSION['email'])) {
-    header("Location: login.php");
+    header("Location: login");
     exit;
 }
 
@@ -77,11 +77,11 @@ if ($userData) {
                         <img src="/views/public\images\user.jpg" alt="profile"/>
                     </a>
                     <div class="dropdown-menu dropdown-menu-right navbar-dropdown" aria-labelledby="profileDropdown">
-                        <a class="dropdown-item" href="profile.php">
+                        <a class="dropdown-item" href="profile">
                             <i class="ti-user text-primary"></i>
                             Profile
                         </a>
-                        <a class="dropdown-item" href="logout.php">
+                        <a class="dropdown-item" href="logout">
                             <i class="ti-power-off text-primary"></i>
                             Logout
                         </a>
@@ -153,7 +153,7 @@ if ($userData) {
                     </a>
                     <div class="collapse" id="courses">
                         <ul class="nav flex-column sub-menu">
-                            <li class="nav-item"> <a class="nav-link" href="my_courses.php">My Courses</a></li>
+                            <li class="nav-item"> <a class="nav-link" href="my_courses">My Courses</a></li>
                             <li class="nav-item"> <a class="nav-link" href="virtual_classroom">Virtual Classroom</a></li>
                             <li class="nav-item"> <a class="nav-link" href="faculty">Assessments</a></li>
                         </ul>

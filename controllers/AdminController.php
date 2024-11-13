@@ -8,6 +8,10 @@ use Models\Course;
 use Models\University;
 use Models\Database;
 use PhpOffice\PhpSpreadsheet\IOFactory;
+use Models\Discussion;
+
+use Exception;
+use PDOException;
 
 class AdminController {
     public function index() {
@@ -158,6 +162,158 @@ class AdminController {
     
         $universities = University::getAll($conn);
         require 'views/admin/uploadStudents.php';
+    }
+    public function addCourse() {
+        $conn = Database::getConnection();
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            $name = $_POST['name'];
+            $description = $_POST['description'];
+            $is_paid = isset($_POST['is_paid']) ? 1 : 0;
+            $price = $_POST['price'] ?? 0.00;
+            $message = Course::create($conn, $name, $description, $is_paid, $price);
+        }
+        require 'views/admin/add_courses.php';
+    }
+    
+    public function manageCourse() {
+        $conn = Database::getConnection();
+        $courses = Course::getAllWithUniversity($conn);
+        require 'views/admin/manage_courses.php';
+    }
+
+    public function courseView($course_id) {
+        $conn = Database::getConnection();
+    
+        if ($course_id === null) {
+            echo "Error: Course ID is not provided.";
+            return;
+        }
+    
+        $course = Course::getById($conn, $course_id);
+    
+        if (!$course) {
+            echo "Error: Invalid Course ID.";
+            return;
+        }
+    
+        // Ensure course_materials is an array
+        if (!is_array($course['course_materials'])) {
+            $course['course_materials'] = [];
+        }
+
+        // Fetch universities details
+        $universities = University::getAll($conn);
+    
+        require 'views/admin/view_course.php';
+    }
+
+    public function addUnit() {
+        $conn = Database::getConnection();
+
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            $course_id = $_POST['course_id'];
+            $unit_name = $_POST['unit_name'];
+            $scorm_file = $_FILES['scorm_file'];
+
+            if (!$unit_name || !$scorm_file) {
+                echo json_encode(['message' => 'Unit name and SCORM package file are required']);
+                exit;
+            }
+
+            $result = Course::addUnit($conn, $course_id, $unit_name, $scorm_file);
+
+            if (isset($result['indexPath'])) {
+                header("Location: /admin/view_course/$course_id");
+                exit;
+            } else {
+                echo json_encode(['message' => $result['message']]);
+                exit;
+            }
+        }
+    }
+
+    public function assignCourse() {
+        $conn = Database::getConnection();
+
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            $course_id = $_POST['course_id'];
+            $university_id = $_POST['university_id'];
+
+            $result = Course::assignCourseToUniversity($conn, $course_id, $university_id);
+
+            if ($result['message'] === 'Course assigned to university successfully') {
+                header("Location: /admin/view_course/$course_id");
+                exit;
+            } else {
+                echo json_encode(['message' => $result['message']]);
+                exit;
+            }
+        }
+    }
+
+    public function createAssessment() {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $title = $_POST['title'];
+            $questions = json_decode($_POST['questions'], true);
+            $deadline = $_POST['deadline'];
+
+            try {
+                $this->conn->createAssessment($title, $questions, $deadline);
+                $success = "Assessment created successfully!";
+                include 'views/success.php';
+            } catch (Exception $e) {
+                $error = "Error creating assessment: " . $e->getMessage();
+                include 'views/error.php';
+            }
+        } else {
+            include 'views/create_assessment.php';
+        }
+    }
+
+    public function generateQuestions() {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $topic = $_POST['topic'];
+            $numQuestions = intval($_POST['numQuestions']);
+            $marksPerQuestion = intval($_POST['marksPerQuestion']);
+
+            try {
+                $questions = $this->model->generateQuestionsUsingGemini($topic, $numQuestions, $marksPerQuestion);
+                echo json_encode($questions);
+            } catch (Exception $e) {
+                http_response_code(500);
+                echo json_encode(['error' => $e->getMessage()]);
+            }
+        } else {
+            http_response_code(405);
+            echo json_encode(['error' => 'Method not allowed']);
+        }
+    }
+
+    public function facultyForum($course_id) {
+        $conn = Database::getConnection();
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            $msg = $_POST['msg'];
+            $username = $_SESSION['email'];
+            Discussion::addDiscussion($conn, $username, $msg, $course_id);
+        }
+        $discussions = Discussion::getDiscussionsByCourse($conn, $course_id);
+        require 'views/faculty/discussion_forum.php';
+    }
+
+    public function studentForum($course_id) {
+        $conn = Database::getConnection();
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            $msg = $_POST['msg'];
+            $username = $_SESSION['username'];
+            Discussion::addDiscussion($conn, $username, $msg, $course_id);
+        }
+        $discussions = Discussion::getDiscussionsByCourse($conn, $course_id);
+        require 'views/faculty/discussion_forum.php';
+    }
+    public function manageStudents() {
+        $conn = Database::getConnection();
+        $students = Student::getAll($conn);
+        require 'views/admin/manageStudents.php';
     }
 }
 ?>

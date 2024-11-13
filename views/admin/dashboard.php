@@ -32,24 +32,12 @@ include("sidebar.php");
             </div>
         </div>
         <div class="row">
-            <!-- <div class="col-md-6 grid-margin stretch-card">
+            <div class="col-md-6 grid-margin stretch-card">
                 <div class="card tale-bg">
-                    <div class="card-people mt-auto">
-                        <img src="images/dashboard/people.svg" alt="people">
-                        <div class="weather-info">
-                    <div class="d-flex">
-                      <div>
-                        <h2 class="mb-0 font-weight-normal"><i class="icon-sun mr-2"></i>31<sup>C</sup></h2>
-                      </div>
-                      <div class="ml-2">
-                        <h4 class="location font-weight-normal">Bangalore</h4>
-                        <h6 class="font-weight-normal">India</h6>
-                      </div>
-                    </div>
-                  </div>
-                    </div>
+
+                    <canvas id="myPieChart" width="200" height="150" style="width: 200px; height: 150px;"></canvas>
                 </div>
-            </div> -->
+            </div>
             <div class="col-md-6 grid-margin transparent">
                 <div class="row">
                     <div class="col-md-6 mb-4 stretch-card transparent">
@@ -341,34 +329,33 @@ include("sidebar.php");
                     <div class="card-body">
                         <p class="card-title mb-0">SPOC</p>
                         <div class="table-responsive">
-                        <table class="table table-striped table-borderless">
-                            <thead>
-                                <tr>
-                                    <th>Name</th>
-                                    <th>Email</th>
-                                    <th>Phone</th>
-                                    <!-- <th>University ID</th> -->
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php
-                                if ($result4->num_rows > 0) {
-                                    // Output data of each row
-                                    while($row = $result4->fetch_assoc()) {
-                                        echo "<tr>";
-                                        echo "<td>" . htmlspecialchars($row['name']) . "</td>";
-                                        echo "<td>" . htmlspecialchars($row['email']) . "</td>";
-                                        echo "<td>" . htmlspecialchars($row['phone']) . "</td>";
-                                        // echo "<td>" . htmlspecialchars($university_name) . "</td>";
-                                        echo "</tr>";
+                            <table class="table table-striped table-borderless">
+                                <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Email</th>
+                                        <th>Phone</th>
+                                        <!-- <th>University ID</th> -->
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php
+                                    if (!empty($spocs)) {
+                                        // Output data of each row
+                                        foreach ($spocs as $row) {
+                                            echo "<tr>";
+                                            echo "<td>" . htmlspecialchars($row['name']) . "</td>";
+                                            echo "<td>" . htmlspecialchars($row['email']) . "</td>";
+                                            echo "<td>" . htmlspecialchars($row['phone']) . "</td>";
+                                            // echo "<td>" . htmlspecialchars($university_name) . "</td>";
+                                            echo "</tr>";
+                                        }
+                                    } else {
+                                        echo "<tr><td colspan='3'>No data available</td></tr>";
                                     }
-                                } else {
-                                    echo "<tr><td colspan='4'>No data available</td></tr>";
-                                }
-                                ?>
-                            </tbody>
-                        </table>
-
+                                    ?>
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
@@ -414,13 +401,13 @@ include("sidebar.php");
                                         </label>
                                     </div>
                                     <i class="remove ti-close"></i>
-                                </li> --> 
+                                </li> -->
                             </ul>
                         </div>
-                        <div class="add-items d-flex mb-0 mt-2">
+                        <!-- <div class="add-items d-flex mb-0 mt-2">
                             <input type="text" class="form-control todo-list-input" placeholder="Add new task">
                             <button class="add btn btn-icon text-primary todo-list-add-btn bg-transparent"><i class="icon-circle-plus"></i></button>
-                        </div>
+                        </div> -->
                     </div>
                 </div>
             </div>
@@ -431,28 +418,28 @@ include("sidebar.php");
                     <div class="card-body">
                         <p class="card-title mb-0">Universities</p>
                         <div class="table-responsive">
-                        <table class="table table-borderless">
-    <thead>
-        <tr>
-            <th class="pl-0 pb-2 border-bottom">University Name</th>
-            <th class="border-bottom pb-2">Short Name</th>
-        </tr>
-    </thead>
-    <tbody>
-        <?php
-        if ($result5->num_rows > 0) {
-            while($row = $result5->fetch_assoc()) {
-                echo "<tr>";
-                echo "<td class='pl-0'>" . htmlspecialchars($row['long_name']) . "</td>";
-                echo "<td><p class='mb-0'><span class='font-weight-bold mr-2'>" . htmlspecialchars($row['short_name']) . "</span></p></td>";
-                echo "</tr>";
-            }
-        } else {
-            echo "<tr><td colspan='3'>No data available</td></tr>";
-        }
-        ?>
-    </tbody>
-</table>
+                            <table class="table table-borderless">
+                                <thead>
+                                    <tr>
+                                        <th class="pl-0 pb-2 border-bottom">University Name</th>
+                                        <th class="border-bottom pb-2">Short Name</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php
+                                    if (!empty($universities)) {
+                                        foreach ($universities as $row) {
+                                            echo "<tr>";
+                                            echo "<td class='pl-0'>" . htmlspecialchars($row['long_name']) . "</td>";
+                                            echo "<td><p class='mb-0'><span class='font-weight-bold mr-2'>" . htmlspecialchars($row['short_name']) . "</span></p></td>";
+                                            echo "</tr>";
+                                        }
+                                    } else {
+                                        echo "<tr><td colspan='2'>No data available</td></tr>";
+                                    }
+                                    ?>
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
@@ -520,35 +507,62 @@ include("sidebar.php");
                 </div>
             </div>
             <div class="col-md-4 stretch-card grid-margin">
-    <div class="card">
-        <div class="card-body">
-            <p class="card-title">Courses</p>
-            <table class="table table-borderless">
-                <thead>
-                    <tr>
-                        <th class="pl-0 pb-2 border-bottom">Course Name</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php
-                    if ($result6->num_rows > 0) {
-                        while($row = $result6->fetch_assoc()) {
-                            echo "<tr>";
-                            echo "<td class='pl-0'>" . htmlspecialchars($row['name']) . "</td>";
-                            echo "</tr>";
-                        }
-                    } else {
-                        echo "<tr><td colspan='3'>No courses available</td></tr>";
-                    }
-                    ?>
-                </tbody>
-            </table>
-        </div>
-    </div>
-</div>
+                <div class="card">
+                    <div class="card-body">
+                        <p class="card-title">Courses</p>
+                        <table class="table table-borderless">
+                            <thead>
+                                <tr>
+                                    <th class="pl-0 pb-2 border-bottom">Course Name</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php
+                                if (!empty($courses)) {
+                                    foreach ($courses as $row) {
+                                        echo "<tr>";
+                                        echo "<td class='pl-0'>" . htmlspecialchars($row['name']) . "</td>";
+                                        echo "</tr>";
+                                    }
+                                } else {
+                                    echo "<tr><td colspan='1'>No courses available</td></tr>";
+                                }
+                                ?>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
         </div>
 
     </div>
     <!-- content-wrapper ends -->
     <?php include 'footer.html'; ?>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    var ctx = document.getElementById('myPieChart').getContext('2d');
+    var myPieChart = new Chart(ctx, {
+        type: 'pie',
+        data: {
+            labels: ['Universities', 'Students', 'SPOCs', 'Courses'],
+            datasets: [{
+                data: [<?php echo $university_count; ?>, <?php echo $student_count; ?>, <?php echo $spoc_count; ?>, <?php echo $course_count; ?>],
+                backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0'],
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'top',
+                },
+                title: {
+                    display: true,
+                    text: 'Distribution of Entities'
+                }
+            }
+        }
+    });
+</script>

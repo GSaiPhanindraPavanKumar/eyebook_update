@@ -1,10 +1,9 @@
 <?php
-require_once '../../config/connection.php';
+require_once __DIR__ . '/../../models/database.php';
 require_once 'config.php';
+use Models\Database;
 
-
-// Establish database connection
-$conn = new PDO('mysql:host=' . $servername . ';dbname=' . $dbname, $username, $password);
+$conn = Database::getConnection();
 
 // Include Zoom integration
 require_once 'zoom_integration.php';

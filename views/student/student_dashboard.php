@@ -7,10 +7,12 @@ if (!isset($_SESSION['email'])) {
 
 require 'zoom_integration.php';
 
-// Load configuration
-$config = require '../../src/config.php';
+// // Load configuration
+// $config = require '../../src/config.php';
 
-require_once '../../config/connection.php';
+use Models\Database;
+
+$conn = Database::getConnection();
 
 // Establish database connection
 $zoom = new ZoomAPI($config['zoom']['client_id'], $config['zoom']['client_secret'], $config['zoom']['account_id'], $conn);

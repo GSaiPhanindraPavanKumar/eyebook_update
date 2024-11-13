@@ -13,6 +13,12 @@ class Student {
         return $result['student_count'] ?? 0;
     }
 
+    public static function getAll($conn) {
+        $sql = "SELECT * FROM students";
+        $stmt = $conn->query($sql);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
     public static function uploadStudents($conn, $data, $university_id) {
         // Check for duplicates
         $sql = "SELECT * FROM students WHERE regd_no = :regd_no OR email = :email";
@@ -64,5 +70,11 @@ class Student {
         }
 
         return false;
+    }
+    public static function getAllByUniversity($conn, $university_id) {
+        $sql = "SELECT * FROM students WHERE university_id = :university_id";
+        $stmt = $conn->prepare($sql);
+        $stmt->execute(['university_id' => $university_id]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 }

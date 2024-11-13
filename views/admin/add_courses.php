@@ -1,30 +1,6 @@
-<?php
-include("sidebar.php");
-
-use Models\Database;
-$conn = Database::getConnection();
-
-// Handle form submission
+<?php 
+include "sidebar.php"; 
 $message = '';
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $name = $_POST['name'];
-    $description = $_POST['description'];
-
-    $sql = "INSERT INTO courses (name, description) VALUES (?, ?)";
-    $stmt = $conn->prepare($sql);
-    $stmt->bindValue(1, $name, PDO::PARAM_STR);
-    $stmt->bindValue(2, $description, PDO::PARAM_STR);
-
-    if ($stmt->execute()) {
-        $message = "Course created successfully!";
-    } else {
-        $errorInfo = $stmt->errorInfo();
-        $message = "Error creating course: " . $errorInfo[2];
-    }
-
-}
-
-
 ?>
 
 <!-- HTML Content -->
@@ -52,29 +28,24 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                 }, 3000); // Redirect after 3 seconds
                             </script>
                         <?php endif; ?>
-                        <form method="POST" action="">
-                            <div class="mb-3">
-                                <label class="form-label">Course Name</label>
-                                <input
-                                    type="text"
-                                    name="name"
-                                    value="<?php echo isset($_POST['name']) ? htmlspecialchars($_POST['name']) : ''; ?>"
-                                    class="form-control"
-                                    required />
+                        <form action="add_courses" method="post">
+                            <div class="form-group">
+                                <label for="name">Course Name</label>
+                                <input type="text" class="form-control" id="name" name="name" required>
                             </div>
-                            <div class="mb-3">
-                                <label class="form-label">Description</label>
-                                <textarea
-                                    name="description"
-                                    class="form-control"
-                                    rows="4"
-                                    required><?php echo isset($_POST['description']) ? htmlspecialchars($_POST['description']) : ''; ?></textarea>
+                            <div class="form-group">
+                                <label for="description">Course Description</label>
+                                <textarea class="form-control" id="description" name="description" required></textarea>
                             </div>
-                            <button
-                                type="submit"
-                                class="btn btn-primary w-100">
-                                Create Course
-                            </button>
+                            <div class="form-group">
+                                <label for="is_paid">Is Paid Course</label>
+                                <input type="checkbox" id="is_paid" name="is_paid" onchange="togglePriceField()">
+                            </div>
+                            <div class="form-group" id="price-group" style="display: none;">
+                                <label for="price">Price</label>
+                                <input type="number" class="form-control" id="price" name="price" step="0.01">
+                            </div>
+                            <button type="submit" class="btn btn-primary">Add Course</button>
                         </form>
                     </div>
                 </div>
@@ -87,3 +58,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
 <!-- Include Bootstrap CSS -->
 <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+
+<!-- JavaScript to toggle price field -->
+<script>
+function togglePriceField() {
+    var isPaidCheckbox = document.getElementById('is_paid');
+    var priceGroup = document.getElementById('price-group');
+    if (isPaidCheckbox.checked) {
+        priceGroup.style.display = 'block';
+    } else {
+        priceGroup.style.display = 'none';
+    }
+}
+</script>

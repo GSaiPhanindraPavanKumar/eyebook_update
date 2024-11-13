@@ -112,8 +112,6 @@ class Spoc {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-
-
     public function addFaculty($conn,$name, $email, $phone, $section, $stream, $year, $department, $university_id, $password) {
         $sql = "INSERT INTO faculty (name, email, phone, section, stream, year, department, university_id, password) VALUES (:name, :email, :phone, :section, :stream, :year, :department, :university_id, :password)";
         $stmt = $conn->prepare($sql);
@@ -129,6 +127,28 @@ class Spoc {
             ':password' => $password
         ]);
         return $this->conn->lastInsertId();
+    }
+
+    public function getUserByEmail($conn, $email) {
+        $stmt = $conn->prepare("SELECT * FROM spocs WHERE email = ?");
+        $stmt->execute([$email]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+    public function storeResetToken($conn, $email, $token) {
+        $stmt = $conn->prepare("UPDATE spocs SET reset_token = ?, reset_token_expiry = DATE_ADD(NOW(), INTERVAL 1 HOUR) WHERE email = ?");
+        $stmt->execute([$token, $email]);
+    }
+
+    public function getUserByResetToken($conn, $token) {
+        $stmt = $conn->prepare("SELECT * FROM spocs WHERE reset_token = ? AND reset_token_expiry > NOW()");
+        $stmt->execute([$token]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+    public function updatePasswordByEmail($conn, $email, $new_password) {
+        $stmt = $conn->prepare("UPDATE spocs SET password = ?, reset_token = NULL, reset_token_expiry = NULL WHERE email = ?");
+        $stmt->execute([$new_password, $email]);
     }
 }
 ?>

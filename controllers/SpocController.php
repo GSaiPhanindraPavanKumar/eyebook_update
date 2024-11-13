@@ -5,6 +5,9 @@ namespace Controllers;
 use Models\Spoc;
 use Models\Database;
 use Models\Faculty;
+use Models\Student;
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
 
 class SpocController {
     public function dashboard() {
@@ -20,10 +23,25 @@ class SpocController {
         $spoc_count = $spocModel->getSpocCount();
         $course_count = $spocModel->getCourseCount();
         $spocs = $spocModel->getAllSpocs();
+        $faculties = Faculty::getAllByUniversity($conn, $university_id); // Fetch all faculties for the university
+        $students = Student::getAllByUniversity($conn, $university_id); // Fetch all students for the university
         $universities = $spocModel->getAllUniversities();
         $courses = $spocModel->getAllCourses();
 
         require 'views/spoc/dashboard.php';
+    }
+
+    public function manageStudents() {
+        $conn = Database::getConnection();
+        $spocModel = new Spoc($conn);
+
+        $username = $_SESSION['email'];
+        $userData = $spocModel->getUserData($username);
+        $university_id = $userData['university_id'];
+
+        $students = Student::getAllByUniversity($conn, $university_id); // Fetch all students for the university
+
+        require 'views/spoc/manage_students.php';
     }
 
     public function userProfile() {
@@ -32,7 +50,6 @@ class SpocController {
         $spoc = $spocModel->getUserProfile($conn);
         require 'views/spoc/profile.php';
     }
-
 
     public function addFaculty() {
         $conn = Database::getConnection();
@@ -56,7 +73,7 @@ class SpocController {
             exit();
         }
         require 'views/spoc/addFaculty.php';
-        }
+    }
 
     public function updatePassword() {
         $conn = Database::getConnection();
@@ -73,6 +90,4 @@ class SpocController {
 
         require 'views/spoc/updatePassword.php';
     }
-
-
 }

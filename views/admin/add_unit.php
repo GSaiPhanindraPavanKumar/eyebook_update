@@ -32,12 +32,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     // Create a directory for the SCORM package
     $scorm_dir = "uploads/course-$course_id/course_book" . time() . '-' . basename($scorm_file['name'], '.zip');
-    mkdir("../../" . $scorm_dir, 0777, true);
+    mkdir( $scorm_dir, 0777, true);
 
     // Unzip the SCORM package directly to the created directory
     $zip = new ZipArchive;
     if ($zip->open($scorm_file['tmp_name']) === TRUE) {
-        $zip->extractTo("../../" . $scorm_dir);
+        $zip->extractTo($scorm_dir);
         $zip->close();
     } else {
         echo json_encode(['message' => 'Failed to unzip SCORM package']);
@@ -46,7 +46,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     // Verify that the index.html file exists
     $index_path = $scorm_dir . '/index.html';
-    if (!file_exists("../../" . $index_path)) {
+    if (!file_exists($index_path)) {
         echo json_encode(['message' => 'index.html file not found']);
         exit;
     }

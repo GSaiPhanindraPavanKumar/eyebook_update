@@ -1,7 +1,8 @@
 <?php
 require_once __DIR__ . '/../../vendor/autoload.php'; // Include Composer's autoloader
-require_once '../../config/connection.php';
+require_once __DIR__ . '/../../models/database.php';
 require_once 'config.php';
+use Models\Database;
 
 use GuzzleHttp\Client;
 
@@ -50,7 +51,7 @@ class ZoomAPI {
                 'settings' => [
                     'host_video' => true,
                     'participant_video' => true,
-                    'join_before_host' => false,
+                    'join_before_host' => true,
                     'mute_upon_entry' => true,
                     'waiting_room' => true
                 ]
@@ -64,33 +65,21 @@ class ZoomAPI {
 
     private function saveVirtualClassroomToDatabase($data) {
         $stmt = $this->conn->prepare("INSERT INTO virtual_classrooms (classroom_id, topic, start_time, duration, join_url) VALUES (?, ?, ?, ?, ?)");
-        $stmt->bind_param("sssis", $data['id'], $data['topic'], $data['start_time'], $data['duration'], $data['join_url']);
-        $stmt->execute();
+        $stmt->execute([$data['id'], $data['topic'], $data['start_time'], $data['duration'], $data['join_url']]);
     }
 
     public function getAllClassrooms() {
-        $result = $this->conn->query("SELECT * FROM virtual_classrooms ORDER BY start_time DESC");
-        $classrooms = [];
-        while ($row = $result->fetch_assoc()) {
-            $classrooms[] = $row;
-        }
-        return $classrooms;
+        $stmt = $this->conn->query("SELECT * FROM virtual_classrooms ORDER BY start_time DESC");
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     public function getAttendance($classroomId) {
-        $stmt = $this->conn->prepare("SELECT * FROM attendance WHERE classroom_id = ?");
-        $stmt->bind_param("s", $classroomId);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        $attendance = [];
-        while ($row = $result->fetch_assoc()) {
-            $attendance[] = $row;
-        }
-        return $attendance;
+        $stmt = $this->conn->prepare("SELECT * FROM attendance WHERE virtual_classroom_id = ?");
+        $stmt->execute([$classroomId]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 }
 
 // Database connection
-$conn = new mysqli($servername, $username, $password, $dbname);
+$conn = Database::getConnection();
 $zoomAPI = new ZoomAPI(ZOOM_CLIENT_ID, ZOOM_CLIENT_SECRET, ZOOM_ACCOUNT_ID, $conn);
-?>

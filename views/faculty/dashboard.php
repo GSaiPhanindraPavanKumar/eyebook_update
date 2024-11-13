@@ -2,10 +2,11 @@
 include("sidebar.php");
 $email = $_SESSION['email'];
 
-// Fetch top performers, tasks, and upcoming events
+// Fetch top performers, tasks, upcoming events, and pending meetings
 $topPerformers = getTopPerformers(); // Define this function in your functions.php
 $tasks = getTasks($email); // Define this function in your functions.php
 $upcomingEvents = getUpcomingEvents(); // Define this function in your functions.php
+$pendingMeetings = getPendingMeetings($email); // Define this function in your functions.php
 ?>
 
 <!-- HTML Content -->
@@ -84,6 +85,35 @@ $upcomingEvents = getUpcomingEvents(); // Define this function in your functions
                 </div>
             </div>
         </div>
+
+        <div class="row">
+            <!-- Pending Meetings -->
+            <div class="col-md-6 grid-margin stretch-card">
+                <div class="card">
+                    <div class="card-body">
+                        <p class="card-title mb-0" style="font-size:x-large">Pending Meetings</p><br>
+                        <ul class="list-group">
+                            <?php foreach ($pendingMeetings as $meeting): ?>
+                                <li class="list-group-item">
+                                    <strong><?php echo htmlspecialchars($meeting['title']); ?></strong><br>
+                                    <small><?php echo htmlspecialchars($meeting['date']); ?></small>
+                                </li>
+                            <?php endforeach; ?>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Graphs -->
+            <div class="col-md-6 grid-margin stretch-card">
+                <div class="card">
+                    <div class="card-body">
+                        <p class="card-title mb-0" style="font-size:x-large">Performance Graph</p><br>
+                        <canvas id="performanceChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
     <!-- content-wrapper ends -->
     <?php include 'footer.html'; ?>
@@ -116,4 +146,38 @@ function getUpcomingEvents() {
         ['title' => 'Meeting', 'date' => '2023-10-20'],
     ];
 }
+
+function getPendingMeetings($email) {
+    // Example data, replace with actual database query
+    return [
+        ['title' => 'Faculty Meeting', 'date' => '2023-11-01'],
+        ['title' => 'Project Discussion', 'date' => '2023-11-05'],
+    ];
+}
 ?>
+
+<!-- Include Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    var ctx = document.getElementById('performanceChart').getContext('2d');
+    var performanceChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
+            datasets: [{
+                label: 'Performance',
+                data: [65, 59, 80, 81, 56, 55, 40],
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                borderColor: 'rgba(75, 192, 192, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+</script>

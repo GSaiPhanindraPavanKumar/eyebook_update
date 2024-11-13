@@ -1,10 +1,13 @@
 <?php
 // Load configuration
 require_once 'config.php';
-require_once '../../config/connection.php';
+// require_once __DIR__ . '/../../models/database.php';
 
 // Include Zoom integration
 require_once 'zoom_integration.php';
+use Models\Database;
+
+$conn = Database::getConnection();
 
 // Initialize ZoomAPI
 $zoom = new ZoomAPI(ZOOM_CLIENT_ID, ZOOM_CLIENT_SECRET, ZOOM_ACCOUNT_ID, $conn);
@@ -28,7 +31,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $stmt->execute([$start_time->format('Y-m-d H:i:s'), $classroom['id']]);
 
         // Redirect to the faculty dashboard
-        header('Location: faculty_dashboard.php');
+        header('Location: virtual_classroom');
         exit();
     } else {
         echo "Error creating virtual classroom.";

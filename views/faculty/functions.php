@@ -1,78 +1,61 @@
 <?php
 // File: functions.php
-include '../../config/connection.php';
+use Models\Database;
+$conn = Database::getConnection();
 
 function createAssessment($title, $questions, $deadline) {
     global $conn;
     
-    // Ensure $questions is an array
-    if (!is_array($questions)) {
-        throw new Exception('Questions must be an array');
-    }
-
-    $conn->begin_transaction();
+    $conn->beginTransaction();
 
     try {
         $stmt = $conn->prepare("INSERT INTO assessments (title, deadline) VALUES (?, ?)");
-        $stmt->bind_param("ss", $title, $deadline);
-        $stmt->execute();
-        $assessmentId = $conn->insert_id;
+        $stmt->execute([$title, $deadline]);
+        $assessmentId = $conn->lastInsertId();
 
         $stmt = $conn->prepare("INSERT INTO questions (assessment_id, question_text, options, correct_answer, marks) VALUES (?, ?, ?, ?, ?)");
         foreach ($questions as $question) {
-            // Ensure each question is an array with the required keys
-            if (!is_array($question) || !isset($question['questionText'], $question['options'], $question['correctAnswer'], $question['marks'])) {
-                throw new Exception('Each question must be an array with keys: questionText, options, correctAnswer, marks');
-            }
-
             $options = json_encode($question['options']);
-            $stmt->bind_param("isssi", $assessmentId, $question['questionText'], $options, $question['correctAnswer'], $question['marks']);
-            $stmt->execute();
+            $stmt->execute([$assessmentId, $question['questionText'], $options, $question['correctAnswer'], $question['marks']]);
         }
 
         $conn->commit();
         return true;
     } catch (Exception $e) {
-        $conn->rollback();
+        $conn->rollBack();
         throw $e;
     }
 }
 
 function getAssessments() {
     global $conn;
-    $result = $conn->query("SELECT * FROM assessments ORDER BY deadline DESC");
-    return $result->fetch_all(MYSQLI_ASSOC);
+    $stmt = $conn->query("SELECT * FROM assessments ORDER BY deadline DESC");
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 
 function getAssessmentResults($assessmentId) {
     global $conn;
     $stmt = $conn->prepare("SELECT s.name as student_name, ar.score FROM assessment_results ar JOIN students s ON ar.student_id = s.id WHERE ar.assessment_id = ?");
-    $stmt->bind_param("i", $assessmentId);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    return $result->fetch_all(MYSQLI_ASSOC);
+    $stmt->execute([$assessmentId]);
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 
 function getAvailableAssessments() {
     global $conn;
     $now = date('Y-m-d H:i:s');
-    $result = $conn->query("SELECT * FROM assessments WHERE deadline > '$now' ORDER BY deadline ASC");
-    return $result->fetch_all(MYSQLI_ASSOC);
+    $stmt = $conn->query("SELECT * FROM assessments WHERE deadline > '$now' ORDER BY deadline ASC");
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 
 function getAssessment($assessmentId) {
     global $conn;
     $stmt = $conn->prepare("SELECT * FROM assessments WHERE id = ?");
-    $stmt->bind_param("i", $assessmentId);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    $assessment = $result->fetch_assoc();
+    $stmt->execute([$assessmentId]);
+    $assessment = $stmt->fetch(PDO::FETCH_ASSOC);
 
     $stmt = $conn->prepare("SELECT * FROM questions WHERE assessment_id = ?");
-    $stmt->bind_param("i", $assessmentId);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    $assessment['questions'] = $result->fetch_all(MYSQLI_ASSOC);
+    $stmt->execute([$assessmentId]);
+    $assessment['questions'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     return $assessment;
 }
@@ -84,10 +67,8 @@ function submitAssessment($assessmentId, $answers, $studentId) {
     $totalMarks = 0;
 
     $stmt = $conn->prepare("SELECT * FROM questions WHERE assessment_id = ?");
-    $stmt->bind_param("i", $assessmentId);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    $questions = $result->fetch_all(MYSQLI_ASSOC);
+    $stmt->execute([$assessmentId]);
+    $questions = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     foreach ($questions as $index => $question) {
         $totalMarks += $question['marks'];
@@ -98,8 +79,7 @@ function submitAssessment($assessmentId, $answers, $studentId) {
 
     // Store the result
     $stmt = $conn->prepare("INSERT INTO assessment_results (assessment_id, student_id, score) VALUES (?, ?, ?)");
-    $stmt->bind_param("iii", $assessmentId, $studentId, $score);
-    $stmt->execute();
+    $stmt->execute([$assessmentId, $studentId, $score]);
     
     return $score;
 }
@@ -109,19 +89,17 @@ function getOrCreateStudent($name, $email) {
     
     // Check if student exists
     $stmt = $conn->prepare("SELECT id FROM students WHERE email = ?");
-    $stmt->bind_param("s", $email);
-    $stmt->execute();
-    $result = $stmt->get_result();
+    $stmt->execute([$email]);
+    $student = $stmt->fetch(PDO::FETCH_ASSOC);
     
-    if ($result->num_rows > 0) {
+    if ($student) {
         // Student exists, return their ID
-        return $result->fetch_assoc()['id'];
+        return $student['id'];
     } else {
         // Student doesn't exist, create new student
         $stmt = $conn->prepare("INSERT INTO students (name, email) VALUES (?, ?)");
-        $stmt->bind_param("ss", $name, $email);
-        $stmt->execute();
-        return $conn->insert_id;
+        $stmt->execute([$name, $email]);
+        return $conn->lastInsertId();
     }
 }
 
@@ -178,3 +156,4 @@ function generateQuestionsUsingGemini($topic, $numQuestions, $marksPerQuestion) 
 
     return $questions;
 }
+?>

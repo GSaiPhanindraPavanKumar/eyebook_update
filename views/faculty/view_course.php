@@ -39,7 +39,12 @@
                         <div class="d-flex justify-content-between align-items-center mt-4">
                             <h5>Course Book</h5>
                             <?php if (!empty($course['course_book'])) : ?>
-                                <button class="btn btn-primary" onclick="redirectToCourseBook()">View</button>
+                                <?php
+                                $hashedId = base64_encode($course['id']);
+                                $hashedId = str_replace(['+', '/', '='], ['-', '_', ''], $hashedId);
+                                ?>
+                                <a href="/faculty/view_book/<?php echo $hashedId; ?>" class="card-link">View Course</a>
+
                             <?php endif; ?>
                         </div>
                         
@@ -117,6 +122,12 @@
                             </tbody>
                         </table>
 
+                        <!-- Discussion Forum Section -->
+                        <div class="d-flex justify-content-between align-items-center mt-4">
+                            <h5>Discussion Forum</h5>
+                            <a href="/faculty/discussion_forum/<?php echo $course['id']; ?>" class="btn btn-primary">Go to Discussion Forum</a>
+                        </div>
+
                     </div>
                 </div>
             </div>
@@ -161,7 +172,7 @@ function showSingleUpload() {
         courseMaterialsFile.required = true;
     }
     var bulkUnitNumber = document.getElementById('bulkUnitNumber');
-    var bulkCourseMaterialsFile = document.getElementById('bulk_course_materials_file');
+    var bulkCourseMaterialsFile = document.getElement.getElementById('bulk_course_materials_file');
     if (bulkUnitNumber && bulkCourseMaterialsFile) {
         bulkUnitNumber.required = false;
         bulkCourseMaterialsFile.required = false;
@@ -205,22 +216,6 @@ function redirectToCoursePlan() {
         window.open(coursePlanUrl, '_blank');
     } else {
         alert('Course Plan URL not available.');
-    }
-}
-
-function redirectToCourseBook() {
-    var courseMaterials = <?php echo json_encode($course['course_book']); ?>;
-    var baseUrl = "http://localhost/eyebook_update/"; // Replace with your actual base URL
-    var courseBookUrl = "";
-
-    if (courseMaterials.length > 0 && courseMaterials[0].materials.length > 0) {
-        courseBookUrl = baseUrl + courseMaterials[0].materials[0].indexPath;
-    }
-
-    if (courseBookUrl) {
-        window.open(courseBookUrl, '_blank');
-    } else {
-        alert('Course Book URL not available.');
     }
 }
 

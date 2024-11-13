@@ -16,7 +16,8 @@ include "sidebar.php";
             <div class="col-md-12 grid-margin stretch-card">
                 <div class="card">
                     <div class="card-body">
-                        <p class="card-title mb-0" style="font-size:x-large">Create University</p><br>
+                        <p class="card-title mb-0" style="font-size:x-large; font-weight:bold; color:#343a40;">Create University</p><br>
+                        
                         <?php if (isset($message)): ?>
                             <div class="alert alert-<?php echo $message_type; ?>" role="alert">
                                 <?php echo htmlspecialchars($message); ?>
@@ -24,61 +25,69 @@ include "sidebar.php";
                             <?php if ($message_type == 'success'): ?>
                                 <script>
                                     setTimeout(function() {
-                                        window.location.href = 'manageUniversity';
-                                    }, 3000); // Redirect after 3 seconds
+                                        window.location.href = 'manageUniversity.php';
+                                    }, 3000);
                                 </script>
                             <?php endif; ?>
                         <?php endif; ?>
+
                         <form method="POST" action="addUniversity">
                             <div class="row">
+                                <!-- Left column -->
                                 <div class="col-md-6">
                                     <div class="form-group">
                                         <label for="long_name">Long Name</label>
-                                        <input type="text" id="long_name" name="long_name" class="form-control" required>
+                                        <input type="text" id="long_name" name="long_name" class="form-control border-secondary" required>
                                     </div>
                                     <div class="form-group">
                                         <label for="short_name">Short Name</label>
-                                        <input type="text" id="short_name" name="short_name" class="form-control" required>
+                                        <input type="text" id="short_name" name="short_name" class="form-control border-secondary" required>
                                     </div>
                                     <div class="form-group">
                                         <label for="location">Location</label>
-                                        <input type="text" id="location" name="location" class="form-control" required>
+                                        <input type="text" id="location" name="location" class="form-control border-secondary" required>
                                     </div>
                                     <div class="form-group">
                                         <label for="country">Country</label>
-                                        <input type="text" id="country" name="country" class="form-control" required>
+                                        <input type="text" id="country" name="country" class="form-control border-secondary" required>
                                     </div>
                                 </div>
+
+                                <!-- Right column -->
                                 <div class="col-md-6">
                                     <div class="form-group">
                                         <label for="spoc_name">SPOC Name</label>
-                                        <input type="text" id="spoc_name" name="spoc_name" class="form-control" required>
+                                        <input type="text" id="spoc_name" name="spoc_name" class="form-control border-secondary" required>
                                     </div>
                                     <div class="form-group">
                                         <label for="spoc_email">SPOC Email</label>
-                                        <input type="email" id="spoc_email" name="spoc_email" class="form-control" required>
+                                        <input type="email" id="spoc_email" name="spoc_email" class="form-control border-secondary" required>
                                     </div>
                                     <div class="form-group">
                                         <label for="spoc_phone">SPOC Phone</label>
-                                        <input type="text" id="spoc_phone" name="spoc_phone" class="form-control" required>
+                                        <input type="text" id="spoc_phone" name="spoc_phone" class="form-control border-secondary" required>
                                     </div>
                                     <div class="form-group">
                                         <label for="spoc_password">SPOC Password</label>
-                                        <input type="password" id="spoc_password" name="spoc_password" class="form-control" required>
+                                        <input type="password" id="spoc_password" name="spoc_password" class="form-control border-secondary" required>
                                     </div>
                                 </div>
                             </div>
-                            <div class="form-group">
-                                <button type="submit" class="btn btn-primary">Create University</button>
+
+                            <div class="form-group text-center mt-4">
+                                <button type="submit" class="btn btn-primary btn-lg" style="background-color:#007bff; border:none;">
+                                    Create University
+                                </button>
                             </div>
                         </form>
+
                         <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
                         <script>
                             <?php if (isset($message)): ?>
                                 toastr.<?php echo $message_type; ?>("<?php echo htmlspecialchars($message); ?>");
                                 setTimeout(function() {
                                     window.location.href = 'manageUniversity.php';
-                                }, 3000); // Redirect after 3 seconds
+                                }, 3000);
                             <?php endif; ?>
                         </script>
                     </div>
@@ -86,9 +95,28 @@ include "sidebar.php";
             </div>
         </div>
     </div>
-    <!-- content-wrapper ends -->
     <?php include 'footer.html'; ?>
 </div>
 
-<!-- Bootstrap CSS (Make sure to include Bootstrap CSS in your project) -->
+<!-- Bootstrap CSS -->
 <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+
+<!-- Custom Styling -->
+<style>
+    .form-control {
+        border-radius: 5px;
+        font-size: 16px;
+    }
+    .btn-primary {
+        font-weight: bold;
+        padding: 10px 20px;
+        transition: background-color 0.3s ease;
+    }
+    .btn-primary:hover {
+        background-color: #0056b3;
+    }
+    .alert {
+        font-size: 16px;
+        border-radius: 5px;
+    }
+</style>
