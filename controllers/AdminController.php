@@ -163,13 +163,14 @@ class AdminController {
         $universities = University::getAll($conn);
         require 'views/admin/uploadStudents.php';
     }
+    
     public function addCourse() {
         $conn = Database::getConnection();
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $name = $_POST['name'];
             $description = $_POST['description'];
             $is_paid = isset($_POST['is_paid']) ? 1 : 0;
-            $price = $_POST['price'] ?? 0.00;
+            $price = $_POST['price'] ?? '0.00'; // Set default value for price
             $message = Course::create($conn, $name, $description, $is_paid, $price);
         }
         require 'views/admin/add_courses.php';
