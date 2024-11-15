@@ -74,6 +74,24 @@ include("sidebar.php");
                             </div>
                         </div>
                     </div>
+                </div><br>
+                <div class="row">
+                    <div class="col-md-6 mb-4 mb-lg-0 stretch-card transparent">
+                        <div class="card card-light-blue">
+                            <div class="card-body">
+                                <p class="mb-4">SPOCs</p>
+                                <p class="fs-30 mb-2"><?php echo $spoc_count; ?></p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 stretch-card transparent">
+                        <div class="card card-light-danger">
+                            <div class="card-body">
+                                <p class="mb-4">Courses</p>
+                                <p class="fs-30 mb-2"><?php echo $course_count; ?></p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

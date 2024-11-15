@@ -8,7 +8,7 @@
                         <h3 class="font-weight-bold">Manage Universities</h3>
                     </div>
                     <div class="col-12 col-xl-4 text-right">
-                        <a href="addUniversity.php" class="btn btn-primary">
+                        <a href="addUniversity" class="btn btn-primary">
                             <i class="fas fa-plus-circle"></i> Create University
                         </a>
                     </div>
@@ -27,32 +27,29 @@
                                 <table class="table table-hover table-borderless table-striped">
                                     <thead class="thead-light">
                                         <tr>
-                                            <th>Select</th>
-                                            <th>Serial Number <i class="fas fa-sort"></i></th>
-                                            <th>Long Name <i class="fas fa-sort"></i></th>
-                                            <th>Short Name <i class="fas fa-sort"></i></th>
+                                            <th data-sort="serialNumber">S.no <i class="fas fa-sort"></i></th>
+                                            <th data-sort="longName">University Name <i class="fas fa-sort"></i></th>
+                                            <th data-sort="shortName">Short Name <i class="fas fa-sort"></i></th>
                                             <th>Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody id="universityTable">
-                                        <?php $serialNumber = 1; foreach ($universities as $university): ?>
+                                        <?php
+                                        $serialNumber = 1;
+                                        $limit = 10;
+                                        $page = isset($_GET['page']) ? $_GET['page'] : 1;
+                                        $offset = ($page - 1) * $limit;
+                                        $total_universities = count($universities);
+                                        $total_pages = ceil($total_universities / $limit);
+                                        $universities_paginated = array_slice($universities, $offset, $limit);
+
+                                        foreach ($universities_paginated as $university): ?>
                                             <tr>
-                                                <td><input type="checkbox" name="selected[]" value="<?= $university['id'] ?>"></td>
                                                 <td><?= $serialNumber++ ?></td>
-                                                <td><?= $university['long_name'] ?></td>
-                                                <td><?= $university['short_name'] ?></td>
+                                                <td><?= htmlspecialchars($university['long_name']) ?></td>
+                                                <td><?= htmlspecialchars($university['short_name']) ?></td>
                                                 <td>
-                                                    <button type="button" class="btn btn-outline-primary btn-sm edit-btn" 
-                                                            data-id="<?= $university['id'] ?>" 
-                                                            data-long_name="<?= $university['long_name'] ?>" 
-                                                            data-short_name="<?= $university['short_name'] ?>" 
-                                                            data-location="<?= $university['location'] ?>" 
-                                                            data-country="<?= $university['country'] ?>">
-                                                        <i class="fas fa-edit"></i> Edit
-                                                    </button>
-                                                    <button type="submit" name="delete" value="<?= $university['id'] ?>" class="btn btn-outline-danger btn-sm">
-                                                        <i class="fas fa-trash"></i> Delete
-                                                    </button>
+                                                    <button type="submit" name="view" class="btn btn-outline-info btn-sm"><i class="fas fa-eye"></i>View</button>
                                                 </td>
                                             </tr>
                                         <?php endforeach; ?>
@@ -61,6 +58,15 @@
                                 <div id="noRecords" style="display: none;" class="text-center">No records found</div>
                             </form>
                         </div>
+                        <nav aria-label="Page navigation">
+                            <ul class="pagination justify-content-center">
+                                <?php for ($i = 1; $i <= $total_pages; $i++): ?>
+                                    <li class="page-item <?= ($i == $page) ? 'active' : '' ?>">
+                                        <a class="page-link" href="?page=<?= $i ?>"><?= $i ?></a>
+                                    </li>
+                                <?php endfor; ?>
+                            </ul>
+                        </nav>
                     </div>
                 </div>
             </div>
@@ -139,5 +145,24 @@
             });
             $('#noRecords').toggle(visibleRows === 0);
         });
+
+        $('th[data-sort]').on('click', function() {
+            var table = $(this).parents('table').eq(0);
+            var rows = table.find('tbody tr').toArray().sort(comparer($(this).index()));
+            this.asc = !this.asc;
+            if (!this.asc) { rows = rows.reverse(); }
+            for (var i = 0; i < rows.length; i++) { table.append(rows[i]); }
+        });
+
+        function comparer(index) {
+            return function(a, b) {
+                var valA = getCellValue(a, index), valB = getCellValue(b, index);
+                return $.isNumeric(valA) && $.isNumeric(valB) ? valA - valB : valA.localeCompare(valB);
+            };
+        }
+
+        function getCellValue(row, index) {
+            return $(row).children('td').eq(index).text();
+        }
     });
 </script>

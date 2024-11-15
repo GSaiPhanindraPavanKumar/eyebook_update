@@ -28,76 +28,84 @@ include("sidebar.php");
                             </script>
                         <?php endif; ?>
                         <form method="POST" action="">
-                            <div class="mb-3">
-                                <label class="form-label">Name</label>
-                                <input
-                                    type="text"
-                                    name="name"
-                                    value="<?php echo isset($_POST['name']) ? htmlspecialchars($_POST['name']) : ''; ?>"
-                                    class="form-control"
-                                    required />
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Name</label>
+                                    <input
+                                        type="text"
+                                        name="name"
+                                        value="<?php echo isset($_POST['name']) ? htmlspecialchars($_POST['name']) : ''; ?>"
+                                        class="form-control"
+                                        required />
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Email</label>
+                                    <input
+                                        type="email"
+                                        name="email"
+                                        value="<?php echo isset($_POST['email']) ? htmlspecialchars($_POST['email']) : ''; ?>"
+                                        class="form-control"
+                                        required />
+                                </div>
                             </div>
-                            <div class="mb-3">
-                                <label class="form-label">Email</label>
-                                <input
-                                    type="email"
-                                    name="email"
-                                    value="<?php echo isset($_POST['email']) ? htmlspecialchars($_POST['email']) : ''; ?>"
-                                    class="form-control"
-                                    required />
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Phone</label>
+                                    <input
+                                        type="text"
+                                        name="phone"
+                                        value="<?php echo isset($_POST['phone']) ? htmlspecialchars($_POST['phone']) : ''; ?>"
+                                        class="form-control"
+                                        required />
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Section</label>
+                                    <input
+                                        type="text"
+                                        name="section"
+                                        value="<?php echo isset($_POST['section']) ? htmlspecialchars($_POST['section']) : ''; ?>"
+                                        class="form-control"
+                                        required />
+                                </div>
                             </div>
-                            <div class="mb-3">
-                                <label class="form-label">Phone</label>
-                                <input
-                                    type="text"
-                                    name="phone"
-                                    value="<?php echo isset($_POST['phone']) ? htmlspecialchars($_POST['phone']) : ''; ?>"
-                                    class="form-control"
-                                    required />
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Stream</label>
+                                    <input
+                                        type="text"
+                                        name="stream"
+                                        value="<?php echo isset($_POST['stream']) ? htmlspecialchars($_POST['stream']) : ''; ?>"
+                                        class="form-control"
+                                        required />
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Year</label>
+                                    <input
+                                        type="text"
+                                        name="year"
+                                        value="<?php echo isset($_POST['year']) ? htmlspecialchars($_POST['year']) : ''; ?>"
+                                        class="form-control"
+                                        required />
+                                </div>
                             </div>
-                            <div class="mb-3">
-                                <label class="form-label">Section</label>
-                                <input
-                                    type="text"
-                                    name="section"
-                                    value="<?php echo isset($_POST['section']) ? htmlspecialchars($_POST['section']) : ''; ?>"
-                                    class="form-control"
-                                    required />
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label">Stream</label>
-                                <input
-                                    type="text"
-                                    name="stream"
-                                    value="<?php echo isset($_POST['stream']) ? htmlspecialchars($_POST['stream']) : ''; ?>"
-                                    class="form-control"
-                                    required />
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label">Year</label>
-                                <input
-                                    type="text"
-                                    name="year"
-                                    value="<?php echo isset($_POST['year']) ? htmlspecialchars($_POST['year']) : ''; ?>"
-                                    class="form-control"
-                                    required />
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label">Department</label>
-                                <input
-                                    type="text"
-                                    name="department"
-                                    value="<?php echo isset($_POST['department']) ? htmlspecialchars($_POST['department']) : ''; ?>"
-                                    class="form-control"
-                                    required />
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label">Password</label>
-                                <input
-                                    type="password"
-                                    name="password"
-                                    class="form-control"
-                                    required />
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Department</label>
+                                    <input
+                                        type="text"
+                                        name="department"
+                                        value="<?php echo isset($_POST['department']) ? htmlspecialchars($_POST['department']) : ''; ?>"
+                                        class="form-control"
+                                        required />
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Password</label>
+                                    <input
+                                        type="password"
+                                        name="password"
+                                        class="form-control"
+                                        required />
+                                </div>
                             </div>
                             <button
                                 type="submit"

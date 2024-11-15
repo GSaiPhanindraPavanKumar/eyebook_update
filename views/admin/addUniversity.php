@@ -75,7 +75,7 @@ include "sidebar.php";
                             </div>
 
                             <div class="form-group text-center mt-4">
-                                <button type="submit" class="btn btn-primary btn-lg" style="background-color:#007bff; border:none;">
+                                <button type="submit" class="btn btn-primary btn" style="background-color:#007bff; border:none;">
                                     Create University
                                 </button>
                             </div>

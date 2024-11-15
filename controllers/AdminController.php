@@ -151,14 +151,14 @@ class AdminController {
             if (empty($duplicateRecords)) {
                 $message = "Students uploaded successfully.";
                 $message_type = "success";
-            } else {
+            } else if (!empty($duplicateRecords)) {
                 $message = "Some records were not uploaded due to duplicates.";
                 $message_type = "warning";
+            } else {
+                $message = "Failed to upload students.";
+                $message_type = "danger";
             }
-        } else {
-            $message = "Failed to upload students.";
-            $message_type = "danger";
-        }
+        } 
     
         $universities = University::getAll($conn);
         require 'views/admin/uploadStudents.php';

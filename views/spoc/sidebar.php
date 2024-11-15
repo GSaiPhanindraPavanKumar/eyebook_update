@@ -233,6 +233,12 @@ if ($userData) {
 
                 <li class="nav-item"><hr></li>
                 <li class="nav-item">
+                    <a class="nav-link" href="profile">
+                        <i class="ti-user menu-icon"></i>
+                        <span class="menu-title">Profile</span>
+                    </a>
+                </li>
+                <li class="nav-item">
                     <a class="nav-link" href="updatePassword">
                         <i class="ti-settings menu-icon"></i>
                         <span class="menu-title">Change Password</span>
