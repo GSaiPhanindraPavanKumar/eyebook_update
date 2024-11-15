@@ -4,7 +4,7 @@ include('sidebar.php');
 
 // Load configuration
 require_once 'config.php';
-require_once '../../config/connection.php';
+require_once '../../models/Database.php';
 
 // Establish database connection
 $conn = new mysqli($servername, $username, $password, $dbname);

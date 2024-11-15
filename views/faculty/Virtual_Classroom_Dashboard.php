@@ -1,4 +1,38 @@
-<?php include 'sidebar.php'; ?>
+<?php
+// Include sidebar
+include('sidebar.php');
+
+// Load configuration
+require_once 'config.php';
+
+// Establish database connection using the Database class
+require_once __DIR__ . '/../../models/database.php';
+use Models\Database;
+
+$conn = Database::getConnection();
+
+// Include Zoom integration
+require_once 'zoom_integration.php';
+
+// Initialize ZoomAPI
+$zoom = new ZoomAPI(ZOOM_CLIENT_ID, ZOOM_CLIENT_SECRET, ZOOM_ACCOUNT_ID, $conn);
+
+// Fetch all classrooms
+$facultyClassrooms = $zoom->getAllClassrooms();
+
+// Sort classrooms by start_time in descending order
+usort($facultyClassrooms, function($a, $b) {
+    return strtotime($b['start_time']) - strtotime($a['start_time']);
+});
+?>
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Virtual Classroom Dashboard</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
     <div class="container-fluid">
         <div class="row">
             <div class="col-md-12">
@@ -6,7 +40,7 @@
                     <div class="row">
                         <div class="col-md-12 grid-margin">
                             <div class="d-flex justify-content-between align-items-center">
-                                <h2 class="font-weight-bold mb-4">Virtual Classroom Dashboard</h2>
+                                <h2 class="font-weight-bold mb-4">Faculty Dashboard</h2>
                             </div>
                         </div>
                     </div>
@@ -100,7 +134,7 @@
                                                     <td><?php echo htmlspecialchars($start_time->format('Y-m-d')); ?></td>
                                                     <td><?php echo htmlspecialchars($start_time->format('H:i:s')); ?></td>
                                                     <td><?php echo htmlspecialchars($end_time->format('H:i:s')); ?></td>
-                                                    <td><a href="download_attendance.php?classroom_id=<?php echo htmlspecialchars($classroom['classroom_id']); ?>" class="btn btn-primary">Download</a></td>
+                                                    <td><a href="/faculty/download_attendance?classroom_id=<?php echo htmlspecialchars($classroom['classroom_id']); ?>" class="btn btn-primary">Download</a></td>
                                                 </tr>
                                             <?php endif; endforeach; ?>
                                         </tbody>
@@ -114,3 +148,6 @@
                 <?php include('footer.html'); ?>
             </div>
         </div>
+    </div>
+</body>
+</html>

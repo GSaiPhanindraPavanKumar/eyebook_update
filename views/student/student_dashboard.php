@@ -15,7 +15,7 @@ use Models\Database;
 $conn = Database::getConnection();
 
 // Establish database connection
-$zoom = new ZoomAPI($config['zoom']['client_id'], $config['zoom']['client_secret'], $config['zoom']['account_id'], $conn);
+$zoom = new ZoomAPI(ZOOM_CLIENT_ID, ZOOM_CLIENT_SECRET, ZOOM_ACCOUNT_ID, $conn);
 $allClassrooms = $zoom->getAllClassrooms();
 ?>
 

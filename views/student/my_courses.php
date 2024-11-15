@@ -4,12 +4,22 @@ use Models\Database;
 $conn = Database::getConnection();
 
 // Fetch courses from the database
-$sql = "SELECT id, name, description FROM courses";
+$sql = "SELECT id, name, description, completed_books, course_book FROM courses";
 $stmt = $conn->query($sql);
 $courses = [];
 
 while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
     $courses[] = $row;
+}
+
+// Calculate progress data for each course
+$progressData = [];
+foreach ($courses as $course) {
+    $courseId = $course['id'];
+    $completedBooks = !empty($course['completed_books']) ? json_decode($course['completed_books'], true) : [];
+    $totalBooks = !empty($course['course_book']) ? count(json_decode($course['course_book'], true) ?? []) : 0;
+    $progress = $totalBooks > 0 ? (count($completedBooks) / $totalBooks) * 100 : 0;
+    $progressData[$courseId] = $progress;
 }
 
 // No need to close the connection explicitly in PDO
@@ -37,15 +47,18 @@ while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
                                 <div class="card-body">
                                     <h5 class="card-title" style="font-family:cursive"><?php echo htmlspecialchars($course['name']); ?></h5>
                                     <p class="card-text"><?php echo htmlspecialchars($course['description']); ?></p>
+                                    <div class="progress">
+                                        <div class="progress-bar" role="progressbar" style="width: <?php echo $progressData[$course['id']]; ?>%;" aria-valuenow="<?php echo $progressData[$course['id']]; ?>" aria-valuemin="0" aria-valuemax="100"><?php echo round($progressData[$course['id']], 2); ?>%</div>
+                                    </div>
                                 </div>
                                 <div class="card-body">
-                                        <?php 
-                                        $hashedId = base64_encode($course['id']);
-                                        $hashedId = str_replace(['+', '/', '='], ['-', '_', ''], $hashedId);
-                                        ?>
-                                        <a href="view_book/<?php echo $hashedId; ?>" class="card-link">View Course</a>
-                                        <a href="/faculty/discussion_forum/<?php echo $course['id']; ?>" class="card-link">Chat Room</a>
-                                    </div>
+                                    <?php 
+                                    $hashedId = base64_encode($course['id']);
+                                    $hashedId = str_replace(['+', '/', '='], ['-', '_', ''], $hashedId);
+                                    ?>
+                                    <a href="view_course/<?php echo $hashedId; ?>" class="card-link">View Course</a>
+                                    <a href="/faculty/discussion_forum/<?php echo $course['id']; ?>" class="card-link">Chat Room</a>
+                                </div>
                             </div>
                         </div>
                     <?php endforeach; ?>

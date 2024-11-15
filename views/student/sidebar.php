@@ -161,8 +161,8 @@ if ($userData) {
                     </a>
                     <div class="collapse" id="courses">
                         <ul class="nav flex-column sub-menu">
-                            <li class="nav-item"><a class="nav-link" href="my_courses.php">My Courses</a></li>
-                            <li class="nav-item"><a class="nav-link" href="student_dashboard.php">Virtual Classroom</a></li>
+                            <li class="nav-item"><a class="nav-link" href="my_courses">My Courses</a></li>
+                            <li class="nav-item"><a class="nav-link" href="virtual_classroom">Virtual Classroom</a></li>
                             <li class="nav-item"><a class="nav-link" href="student.php">Assessments</a></li> 
                             <!-- <li class="nav-item"><a class="nav-link" href="#">Meetings</a></li>  -->
                         </ul>

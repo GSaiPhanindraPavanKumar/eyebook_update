@@ -92,40 +92,12 @@ class FacultyController {
     }
 
     public function virtualClassroom() {
-        $conn = Database::getConnection();
-        $virtualClassroomModel = new VirtualClassroom($conn);
-        $facultyClassrooms = $virtualClassroomModel->getAll();
-
         require 'views/faculty/virtual_classroom_dashboard.php';
     }
-
     public function createVirtualClassroom() {
-        $conn = Database::getConnection();
-        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-            $data = [
-                'id' => uniqid(),
-                'topic' => $_POST['topic'],
-                'start_time' => $_POST['start_time'],
-                'duration' => $_POST['duration'],
-                'join_url' => 'https://zoom.us/j/' . uniqid() // Example join URL
-            ];
-            $virtualClassroomModel = new VirtualClassroom($conn);
-            $virtualClassroomModel->create($data);
-            header('Location: /faculty/virtual_classroom');
-            exit();
-        }
         require 'views/faculty/create_virtual_classroom.php';
     }
-
     public function downloadAttendance() {
-        $conn = Database::getConnection();
-        $classroomId = $_GET['classroom_id'];
-        $virtualClassroomModel = new VirtualClassroom($conn);
-        $attendance = $virtualClassroomModel->getAttendance($classroomId);
-
-        // Code to generate and download attendance report
-        // ...
-
         require 'views/faculty/download_attendance.php';
     }
 }
