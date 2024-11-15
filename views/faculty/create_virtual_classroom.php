@@ -1,7 +1,7 @@
 <?php
 // Load configuration
 require_once 'config.php';
-// require_once __DIR__ . '/../../models/database.php';
+require_once __DIR__ . '/../../models/database.php';
 
 // Include Zoom integration
 require_once 'zoom_integration.php';

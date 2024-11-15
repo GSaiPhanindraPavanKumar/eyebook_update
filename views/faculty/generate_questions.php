@@ -20,4 +20,4 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     http_response_code(405);
     header('Content-Type: application/json');
     echo json_encode(['error' => 'Method not allowed'], JSON_THROW_ON_ERROR);
-}pe
+}
