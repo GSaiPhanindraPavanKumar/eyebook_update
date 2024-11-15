@@ -7,23 +7,17 @@ use PDO;
 use PDOException;
 
 class StudentController {
-    public function viewCourse($id) {
+    public function viewCourse($hashedId) {
         $conn = Database::getConnection();
-        $student_id = $_SESSION['student_id']; // Assuming student_id is stored in session
-
-        // Check if the student is subscribed to the course
-        $sql = "SELECT * FROM subscriptions WHERE student_id = :student_id AND course_id = :course_id";
-        $stmt = $conn->prepare($sql);
-        $stmt->execute([':student_id' => $student_id, ':course_id' => $id]);
-        $subscription = $stmt->fetch(PDO::FETCH_ASSOC);
-
-        if ($subscription) {
-            $course = Course::getById($conn, $id);
-            require 'views/student/view_course.php';
-        } else {
-            echo "You are not subscribed to this course.";
+        $course_id = base64_decode($hashedId);
+        if (!is_numeric($course_id)) {
+            die('Invalid course ID');
         }
+        $course = Course::getById($conn, $course_id);
+        
+        require 'views/student/view_course.php';
     }
+
 
     public function viewBook($hashedId) {
         $conn = Database::getConnection();

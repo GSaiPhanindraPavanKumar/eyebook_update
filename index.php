@@ -115,6 +115,7 @@ $router->post('/faculty/Update_profile','FacultyController@profile');
 // });
 
 $router->get('/faculty/view_book/([a-zA-Z0-9]+)', 'FacultyController@viewBook');
+$router->get('/faculty/view_material/([a-zA-Z0-9]+)', 'FacultyController@viewBook');
 
 
 $router->get('/student/dashboard', function(){
@@ -138,9 +139,11 @@ $router->get('/student/my_courses', function(){
     require 'views/student/my_courses.php';
 });
 
-$router->get('/student/view_course/(\d+)', function($course_id) {
-    require 'views/student/view_course.php';
+$router->post('/student/mark_as_completed', function() {
+    require 'views/student/mark_as_completed.php';
 });
+
+$router->get('/student/view_course/([a-zA-Z0-9]+)', 'StudentController@viewCourse');
 
 $router->get('/student/view_book/([a-zA-Z0-9]+)', 'StudentController@viewBook');
 
@@ -152,7 +155,7 @@ $router->post('/student/askguru', function(){
     require 'views/student/askguru.php';
 });
 
-$router->get('/student/meetings', function(){
+$router->get('/student/virtual_classroom', function(){
     require 'views/student/student_dashboard.php';
 });
 

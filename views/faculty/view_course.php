@@ -43,10 +43,40 @@
                                 $hashedId = base64_encode($course['id']);
                                 $hashedId = str_replace(['+', '/', '='], ['-', '_', ''], $hashedId);
                                 ?>
-                                <a href="/faculty/view_book/<?php echo $hashedId; ?>" class="card-link">View Course</a>
-
+                                <!-- <a href="/faculty/view_book/<?php echo $hashedId; ?>" class="card-link">View Course</a> -->
                             <?php endif; ?>
                         </div>
+
+                        <table class="table table-hover mt-2">
+                            <thead class="thead-dark">
+                                <tr>
+                                    <th scope="col">S. No.</th>
+                                    <th scope="col">Unit Title</th>
+                                    <th scope="col">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php
+                                if (!empty($course['course_book'])) {
+                                    $serialNumber = 1; 
+                                    foreach ($course['course_book'] as $unit) {
+                                        if (isset($unit['materials'])) {
+                                            foreach ($unit['materials'] as $material) {
+                                                echo "<tr>";
+                                                echo "<td>" . $serialNumber++ . "</td>"; // Increment the serial number
+                                                echo "<td>" . htmlspecialchars($unit['unitTitle']) . "</td>";
+                                                $full_url = $material['indexPath'];
+                                                echo "<td><a href='/faculty/view_book/" . $hashedId . "?index_path=" . urlencode($full_url) . "' class='btn btn-primary'>View Course Book</a></td>";
+                                                echo "</tr>";
+                                            }
+                                        }
+                                    }
+                                } else {
+                                    echo "<tr><td colspan='3'>No course books available.</td></tr>";
+                                }
+                                ?>
+                            </tbody>
+                        </table>
                         
                         <!-- Course Materials Section -->
                         <div class="d-flex justify-content-between align-items-center mt-4">
@@ -108,8 +138,7 @@
                                                 echo "<tr>";
                                                 echo "<td>" . htmlspecialchars($unit['unitNumber']) . "</td>";
                                                 echo "<td>" . htmlspecialchars($unit['topic']) . "</td>";
-                                                $base_url = "http://localhost/eyebook_update/"; // Replace with your actual base URL
-                                                $full_url = $base_url . $material['indexPath'];
+                                                $full_url = $material['indexPath'];
                                                 echo "<td><a href='#' class='btn btn-primary' onclick='redirectToCourseMaterial(\"" . htmlspecialchars($full_url) . "\")'>View</a></td>";
                                                 echo "</tr>";
                                             }
@@ -172,7 +201,7 @@ function showSingleUpload() {
         courseMaterialsFile.required = true;
     }
     var bulkUnitNumber = document.getElementById('bulkUnitNumber');
-    var bulkCourseMaterialsFile = document.getElement.getElementById('bulk_course_materials_file');
+    var bulkCourseMaterialsFile = document.getElementById('bulk_course_materials_file');
     if (bulkUnitNumber && bulkCourseMaterialsFile) {
         bulkUnitNumber.required = false;
         bulkCourseMaterialsFile.required = false;
@@ -216,6 +245,17 @@ function redirectToCoursePlan() {
         window.open(coursePlanUrl, '_blank');
     } else {
         alert('Course Plan URL not available.');
+    }
+}
+
+function redirectToCourseBook(url) {
+    var baseUrl = "http://localhost/eyebook_update/"; // Replace with your actual base URL
+    var courseBookUrl = baseUrl + "book_view.php?index_path=" + encodeURIComponent(url);
+
+    if (url) {
+        window.location.href = courseBookUrl;
+    } else {
+        alert('Course Book URL not available.');
     }
 }
 
