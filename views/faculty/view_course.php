@@ -66,7 +66,7 @@
                                                 echo "<td>" . $serialNumber++ . "</td>"; // Increment the serial number
                                                 echo "<td>" . htmlspecialchars($unit['unitTitle']) . "</td>";
                                                 $full_url = $material['indexPath'];
-                                                echo "<td><a href='/faculty/view_book/" . $hashedId . "?index_path=" . urlencode($full_url) . "' class='btn btn-primary'>View Course Book</a></td>";
+                                                echo "<td><a href='http://localhost/eye_book/" . $hashedId . "?index_path=" . $full_url . "' class='btn btn-primary'>View Course Book</a></td>";
                                                 echo "</tr>";
                                             }
                                         }

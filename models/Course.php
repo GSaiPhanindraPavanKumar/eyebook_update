@@ -83,12 +83,10 @@ class Course {
         }
 
         public static function create($conn, $name, $description, $is_paid, $price) {
-            $sql = "INSERT INTO courses (name, description, is_paid, price) VALUES (?, ?, ?, ?)";
+            $sql = "INSERT INTO courses (name, description) VALUES (?, ?)";
             $stmt = $conn->prepare($sql);
             $stmt->bindValue(1, $name, PDO::PARAM_STR);
             $stmt->bindValue(2, $description, PDO::PARAM_STR);
-            $stmt->bindValue(3, $is_paid, PDO::PARAM_BOOL);
-            $stmt->bindValue(4, $price, PDO::PARAM_STR);
         
             if ($stmt->execute()) {
                 return "Course created successfully!";

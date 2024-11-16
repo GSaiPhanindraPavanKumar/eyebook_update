@@ -8,7 +8,7 @@
                         <h3 class="font-weight-bold">Manage Students</h3>
                     </div>
                     <div class="col-12 col-xl-4 text-right">
-                        <a href="addStudent.php" class="btn btn-primary">
+                        <a href="uploadStudents" class="btn btn-primary">
                             <i class="fas fa-plus-circle"></i> Add Student
                         </a>
                     </div>
@@ -31,7 +31,7 @@
                                             <th data-sort="regd_no">Registration Number <i class="fas fa-sort"></i></th>
                                             <th data-sort="name">Name <i class="fas fa-sort"></i></th>
                                             <th data-sort="email">Email <i class="fas fa-sort"></i></th>
-                                            <th>Actions</th>
+                                            <!-- <th>Actions</th> -->
                                         </tr>
                                     </thead>
                                     <tbody id="studentTable">
@@ -50,9 +50,9 @@
                                                 <td><?= htmlspecialchars($student['regd_no']) ?></td>
                                                 <td><?= htmlspecialchars($student['name']) ?></td>
                                                 <td><?= htmlspecialchars($student['email']) ?></td>
-                                                <td>
+                                                <!-- <td>
                                                     <button type="submit" name="view" class="btn btn-outline-info btn-sm"><i class="fas fa-eye"></i>View</button>
-                                                </td>
+                                                </td> -->
                                             </tr>
                                         <?php endforeach; ?>
                                     </tbody>

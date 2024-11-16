@@ -42,6 +42,7 @@ $router->post('/admin/add_unit', 'AdminController@addUnit');
 $router->post('/admin/assign_course', 'AdminController@assignCourse');
 $router->get('/admin/manage_students', 'AdminController@manageStudents');
 $router->get('/admin/view_student/(\d+)', 'AdminController@viewStudent');
+$router->post('/admin/handleTodo', 'AdminController@handleTodo');
 
 
 

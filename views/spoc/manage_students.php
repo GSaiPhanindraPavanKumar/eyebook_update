@@ -7,9 +7,9 @@
                     <div class="col-12 col-xl-8 mb-4 mb-xl-0">
                         <h3 class="font-weight-bold">Manage Students</h3>
                     </div>
-                    <div class="col-12 col-xl-4 text-right">
+                    <!-- <div class="col-12 col-xl-4 text-right">
                         <a href="addStudent.php" class="btn btn-primary">Add Student</a>
-                    </div>
+                    </div> -->
                 </div>
             </div>
         </div>

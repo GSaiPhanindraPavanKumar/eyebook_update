@@ -67,11 +67,11 @@ $adminModel = new \Models\Admin();
                         <img src="/views/public/images/user.jpg" alt="profile"/>
                     </a>
                     <div class="dropdown-menu dropdown-menu-right navbar-dropdown" aria-labelledby="profileDropdown">
-                        <a class="dropdown-item" href="profile">
+                        <a class="dropdown-item" href="/admin/profile">
                             <i class="ti-user text-primary"></i>
                             Profile
                         </a>
-                        <a class="dropdown-item" href="logout">
+                        <a class="dropdown-item" href="/admin/logout">
                             <i class="ti-power-off text-primary"></i>
                             Logout
                         </a>
@@ -111,7 +111,7 @@ $adminModel = new \Models\Admin();
         <nav class="sidebar sidebar-offcanvas" id="sidebar">
             <ul class="nav">
                 <li class="nav-item">
-                    <a class="nav-link" href="dashboard">
+                    <a class="nav-link" href="/admin/dashboard">
                         <i class="icon-grid menu-icon"></i>
                         <span class="menu-title">Dashboard</span>
                     </a>
@@ -127,8 +127,8 @@ $adminModel = new \Models\Admin();
                     </a>
                     <div class="collapse" id="university">
                         <ul class="nav flex-column sub-menu">
-                            <li class="nav-item"> <a class="nav-link" href="addUniversity">Create University</a></li>
-                            <li class="nav-item"> <a class="nav-link" href="manage_university">Manage University</a></li>
+                            <li class="nav-item"> <a class="nav-link" href="/admin/addUniversity">Create University</a></li>
+                            <li class="nav-item"> <a class="nav-link" href="/admin/manage_university">Manage University</a></li>
 <!--                            <li class="nav-item"> <a class="nav-link" href="#">Typography</a></li>-->
                         </ul>
                     </div>
@@ -143,8 +143,8 @@ $adminModel = new \Models\Admin();
                     </a>
                     <div class="collapse" id="courses">
                         <ul class="nav flex-column sub-menu">
-                            <li class="nav-item"><a class="nav-link" href="add_courses">Add Courses</a></li>
-                            <li class="nav-item"><a class="nav-link" href="manage_courses">Manage Courses</a></li>
+                            <li class="nav-item"><a class="nav-link" href="/admin/add_courses">Add Courses</a></li>
+                            <li class="nav-item"><a class="nav-link" href="/admin/manage_courses">Manage Courses</a></li>
                             <!-- <li class="nav-item"><a class="nav-link" href="courses">Submission</a></li> -->
                         </ul>
                     </div>
@@ -157,12 +157,12 @@ $adminModel = new \Models\Admin();
                     </a>
                     <div class="collapse" id="student">
                         <ul class="nav flex-column sub-menu">
-                        <li class="nav-item"> <a class="nav-link" href="uploadStudents">Upload Students</a></li>
-                            <li class="nav-item"> <a class="nav-link" href="manage_students">Manage Student</a></li>
+                        <li class="nav-item"> <a class="nav-link" href="/admin/uploadStudents">Upload Students</a></li>
+                            <li class="nav-item"> <a class="nav-link" href="/admin/manage_students">Manage Student</a></li>
                         </ul>
                     </div>
                 </li>
-                <li class="nav-item">
+                <!-- <li class="nav-item">
                     <a class="nav-link" data-toggle="collapse" href="#streams" aria-expanded="false" aria-controls="streams">
                         <i class="icon-grid-2 menu-icon"></i>
                         <span class="menu-title">Public Courses</span>
@@ -174,7 +174,7 @@ $adminModel = new \Models\Admin();
                             <li class="nav-item"> <a class="nav-link" href="streams_team">Manage Course</a></li>
                         </ul>
                     </div>
-                </li>
+                </li> -->
 
 
                 <!-- <li class="nav-item">
@@ -225,13 +225,13 @@ $adminModel = new \Models\Admin();
 
                 <li class="nav-item"><hr></li>
                 <li class="nav-item">
-                    <a class="nav-link" href="updatePassword">
+                    <a class="nav-link" href="/admin/updatePassword">
                         <i class="ti-settings menu-icon"></i>
                         <span class="menu-title">Change Password</span>
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="logout">
+                    <a class="nav-link" href="/admin/logout">
                         <i class="ti-power-off menu-icon"></i>
                         <span class="menu-title">Logout</span>
                 </a>

@@ -79,16 +79,16 @@ include("sidebar.php");
                     <div class="col-md-6 mb-4 mb-lg-0 stretch-card transparent">
                         <div class="card card-light-blue">
                             <div class="card-body">
-                                <p class="mb-4">SPOCs</p>
-                                <p class="fs-30 mb-2"><?php echo $spoc_count; ?></p>
+                                <p class="mb-4">Transactions</p>
+                                <p class="fs-30 mb-2">0</p>
                             </div>
                         </div>
                     </div>
                     <div class="col-md-6 stretch-card transparent">
                         <div class="card card-light-danger">
                             <div class="card-body">
-                                <p class="mb-4">Courses</p>
-                                <p class="fs-30 mb-2"><?php echo $course_count; ?></p>
+                                <p class="mb-4">Users</p>
+                                <p class="fs-30 mb-2">0</p>
                             </div>
                         </div>
                     </div>
@@ -383,45 +383,72 @@ include("sidebar.php");
                     <div class="card-body">
                         <h4 class="card-title">To Do Lists</h4>
                         <div class="list-wrapper pt-2">
-                            <ul class="d-flex flex-column-reverse todo-list todo-list-custom">
-                                <li>
-                                    <div class="form-check form-check-flat">
-                                        <label class="form-check-label">
-                                            <input class="checkbox" type="checkbox">
-                                            Meeting with Urban Team
-                                        </label>
-                                    </div>
-                                    <i class="remove ti-close"></i>
-                                </li>
-                                <!-- <li class="completed">
-                                    <div class="form-check form-check-flat">
-                                        <label class="form-check-label">
-                                            <input class="checkbox" type="checkbox" checked>
-                                            Duplicate a project for new customer
-                                        </label>
-                                    </div>
-                                    <i class="remove ti-close"></i>
-                                </li>
-                                <li>
-                                    <div class="form-check form-check-flat">
-                                        <label class="form-check-label">
-                                            <input class="checkbox" type="checkbox">
-                                            Project meeting with CEO
-                                        </label>
-                                    </div>
-                                    <i class="remove ti-close"></i>
-                                </li>
-                                <li class="completed">
-                                    <div class="form-check form-check-flat">
-                                        <label class="form-check-label">
-                                            <input class="checkbox" type="checkbox" checked>
-                                            Follow up of team zilla
-                                        </label>
-                                    </div>
-                                    <i class="remove ti-close"></i>
-                                </li> -->
+                            <ul id="todo-list" class="d-flex flex-column-reverse todo-list todo-list-custom">
+                                <?php foreach ($todos as $todo): ?>
+                                    <li data-id="<?php echo $todo['id']; ?>">
+                                        <div class="form-check form-check-flat">
+                                            <label class="form-check-label">
+                                                <?php echo htmlspecialchars($todo['title']); ?>
+                                            </label>
+                                        </div>
+                                        <i class="remove ti-close" onclick="deleteTodo(<?php echo $todo['id']; ?>)"></i>
+                                    </li>
+                                <?php endforeach; ?>
                             </ul>
+                            <form id="add-todo-form" method="POST">
+                            <input type="text" name="title" placeholder="Add new task">
+                            <button type="submit">Add</button>
+                        </form>
                         </div>
+
+                        
+                        <script>
+                        document.getElementById('add-todo-form').addEventListener('submit', function(e) {
+                            e.preventDefault();
+                            const title = this.title.value;
+                            if (title) {
+                                const formData = new FormData();
+                                formData.append('action', 'add');
+                                formData.append('title', title);
+                        
+                                fetch('/admin/handleTodo', {
+                                    method: 'POST',
+                                    body: formData
+                                }).then(response => response.json())
+                                  .then(data => updateTodoList(data));
+                            }
+                        });
+                        
+                        function deleteTodo(id) {
+                            const formData = new FormData();
+                            formData.append('action', 'delete');
+                            formData.append('id', id);
+                        
+                            fetch('/admin/handleTodo', {
+                                method: 'POST',
+                                body: formData
+                            }).then(response => response.json())
+                              .then(data => updateTodoList(data));
+                        }
+                        
+                        function updateTodoList(todos) {
+                            const todoList = document.getElementById('todo-list');
+                            todoList.innerHTML = '';
+                            todos.forEach(todo => {
+                                const li = document.createElement('li');
+                                li.setAttribute('data-id', todo.id);
+                                li.innerHTML = `
+                                    <div class="form-check form-check-flat">
+                                        <label class="form-check-label">
+                                            ${todo.title}
+                                        </label>
+                                    </div>
+                                    <i class="remove ti-close" onclick="deleteTodo(${todo.id})"></i>
+                                `;
+                                todoList.appendChild(li);
+                            });
+                        }
+                        </script>
                         <!-- <div class="add-items d-flex mb-0 mt-2">
                             <input type="text" class="form-control todo-list-input" placeholder="Add new task">
                             <button class="add btn btn-icon text-primary todo-list-add-btn bg-transparent"><i class="icon-circle-plus"></i></button>
@@ -515,7 +542,9 @@ include("sidebar.php");
                                 <p class="card-title text-white">Number of Meetings</p>
                                 <div class="row">
                                     <div class="col-8 text-white">
-                                        <h3>0</h3>
+                                        <h3>
+                                            <?php echo $meeting_count; ?>
+                                        </h3>
                                         <!-- <p class="text-white font-weight-500 mb-0">The total number of sessions within the date range.It is calculated as the sum . </p> -->
                                     </div>
                                 </div>

@@ -30,7 +30,7 @@
                                             <th data-sort="serialNumber">S.no <i class="fas fa-sort"></i></th>
                                             <th data-sort="longName">University Name <i class="fas fa-sort"></i></th>
                                             <th data-sort="shortName">Short Name <i class="fas fa-sort"></i></th>
-                                            <th>Actions</th>
+                                            <!-- <th>Actions</th> -->
                                         </tr>
                                     </thead>
                                     <tbody id="universityTable">
@@ -48,9 +48,9 @@
                                                 <td><?= $serialNumber++ ?></td>
                                                 <td><?= htmlspecialchars($university['long_name']) ?></td>
                                                 <td><?= htmlspecialchars($university['short_name']) ?></td>
-                                                <td>
+                                                <!-- <td>
                                                     <button type="submit" name="view" class="btn btn-outline-info btn-sm"><i class="fas fa-eye"></i>View</button>
-                                                </td>
+                                                </td> -->
                                             </tr>
                                         <?php endforeach; ?>
                                     </tbody>

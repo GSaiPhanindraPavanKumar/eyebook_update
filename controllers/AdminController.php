@@ -7,8 +7,10 @@ use Models\Spoc;
 use Models\Course;
 use Models\University;
 use Models\Database;
+use Models\Todo;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use Models\Discussion;
+use Models\Meetings;
 
 use Exception;
 use PDOException;
@@ -35,10 +37,14 @@ class AdminController {
         $student_count = Student::getCount($conn);
         $spoc_count = Spoc::getCount($conn);
         $course_count = Course::getCount($conn);
+        $meeting_count = Meetings::getCount($conn);
+
+
 
         $spocs = Spoc::getAll($conn);
         $universities = University::getAll($conn);
         $courses = Course::getAll($conn);
+        $todos = Todo::getAll($conn); 
 
         require 'views/admin/dashboard.php';
     }
@@ -169,8 +175,8 @@ class AdminController {
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $name = $_POST['name'];
             $description = $_POST['description'];
-            $is_paid = isset($_POST['is_paid']) ? 1 : 0;
-            $price = $_POST['price'] ?? '0.00'; // Set default value for price
+            $is_paid =  0;
+            $price =  0; // Set default value for price
             $message = Course::create($conn, $name, $description, $is_paid, $price);
         }
         require 'views/admin/add_courses.php';
@@ -259,7 +265,8 @@ class AdminController {
             $deadline = $_POST['deadline'];
 
             try {
-                $this->conn->createAssessment($title, $questions, $deadline);
+                $conn = Database::getConnection();
+                $conn->createAssessment($title, $questions, $deadline);
                 $success = "Assessment created successfully!";
                 include 'views/success.php';
             } catch (Exception $e) {
@@ -315,6 +322,31 @@ class AdminController {
         $conn = Database::getConnection();
         $students = Student::getAll($conn);
         require 'views/admin/manageStudents.php';
+    }
+    
+    public function handleTodo() {
+        $conn = Database::getConnection();
+        $action = $_POST['action'];
+    
+        switch ($action) {
+            case 'add':
+                $title = $_POST['title'];
+                Todo::add($conn, $title);
+                break;
+            case 'update':
+                $id = $_POST['id'];
+                $is_completed = $_POST['is_completed'] ? 1 : 0;
+                Todo::update($conn, $id, $is_completed);
+                break;
+            case 'delete':
+                $id = $_POST['id'];
+                Todo::delete($conn, $id);
+                break;
+        }
+    
+        $todos = Todo::getAll($conn);
+        echo json_encode($todos);
+        exit();
     }
 }
 ?>

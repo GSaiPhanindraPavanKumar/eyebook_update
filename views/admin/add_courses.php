@@ -37,14 +37,14 @@ $message = '';
                                 <label for="description">Course Description</label>
                                 <textarea class="form-control" id="description" name="description" required></textarea>
                             </div>
-                            <div class="form-group">
+                            <!-- <div class="form-group">
                                 <label for="is_paid">Is Paid Course</label>
                                 <input type="checkbox" id="is_paid" name="is_paid" onchange="togglePriceField()">
                             </div>
                             <div class="form-group" id="price-group" style="display: none;">
                                 <label for="price">Price</label>
                                 <input type="number" class="form-control" id="price" name="price" step="0.01">
-                            </div>
+                            </div> -->
                             <button type="submit" class="btn btn-primary">Add Course</button>
                         </form>
                     </div>
@@ -60,7 +60,7 @@ $message = '';
 <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
 
 <!-- JavaScript to toggle price field -->
-<script>
+<!-- <script>
 function togglePriceField() {
     var isPaidCheckbox = document.getElementById('is_paid');
     var priceGroup = document.getElementById('price-group');
@@ -70,4 +70,4 @@ function togglePriceField() {
         priceGroup.style.display = 'none';
     }
 }
-</script>
+</script> -->
