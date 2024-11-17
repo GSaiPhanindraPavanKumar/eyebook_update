@@ -66,6 +66,13 @@ $router->get('/faculty/profile', 'FacultyController@profile');
 $router->get('/faculty/my_courses', 'FacultyController@myCourses');
 $router->get('/faculty/view_course/([a-zA-Z0-9]+)', 'FacultyController@viewCourse');
 $router->get('/faculty/manage_students', 'FacultyController@manageStudents');
+$router->get('/faculty/create_assignment',function(){
+        require 'views/faculty/assignment_create.php';
+
+});
+$router->post('/faculty/create_assignment',function(){
+    require 'views/faculty/assignment_create.php';
+});
 
 $router->post('/faculty/updatePassword', function(){
     require 'views/faculty/updatePassword.php';
