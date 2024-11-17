@@ -49,13 +49,13 @@
                             </thead>
                             <tbody>
                                 <?php
+                                $studentCompletedBooks = json_decode($student['completed_books'] ?? '[]', true)[$course['id']] ?? [];
                                 if (!empty($course['course_book'])) {
                                     $serialNumber = 1; 
-                                    $completedBooks = json_decode($course['completed_books'], true) ?? [];
                                     foreach ($course['course_book'] as $unit) {
                                         if (isset($unit['materials'])) {
                                             foreach ($unit['materials'] as $material) {
-                                                $isCompleted = in_array($material['indexPath'], $completedBooks);
+                                                $isCompleted = in_array($material['indexPath'], $studentCompletedBooks);
                                                 echo "<tr>";
                                                 echo "<td>" . $serialNumber++ . "</td>"; // Increment the serial number
                                                 echo "<td>" . htmlspecialchars($unit['unitTitle']) . "</td>";

@@ -1,10 +1,16 @@
 <?php
 include 'sidebar.php';
 use Models\Database;
+use Models\Student;
+
 $conn = Database::getConnection();
+if (!isset($_SESSION['student_id'])) {
+    die('Student ID not set in session.');
+}
+$studentId = $_SESSION['student_id']; // Assuming student ID is stored in session
 
 // Fetch courses from the database
-$sql = "SELECT id, name, description, completed_books, course_book FROM courses";
+$sql = "SELECT id, name, description, course_book FROM courses";
 $stmt = $conn->query($sql);
 $courses = [];
 
@@ -12,13 +18,17 @@ while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
     $courses[] = $row;
 }
 
+// Fetch the student's completed books
+$student = Student::getById($conn, $studentId);
+$completedBooks = json_decode($student['completed_books'], true) ?? [];
+
 // Calculate progress data for each course
 $progressData = [];
 foreach ($courses as $course) {
     $courseId = $course['id'];
-    $completedBooks = !empty($course['completed_books']) ? json_decode($course['completed_books'], true) : [];
+    $studentCompletedBooks = $completedBooks[$courseId] ?? [];
     $totalBooks = !empty($course['course_book']) ? count(json_decode($course['course_book'], true) ?? []) : 0;
-    $progress = $totalBooks > 0 ? (count($completedBooks) / $totalBooks) * 100 : 0;
+    $progress = $totalBooks > 0 ? (count($studentCompletedBooks) / $totalBooks) * 100 : 0;
     $progressData[$courseId] = $progress;
 }
 

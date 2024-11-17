@@ -1,5 +1,61 @@
 <?php
-include("sidebar.php");
+include 'sidebar.php';
+use Models\Database;
+use Models\Faculty;
+use Models\Course;
+
+$conn = Database::getConnection();
+
+// Handle archiving of courses
+if (isset($_POST['archive_course_id'])) {
+    $courseId = $_POST['archive_course_id'];
+    $stmt = $conn->prepare("UPDATE courses SET status = 'archived' WHERE id = :course_id");
+    $stmt->execute(['course_id' => $courseId]);
+}
+
+// Fetch courses from the database
+$sql = "SELECT id, name, description, course_book, status FROM courses";
+$stmt = $conn->query($sql);
+$courses = [];
+
+while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+    $courses[] = $row;
+}
+
+// Fetch all students
+$sql = "SELECT id, completed_books FROM students";
+$stmt = $conn->query($sql);
+$students = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+// Calculate progress data for each course
+$progressData = [];
+foreach ($courses as $course) {
+    $courseId = $course['id'];
+    $totalBooks = !empty($course['course_book']) ? count(json_decode($course['course_book'], true) ?? []) : 0;
+    $totalProgress = 0;
+    $studentCount = 0;
+
+    foreach ($students as $student) {
+        $completedBooks = json_decode($student['completed_books'], true) ?? [];
+        $studentCompletedBooks = $completedBooks[$courseId] ?? [];
+        $progress = $totalBooks > 0 ? (count($studentCompletedBooks) / $totalBooks) * 100 : 0;
+        $totalProgress += $progress;
+        $studentCount++;
+    }
+
+    $averageProgress = $studentCount > 0 ? $totalProgress / $studentCount : 0;
+    $progressData[$courseId] = $averageProgress;
+}
+
+// Separate ongoing and archived courses
+$ongoingCourses = array_filter($courses, function($course) {
+    return $course['status'] === 'ongoing';
+});
+$archivedCourses = array_filter($courses, function($course) {
+    return $course['status'] === 'archived';
+});
+
+// No need to close the connection explicitly in PDO
 ?>
 
 <div class="main-panel">
@@ -17,29 +73,57 @@ include("sidebar.php");
             <div class="col-md-12 grid-margin">
                 <p class="card-title mb-0" style="font-size:x-large">My Courses</p><br>
                 <div class="row">
-                    <?php if (!empty($courses)): ?>
-                        <?php foreach ($courses as $course): ?>
-                            <div class="col-md-4 d-flex align-items-stretch">
-                                <div class="card mb-4" style="width: 100%;">
-                                    <!-- <img class="card-img-top" src="../views\public\assets\images\book.jpeg" alt="Card image cap" height="60%"> -->
-                                    <div class="card-body">
-                                        <h5 class="card-title" style="font-family:cursive"><?php echo htmlspecialchars($course['name']); ?></h5>
-                                        <p class="card-text"><?php echo htmlspecialchars($course['description']); ?></p>
-                                    </div>
-                                    <div class="card-body">
-                                        <?php 
-                                        $hashedId = base64_encode($course['id']);
-                                        $hashedId = str_replace(['+', '/', '='], ['-', '_', ''], $hashedId);
-                                        ?>
-                                        <a href="view_course/<?php echo $hashedId; ?>" class="card-link">View Course</a>
-                                        <a href="/faculty/discussion_forum/<?php echo $course['id']; ?>" class="card-link">Chat Room</a>
+                    <?php foreach ($ongoingCourses as $course): ?>
+                        <div class="col-md-4 d-flex align-items-stretch">
+                            <div class="card mb-4" style="width: 100%;">
+                                <!-- <img class="card-img-top" src="../views\public\assets\images\book.jpeg" alt="Card image cap" height="60%"> -->
+                                <div class="card-body">
+                                    <h5 class="card-title" style="font-family:cursive"><?php echo htmlspecialchars($course['name']); ?></h5>
+                                    <p class="card-text"><?php echo htmlspecialchars($course['description']); ?></p>
+                                    <div class="progress">
+                                        <div class="progress-bar" role="progressbar" style="width: <?php echo $progressData[$course['id']]; ?>%;" aria-valuenow="<?php echo $progressData[$course['id']]; ?>" aria-valuemin="0" aria-valuemax="100"><?php echo round($progressData[$course['id']], 2); ?>%</div>
                                     </div>
                                 </div>
+                                <div class="card-body">
+                                    <?php 
+                                    $hashedId = base64_encode($course['id']);
+                                    $hashedId = str_replace(['+', '/', '='], ['-', '_', ''], $hashedId);
+                                    ?>
+                                    <a href="view_course/<?php echo $hashedId; ?>" class="card-link">View Course</a>
+                                    <a href="/faculty/discussion_forum/<?php echo $course['id']; ?>" class="card-link">Chat Room</a>
+                                    <form method="POST" action="" style="display:inline;">
+                                        <input type="hidden" name="archive_course_id" value="<?php echo $course['id']; ?>">
+                                        <button type="submit" class="btn btn-warning btn-sm">Archive</button>
+                                    </form>
+                                </div>
                             </div>
-                        <?php endforeach; ?>
-                    <?php else: ?>
-                        <p>No courses found.</p>
-                    <?php endif; ?>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+                <p class="card-title mb-0" style="font-size:x-large">Archived Courses</p><br>
+                <div class="row">
+                    <?php foreach ($archivedCourses as $course): ?>
+                        <div class="col-md-4 d-flex align-items-stretch">
+                            <div class="card mb-4" style="width: 100%;">
+                                <!-- <img class="card-img-top" src="../views\public\assets\images\book.jpeg" alt="Card image cap" height="60%"> -->
+                                <div class="card-body">
+                                    <h5 class="card-title" style="font-family:cursive"><?php echo htmlspecialchars($course['name']); ?></h5>
+                                    <p class="card-text"><?php echo htmlspecialchars($course['description']); ?></p>
+                                    <div class="progress">
+                                        <div class="progress-bar" role="progressbar" style="width: <?php echo $progressData[$course['id']]; ?>%;" aria-valuenow="<?php echo $progressData[$course['id']]; ?>" aria-valuemin="0" aria-valuemax="100"><?php echo round($progressData[$course['id']], 2); ?>%</div>
+                                    </div>
+                                </div>
+                                <div class="card-body">
+                                    <?php 
+                                    $hashedId = base64_encode($course['id']);
+                                    $hashedId = str_replace(['+', '/', '='], ['-', '_', ''], $hashedId);
+                                    ?>
+                                    <a href="view_course/<?php echo $hashedId; ?>" class="card-link">View Course</a>
+                                    <a href="/faculty/discussion_forum/<?php echo $course['id']; ?>" class="card-link">Chat Room</a>
+                                </div>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
                 </div>
             </div>
         </div>

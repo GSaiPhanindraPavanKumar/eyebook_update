@@ -30,5 +30,16 @@ class VirtualClassroom {
         $stmt->execute([$classroomId]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+
+    public function getVirtualClassesForStudent($studentId, $date) {
+        $stmt = $this->conn->prepare("
+            SELECT vc.* 
+            FROM virtual_classrooms vc
+            JOIN student_classrooms sc ON vc.classroom_id = sc.classroom_id
+            WHERE sc.student_id = :student_id AND vc.date = :date
+        ");
+        $stmt->execute(['student_id' => $studentId, 'date' => $date]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
 }
 ?>
