@@ -1,28 +1,32 @@
 <?php
 use Models\Database;
-use Models\Course;
+use Models\Student;
 
 $conn = Database::getConnection();
 
+$studentId = $_SESSION['student_id']; // Assuming student ID is stored in session
 $courseId = $_POST['course_id'];
 $indexPath = $_POST['indexPath'];
 
-// Fetch the course
-$course = Course::getById($conn, $courseId);
-if (!$course) {
-    die('Course not found');
+// Fetch the student
+$student = Student::getById($conn, $studentId);
+if (!$student) {
+    die('Student not found');
 }
 
 // Update the completed_books field
-$completedBooks = json_decode($course['completed_books'], true) ?? [];
-if (!in_array($indexPath, $completedBooks)) {
-    $completedBooks[] = $indexPath;
+$completedBooks = json_decode($student['completed_books'], true) ?? [];
+if (!isset($completedBooks[$courseId])) {
+    $completedBooks[$courseId] = [];
+}
+if (!in_array($indexPath, $completedBooks[$courseId])) {
+    $completedBooks[$courseId][] = $indexPath;
 }
 
 $completedBooksJson = json_encode($completedBooks);
-$sql = "UPDATE courses SET completed_books = :completed_books WHERE id = :id";
+$sql = "UPDATE students SET completed_books = :completed_books WHERE id = :id";
 $stmt = $conn->prepare($sql);
-$stmt->execute(['completed_books' => $completedBooksJson, 'id' => $courseId]);
+$stmt->execute(['completed_books' => $completedBooksJson, 'id' => $studentId]);
 
 echo 'Success';
 ?>
