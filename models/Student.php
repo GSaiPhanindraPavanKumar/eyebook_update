@@ -66,11 +66,20 @@ class Student {
         $student = $stmt->fetch(PDO::FETCH_ASSOC);
 
         if ($student && password_verify($password, $student['password'])) {
+            $_SESSION['student_id'] = $student['id']; // Set student_id in session
             return $student;
         }
 
         return false;
     }
+
+    public static function getById($conn, $id) {
+        $sql = "SELECT * FROM students WHERE id = :id";
+        $stmt = $conn->prepare($sql);
+        $stmt->execute(['id' => $id]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
     public static function getAllByUniversity($conn, $university_id) {
         $sql = "SELECT * FROM students WHERE university_id = :university_id";
         $stmt = $conn->prepare($sql);
@@ -78,3 +87,4 @@ class Student {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 }
+?>
