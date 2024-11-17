@@ -1,16 +1,25 @@
 <?php
 include("sidebar.php");
-// include '../../src/functions.php';
+use Models\Database;
+use Models\Student;
+use Models\Course;
 
 $email = $_SESSION['email'];
 
+// Fetch user data
+$userData = getUserDataByEmail($email);
 
+// Fetch today's classes
+$todaysClasses = getTodaysClasses();
 
-// Fetch upcoming tasks, meetings, assessments, and assignment submissions
-$upcomingTasks = getUpcomingTasks($email); // Define this function in your functions.php
-$upcomingMeetings = getUpcomingMeetings($email); // Define this function in your functions.php
-$upcomingAssessments = getUpcomingAssessments($email); // Define this function in your functions.php
-$assignmentSubmissions = getAssignmentSubmissions($email); // Define this function in your functions.php
+// Fetch courses and progress
+$studentId = $_SESSION['student_id'];
+$courses = getCoursesWithProgress($studentId);
+$leastProgressCourses = array_filter($courses, function($course) {
+    return !empty($course['course_book']) && $course['progress'] < 100;
+});
+$leastProgressCourses = array_slice($leastProgressCourses, 0, 5); // Get the least 5 progress courses
+
 ?>
 
 <!-- HTML Content -->
@@ -26,72 +35,122 @@ $assignmentSubmissions = getAssignmentSubmissions($email); // Define this functi
             </div>
         </div>
         <div class="row">
-            <!-- Upcoming Tasks -->
-            <div class="col-md-6 grid-margin stretch-card">
+            <!-- Student Details -->
+            <div class="col-md-12 grid-margin stretch-card">
                 <div class="card">
                     <div class="card-body">
-                        <p class="card-title mb-0" style="font-size:x-large">Upcoming Tasks</p><br>
-                        <ul class="list-group">
-                            <?php foreach ($upcomingTasks as $task): ?>
-                                <li class="list-group-item">
-                                    <?php echo htmlspecialchars($task['description']); ?>
-                                    <span class="badge badge-primary"><?php echo htmlspecialchars($task['due_date']); ?></span>
-                                </li>
-                            <?php endforeach; ?>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Upcoming Meetings -->
-            <div class="col-md-6 grid-margin stretch-card">
-                <div class="card">
-                    <div class="card-body">
-                        <p class="card-title mb-0" style="font-size:x-large">Upcoming Meetings</p><br>
-                        <ul class="list-group">
-                            <?php foreach ($upcomingMeetings as $meeting): ?>
-                                <li class="list-group-item">
-                                    <strong><?php echo htmlspecialchars($meeting['title']); ?></strong><br>
-                                    <small><?php echo htmlspecialchars($meeting['date']); ?></small>
-                                </li>
-                            <?php endforeach; ?>
-                        </ul>
+                        <h4 class="card-title">Student Details</h4>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p><strong>Name:</strong> <?php echo htmlspecialchars($userData['name']); ?></p>
+                                <p><strong>Email:</strong> <?php echo htmlspecialchars($userData['email']); ?></p>
+                                <p><strong>Registration Number:</strong> <?php echo htmlspecialchars($userData['regd_no']); ?></p>
+                                <p><strong>Section:</strong> <?php echo htmlspecialchars($userData['section']); ?></p>
+                            </div>
+                            <div class="col-md-6">
+                                <p><strong>Stream:</strong> <?php echo htmlspecialchars($userData['stream']); ?></p>
+                                <p><strong>Year:</strong> <?php echo htmlspecialchars($userData['year']); ?></p>
+                                <p><strong>Department:</strong> <?php echo htmlspecialchars($userData['dept']); ?></p>
+                                <p><strong>University:</strong> <?php echo htmlspecialchars($userData['university']); ?></p>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-
         <div class="row">
-            <!-- Upcoming Assessments -->
-            <div class="col-md-6 grid-margin stretch-card">
+            <!-- Today's Classes -->
+            <div class="col-md-12 grid-margin stretch-card">
                 <div class="card">
                     <div class="card-body">
-                        <p class="card-title mb-0" style="font-size:x-large">Upcoming Assessments</p><br>
-                        <ul class="list-group">
-                            <?php foreach ($upcomingAssessments as $assessment): ?>
-                                <li class="list-group-item">
-                                    <strong><?php echo htmlspecialchars($assessment['title']); ?></strong><br>
-                                    <small><?php echo htmlspecialchars($assessment['due_date']); ?></small>
-                                </li>
-                            <?php endforeach; ?>
-                        </ul>
+                        <h4 class="card-title">Today's Classes</h4>
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Topic</th>
+                                        <th>Start Time</th>
+                                        <th>End Time</th>
+                                        <th>Join URL</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php if (!empty($todaysClasses)): ?>
+                                        <?php foreach ($todaysClasses as $class): ?>
+                                            <tr>
+                                                <td><?php echo htmlspecialchars($class['topic']); ?></td>
+                                                <td><?php echo htmlspecialchars($class['start_time']); ?></td>
+                                                <td><?php echo htmlspecialchars($class['end_time']); ?></td>
+                                                <td><a href="<?php echo htmlspecialchars($class['join_url']); ?>" target="_blank" class="btn btn-primary">Join</a></td>
+                                            </tr>
+                                        <?php endforeach; ?>
+                                    <?php else: ?>
+                                        <tr>
+                                            <td colspan="4">No classes scheduled for today.</td>
+                                        </tr>
+                                    <?php endif; ?>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
-
-            <!-- Assignment Submissions -->
-            <div class="col-md-6 grid-margin stretch-card">
+        </div>
+        <div class="row">
+            <!-- Least Progress Courses -->
+            <div class="col-md-12 grid-margin stretch-card">
                 <div class="card">
                     <div class="card-body">
-                        <p class="card-title mb-0" style="font-size:x-large">Assignment Submissions</p><br>
-                        <ul class="list-group">
-                            <?php foreach ($assignmentSubmissions as $submission): ?>
-                                <li class="list-group-item">
-                                    <strong><?php echo htmlspecialchars($submission['title']); ?></strong><br>
-                                    <small><?php echo htmlspecialchars($submission['due_date']); ?></small>
-                                </li>
+                        <h4 class="card-title text-center">Least Progress Courses</h4>
+                        <div class="d-flex justify-content-center">
+                            <?php foreach ($leastProgressCourses as $course): ?>
+                                <div class="col-md-2">
+                                    <div class="card mb-4" style="height: 200px;">
+                                        <div class="card-body text-center">
+                                            <h5 class="card-title"><?php echo htmlspecialchars($course['name']); ?></h5>
+                                            <canvas id="progressChart<?php echo $course['id']; ?>" width="60" height="60"></canvas>
+                                            <script>
+                                                document.addEventListener('DOMContentLoaded', function() {
+                                                    console.log("Course ID: <?php echo $course['id']; ?>, Progress: <?php echo $course['progress']; ?>");
+                                                    var ctx = document.getElementById('progressChart<?php echo $course['id']; ?>').getContext('2d');
+                                                    var progressChart = new Chart(ctx, {
+                                                        type: 'doughnut',
+                                                        data: {
+                                                            datasets: [{
+                                                                data: [<?php echo $course['progress']; ?>, <?php echo 100 - $course['progress']; ?>],
+                                                                backgroundColor: ['#36a2eb', '#ff6384']
+                                                            }],
+                                                            labels: ['Completed', 'Remaining']
+                                                        },
+                                                        options: {
+                                                            responsive: true,
+                                                            maintainAspectRatio: false,
+                                                            cutoutPercentage: 70,
+                                                            legend: {
+                                                                display: false
+                                                            },
+                                                            tooltips: {
+                                                                callbacks: {
+                                                                    label: function(tooltipItem, data) {
+                                                                        var dataset = data.datasets[tooltipItem.datasetIndex];
+                                                                        var total = dataset.data.reduce(function(previousValue, currentValue) {
+                                                                            return previousValue + currentValue;
+                                                                        });
+                                                                        var currentValue = dataset.data[tooltipItem.index];
+                                                                        var percentage = Math.floor(((currentValue / total) * 100) + 0.5);
+                                                                        return percentage + "%";
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    });
+                                                });
+                                            </script>
+                                        </div>
+                                    </div>
+                                </div>
                             <?php endforeach; ?>
-                        </ul>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -102,45 +161,57 @@ $assignmentSubmissions = getAssignmentSubmissions($email); // Define this functi
 </div>
 
 <?php
-// Define the functions to fetch data in your functions.php or relevant file
+// Define the function to fetch user data from the database
 
 function getUserDataByEmail($email) {
-    // Example data, replace with actual database query
-    return [
-        'name' => 'John Doe',
-        'email' => $email,
-    ];
+    $conn = Database::getConnection();
+    $stmt = $conn->prepare("SELECT students.*, universities.long_name as university FROM students JOIN universities ON students.university_id = universities.id WHERE students.email = :email");
+    $stmt->execute(['email' => $email]);
+    return $stmt->fetch(PDO::FETCH_ASSOC);
 }
 
-function getUpcomingTasks($email) {
-    // Example data, replace with actual database query
-    return [
-        ['description' => 'Complete assignment', 'due_date' => '2024-10-15'],
-        ['description' => 'Prepare presentation', 'due_date' => '2024-10-20'],
-    ];
+// Define the function to fetch today's classes
+
+function getTodaysClasses() {
+    $conn = Database::getConnection();
+    $stmt = $conn->prepare("
+        SELECT topic, start_time, duration, join_url,
+               DATE_ADD(start_time, INTERVAL duration MINUTE) as end_time
+        FROM virtual_classrooms
+        WHERE DATE(start_time) = CURDATE()
+        ORDER BY start_time ASC
+    ");
+    $stmt->execute();
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 
-function getUpcomingMeetings($email) {
-    // Example data, replace with actual database query
-    return [
-        ['title' => 'Team Meeting', 'date' => '2024-10-18'],
-        ['title' => 'Project Kickoff', 'date' => '2024-10-25'],
-    ];
-}
+// Define the function to fetch courses with progress
 
-function getUpcomingAssessments($email) {
-    // Example data, replace with actual database query
-    return [
-        ['title' => 'Math Assessment', 'due_date' => '2024-10-22'],
-        ['title' => 'Science Quiz', 'due_date' => '2024-10-28'],
-    ];
-}
+function getCoursesWithProgress($studentId) {
+    $conn = Database::getConnection();
+    $stmt = $conn->prepare("SELECT * FROM courses");
+    $stmt->execute();
+    $courses = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-function getAssignmentSubmissions($email) {
-    // Example data, replace with actual database query
-    return [
-        ['title' => 'History Assignment', 'due_date' => '2024-10-30'],
-        ['title' => 'Literature Essay', 'due_date' => '2024-11-05'],
-    ];
+    $stmt = $conn->prepare("SELECT completed_books FROM students WHERE id = :student_id");
+    $stmt->execute(['student_id' => $studentId]);
+    $student = $stmt->fetch(PDO::FETCH_ASSOC);
+    $completedBooks = json_decode($student['completed_books'], true) ?? [];
+
+    foreach ($courses as &$course) {
+        $courseId = $course['id'];
+        $courseBooks = !empty($course['course_book']) ? json_decode($course['course_book'], true) : [];
+        $totalBooks = is_array($courseBooks) ? count($courseBooks) : 0;
+        $completedBooksCount = is_array($completedBooks[$courseId] ?? []) ? count($completedBooks[$courseId] ?? []) : 0;
+        $course['progress'] = ($totalBooks > 0) ? ($completedBooksCount / $totalBooks) * 100 : 0;
+    }
+
+    usort($courses, function($a, $b) {
+        return $a['progress'] <=> $b['progress'];
+    });
+
+    return $courses;
 }
 ?>
+<!-- Include Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
