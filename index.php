@@ -66,7 +66,9 @@ $router->get('/faculty/profile', 'FacultyController@profile');
 $router->get('/faculty/my_courses', 'FacultyController@myCourses');
 $router->get('/faculty/view_course/([a-zA-Z0-9]+)', 'FacultyController@viewCourse');
 $router->get('/faculty/manage_students', 'FacultyController@manageStudents');
-
+$router->post('/faculty/archive_course', function(){
+    require 'views/faculty/archive_course.php';
+});
 $router->post('/faculty/updatePassword', function(){
     require 'views/faculty/updatePassword.php';
 });
