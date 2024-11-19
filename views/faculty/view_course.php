@@ -22,18 +22,22 @@
                         <div class="d-flex justify-content-between align-items-center">
                             <h5>Course Plan</h5>
                             <div>
-                                <button type="button" class="btn btn-primary" onclick="toggleCoursePlanForm()">Upload</button>
+                                <?php if ($course['status'] !== 'archived') : ?>
+                                    <button type="button" class="btn btn-primary" onclick="toggleCoursePlanForm()">Upload</button>
+                                <?php endif; ?>
                                 <?php if (!empty($course['course_plan'])) : ?>
                                     <button class="btn btn-primary" onclick="redirectToCoursePlan()">View</button>
                                 <?php endif; ?>
                             </div>
                         </div>
-                        <form id="uploadCoursePlanForm" action="upload_course_plan.php" method="post" enctype="multipart/form-data" style="display: none; margin-top: 10px;">
-                            <input type="hidden" name="course_id" value="<?php echo $course['id']; ?>">
-                            <input type="file" name="course_plan_file" accept="application/pdf" required>
-                            <button type="submit" class="btn btn-success">Upload</button>
-                            <button type="button" class="btn btn-secondary" onclick="toggleCoursePlanForm()">Cancel</button>
-                        </form>
+                        <?php if ($course['status'] !== 'archived') : ?>
+                            <form id="uploadCoursePlanForm" action="upload_course_plan.php" method="post" enctype="multipart/form-data" style="display: none; margin-top: 10px;">
+                                <input type="hidden" name="course_id" value="<?php echo $course['id']; ?>">
+                                <input type="file" name="course_plan_file" accept="application/pdf" required>
+                                <button type="submit" class="btn btn-success">Upload</button>
+                                <button type="button" class="btn btn-secondary" onclick="toggleCoursePlanForm()">Cancel</button>
+                            </form>
+                        <?php endif; ?>
 
                         <!-- Course Book Section -->
                         <div class="d-flex justify-content-between align-items-center mt-4">
@@ -81,46 +85,50 @@
                         <!-- Course Materials Section -->
                         <div class="d-flex justify-content-between align-items-center mt-4">
                             <h5>Course Materials</h5>
-                            <button type="button" class="btn btn-primary" onclick="toggleUploadOptions()">Upload</button>
+                            <?php if ($course['status'] !== 'archived') : ?>
+                                <button type="button" class="btn btn-primary" onclick="toggleUploadOptions()">Upload</button>
+                            <?php endif; ?>
                         </div>
-                        <div id="uploadOptions" class="text-center" style="display: none; margin-top: 10px;">
-                            <button type="button" class="btn btn-info" onclick="showSingleUpload()">Single Document</button>
-                            <button type="button" class="btn btn-warning" onclick="showBulkUpload()">Bulk Upload</button>
-                        </div>
-                        <form id="uploadCourseMaterialsForm" action="upload_course_materials.php" method="post" enctype="multipart/form-data" style="display: none; margin-top: 10px;">
-                            <input type="hidden" name="course_id" value="<?php echo $course['id']; ?>">
-                            <input type="hidden" name="upload_type" id="uploadType">
-                            <div id="singleUpload" style="display: none;">
-                                <div class="form-group">
-                                    <label for="unitNumber">Unit Number</label>
-                                    <input type="number" class="form-control" name="unit_number" id="unitNumber">
-                                </div>
-                                <div class="form-group">
-                                    <label for="topic">Topic</label>
-                                    <input type="text" class="form-control" name="topic" id="topic">
-                                </div>
-                                <div class="form-group d-flex justify-content-between align-items-center">
-                                    <input type="file" name="course_materials_file" accept="application/pdf">
-                                    <div>
-                                        <button type="submit" class="btn btn-success">Upload</button>
-                                        <button type="button" class="btn btn-secondary" onclick="toggleCourseMaterialsForm()">Cancel</button>
+                        <?php if ($course['status'] !== 'archived') : ?>
+                            <div id="uploadOptions" class="text-center" style="display: none; margin-top: 10px;">
+                                <button type="button" class="btn btn-info" onclick="showSingleUpload()">Single Document</button>
+                                <button type="button" class="btn btn-warning" onclick="showBulkUpload()">Bulk Upload</button>
+                            </div>
+                            <form id="uploadCourseMaterialsForm" action="upload_course_materials.php" method="post" enctype="multipart/form-data" style="display: none; margin-top: 10px;">
+                                <input type="hidden" name="course_id" value="<?php echo $course['id']; ?>">
+                                <input type="hidden" name="upload_type" id="uploadType">
+                                <div id="singleUpload" style="display: none;">
+                                    <div class="form-group">
+                                        <label for="unitNumber">Unit Number</label>
+                                        <input type="number" class="form-control" name="unit_number" id="unitNumber">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="topic">Topic</label>
+                                        <input type="text" class="form-control" name="topic" id="topic">
+                                    </div>
+                                    <div class="form-group d-flex justify-content-between align-items-center">
+                                        <input type="file" name="course_materials_file" accept="application/pdf">
+                                        <div>
+                                            <button type="submit" class="btn btn-success">Upload</button>
+                                            <button type="button" class="btn btn-secondary" onclick="toggleCourseMaterialsForm()">Cancel</button>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                            <div id="bulkUpload" style="display: none;">
-                                <div class="form-group">
-                                    <label for="bulkUnitNumber">Unit Number</label>
-                                    <input type="number" class="form-control" name="bulk_unit_number" id="bulkUnitNumber">
-                                </div>
-                                <div class="form-group d-flex justify-content-between align-items-center">
-                                    <input type="file" name="bulk_course_materials_file" accept=".zip">
-                                    <div>
-                                        <button type="submit" class="btn btn-success">Upload</button>
-                                        <button type="button" class="btn btn-secondary" onclick="toggleCourseMaterialsForm()">Cancel</button>
+                                <div id="bulkUpload" style="display: none;">
+                                    <div class="form-group">
+                                        <label for="bulkUnitNumber">Unit Number</label>
+                                        <input type="number" class="form-control" name="bulk_unit_number" id="bulkUnitNumber">
+                                    </div>
+                                    <div class="form-group d-flex justify-content-between align-items-center">
+                                        <input type="file" name="bulk_course_materials_file" accept=".zip">
+                                        <div>
+                                            <button type="submit" class="btn btn-success">Upload</button>
+                                            <button type="button" class="btn btn-secondary" onclick="toggleCourseMaterialsForm()">Cancel</button>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        </form>
+                            </form>
+                        <?php endif; ?>
                         <table class="table table-hover">
                             <thead class="thead-dark">
                                 <tr>

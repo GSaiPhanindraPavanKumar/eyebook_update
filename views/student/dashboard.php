@@ -15,7 +15,10 @@ $todaysClasses = getTodaysClasses();
 // Fetch courses and progress
 $studentId = $_SESSION['student_id'];
 $courses = getCoursesWithProgress($studentId);
-$leastProgressCourses = array_filter($courses, function($course) {
+$ongoingCourses = array_filter($courses, function($course) {
+    return $course['status'] === 'ongoing';
+});
+$leastProgressCourses = array_filter($ongoingCourses, function($course) {
     return !empty($course['course_book']) && $course['progress'] < 100;
 });
 $leastProgressCourses = array_slice($leastProgressCourses, 0, 5); // Get the least 5 progress courses
@@ -189,7 +192,7 @@ function getTodaysClasses() {
 
 function getCoursesWithProgress($studentId) {
     $conn = Database::getConnection();
-    $stmt = $conn->prepare("SELECT * FROM courses");
+    $stmt = $conn->prepare("SELECT * FROM courses WHERE status = 'ongoing'");
     $stmt->execute();
     $courses = $stmt->fetchAll(PDO::FETCH_ASSOC);
 

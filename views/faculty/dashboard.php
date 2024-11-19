@@ -12,9 +12,12 @@ $userData = getUserDataByEmail($email);
 // Fetch today's classes
 $todaysClasses = getTodaysClasses();
 
-// Fetch courses and progress
+// Fetch ongoing courses and progress
 $courses = getCoursesWithProgress();
-$leastProgressCourses = array_filter($courses, function($course) {
+$ongoingCourses = array_filter($courses, function($course) {
+    return $course['status'] === 'ongoing';
+});
+$leastProgressCourses = array_filter($ongoingCourses, function($course) {
     return !empty($course['course_book']) && $course['progress'] < 100;
 });
 $leastProgressCourses = array_slice($leastProgressCourses, 0, 5); // Get the least 5 progress courses

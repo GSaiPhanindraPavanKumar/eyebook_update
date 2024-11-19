@@ -6,13 +6,6 @@ use Models\Course;
 
 $conn = Database::getConnection();
 
-// Handle archiving of courses
-if (isset($_POST['archive_course_id'])) {
-    $courseId = $_POST['archive_course_id'];
-    $stmt = $conn->prepare("UPDATE courses SET status = 'archived' WHERE id = :course_id");
-    $stmt->execute(['course_id' => $courseId]);
-}
-
 // Fetch courses from the database
 $sql = "SELECT id, name, description, course_book, status FROM courses";
 $stmt = $conn->query($sql);
@@ -91,7 +84,7 @@ $archivedCourses = array_filter($courses, function($course) {
                                     ?>
                                     <a href="view_course/<?php echo $hashedId; ?>" class="card-link">View Course</a>
                                     <a href="/faculty/discussion_forum/<?php echo $course['id']; ?>" class="card-link">Chat Room</a>
-                                    <form method="POST" action="" style="display:inline;">
+                                    <form method="POST" action="archive_course" style="display:inline;" onsubmit="return confirmArchive()">
                                         <input type="hidden" name="archive_course_id" value="<?php echo $course['id']; ?>">
                                         <button type="submit" class="btn btn-warning btn-sm">Archive</button>
                                     </form>
@@ -134,3 +127,9 @@ $archivedCourses = array_filter($courses, function($course) {
 
 <!-- Include Bootstrap CSS -->
 <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+
+<script>
+function confirmArchive() {
+    return confirm("Are you sure you want to archive this course? You will not be able to make any updates to this course.");
+}
+</script>
