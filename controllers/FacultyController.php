@@ -100,4 +100,10 @@ class FacultyController {
     public function downloadAttendance() {
         require 'views/faculty/download_attendance.php';
     }
+    public function takeAttendance() {
+        require 'views/faculty/take_attendance.php';
+    }
+    public function saveAttendance() {
+        require 'views/faculty/save_attendance.php';
+    }
 }
