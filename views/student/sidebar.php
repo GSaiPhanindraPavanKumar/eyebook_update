@@ -129,7 +129,7 @@ if ($userData) {
         <nav class="sidebar sidebar-offcanvas" id="sidebar">
             <ul class="nav">
                 <li class="nav-item">
-                    <a class="nav-link" href="dashboard">
+                    <a class="nav-link" href="/student/dashboard">
                         <i class="icon-grid menu-icon"></i>
                         <span class="menu-title">Dashboard</span>
                     </a>
@@ -161,9 +161,9 @@ if ($userData) {
                     </a>
                     <div class="collapse" id="courses">
                         <ul class="nav flex-column sub-menu">
-                            <li class="nav-item"><a class="nav-link" href="my_courses">My Courses</a></li>
-                            <li class="nav-item"><a class="nav-link" href="virtual_classroom">Virtual Classroom</a></li>
-                            <li class="nav-item"><a class="nav-link" href="student.php">Assessments</a></li> 
+                            <li class="nav-item"><a class="nav-link" href="/student/my_courses">My Courses</a></li>
+                            <li class="nav-item"><a class="nav-link" href="/student/virtual_classroom">Virtual Classroom</a></li>
+                            <li class="nav-item"><a class="nav-link" href="/student/student.php">Assessments</a></li> 
                             <!-- <li class="nav-item"><a class="nav-link" href="#">Meetings</a></li>  -->
                         </ul>
                     </div>
@@ -243,13 +243,13 @@ if ($userData) {
 
                 <li class="nav-item"><hr></li>
                 <li class="nav-item">
-                    <a class="nav-link" href="change_password">
+                    <a class="nav-link" href="/student/change_password">
                         <i class="ti-settings menu-icon"></i>
                         <span class="menu-title">Change Password</span>
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="logout">
+                    <a class="nav-link" href="/student/logout">
                         <i class="ti-power-off menu-icon"></i>
                         <span class="menu-title">Logout</span>
                 </a>

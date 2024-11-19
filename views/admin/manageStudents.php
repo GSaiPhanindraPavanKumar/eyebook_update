@@ -22,16 +22,27 @@
                     <div class="card-body">
                         <p class="card-title mb-0" style="font-size:larger">Students</p><br>
                         <div class="table-responsive">
-                            <input class="form-control mb-3" id="searchInput" type="text" placeholder="🔍 Search Students...">
-                            <form id="studentForm" method="post" action="deleteStudent.php">
+                            <div class="input-group mb-3">
+                                <input class="form-control" id="searchInput" type="text" placeholder="🔍 Search Students...">
+                                <div class="input-group-append">
+                                    <select class="form-control" id="filterSelect">
+                                        <option value="">Filter by...</option>
+                                        <option value="regd_no">Registration Number</option>
+                                        <option value="name">Name</option>
+                                        <option value="email">Email</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <form id="studentForm" method="post" action="manageStudentActions.php">
                                 <table class="table table-hover table-borderless table-striped">
                                     <thead class="thead-light">
                                         <tr>
+                                            <th><input type="checkbox" id="selectAll"></th>
                                             <th data-sort="serialNumber">S.No<i class="fas fa-sort"></i></th>
                                             <th data-sort="regd_no">Registration Number <i class="fas fa-sort"></i></th>
                                             <th data-sort="name">Name <i class="fas fa-sort"></i></th>
                                             <th data-sort="email">Email <i class="fas fa-sort"></i></th>
-                                            <!-- <th>Actions</th> -->
+                                            <th>Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody id="studentTable">
@@ -46,18 +57,25 @@
 
                                         foreach ($students_paginated as $student): ?>
                                             <tr>
+                                                <td><input type="checkbox" name="selected[]" value="<?= $student['id'] ?>"></td>
                                                 <td><?= $serialNumber++ ?></td>
-                                                <td><?= htmlspecialchars($student['regd_no']) ?></td>
-                                                <td><?= htmlspecialchars($student['name']) ?></td>
-                                                <td><?= htmlspecialchars($student['email']) ?></td>
-                                                <!-- <td>
-                                                    <button type="submit" name="view" class="btn btn-outline-info btn-sm"><i class="fas fa-eye"></i>View</button>
-                                                </td> -->
+                                                <td data-filter="regd_no"><?= htmlspecialchars($student['regd_no']) ?></td>
+                                                <td data-filter="name"><?= htmlspecialchars($student['name']) ?></td>
+                                                <td data-filter="email"><?= htmlspecialchars($student['email']) ?></td>
+                                                <td>
+                                                    <!-- <button type="button" class="btn btn-outline-info btn-sm edit-btn" data-id="<?= $student['id'] ?>" data-regd_no="<?= $student['regd_no'] ?>" data-name="<?= $student['name'] ?>" data-email="<?= $student['email'] ?>"><i class="fas fa-edit"></i> Edit</button>
+                                                    <button type="submit" name="delete" value="<?= $student['id'] ?>" class="btn btn-outline-danger btn-sm"><i class="fas fa-trash"></i> Delete</button> -->
+                                                    <a href="viewStudentProfile/<?= $student['id'] ?>" class="btn btn-outline-primary btn-sm"><i class="fas fa-eye"></i> View</a>
+                                                </td>
                                             </tr>
                                         <?php endforeach; ?>
                                     </tbody>
                                 </table>
                                 <div id="noRecords" style="display: none;" class="text-center">No records found</div>
+                                <div class="text-right">
+                                    <button type="submit" name="bulk_update" class="btn btn-warning">Update Selected</button>
+                                    <button type="submit" name="bulk_delete" class="btn btn-danger">Delete Selected</button>
+                                </div>
                             </form>
                         </div>
                         <nav aria-label="Page navigation">
@@ -131,11 +149,17 @@
             $('#editModal').modal('show');
         });
 
-        $('#searchInput').on('keyup', function() {
-            var value = $(this).val().toLowerCase();
+        $('#searchInput, #filterSelect').on('input change', function() {
+            var searchValue = $('#searchInput').val().toLowerCase();
+            var filterValue = $('#filterSelect').val();
             var visibleRows = 0;
             $('#studentTable tr').filter(function() {
-                var isVisible = $(this).text().toLowerCase().indexOf(value) > -1;
+                var text = $(this).text().toLowerCase();
+                var isVisible = text.indexOf(searchValue) > -1;
+                if (filterValue) {
+                    var cellValue = $(this).find('td[data-filter="' + filterValue + '"]').text().toLowerCase();
+                    isVisible = isVisible && cellValue.indexOf(searchValue) > -1;
+                }
                 $(this).toggle(isVisible);
                 if (isVisible) visibleRows++;
             });
@@ -160,5 +184,9 @@
         function getCellValue(row, index) {
             return $(row).children('td').eq(index).text();
         }
+
+        $('#selectAll').on('click', function() {
+            $('input[name="selected[]"]').prop('checked', this.checked);
+        });
     });
 </script>

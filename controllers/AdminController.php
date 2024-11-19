@@ -8,9 +8,11 @@ use Models\Course;
 use Models\University;
 use Models\Database;
 use Models\Todo;
+use Models\Mailer;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use Models\Discussion;
 use Models\Meetings;
+
 
 use Exception;
 use PDOException;
@@ -130,45 +132,52 @@ class AdminController {
 
         require 'views/admin/updatePassword.php';
     }
-    
-    public function uploadStudents() {
-        $conn = Database::getConnection();
-        $duplicateRecords = [];
-    
-        if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['file'])) {
-            $file = $_FILES['file']['tmp_name'];
-            $university_id = $_POST['university_id'];
-    
-            $spreadsheet = IOFactory::load($file);
-            $sheet = $spreadsheet->getActiveSheet();
-            $rows = $sheet->toArray();
-    
-            // Assuming the first row contains headers
-            $headers = array_shift($rows);
-    
-            foreach ($rows as $row) {
-                $data = array_combine($headers, $row);
-                $result = Student::uploadStudents($conn, $data, $university_id);
-                if ($result['duplicate']) {
-                    $duplicateRecords[] = $result['data'];
+
+
+        public function uploadStudents() {
+            $conn = Database::getConnection();
+            $duplicateRecords = [];
+        
+            if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['file'])) {
+                $file = $_FILES['file']['tmp_name'];
+                $university_id = $_POST['university_id'];
+        
+                $spreadsheet = IOFactory::load($file);
+                $sheet = $spreadsheet->getActiveSheet();
+                $rows = $sheet->toArray();
+        
+                // Assuming the first row contains headers
+                $headers = array_shift($rows);
+        
+                foreach ($rows as $row) {
+                    $data = array_combine($headers, $row);
+                    $result = Student::uploadStudents($conn, $data, $university_id);
+                    if ($result['duplicate']) {
+                        $duplicateRecords[] = $result['data'];
+                    } else {
+                        // Send account creation email
+                        $mailer = new Mailer();
+                        $subject = 'Welcome to EyeBook!';
+                        $body = "Dear {$data['name']},<br><br>Your account has been created successfully.<br><br>Username: {$data['email']}<br>Password: {$data['password']}<br><br>Best Regards,<br>EyeBook Team";
+                        $mailer->sendMail($data['email'], $subject, $body);
+                    }
                 }
-            }
-    
-            if (empty($duplicateRecords)) {
-                $message = "Students uploaded successfully.";
-                $message_type = "success";
-            } else if (!empty($duplicateRecords)) {
-                $message = "Some records were not uploaded due to duplicates.";
-                $message_type = "warning";
-            } else {
-                $message = "Failed to upload students.";
-                $message_type = "danger";
-            }
-        } 
-    
-        $universities = University::getAll($conn);
-        require 'views/admin/uploadStudents.php';
-    }
+        
+                if (empty($duplicateRecords)) {
+                    $message = "Students uploaded successfully.";
+                    $message_type = "success";
+                } else if (!empty($duplicateRecords)) {
+                    $message = "Some records were not uploaded due to duplicates.";
+                    $message_type = "warning";
+                } else {
+                    $message = "Failed to upload students.";
+                    $message_type = "danger";
+                }
+            } 
+        
+            $universities = University::getAll($conn);
+            require 'views/admin/uploadStudents.php';
+        }
     
     public function addCourse() {
         $conn = Database::getConnection();
@@ -250,7 +259,7 @@ class AdminController {
 
             if ($result['message'] === 'Course assigned to university successfully') {
                 header("Location: /admin/view_course/$course_id");
-                exit;
+                exit();
             } else {
                 echo json_encode(['message' => $result['message']]);
                 exit;
@@ -348,5 +357,25 @@ class AdminController {
         echo json_encode($todos);
         exit();
     }
+
+    private function checkAuth() {
+        if (!isset($_SESSION['admin'])) {
+            header('Location: /login');
+            exit();
+        }
+    }
+
+    public function viewStudentProfile($studentId) {
+        $this->checkAuth();
+        $conn = Database::getConnection();
+        $student = Student::getById($conn, $studentId);
+        if (!$student) {
+            // Handle student not found
+            header('Location: /admin/manageStudents');
+            exit();
+        }
+        require 'views/admin/viewStudentProfile.php';
+    }
+
 }
 ?>

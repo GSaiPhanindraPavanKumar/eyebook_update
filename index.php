@@ -43,6 +43,7 @@ $router->post('/admin/assign_course', 'AdminController@assignCourse');
 $router->get('/admin/manage_students', 'AdminController@manageStudents');
 $router->get('/admin/view_student/(\d+)', 'AdminController@viewStudent');
 $router->post('/admin/handleTodo', 'AdminController@handleTodo');
+$router->get('/admin/viewStudentProfile/(\d+)', 'AdminController@viewStudentProfile');
 
 
 
@@ -66,6 +67,13 @@ $router->get('/faculty/profile', 'FacultyController@profile');
 $router->get('/faculty/my_courses', 'FacultyController@myCourses');
 $router->get('/faculty/view_course/([a-zA-Z0-9]+)', 'FacultyController@viewCourse');
 $router->get('/faculty/manage_students', 'FacultyController@manageStudents');
+$router->get('/faculty/create_assignment',function(){
+        require 'views/faculty/assignment_create.php';
+
+});
+$router->post('/faculty/create_assignment',function(){
+    require 'views/faculty/assignment_create.php';
+});
 
 $router->post('/faculty/updatePassword', function(){
     require 'views/faculty/updatePassword.php';
@@ -163,6 +171,7 @@ $router->get('/student/virtual_classroom', function(){
 $router->get('/admin/logout', 'AuthController@logout');
 $router->get('/spoc/logout', 'AuthController@logout');
 $router->get('/faculty/logout', 'AuthController@logout');
+$router->get('/student/logout', 'AuthController@logout');
 
 
 $router->set404(function() {
