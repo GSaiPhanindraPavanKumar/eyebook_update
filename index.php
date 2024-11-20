@@ -143,6 +143,9 @@ $router->get('/student/updatePassword', function(){
 $router->get('/student/all_courses', function(){
     require 'views/student/all_courses.php';
 });
+$router->get('/student/updatePassword', function(){
+    require 'views/student/updatePassword.php';
+});
 $router->post('/student/updatePassword', function(){
     require 'views/student/updatePassword.php';
 });
