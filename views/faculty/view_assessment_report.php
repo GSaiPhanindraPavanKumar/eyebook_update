@@ -1,14 +1,12 @@
 <?php
 require_once 'functions.php';
 
-$assessmentId = $_GET['id'] ?? null;
-
-if (!$assessmentId) {
-    die('Assessment ID is required.');
-}
-
-// Fetch assessment results
-$results = getAssessmentResults($assessmentId);
+// Dummy data for assessment results
+$results = [
+    ['student_name' => 'Sumanth', 'score' => 85],
+    ['student_name' => 'Ravi Ram', 'score' => 90],
+    ['student_name' => 'Phani', 'score' => 78]
+];
 
 ?>
 <!DOCTYPE html>

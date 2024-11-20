@@ -6,7 +6,7 @@ require_once 'functions.php';
 $assessments = [
     [
         'id' => 1,
-        'title' => 'Deep Learining',
+        'title' => 'Deep Learning',
         'deadline' => '2024-11-21 23:59:59'
     ],
     [
@@ -16,7 +16,7 @@ $assessments = [
     ],
     [
         'id' => 3,
-        'title' => 'class Test',
+        'title' => 'Class Test',
         'deadline' => '2024-11-21 23:59:59'
     ]
 ];
@@ -49,8 +49,9 @@ $assessments = [
                                 <td class="py-2 px-4 border-b"><?= htmlspecialchars($assessment['title']) ?></td>
                                 <td class="py-2 px-4 border-b"><?= htmlspecialchars($assessment['deadline']) ?></td>
                                 <td class="py-2 px-4 border-b">
-                                    <a href="view_assessment_report.php?id=<?= $assessment['id'] ?>" class="text-blue-500 hover:underline">View Report</a>
-                                    <a href="download_assessment_report.php?id=<?= $assessment['id'] ?>" class="text-green-500 hover:underline ml-4">Download Report</a>
+                                    <a href="view_assessment_report/<?= $assessment['id'] ?>" class="text-blue-500 hover:underline">View Report</a>
+                                    <a href="download_assessment_report/<?= $assessment['id'] ?>" class="text-green-500 hover:underline ml-4">Download Report</a>
+                                    <!-- <a href="download_assessment_report_excel.php?id=<?= $assessment['id'] ?>" class="text-purple-500 hover:underline ml-4">Download Excel</a> -->
                                 </td>
                             </tr>
                         <?php endforeach; ?>
@@ -62,6 +63,8 @@ $assessments = [
                 </tbody>
             </table>
         </div>
+        <?php include('footer.html'); ?>
     </div>
+
 </body>
 </html>
