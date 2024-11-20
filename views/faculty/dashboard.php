@@ -189,6 +189,7 @@ function getTodaysClasses() {
 
 // Define the function to fetch courses with progress
 
+
 function getCoursesWithProgress() {
     $conn = Database::getConnection();
     $stmt = $conn->prepare("SELECT * FROM courses");
@@ -207,7 +208,7 @@ function getCoursesWithProgress() {
         $studentCount = 0;
 
         foreach ($students as $student) {
-            $completedBooks = json_decode($student['completed_books'], true) ?? [];
+            $completedBooks = !empty($student['completed_books']) ? json_decode($student['completed_books'], true) : [];
             $completedBooksCount = is_array($completedBooks[$courseId] ?? []) ? count($completedBooks[$courseId] ?? []) : 0;
             $progress = ($totalBooks > 0) ? ($completedBooksCount / $totalBooks) * 100 : 0;
             $totalProgress += $progress;
