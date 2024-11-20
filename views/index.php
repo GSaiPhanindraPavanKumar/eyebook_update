@@ -48,7 +48,7 @@ $message = '';
             <div class="col-md-6 col-lg-5">
                 <div class="login-box bg-light box-shadow border-radius-12">
                     <div class="login-title">
-                        <h2 class="text-center text-primary" style="font-family: cursive;">Admin Login</h2>
+                        <h2 class="text-center text-primary" style="font-family: cursive;">Login</h2>
                     </div>
                     <form id="loginForm" action="/login" method="POST">
                         <div class="input-group custom">
