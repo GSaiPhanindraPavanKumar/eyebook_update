@@ -190,6 +190,7 @@ function getTodaysClasses() {
 
 // Define the function to fetch courses with progress
 
+
 function getCoursesWithProgress($studentId) {
     $conn = Database::getConnection();
     $stmt = $conn->prepare("SELECT * FROM courses WHERE status = 'ongoing'");
@@ -199,7 +200,7 @@ function getCoursesWithProgress($studentId) {
     $stmt = $conn->prepare("SELECT completed_books FROM students WHERE id = :student_id");
     $stmt->execute(['student_id' => $studentId]);
     $student = $stmt->fetch(PDO::FETCH_ASSOC);
-    $completedBooks = json_decode($student['completed_books'], true) ?? [];
+    $completedBooks = !empty($student['completed_books']) ? json_decode($student['completed_books'], true) : [];
 
     foreach ($courses as &$course) {
         $courseId = $course['id'];
