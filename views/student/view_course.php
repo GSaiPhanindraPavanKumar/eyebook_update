@@ -122,7 +122,7 @@
 <script>
 function redirectToCoursePlan() {
     var coursePlan = <?php echo json_encode($course['course_plan'] ?? []); ?>;
-    var baseUrl = "http://localhost/eyebook_update/"; // Replace with your actual base URL
+    var baseUrl = "https://eyebook.phemesoft.com/"; // Replace with your actual base URL
     var coursePlanUrl = "";
     if (coursePlan && coursePlan.url) {
         coursePlanUrl = baseUrl + coursePlan.url;
@@ -136,7 +136,7 @@ function redirectToCoursePlan() {
 }
 
 function redirectToCourseBook(hashedId) {
-    var baseUrl = "http://localhost/eyebook_update/"; // Replace with your actual base URL
+    var baseUrl = "https://eyebook.phemesoft.com/"; // Replace with your actual base URL
     var courseBookUrl = baseUrl + "book_view.php?course_id=" + hashedId;
 
     if (hashedId) {
@@ -147,7 +147,7 @@ function redirectToCourseBook(hashedId) {
 }
 
 function redirectToCourseMaterial(url) {
-    var baseUrl = "http://localhost/eyebook_update/"; // Replace with your actual base URL
+    var baseUrl = "https://eyebook.phemesoft.com/"; // Replace with your actual base URL
     var courseMaterialUrl = baseUrl + url;
 
     if (url) {
