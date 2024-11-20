@@ -1,6 +1,8 @@
 <?php
 include 'sidebar.php';
 
+use Models\Database; // Add this line to include the Database class
+
 // Check if the user is not logged in
 if (!isset($_SESSION['email'])) {
     header("Location: login");
