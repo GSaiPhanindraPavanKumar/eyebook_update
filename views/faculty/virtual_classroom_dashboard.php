@@ -3,7 +3,7 @@
 include('sidebar.php');
 
 // Load configuration
-require_once 'config.php';
+require_once '/../../models/config.php';
 
 // Establish database connection using the Database class
 use Models\Database;
