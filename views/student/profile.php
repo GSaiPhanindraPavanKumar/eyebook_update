@@ -89,9 +89,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                             <p><strong>University:</strong> <?php echo $university; ?></p>
                         </div>
 
-                        <!-- Edit Profile Button -->
+                        <!-- Edit Profile and Update Password Buttons -->
                         <div style="margin-top: 20px;">
                             <button class="btn btn-secondary" onclick="document.getElementById('editProfileForm').style.display='block'">Edit Profile</button>
+                            <a href="updatePassword" class="btn btn-primary">Update Password</a>
                         </div>
 
                         <!-- Edit Profile Form -->
