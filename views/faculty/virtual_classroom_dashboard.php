@@ -11,7 +11,7 @@ use Models\Database;
 $conn = Database::getConnection();
 
 // Include Zoom integration
-require_once __DIR__ . 'zoom_integration.php';
+require_once __DIR__ . '/zoom_integration.php';
 
 // Initialize ZoomAPI
 $zoom = new ZoomAPI(ZOOM_CLIENT_ID, ZOOM_CLIENT_SECRET, ZOOM_ACCOUNT_ID, $conn);
