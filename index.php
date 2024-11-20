@@ -73,14 +73,23 @@ $router->post('/faculty/updatePassword', 'FacultyController@updatePassword');
 $router->get('/faculty/discussion_forum/(\d+)', 'FacultyController@discussionForum');
 $router->post('/faculty/discussion_forum/(\d+)', 'FacultyController@discussionForum');
 $router->get('/faculty/create_assessment', function() {
-    require 'views/faculty/create_assessment.php';
+    require 'views/faculty/faculty.php';
 });
 $router->post('/faculty/create_assessment', function() {
-    require 'views/faculty/create_asssessment.php';
+    require 'views/faculty/faculty.php';
 });
 
-$router->get('/faculty/manage_assessments', 'FacultyController@manageAssessments');
-$router->post('/faculty/generate_questions', 'FacultyController@generateQuestions');
+// $router->get('/faculty/manage_assessments', 'FacultyController@manageAssessments');
+$router->post('/faculty/generate_questions', function(){
+    require 'views/faculty/api/generate_questions.php';
+});
+
+$router->get('/faculty/view_assessment_report/(\d+)', function($assessmentId) {
+    require 'views/faculty/view_assessment_report.php';
+});
+$router->get('/faculty/download_assessment_report/(\d+)', function($assessmentId) {
+    require 'views/faculty/download_assessment_report.php';
+});
 
 $router->get('/faculty/virtual_classroom', 'FacultyController@virtualClassroom');
 $router->post('/faculty/create_virtual_classroom', 'FacultyController@createVirtualClassroom');
@@ -93,6 +102,17 @@ $router->get('/faculty/manage_students', 'FacultyController@manageStudents');
 
 $router->get('/faculty/take_attendance', 'FacultyController@takeAttendance');
 $router->post('/faculty/save_attendance', 'FacultyController@saveAttendance');
+
+$router->get('/faculty/manage_assessments', function(){
+    require 'views/faculty/manage_assessments.php';
+});
+
+$router->get('/faculty/view_assessment_report/(\d+)', function($assessmentId) {
+    require 'views/faculty/view_assessment_report.php';
+});
+$router->get('/faculty/download_assessment_report/(\d+)', function($assessmentId) {
+    require 'views/faculty/download_assessment_report.php';
+});
 
 
 

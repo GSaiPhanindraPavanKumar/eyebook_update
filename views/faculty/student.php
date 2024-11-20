@@ -19,8 +19,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $studentId = getOrCreateStudent("John Doe", "john@example.com");
             
             $score = submitAssessment($assessmentId, $answers, $studentId);
-            $grade = calculateGrade($score);
-            $success = "Assessment submitted successfully! Your score: $score. Your grade: $grade";
+            $success = "Assessment submitted successfully! Your score: $score";
         }
     }
 }

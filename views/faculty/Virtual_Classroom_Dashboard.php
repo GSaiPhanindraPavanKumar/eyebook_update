@@ -6,7 +6,7 @@ include('sidebar.php');
 require_once 'config.php';
 
 // Establish database connection using the Database class
-require_once __DIR__ . '/../../models/database.php';
+// require_once _DIR_ . '/../../models/database.php';
 use Models\Database;
 
 $conn = Database::getConnection();
