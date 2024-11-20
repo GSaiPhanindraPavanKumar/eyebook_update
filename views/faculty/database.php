@@ -1,8 +1,8 @@
 <?php
 // File: database.php
 define('DB_HOST', 'localhost');
-define('DB_USER', 'root');
-define('DB_PASS', '');
+define('DB_USER', 'user');
+define('DB_PASS', '#*Eyebook@123*#');
 define('DB_NAME', 'eyebook');
 define('GEMINI_API_KEY', 'AIzaSyAmfv5ML6txGnCXH3-7AYD-UwT57yj3VmI');
 
