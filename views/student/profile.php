@@ -11,17 +11,18 @@ if (!isset($_SESSION['email'])) {
 $email = $_SESSION['email'];
 
 // Use prepared statements to prevent SQL injection
-$stmt = $conn->prepare("SELECT * FROM students WHERE email = ?");
+$conn = Database::getConnection();
+$stmt = $conn->prepare("SELECT * FROM students WHERE email = :email");
 if (!$stmt) {
-    die('Error in preparing statement: ' . $conn->error);
+    die('Error in preparing statement: ' . $conn->errorInfo()[2]);
 }
 
-$stmt->bind_param("s", $email);
+$stmt->bindValue(':email', $email);
 $stmt->execute();
-$result = $stmt->get_result();
+$result = $stmt->fetch(PDO::FETCH_ASSOC);
 
 // Fetch user data
-$userData = $result->fetch_assoc();
+$userData = $result;
 ?>
 
 <!-- HTML Content -->
