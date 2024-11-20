@@ -121,7 +121,7 @@ if ($userData) {
         <nav class="sidebar sidebar-offcanvas" id="sidebar">
             <ul class="nav">
                 <li class="nav-item">
-                    <a class="nav-link" href="dashboard">
+                    <a class="nav-link" href="/faculty/dashboard">
                         <i class="icon-grid menu-icon"></i>
                         <span class="menu-title">Dashboard</span>
                     </a>
@@ -153,9 +153,9 @@ if ($userData) {
                     </a>
                     <div class="collapse" id="courses">
                         <ul class="nav flex-column sub-menu">
-                            <li class="nav-item"> <a class="nav-link" href="my_courses">My Courses</a></li>
-                            <li class="nav-item"> <a class="nav-link" href="virtual_classroom">Virtual Classroom</a></li>
-                            <li class="nav-item"> <a class="nav-link" href="faculty">Assessments</a></li>
+                            <li class="nav-item"> <a class="nav-link" href="/faculty/my_courses">My Courses</a></li>
+                            <li class="nav-item"> <a class="nav-link" href="/faculty/virtual_classroom">Virtual Classroom</a></li>
+                            <li class="nav-item"> <a class="nav-link" href="/faculty/faculty">Assessments</a></li>
                         </ul>
                     </div>
                 </li>
@@ -167,8 +167,8 @@ if ($userData) {
                     </a>
                     <div class="collapse" id="assessments">
                         <ul class="nav flex-column sub-menu">
-                            <li class="nav-item"> <a class="nav-link" href="create_assessment">Create Assessment</a></li>
-                            <li class="nav-item"> <a class="nav-link" href="manage_assessments">Manage Assessments</a></li>
+                            <li class="nav-item"> <a class="nav-link" href="/faculty/create_assessment">Create Assessment</a></li>
+                            <li class="nav-item"> <a class="nav-link" href="/faculty/manage_assessments">Manage Assessments</a></li>
                         </ul>
                     </div>
                 </li>
@@ -247,13 +247,13 @@ if ($userData) {
 
                 <li class="nav-item"><hr></li>
                 <li class="nav-item">
-                    <a class="nav-link" href="updatePassword.php">
+                    <a class="nav-link" href="/faculty/updatePassword">
                         <i class="ti-settings menu-icon"></i>
                         <span class="menu-title">Change Password</span>
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="logout.php">
+                    <a class="nav-link" href="/faculty/logout">
                         <i class="ti-power-off menu-icon"></i>
                         <span class="menu-title">Logout</span>
                 </a>

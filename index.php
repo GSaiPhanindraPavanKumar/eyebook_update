@@ -70,8 +70,12 @@ $router->get('/faculty/manage_students', 'FacultyController@manageStudents');
 $router->get('/faculty/create_assignment', 'FacultyController@createAssignment');
 $router->post('/faculty/create_assignment', 'FacultyController@createAssignment');
 $router->post('/faculty/updatePassword', 'FacultyController@updatePassword');
-$router->get('/faculty/discussion_forum/(\d+)', 'FacultyController@discussionForum');
-$router->post('/faculty/discussion_forum/(\d+)', 'FacultyController@discussionForum');
+$router->get('/faculty/discussion_forum/(\d+)', function(){
+    require 'views/faculty/discussion_forum.php';
+});
+$router->post('/faculty/discussion_forum/(\d+)', function(){
+    require 'views/faculty/discussion_forum.php';
+});
 $router->get('/faculty/create_assessment', function() {
     require 'views/faculty/faculty.php';
 });
@@ -137,6 +141,13 @@ $router->post('/student/updatePassword', function(){
 
 $router->get('/student/profile', function(){
     require 'views/student/profile.php';
+});
+
+$router->get('/student/discussion_forum/(\d+)', function(){
+    require 'views/faculty/discussion_forum.php';
+});
+$router->post('/student/discussion_forum/(\d+)', function(){
+    require 'views/faculty/discussion_forum.php';
 });
 
 $router->get('/student/my_courses', function(){
