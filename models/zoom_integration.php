@@ -1,6 +1,6 @@
 <?php
 require_once __DIR__ . '/../vendor/autoload.php'; // Include Composer's autoloader
-require_once __DIR__ . '/database.php';
+require_once __DIR__ . '/Database.php';
 require_once '/../views/faculty/config.php';
 use Models\Database;
 
