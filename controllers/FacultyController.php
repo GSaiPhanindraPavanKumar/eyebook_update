@@ -106,4 +106,66 @@ class FacultyController {
     public function saveAttendance() {
         require 'views/faculty/save_attendance.php';
     }
+
+    public function manageStudents() {
+        $conn = Database::getConnection();
+        $facultyId = $_SESSION['email']; // Assuming faculty_id is stored in session
+        $students = Student::getAllByFaculty($conn, $facultyId);
+
+        require 'views/faculty/manage_students.php';
+    }
+
+    public function viewReports() {
+        $conn = Database::getConnection();
+        $assessments = getAssessments();
+        require 'views/faculty/view_reports.php';
+    }
+
+    public function downloadReport($assessmentId) {
+        $conn = Database::getConnection();
+        $results = getAssessmentResults($assessmentId);
+
+        header('Content-Type: text/csv');
+        header('Content-Disposition: attachment;filename=assessment_report.csv');
+
+        $output = fopen('php://output', 'w');
+        fputcsv($output, ['Student Name', 'Score', 'Grade']);
+
+        foreach ($results as $result) {
+            fputcsv($output, [$result['student_name'], $result['score'], $result['grade']]);
+        }
+
+        fclose($output);
+        exit;
+    }
+
+    public function createAssignment() {
+        // ...existing code...
+    }
+
+    public function updatePassword() {
+        // ...existing code...
+    }
+
+    public function discussionForum($id) {
+        // ...existing code...
+    }
+
+    public function createAssessment() {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            // Handle form submission for creating an assessment
+            // ...existing code...
+        } else {
+            // Display the assessment creation form
+            require 'views/faculty/create_assessment.php';
+        }
+    }
+
+    public function manageAssessments() {
+        // ...existing code...
+    }
+
+    public function generateQuestions() {
+        // ...existing code...
+    }
 }

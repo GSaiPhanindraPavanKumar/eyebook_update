@@ -86,5 +86,12 @@ class Student {
         $stmt->execute(['university_id' => $university_id]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+
+    public static function getAllByFaculty($conn, $facultyId) {
+        $sql = "SELECT * FROM students WHERE email = :faculty_id";
+        $stmt = $conn->prepare($sql);
+        $stmt->execute([':email' => $facultyId]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
 }
 ?>

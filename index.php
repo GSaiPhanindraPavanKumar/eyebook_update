@@ -67,40 +67,20 @@ $router->get('/faculty/profile', 'FacultyController@profile');
 $router->get('/faculty/my_courses', 'FacultyController@myCourses');
 $router->get('/faculty/view_course/([a-zA-Z0-9]+)', 'FacultyController@viewCourse');
 $router->get('/faculty/manage_students', 'FacultyController@manageStudents');
-$router->get('/faculty/create_assignment',function(){
-        require 'views/faculty/assignment_create.php';
-
-});
-$router->post('/faculty/create_assignment',function(){
-    require 'views/faculty/assignment_create.php';
-});
-
-$router->post('/faculty/updatePassword', function(){
-    require 'views/faculty/updatePassword.php';
-});
-
-$router->get('/faculty/discussion_forum/(\d+)', function() {
-    require 'views/faculty/discussion_forum.php';
-});
-$router->post('/faculty/discussion_forum/(\d+)', function() {
-    require 'views/faculty/discussion_forum.php';
-});
-
-// Add routes for assessment creation
+$router->get('/faculty/create_assignment', 'FacultyController@createAssignment');
+$router->post('/faculty/create_assignment', 'FacultyController@createAssignment');
+$router->post('/faculty/updatePassword', 'FacultyController@updatePassword');
+$router->get('/faculty/discussion_forum/(\d+)', 'FacultyController@discussionForum');
+$router->post('/faculty/discussion_forum/(\d+)', 'FacultyController@discussionForum');
 $router->get('/faculty/create_assessment', function() {
     require 'views/faculty/create_assessment.php';
 });
-
 $router->post('/faculty/create_assessment', function() {
-    require 'views/faculty/create_assessment.php';
+    require 'views/faculty/create_asssessment.php';
 });
 
-$router->post('/faculty/generate_questions', function() {
-    require 'generate_questions.php';
-});
-// $router->post('/faculty/create_assessment', 'AssessmentController@createAssessment');
-// $router->get('/faculty/generate_questions', 'AssessmentController@generateQuestions');
-// $router->post('/faculty/generate_questions', 'AssessmentController@generateQuestions');
+$router->get('/faculty/manage_assessments', 'FacultyController@manageAssessments');
+$router->post('/faculty/generate_questions', 'FacultyController@generateQuestions');
 
 $router->get('/faculty/virtual_classroom', 'FacultyController@virtualClassroom');
 $router->post('/faculty/create_virtual_classroom', 'FacultyController@createVirtualClassroom');
@@ -108,29 +88,19 @@ $router->get('/faculty/download_attendance', 'FacultyController@downloadAttendan
 
 $router->post('/faculty/Update_profile','FacultyController@profile');
 
+$router->get('/faculty/manage_students', 'FacultyController@manageStudents');
+
 
 $router->get('/faculty/take_attendance', 'FacultyController@takeAttendance');
 $router->post('/faculty/save_attendance', 'FacultyController@saveAttendance');
 
 
 
-// $router->get('/faculty/view_book/(\d+)/(.+)', function($course_id, $file_path) {
-//     $base_dir = 'eyebook_update/uploads/course-' . $course_id . '/';
-//     $full_path = $base_dir . $file_path;
-
-//     if (file_exists($full_path)) {
-//         // Serve the file
-//         header('Content-Type: ' . mime_content_type($full_path));
-//         readfile($full_path);
-//     } else {
-//         header('HTTP/1.0 404 Not Found');
-//         echo 'File not found.';
-//     }
-// });
-
 $router->get('/faculty/view_book/([a-zA-Z0-9]+)', 'FacultyController@viewBook');
 $router->get('/faculty/view_material/([a-zA-Z0-9]+)', 'FacultyController@viewBook');
 
+$router->get('/faculty/view_reports', 'FacultyController@viewReports');
+$router->get('/faculty/download_report/(\d+)', 'FacultyController@downloadReport');
 
 $router->get('/student/dashboard', function(){
     require 'views/student/dashboard.php';

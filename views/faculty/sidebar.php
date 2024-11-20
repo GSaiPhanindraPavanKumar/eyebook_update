@@ -160,6 +160,19 @@ if ($userData) {
                     </div>
                 </li>
                 <li class="nav-item">
+                    <a class="nav-link" data-toggle="collapse" href="#assessments" aria-expanded="false" aria-controls="assessments">
+                        <i class="icon-bar-graph menu-icon"></i>
+                        <span class="menu-title">Assessments</span>
+                        <i class="menu-arrow"></i>
+                    </a>
+                    <div class="collapse" id="assessments">
+                        <ul class="nav flex-column sub-menu">
+                            <li class="nav-item"> <a class="nav-link" href="create_assessment">Create Assessment</a></li>
+                            <li class="nav-item"> <a class="nav-link" href="manage_assessments">Manage Assessments</a></li>
+                        </ul>
+                    </div>
+                </li>
+                <li class="nav-item">
                     <a class="nav-link" data-toggle="collapse" href="#student" aria-expanded="false" aria-controls="student">
                         <i class="icon-bar-graph menu-icon"></i>
                         <span class="menu-title" >Student</span>
