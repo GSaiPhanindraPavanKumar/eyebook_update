@@ -181,7 +181,7 @@ if ($userData) {
                     <div class="collapse" id="student">
                         <ul class="nav flex-column sub-menu">
                         <!-- <li class="nav-item"> <a class="nav-link" href="upload_students">Upload Students</a></li> -->
-                            <li class="nav-item"> <a class="nav-link" href="manage_students.php">Manage Student</a></li>
+                            <li class="nav-item"> <a class="nav-link" href="manage_students">Manage Student</a></li>
                         </ul>
                     </div>
                 </li>

@@ -3,16 +3,15 @@
 include('sidebar.php');
 
 // Load configuration
-require_once 'config.php';
+require_once __DIR__ . '/../../models/config.php';
 
 // Establish database connection using the Database class
-// require_once _DIR_ . '/../../models/database.php';
 use Models\Database;
 
 $conn = Database::getConnection();
 
 // Include Zoom integration
-require_once 'zoom_integration.php';
+require_once __DIR__ . '/../../models/zoom_integration.php';
 
 // Initialize ZoomAPI
 $zoom = new ZoomAPI(ZOOM_CLIENT_ID, ZOOM_CLIENT_SECRET, ZOOM_ACCOUNT_ID, $conn);

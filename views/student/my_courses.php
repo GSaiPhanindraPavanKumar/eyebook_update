@@ -21,7 +21,7 @@ while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
 
 // Fetch the student's completed books
 $student = Student::getById($conn, $studentId);
-$completedBooks = json_decode($student['completed_books'], true) ?? [];
+$completedBooks = !empty($student['completed_books']) ? json_decode($student['completed_books'], true) : [];
 
 // Calculate progress data for each course
 $progressData = [];

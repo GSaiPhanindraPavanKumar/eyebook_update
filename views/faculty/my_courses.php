@@ -29,7 +29,7 @@ foreach ($courses as $course) {
     $studentCount = 0;
 
     foreach ($students as $student) {
-        $completedBooks = json_decode($student['completed_books'], true) ?? [];
+        $completedBooks = !empty($student['completed_books']) ? json_decode($student['completed_books'], true) : [];
         $studentCompletedBooks = $completedBooks[$courseId] ?? [];
         $progress = $totalBooks > 0 ? (count($studentCompletedBooks) / $totalBooks) * 100 : 0;
         $totalProgress += $progress;
