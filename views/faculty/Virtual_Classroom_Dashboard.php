@@ -134,7 +134,13 @@ usort($facultyClassrooms, function($a, $b) {
                                                     <td><?php echo htmlspecialchars($start_time->format('Y-m-d')); ?></td>
                                                     <td><?php echo htmlspecialchars($start_time->format('H:i:s')); ?></td>
                                                     <td><?php echo htmlspecialchars($end_time->format('H:i:s')); ?></td>
-                                                    <td><a href="/faculty/download_attendance?classroom_id=<?php echo htmlspecialchars($classroom['classroom_id']); ?>" class="btn btn-primary">Download</a></td>
+                                                    <td>
+                                                        <?php if (empty($classroom['attendance'])): ?>
+                                                            <a href="/faculty/take_attendance?classroom_id=<?php echo htmlspecialchars($classroom['classroom_id']); ?>" class="btn btn-warning">Take Attendance</a>
+                                                        <?php else: ?>
+                                                            <a href="/faculty/download_attendance?classroom_id=<?php echo htmlspecialchars($classroom['classroom_id']); ?>" class="btn btn-primary">Download</a>
+                                                        <?php endif; ?>
+                                                    </td>
                                                 </tr>
                                             <?php endif; endforeach; ?>
                                         </tbody>

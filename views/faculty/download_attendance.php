@@ -1,32 +1,39 @@
 <?php
 require_once __DIR__ . '/../../models/database.php';
-require_once 'config.php';
 use Models\Database;
 
 $conn = Database::getConnection();
 
-// Include Zoom integration
-require_once 'zoom_integration.php';
-
-// Initialize ZoomAPI
-$zoom = new ZoomAPI(ZOOM_CLIENT_ID, ZOOM_CLIENT_SECRET, ZOOM_ACCOUNT_ID, $conn);
-
 $classroomId = $_GET['classroom_id'] ?? null;
 
 if ($classroomId) {
-    $attendance = $zoom->getAttendance($classroomId);
+    $stmt = $conn->prepare("SELECT attendance FROM virtual_classrooms WHERE classroom_id = ?");
+    $stmt->execute([$classroomId]);
+    $attendance = $stmt->fetchColumn();
 
-    header('Content-Type: text/csv');
-    header('Content-Disposition: attachment;filename=attendance.csv');
+    if ($attendance) {
+        $attendance = json_decode($attendance, true);
 
-    $output = fopen('php://output', 'w');
-    fputcsv($output, array('Student ID', 'Name', 'Email', 'Join Time', 'Leave Time'));
+        header('Content-Type: text/csv');
+        header('Content-Disposition: attachment;filename=attendance.csv');
 
-    foreach ($attendance as $row) {
-        fputcsv($output, $row);
+        $output = fopen('php://output', 'w');
+        fputcsv($output, array('Student ID', 'Name', 'Registration Number', 'Attendance'));
+
+        foreach ($attendance as $studentId => $status) {
+            $stmt = $conn->prepare("SELECT name, regd_no FROM students WHERE id = ?");
+            $stmt->execute([$studentId]);
+            $student = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if ($student) {
+                fputcsv($output, array($studentId, $student['name'], $student['regd_no'], $status));
+            }
+        }
+
+        fclose($output);
+    } else {
+        echo "Error: No attendance data found.";
     }
-
-    fclose($output);
 } else {
     echo "Error: Classroom ID not provided.";
 }

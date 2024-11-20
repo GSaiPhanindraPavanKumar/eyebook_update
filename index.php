@@ -109,6 +109,11 @@ $router->get('/faculty/download_attendance', 'FacultyController@downloadAttendan
 $router->post('/faculty/Update_profile','FacultyController@profile');
 
 
+$router->get('/faculty/take_attendance', 'FacultyController@takeAttendance');
+$router->post('/faculty/save_attendance', 'FacultyController@saveAttendance');
+
+
+
 // $router->get('/faculty/view_book/(\d+)/(.+)', function($course_id, $file_path) {
 //     $base_dir = 'eyebook_update/uploads/course-' . $course_id . '/';
 //     $full_path = $base_dir . $file_path;
