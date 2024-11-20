@@ -71,6 +71,21 @@ class StudentController {
 
         return $courses;
     }
+    public function updatePassword() {
+        $conn = Database::getConnection();
+    
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            $student_id = $_SESSION['student_id'];
+            $new_password = password_hash($_POST['newPassword'], PASSWORD_BCRYPT);
+    
+            Student::updatePassword($conn, $student_id, $new_password);
+    
+            $message = "Password updated successfully.";
+            $message_type = "success";
+        }
+    
+        require 'views/student/updatePassword.php';
+    }
 
 }
 ?>

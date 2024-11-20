@@ -137,9 +137,6 @@ $router->get('/faculty/download_report/(\d+)', 'FacultyController@downloadReport
 $router->get('/student/dashboard', function(){
     require 'views/student/dashboard.php';
 });
-$router->get('/student/updatePassword', function(){
-    require 'views/student/updatePassword.php';
-});
 $router->get('/student/all_courses', function(){
     require 'views/student/all_courses.php';
 });
