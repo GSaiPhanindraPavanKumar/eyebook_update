@@ -67,8 +67,15 @@ $router->get('/faculty/profile', 'FacultyController@profile');
 $router->get('/faculty/my_courses', 'FacultyController@myCourses');
 $router->get('/faculty/view_course/([a-zA-Z0-9]+)', 'FacultyController@viewCourse');
 $router->get('/faculty/manage_students', 'FacultyController@manageStudents');
-$router->get('/faculty/create_assignment', 'FacultyController@createAssignment');
-$router->post('/faculty/create_assignment', 'FacultyController@createAssignment');
+$router->get('/faculty/create_assignment', function(){
+    require 'views/faculty/create_assignment.php';
+});
+$router->post('/faculty/create_assignment', function(){
+    require 'views/faculty/create_assignment.php';
+});
+$router->get('/faculty/manage_assignments', 'FacultyController@manageAssignments');
+$router->get('/faculty/grade_assignment/(\d+)/(\d+)', 'FacultyController@gradeAssignment');
+$router->post('/faculty/grade_assignment/(\d+)/(\d+)', 'FacultyController@gradeAssignment');
 $router->post('/faculty/updatePassword', 'FacultyController@updatePassword');
 $router->get('/faculty/discussion_forum/(\d+)', function(){
     require 'views/faculty/discussion_forum.php';

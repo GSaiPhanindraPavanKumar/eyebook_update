@@ -7,6 +7,7 @@ use Models\Student;
 use Models\Course;
 use Models\University;
 use Models\Database;
+use Models\Assignment;
 use Models\VirtualClassroom;
 
 class FacultyController {
@@ -140,7 +141,44 @@ class FacultyController {
     }
 
     public function createAssignment() {
-        // ...existing code...
+        $conn = Database::getConnection();
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $title = $_POST['title'];
+            $instructions = $_POST['instructions'];
+            $deadline = $_POST['deadline'];
+            $course_id = $_POST['course_id'];
+
+            Assignment::create($conn, $title, $instructions, $deadline, $course_id);
+
+            header('Location: /faculty/manage_assignments');
+            exit;
+        }
+
+        $courses = Course::getCoursesByFaculty($conn);
+        require 'views/faculty/create_assignment.php';
+    }
+
+    public function manageAssignments() {
+        $conn = Database::getConnection();
+        $assignments = Assignment::getAllByFaculty($conn, $_SESSION['email']);
+
+        require 'views/faculty/manage_assignments.php';
+    }
+
+    public function gradeAssignment($assignmentId, $studentId) {
+        $conn = Database::getConnection();
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $grade = $_POST['grade'];
+            Assignment::grade($conn, $assignmentId, $studentId, $grade);
+
+            header('Location: /faculty/manage_assignments');
+            exit;
+        }
+
+        $submission = Assignment::getSubmission($conn, $assignmentId, $studentId);
+        require 'views/faculty/grade_assignment.php';
     }
 
     public function updatePassword() {

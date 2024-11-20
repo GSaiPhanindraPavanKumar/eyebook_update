@@ -62,7 +62,8 @@ class AdminController {
             $spoc_name = $_POST['spoc_name'];
             $spoc_email = $_POST['spoc_email'];
             $spoc_phone = $_POST['spoc_phone'];
-            $spoc_password = password_hash($_POST['spoc_password'], PASSWORD_BCRYPT);
+            $spoc_pass = $_POST['spoc_password'];
+            $spoc_password = password_hash($spoc_pass, PASSWORD_BCRYPT);
 
             if (University::existsByShortName($conn, $short_name)) {
                 $message = "Duplicate entry for short name: " . $short_name;
@@ -75,6 +76,10 @@ class AdminController {
                 $result = $university->addUniversity($conn,$long_name, $short_name, $location, $country, $spoc_name, $spoc_email, $spoc_phone, $spoc_password);
                 $message = $result['message'];
                 $message_type = $result['message_type'];
+                $mailer = new Mailer();
+                $subject = 'Welcome to EyeBook!';
+                $body = "Dear $spoc_name,<br><br>Your account has been created successfully.<br><br>Username: $spoc_email <br>Password: $spoc_pass<br><br>Best Regards,<br>EyeBook Team";
+                $mailer->sendMail($spoc_name, $subject, $body);
             }
         }
 
