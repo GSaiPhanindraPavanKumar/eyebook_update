@@ -111,6 +111,14 @@ $router->get('/faculty/manage_assessments', function(){
     require 'views/faculty/manage_assessments.php';
 });
 
+$router->post('/faculty/view_course/upload_course_materials', function(){
+    require 'views/faculty/upload_course_materials.php';
+});
+
+$router->post('/faculty/view_course/upload_course_plan', function(){
+    require 'views/faculty/upload_course_plan.php';
+});
+
 $router->get('/faculty/view_assessment_report/(\d+)', function($assessmentId) {
     require 'views/faculty/view_assessment_report.php';
 });

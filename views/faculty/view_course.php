@@ -31,7 +31,7 @@
                             </div>
                         </div>
                         <?php if ($course['status'] !== 'archived') : ?>
-                            <form id="uploadCoursePlanForm" action="upload_course_plan.php" method="post" enctype="multipart/form-data" style="display: none; margin-top: 10px;">
+                            <form id="uploadCoursePlanForm" action="upload_course_plan" method="post" enctype="multipart/form-data" style="display: none; margin-top: 10px;">
                                 <input type="hidden" name="course_id" value="<?php echo $course['id']; ?>">
                                 <input type="file" name="course_plan_file" accept="application/pdf" required>
                                 <button type="submit" class="btn btn-success">Upload</button>
@@ -70,7 +70,7 @@
                                                 echo "<td>" . $serialNumber++ . "</td>"; // Increment the serial number
                                                 echo "<td>" . htmlspecialchars($unit['unitTitle']) . "</td>";
                                                 $full_url = $material['indexPath'];
-                                                echo "<td><a href='http://localhost/eye_book/" . $hashedId . "?index_path=" . $full_url . "' class='btn btn-primary'>View Course Book</a></td>";
+                                                echo "<td><a href='https://eyebook.phemesoft.com/"  . $full_url . "' class='btn btn-primary'>View Course Book</a></td>";
                                                 echo "</tr>";
                                             }
                                         }
@@ -94,7 +94,7 @@
                                 <button type="button" class="btn btn-info" onclick="showSingleUpload()">Single Document</button>
                                 <button type="button" class="btn btn-warning" onclick="showBulkUpload()">Bulk Upload</button>
                             </div>
-                            <form id="uploadCourseMaterialsForm" action="upload_course_materials.php" method="post" enctype="multipart/form-data" style="display: none; margin-top: 10px;">
+                            <form id="uploadCourseMaterialsForm" action="upload_course_materials" method="post" enctype="multipart/form-data" style="display: none; margin-top: 10px;">
                                 <input type="hidden" name="course_id" value="<?php echo $course['id']; ?>">
                                 <input type="hidden" name="upload_type" id="uploadType">
                                 <div id="singleUpload" style="display: none;">
@@ -243,7 +243,7 @@ function showBulkUpload() {
 
 function redirectToCoursePlan() {
     var coursePlan = <?php echo json_encode($course['course_plan']); ?>;
-    var baseUrl = "http://localhost/eyebook_update/"; // Replace with your actual base URL
+    var baseUrl = "https://eyebook.phemesoft.com/"; // Replace with your actual base URL
     var coursePlanUrl = "";
     if (coursePlan && coursePlan.url) {
         coursePlanUrl = baseUrl + coursePlan.url;
@@ -257,7 +257,7 @@ function redirectToCoursePlan() {
 }
 
 function redirectToCourseBook(url) {
-    var baseUrl = "http://localhost/eyebook_update/"; // Replace with your actual base URL
+    var baseUrl = "https://eyebook.phemesoft.com/"; // Replace with your actual base URL
     var courseBookUrl = baseUrl + "book_view.php?index_path=" + encodeURIComponent(url);
 
     if (url) {
@@ -268,7 +268,7 @@ function redirectToCourseBook(url) {
 }
 
 function redirectToCourseMaterial(url) {
-    var baseUrl = "http://localhost/eyebook_update/"; // Replace with your actual base URL
+    var baseUrl = "https://eyebook.phemesoft.com/"; // Replace with your actual base URL
     var courseMaterialUrl = baseUrl + url;
 
     if (url) {

@@ -42,7 +42,7 @@ class StudentController {
         $unit = $course['course_book'][0];
         $material = $unit['materials'][0];
         $index_path = 'https://eyebook.phemesoft.com/' . $material['indexPath'];
-        // $index_path = 'http://localhost/eye_final/' . $material['indexPath'];
+        // $index_path = 'http://localhost/new/eyebook_update/' . $material['indexPath'];
 
         require 'views/student/book_view.php';
     }

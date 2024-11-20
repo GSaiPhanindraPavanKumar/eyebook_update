@@ -1,1 +1,0 @@
-﻿var ols=[{caption:"IT Data structure ",page:"2",url:"",level:"1",children:[{caption:"Block1: Overview of Data Structures ",page:"3",url:"",level:"2",children:[]},{caption:"Block II: Stack and Queue Data Structures ",page:"7",url:"",level:"2",children:[]},{caption:"Block-III: Graph and Tree Data Structures ",page:"12",url:"",level:"2",children:[]}]}];
