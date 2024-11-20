@@ -46,6 +46,31 @@ class StudentController {
 
         require 'views/student/book_view.php';
     }
+    function getCoursesWithProgress($studentId) {
+        $conn = Database::getConnection();
+        $stmt = $conn->prepare("SELECT * FROM courses WHERE status = 'ongoing'");
+        $stmt->execute();
+        $courses = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        $stmt = $conn->prepare("SELECT completed_books FROM students WHERE id = :student_id");
+        $stmt->execute(['student_id' => $studentId]);
+        $student = $stmt->fetch(PDO::FETCH_ASSOC);
+        $completedBooks = !empty($student['completed_books']) ? json_decode($student['completed_books'], true) : [];
+
+        foreach ($courses as &$course) {
+            $courseId = $course['id'];
+            $courseBooks = !empty($course['course_book']) ? json_decode($course['course_book'], true) : [];
+            $totalBooks = is_array($courseBooks) ? count($courseBooks) : 0;
+            $completedBooksCount = is_array($completedBooks[$courseId] ?? []) ? count($completedBooks[$courseId] ?? []) : 0;
+            $course['progress'] = ($totalBooks > 0) ? ($completedBooksCount / $totalBooks) * 100 : 0;
+        }
+
+        usort($courses, function($a, $b) {
+            return $a['progress'] <=> $b['progress'];
+        });
+
+        return $courses;
+    }
 
 }
 ?>
