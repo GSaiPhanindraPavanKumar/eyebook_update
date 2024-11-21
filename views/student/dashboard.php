@@ -14,7 +14,7 @@ $todaysClasses = getTodaysClasses();
 
 // Fetch courses and progress
 $studentId = $_SESSION['student_id'];
-$courses = getCoursesWithProgress($studentId);
+$courses = getCoursesWithProgress($studentId, $userData['university_id']);
 $ongoingCourses = array_filter($courses, function($course) {
     return $course['status'] === 'ongoing';
 });
@@ -165,7 +165,6 @@ $leastProgressCourses = array_slice($leastProgressCourses, 0, 5); // Get the lea
 
 <?php
 // Define the function to fetch user data from the database
-
 function getUserDataByEmail($email) {
     $conn = Database::getConnection();
     $stmt = $conn->prepare("SELECT students.*, universities.long_name as university FROM students JOIN universities ON students.university_id = universities.id WHERE students.email = :email");
@@ -174,7 +173,6 @@ function getUserDataByEmail($email) {
 }
 
 // Define the function to fetch today's classes
-
 function getTodaysClasses() {
     $conn = Database::getConnection();
     $stmt = $conn->prepare("
@@ -189,9 +187,7 @@ function getTodaysClasses() {
 }
 
 // Define the function to fetch courses with progress
-
-
-function getCoursesWithProgress($studentId) {
+function getCoursesWithProgress($studentId, $universityId) {
     $conn = Database::getConnection();
     $stmt = $conn->prepare("SELECT * FROM courses WHERE status = 'ongoing'");
     $stmt->execute();
@@ -202,19 +198,24 @@ function getCoursesWithProgress($studentId) {
     $student = $stmt->fetch(PDO::FETCH_ASSOC);
     $completedBooks = !empty($student['completed_books']) ? json_decode($student['completed_books'], true) : [];
 
-    foreach ($courses as &$course) {
-        $courseId = $course['id'];
-        $courseBooks = !empty($course['course_book']) ? json_decode($course['course_book'], true) : [];
-        $totalBooks = is_array($courseBooks) ? count($courseBooks) : 0;
-        $completedBooksCount = is_array($completedBooks[$courseId] ?? []) ? count($completedBooks[$courseId] ?? []) : 0;
-        $course['progress'] = ($totalBooks > 0) ? ($completedBooksCount / $totalBooks) * 100 : 0;
+    $filteredCourses = [];
+    foreach ($courses as $course) {
+        $courseUniversities = !empty($course['universities']) ? json_decode($course['universities'], true) : [];
+        if (is_array($courseUniversities) && in_array($universityId, $courseUniversities)) {
+            $courseId = $course['id'];
+            $courseBooks = !empty($course['course_book']) ? json_decode($course['course_book'], true) : [];
+            $totalBooks = is_array($courseBooks) ? count($courseBooks) : 0;
+            $completedBooksCount = is_array($completedBooks[$courseId] ?? []) ? count($completedBooks[$courseId] ?? []) : 0;
+            $course['progress'] = ($totalBooks > 0) ? ($completedBooksCount / $totalBooks) * 100 : 0;
+            $filteredCourses[] = $course;
+        }
     }
 
-    usort($courses, function($a, $b) {
+    usort($filteredCourses, function($a, $b) {
         return $a['progress'] <=> $b['progress'];
     });
 
-    return $courses;
+    return $filteredCourses;
 }
 ?>
 <!-- Include Chart.js -->

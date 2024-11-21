@@ -87,10 +87,14 @@ class Student {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public static function getAllByFaculty($conn, $facultyId) {
-        $sql = "SELECT * FROM students WHERE email = :faculty_id";
+    public static function getAllByFaculty($conn, $facultyEmail) {
+        $sql = "SELECT students.* 
+                FROM students 
+                JOIN faculty ON students.university_id = faculty.university_id 
+                WHERE faculty.email = :facultyEmail";
         $stmt = $conn->prepare($sql);
-        $stmt->execute([':email' => $facultyId]);
+        $stmt->bindParam(':facultyEmail', $facultyEmail, PDO::PARAM_STR);
+        $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 }

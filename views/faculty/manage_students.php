@@ -1,8 +1,5 @@
 <?php
 include 'sidebar.php'; 
-// $conn = Database::getConnection();
-// $facultyId = $_SESSION['faculty_id']; // Assuming faculty_id is stored in session
-// $students = Student::getAllByFaculty($conn, $facultyId);
 ?>
 
 <div class="container mt-5">
@@ -14,7 +11,6 @@ include 'sidebar.php';
                 <th>Registration Number</th>
                 <th>Name</th>
                 <th>Email</th>
-                <th>Actions</th>
             </tr>
         </thead>
         <tbody>
@@ -24,9 +20,6 @@ include 'sidebar.php';
                     <td><?= htmlspecialchars($student['regd_no']) ?></td>
                     <td><?= htmlspecialchars($student['name']) ?></td>
                     <td><?= htmlspecialchars($student['email']) ?></td>
-                    <td>
-                        <a href="viewStudentProfile/<?= $student['id'] ?>" class="btn btn-outline-primary btn-sm"><i class="fas fa-eye"></i> View</a>
-                    </td>
                 </tr>
             <?php endforeach; ?>
         </tbody>

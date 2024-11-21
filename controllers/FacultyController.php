@@ -110,8 +110,8 @@ class FacultyController {
 
     public function manageStudents() {
         $conn = Database::getConnection();
-        $facultyId = $_SESSION['email']; // Assuming faculty_id is stored in session
-        $students = Student::getAllByFaculty($conn, $facultyId);
+        $facultyEmail = $_SESSION['email']; // Assuming faculty email is stored in session
+        $students = Student::getAllByFaculty($conn, $facultyEmail);
 
         require 'views/faculty/manage_students.php';
     }
