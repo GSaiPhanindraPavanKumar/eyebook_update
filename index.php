@@ -56,7 +56,7 @@ $router->post('/spoc/updatePassword', 'SpocController@updatePassword');
 $router->get('/spoc/profile', 'SpocController@userProfile');
 $router->get('/spoc/addFaculty', 'SpocController@addFaculty');
 $router->post('/spoc/addFaculty', 'SpocController@addFaculty');
-$router->get('/spoc/manage_faculties', 'SpocController@manageFaculties');
+$router->get('/spoc/manage_faculty', 'SpocController@manageFaculties');
 $router->get('/spoc/view_faculty/(\d+)', 'SpocController@viewFaculty');
 $router->post('/spoc/deleteFaculty', 'SpocController@deleteFaculty');
 
