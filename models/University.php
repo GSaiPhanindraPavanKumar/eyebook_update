@@ -86,5 +86,29 @@ class University {
         $stmt = $conn->prepare("DELETE FROM universities WHERE id = :id");
         $stmt->execute([':id' => $id]);
     }
+
+    public static function getById($conn, $id) {
+        $stmt = $conn->prepare("SELECT * FROM universities WHERE id = :id");
+        $stmt->execute([':id' => $id]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+    
+    public static function getByUniversityId($conn, $university_id) {
+        $stmt = $conn->prepare("SELECT * FROM spocs WHERE university_id = :university_id");
+        $stmt->execute([':university_id' => $university_id]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+    
+    public static function getCountByUniversityId($conn, $university_id) {
+        $stmt = $conn->prepare("SELECT COUNT(*) FROM students WHERE university_id = :university_id");
+        $stmt->execute([':university_id' => $university_id]);
+        return $stmt->fetchColumn();
+    }
+    
+    // public static function getCountByUniversityId($conn, $university_id) {
+    //     $stmt = $conn->prepare("SELECT COUNT(*) FROM courses WHERE university_id = :university_id");
+    //     $stmt->execute([':university_id' => $university_id]);
+    //     return $stmt->fetchColumn();
+    // }
 }
 ?>

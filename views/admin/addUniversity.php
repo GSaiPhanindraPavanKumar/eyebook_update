@@ -25,7 +25,7 @@ include "sidebar.php";
                             <?php if ($message_type == 'success'): ?>
                                 <script>
                                     setTimeout(function() {
-                                        window.location.href = 'manageUniversity.php';
+                                        window.location.href = 'manage_university';
                                     }, 3000);
                                 </script>
                             <?php endif; ?>

@@ -45,6 +45,8 @@ $router->get('/admin/view_student/(\d+)', 'AdminController@viewStudent');
 $router->post('/admin/handleTodo', 'AdminController@handleTodo');
 $router->get('/admin/viewStudentProfile/(\d+)', 'AdminController@viewStudentProfile');
 
+$router->get('/admin/view_university/(\d+)', 'AdminController@viewUniversity');
+
 
 
 $router->get('/spoc', 'SpocController@dashboard');

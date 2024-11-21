@@ -8,6 +8,7 @@ use Models\Faculty;
 use Models\Student;
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
+use PDO;
 
 class SpocController {
     public function dashboard() {
@@ -89,5 +90,11 @@ class SpocController {
         }
 
         require 'views/spoc/updatePassword.php';
+    }
+
+    public static function getByUniversityId($conn, $university_id) {
+        $stmt = $conn->prepare("SELECT * FROM spocs WHERE university_id = :university_id");
+        $stmt->execute([':university_id' => $university_id]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 }
