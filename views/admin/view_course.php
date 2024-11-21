@@ -18,7 +18,7 @@ include "sidebar.php";
                     <div class="card-body">
                         <ul class="nav nav-tabs" id="myTab" role="tablist">
                             <li class="nav-item" role="presentation">
-                                <a class="nav-link active" id="course-details-tab" data-toggle="tab" href="#course-details" role="tab" aria-controls="course-details" aria-selected="true">Course Details</a>
+                                <a class="nav-link active" id="details-tab" data-toggle="tab" href="#details" role="tab" aria-controls="details" aria-selected="true">Details</a>
                             </li>
                             <li class="nav-item" role="presentation">
                                 <a class="nav-link" id="add-unit-tab" data-toggle="tab" href="#add-unit" role="tab" aria-controls="add-unit" aria-selected="false">Add Course Book</a>
@@ -28,12 +28,26 @@ include "sidebar.php";
                             </li>
                         </ul>
                         <div class="tab-content" id="myTabContent">
-                            <div class="tab-pane fade show active" id="course-details" role="tabpanel" aria-labelledby="course-details-tab">
+                            <div class="tab-pane fade show active" id="details" role="tabpanel" aria-labelledby="details-tab">
+                                <h5 class="mt-3">Course Details</h5>
                                 <?php if ($course): ?>
+                                    <p><strong>Course Name:</strong> <?php echo htmlspecialchars($course['name'] ?? 'N/A'); ?></p>
+                                    <p><strong>Description:</strong> <?php echo htmlspecialchars($course['description'] ?? 'N/A'); ?></p>
+                                    <h5 class="mt-3">Assigned Universities</h5>
                                     <ul>
-                                        <li><strong>Name:</strong> <?php echo htmlspecialchars($course['name']); ?></li>
-                                        <li><strong>Description:</strong> <?php echo htmlspecialchars($course['description']); ?></li>
-                                        <li><strong>Created At:</strong> <?php echo htmlspecialchars($course['created_at']); ?></li>
+                                        <?php if (!empty($course['universities'])): ?>
+                                            <?php foreach ($course['universities'] as $university_id): ?>
+                                                <?php
+                                                $university = array_filter($universities, function($u) use ($university_id) {
+                                                    return $u['id'] == $university_id;
+                                                });
+                                                $university = array_shift($university);
+                                                ?>
+                                                <li><?php echo htmlspecialchars($university['long_name']); ?></li>
+                                            <?php endforeach; ?>
+                                        <?php else: ?>
+                                            <li>No universities assigned.</li>
+                                        <?php endif; ?>
                                     </ul>
                                 <?php else: ?>
                                     <p>Course not found.</p>
@@ -58,17 +72,27 @@ include "sidebar.php";
                                 <h5 class="mt-3">Assign Course to Universities</h5>
                                 <form method="POST" action="/admin/assign_course">
                                     <div class="form-group">
-                                        <label for="universitySelect">Select Universities</label>
-                                        <select multiple class="form-control" id="universitySelect" name="universities[]">
+                                        <label for="university">Select University</label>
+                                        <select class="form-control" id="university" name="university_id" required>
+                                            <option value="">Select a university</option>
                                             <?php foreach ($universities as $university): ?>
-                                                <option value="<?php echo htmlspecialchars($university['id']); ?>"><?php echo htmlspecialchars($university['name']); ?></option>
+                                                <option value="<?php echo $university['id']; ?>"><?php echo htmlspecialchars($university['long_name']); ?></option>
                                             <?php endforeach; ?>
                                         </select>
                                     </div>
-                                    <button type="submit" class="btn btn-primary">Assign</button>
+                                    <input type="hidden" name="course_id" value="<?php echo $course['id']; ?>">
+                                    <button type="submit" class="btn btn-primary">Assign Course</button>
                                 </form>
                             </div>
                         </div>
+                        <?php if (isset($message)): ?>
+                            <div class="alert alert-info"><?php echo $message; ?></div>
+                            <script>
+                                setTimeout(function() {
+                                    window.location.href = 'manage_courses.php';
+                                }, 3000); // Redirect after 3 seconds
+                            </script>
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>
