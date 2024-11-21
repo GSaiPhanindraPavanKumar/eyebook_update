@@ -155,7 +155,7 @@ if ($userData) {
                         <ul class="nav flex-column sub-menu">
                             <li class="nav-item"> <a class="nav-link" href="/faculty/my_courses">My Courses</a></li>
                             <li class="nav-item"> <a class="nav-link" href="/faculty/virtual_classroom">Virtual Classroom</a></li>
-                            <li class="nav-item"> <a class="nav-link" href="/faculty/faculty">Assessments</a></li>
+                            <!-- <li class="nav-item"> <a class="nav-link" href="/faculty/faculty">Assessments</a></li> -->
                         </ul>
                     </div>
                 </li>

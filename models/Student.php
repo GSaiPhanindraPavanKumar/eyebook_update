@@ -133,5 +133,27 @@ class Student {
         $stmt->execute([':student_id' => $student_id]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+    public static function getAllBySectionYearAndUniversity($conn, $facultyEmail, $year = null, $section = null) {
+        $sql = "SELECT students.* 
+                FROM students 
+                JOIN faculty ON students.university_id = faculty.university_id 
+                WHERE faculty.email = :facultyEmail";
+
+        $params = ['facultyEmail' => $facultyEmail];
+
+        if ($year !== null) {
+            $sql .= " AND students.year = :year";
+            $params['year'] = $year;
+        }
+
+        if ($section !== null) {
+            $sql .= " AND students.section = :section";
+            $params['section'] = $section;
+        }
+
+        $stmt = $conn->prepare($sql);
+        $stmt->execute($params);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
 }
 ?>
