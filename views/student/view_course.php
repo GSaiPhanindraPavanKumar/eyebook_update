@@ -34,7 +34,6 @@
                                 $hashedId = base64_encode($course['id']);
                                 $hashedId = str_replace(['+', '/', '='], ['-', '_', ''], $hashedId);
                                 ?>
-                                <button class="btn btn-primary" onclick="redirectToCourseBook('<?php echo $hashedId; ?>')">View</button>
                             <?php endif; ?>
                         </div>
 
