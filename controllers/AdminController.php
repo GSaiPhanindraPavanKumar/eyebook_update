@@ -12,7 +12,8 @@ use Models\Mailer;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use Models\Discussion;
 use Models\Meetings;
-
+use PDO;
+use ZipArchive;
 
 use Exception;
 use PDOException;
