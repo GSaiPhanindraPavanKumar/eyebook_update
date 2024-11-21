@@ -81,7 +81,7 @@ class AdminController {
                 if (filter_var($spoc_email, FILTER_VALIDATE_EMAIL)) {
                     $mailer = new Mailer();
                     $subject = 'Welcome to EyeBook!';
-                    $body = "Dear $spoc_name,<br><br>Your account has been created successfully.<br><br>Username: $spoc_email <br>Password: $spoc_pass<br><br>Best Regards,<br>EyeBook Team";
+                    $body = "Dear $spoc_name,<br><br>Your account has been created successfully as an SPOC for <b>$long_name<b>.<br><br>Username: $spoc_email <br>Password: $spoc_pass<br><br>Best Regards,<br>EyeBook Team";
                     $mailer->sendMail($spoc_email, $subject, $body);
                 } else {
                     $message = "Invalid email address: " . $spoc_email;
