@@ -242,9 +242,9 @@ class AdminController {
         $conn = Database::getConnection();
     
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-            $course_id = $_POST['course_id'];
-            $unit_name = $_POST['unit_name'];
-            $scorm_file = $_FILES['scorm_file'];
+            $course_id = $_POST['course_id'] ?? null;
+            $unit_name = $_POST['unit_name'] ?? null;
+            $scorm_file = $_FILES['scorm_file'] ?? null;
     
             if (!$unit_name || !$scorm_file) {
                 echo json_encode(['message' => 'Unit name and SCORM package file are required']);
