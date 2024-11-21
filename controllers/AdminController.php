@@ -53,7 +53,7 @@ class AdminController {
 
     public function addUniversity() {
         $conn = Database::getConnection();
-
+    
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $long_name = $_POST['long_name'];
             $short_name = $_POST['short_name'];
@@ -64,7 +64,7 @@ class AdminController {
             $spoc_phone = $_POST['spoc_phone'];
             $spoc_pass = $_POST['spoc_password'];
             $spoc_password = password_hash($spoc_pass, PASSWORD_BCRYPT);
-
+    
             if (University::existsByShortName($conn, $short_name)) {
                 $message = "Duplicate entry for short name: " . $short_name;
                 $message_type = "warning";
@@ -73,16 +73,23 @@ class AdminController {
                 $message_type = "warning";
             } else {
                 $university = new University($conn);
-                $result = $university->addUniversity($conn,$long_name, $short_name, $location, $country, $spoc_name, $spoc_email, $spoc_phone, $spoc_password);
+                $result = $university->addUniversity($conn, $long_name, $short_name, $location, $country, $spoc_name, $spoc_email, $spoc_phone, $spoc_password);
                 $message = $result['message'];
                 $message_type = $result['message_type'];
-                $mailer = new Mailer();
-                $subject = 'Welcome to EyeBook!';
-                $body = "Dear $spoc_name,<br><br>Your account has been created successfully.<br><br>Username: $spoc_email <br>Password: $spoc_pass<br><br>Best Regards,<br>EyeBook Team";
-                $mailer->sendMail($spoc_name, $subject, $body);
+    
+                // Validate email address before sending
+                if (filter_var($spoc_email, FILTER_VALIDATE_EMAIL)) {
+                    $mailer = new Mailer();
+                    $subject = 'Welcome to EyeBook!';
+                    $body = "Dear $spoc_name,<br><br>Your account has been created successfully.<br><br>Username: $spoc_email <br>Password: $spoc_pass<br><br>Best Regards,<br>EyeBook Team";
+                    $mailer->sendMail($spoc_email, $subject, $body);
+                } else {
+                    $message = "Invalid email address: " . $spoc_email;
+                    $message_type = "error";
+                }
             }
         }
-
+    
         require 'views/admin/addUniversity.php';
     }
 
@@ -137,6 +144,8 @@ class AdminController {
 
         require 'views/admin/updatePassword.php';
     }
+
+
 
 
         public function uploadStudents() {
@@ -380,6 +389,18 @@ class AdminController {
             exit();
         }
         require 'views/admin/viewStudentProfile.php';
+    }
+
+    public function viewUniversity($university_id) {
+        $conn = Database::getConnection();
+    
+        // Fetch university details
+        $university = University::getById($conn, $university_id);
+        $spoc = Spoc::getByUniversityId($conn, $university_id);
+        $student_count = Student::getCountByUniversityId($conn, $university_id);
+        $course_count = Course::getCountByUniversityId($conn, $university_id);
+    
+        require 'views/admin/view_university.php';
     }
 
 }

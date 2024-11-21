@@ -23,14 +23,14 @@
                         <p class="card-title mb-0" style="font-size:larger">Universities</p><br>
                         <div class="table-responsive">
                             <input class="form-control mb-3" id="searchInput" type="text" placeholder="🔍 Search Universities...">
-                            <form id="universityForm" method="post" action="deleteUniversity.php">
+                            <form id="universityForm" method="post" action="view_university">
                                 <table class="table table-hover table-borderless table-striped">
                                     <thead class="thead-light">
                                         <tr>
                                             <th data-sort="serialNumber">S.no <i class="fas fa-sort"></i></th>
                                             <th data-sort="longName">University Name <i class="fas fa-sort"></i></th>
                                             <th data-sort="shortName">Short Name <i class="fas fa-sort"></i></th>
-                                            <!-- <th>Actions</th> -->
+                                            <th>Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody id="universityTable">
@@ -48,9 +48,9 @@
                                                 <td><?= $serialNumber++ ?></td>
                                                 <td><?= htmlspecialchars($university['long_name']) ?></td>
                                                 <td><?= htmlspecialchars($university['short_name']) ?></td>
-                                                <!-- <td>
+                                                <td>
                                                     <button type="submit" name="view" class="btn btn-outline-info btn-sm"><i class="fas fa-eye"></i>View</button>
-                                                </td> -->
+                                                </td>
                                             </tr>
                                         <?php endforeach; ?>
                                     </tbody>
