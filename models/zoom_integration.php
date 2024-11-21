@@ -36,7 +36,7 @@ class ZoomAPI {
         return $data['access_token'];
     }
 
-    public function createVirtualClassroom($topic, $start_time, $duration) {
+    public function createVirtualClassroom($topic, $start_time, $duration, $faculty_id) {
         $response = $this->client->request('POST', 'v2/users/me/meetings', [
             'headers' => [
                 'Authorization' => 'Bearer ' . $this->accessToken,
@@ -57,18 +57,18 @@ class ZoomAPI {
                 ]
             ]
         ]);
-
+    
         $data = json_decode($response->getBody(), true);
-        $this->saveVirtualClassroomToDatabase($data);
+        $this->saveVirtualClassroomToDatabase($data, $faculty_id);
         return $data;
     }
 
-    private function saveVirtualClassroomToDatabase($data) {
+    private function saveVirtualClassroomToDatabase($data, $faculty_id) {
         // Convert the start_time to the correct format
         $start_time = (new DateTime($data['start_time']))->format('Y-m-d H:i:s');
     
-        $stmt = $this->conn->prepare("INSERT INTO virtual_classrooms (classroom_id, topic, start_time, duration, join_url) VALUES (?, ?, ?, ?, ?)");
-        $stmt->execute([$data['id'], $data['topic'], $start_time, $data['duration'], $data['join_url']]);
+        $stmt = $this->conn->prepare("INSERT INTO virtual_classrooms (classroom_id, topic, start_time, duration, join_url, faculty_id) VALUES (?, ?, ?, ?, ?, ?)");
+        $stmt->execute([$data['id'], $data['topic'], $start_time, $data['duration'], $data['join_url'], $faculty_id]);
     }
 
     public function getAllClassrooms() {

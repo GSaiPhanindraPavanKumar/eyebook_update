@@ -16,6 +16,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $topic = $_POST['topic'];
     $start_time_local = $_POST['start_time'];
     $duration = $_POST['duration'];
+    $faculty_id = $_SESSION['faculty_id']; // Assuming faculty_id is stored in session
 
     // Convert local time to UTC and then to ISO 8601 format
     $start_time = new DateTime($start_time_local, new DateTimeZone('Asia/Kolkata')); // Set the local time zone
@@ -23,7 +24,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $start_time_utc->setTimezone(new DateTimeZone('UTC')); // Convert to UTC
     $start_time_iso8601 = $start_time_utc->format(DateTime::ATOM);
 
-    $classroom = $zoom->createVirtualClassroom($topic, $start_time_iso8601, $duration);
+    $classroom = $zoom->createVirtualClassroom($topic, $start_time_iso8601, $duration, $faculty_id);
 
     if (isset($classroom['id'])) {
         // Save the start time with the classroom in the correct format
