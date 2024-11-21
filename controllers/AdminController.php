@@ -309,6 +309,22 @@ class AdminController {
         }
     }
 
+    public function assignCourse() {
+        $conn = Database::getConnection();
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            $course_id = $_POST['course_id'];
+            $university_id = $_POST['university_id'];
+            $result = Course::assignCourseToUniversity($conn, $course_id, $university_id);
+            if ($result['message'] === 'Course assigned to university successfully') {
+                header("Location: /admin/view_course/$course_id");
+                exit();
+            } else {
+                echo json_encode(['message' => $result['message']]);
+                exit;
+            }
+        }
+    }
+    
     public function createAssessment() {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $title = $_POST['title'];
