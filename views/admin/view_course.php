@@ -64,7 +64,7 @@ include "sidebar.php";
                                         <label for="scormFile">SCORM File</label>
                                         <input type="file" class="form-control" id="scormFile" name="scorm_file" required>
                                     </div>
-                                    <input type="hidden" name="course_id" value="<?php echo $course['id']; ?>">
+                                    <input type="hidden" name="course_id" value="<?php echo htmlspecialchars($course['id']); ?>">
                                     <button type="submit" class="btn btn-primary">Add Course Book</button>
                                 </form>
                             </div>

@@ -12,7 +12,8 @@ use Models\Mailer;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use Models\Discussion;
 use Models\Meetings;
-
+use PDO;
+use ZipArchive;
 
 use Exception;
 use PDOException;
@@ -241,9 +242,9 @@ class AdminController {
         $conn = Database::getConnection();
     
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-            $course_id = $_POST['course_id'];
-            $unit_name = $_POST['unit_name'];
-            $scorm_file = $_FILES['scorm_file'];
+            $course_id = $_POST['course_id'] ?? null;
+            $unit_name = $_POST['unit_name'] ?? null;
+            $scorm_file = $_FILES['scorm_file'] ?? null;
     
             if (!$unit_name || !$scorm_file) {
                 echo json_encode(['message' => 'Unit name and SCORM package file are required']);
@@ -305,25 +306,6 @@ class AdminController {
     
             header("Location: /admin/view_course/$course_id");
             exit;
-        }
-    }
-
-    public function assignCourse() {
-        $conn = Database::getConnection();
-
-        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-            $course_id = $_POST['course_id'];
-            $university_id = $_POST['university_id'];
-
-            $result = Course::assignCourseToUniversity($conn, $course_id, $university_id);
-
-            if ($result['message'] === 'Course assigned to university successfully') {
-                header("Location: /admin/view_course/$course_id");
-                exit();
-            } else {
-                echo json_encode(['message' => $result['message']]);
-                exit;
-            }
         }
     }
 
