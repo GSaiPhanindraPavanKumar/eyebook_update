@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/../../models/database.php';
+require_once __DIR__ . '/../../models/Database.php';
 use Models\Database;
 
 $conn = Database::getConnection();
