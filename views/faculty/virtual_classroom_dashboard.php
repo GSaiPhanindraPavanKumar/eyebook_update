@@ -79,6 +79,7 @@ usort($facultyClassrooms, function($a, $b) {
                                                 <th>Start Time</th>
                                                 <th>End Time</th>
                                                 <th>Join URL</th>
+                                                <th>Actions</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -96,6 +97,11 @@ usort($facultyClassrooms, function($a, $b) {
                                                     <td><?php echo htmlspecialchars($start_time->format('H:i:s')); ?></td>
                                                     <td><?php echo htmlspecialchars($end_time->format('H:i:s')); ?></td>
                                                     <td><a href="<?php echo htmlspecialchars($classroom['join_url']); ?>" target="_blank" class="btn btn-primary">Join</a></td>
+                                                    <td>
+                                                        <?php if ($current_time >= $start_time && $current_time <= $end_time): ?>
+                                                            <a href="/faculty/take_attendance?classroom_id=<?php echo htmlspecialchars($classroom['classroom_id']); ?>" class="btn btn-warning">Take Attendance</a>
+                                                        <?php endif; ?>
+                                                    </td>
                                                 </tr>
                                             <?php endif; endforeach; ?>
                                         </tbody>
