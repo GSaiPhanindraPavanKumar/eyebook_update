@@ -87,6 +87,31 @@ class FacultyController {
         require 'views/faculty/book_view.php';
     }
 
+    public static function grade($conn, $assignmentId, $studentId, $grade, $feedback) {
+        $sql = "UPDATE submissions SET grade = :grade, feedback = :feedback WHERE assignment_id = :assignment_id AND student_id = :student_id";
+        $stmt = $conn->prepare($sql);
+        $stmt->bindParam(':grade', $grade);
+        $stmt->bindParam(':feedback', $feedback);
+        $stmt->bindParam(':assignment_id', $assignmentId);
+        $stmt->bindParam(':student_id', $studentId);
+        $stmt->execute();
+    }
+
+    public static function getSubmission($conn, $assignmentId, $studentId) {
+        $sql = "SELECT * FROM submissions WHERE assignment_id = :assignment_id AND student_id = :student_id";
+        $stmt = $conn->prepare($sql);
+        $stmt->bindParam(':assignment_id', $assignmentId);
+        $stmt->bindParam(':student_id', $studentId);
+        $stmt->execute();
+        return $stmt->fetch(\PDO::FETCH_ASSOC);
+    }
+
+    public function manageAssignments() {
+        $conn = Database::getConnection();
+        $assignments = Assignment::getAll($conn);
+        require 'views/faculty/manage_assignments.php';
+    }
+
     private function decodeId($hashedId) {
         $hashedId = str_replace(['-', '_'], ['+', '/'], $hashedId);
         return base64_decode($hashedId);
@@ -110,15 +135,10 @@ class FacultyController {
 
     public function manageStudents() {
         $conn = Database::getConnection();
-<<<<<<< HEAD
         $facultyId = $_SESSION['email']; // Assuming faculty_id is stored in session
         $year = $_POST['year'] ?? null;
         $section = $_POST['section'] ?? null;
         $students = Student::getAllBySectionYearAndUniversity($conn, $facultyId, $year, $section);
-=======
-        $facultyEmail = $_SESSION['email']; // Assuming faculty email is stored in session
-        $students = Student::getAllByFaculty($conn, $facultyEmail);
->>>>>>> 9f0da0d00fc01f234b095851af676640ba42d2ac
 
         require 'views/faculty/manage_students.php';
     }
@@ -166,20 +186,22 @@ class FacultyController {
         require 'views/faculty/create_assignment.php';
     }
 
-    public function gradeAssignment($assignmentId, $studentId) {
-        $conn = Database::getConnection();
+    // public function gradeAssignment($assignmentId, $studentId) {
+    //     $conn = Database::getConnection();
 
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $grade = $_POST['grade'];
-            Assignment::grade($conn, $assignmentId, $studentId, $grade);
+    //     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    //         $grade = $_POST['grade'];
+    //         Assignment::grade($conn, $assignmentId, $studentId, $grade);
 
-            header('Location: /faculty/manage_assignments');
-            exit;
-        }
+    //         header('Location: /faculty/manage_assignments');
+    //         exit;
+    //     }
 
-        $submission = Assignment::getSubmission($conn, $assignmentId, $studentId);
-        require 'views/faculty/grade_assignment.php';
-    }
+    //     $submission = Assignment::getSubmission($conn, $assignmentId, $studentId);
+    //     require 'views/faculty/grade_assignment.php';
+    // }
+
+
 
     public function updatePassword() {
         $conn = Database::getConnection();
@@ -219,16 +241,32 @@ class FacultyController {
         // ...existing code...
     }
 
-        public function manageAssignments() {
-            $conn = Database::getConnection();
-            $sql = "SELECT assignments.id, assignments.title, courses.name as course_name, assignments.deadline 
-                    FROM assignments 
-                    JOIN courses ON assignments.course_id = courses.id";
-            $stmt = $conn->prepare($sql);
-            $stmt->execute();
-            $assignments = $stmt->fetchAll(\PDO::FETCH_ASSOC);
-            require 'views/faculty/manage_assignments.php';
-        }
+    public function gradeAssignment($assignmentId, $studentId) {
+    $conn = Database::getConnection();
+
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        $grade = $_POST['grade'];
+        $feedback = $_POST['feedback'];
+        Assignment::grade($conn, $assignmentId, $studentId, $grade, $feedback);
+
+        header('Location: /faculty/manage_assignments');
+        exit;
+    }
+
+    $submission = Assignment::getSubmission($conn, $assignmentId, $studentId);
+    require 'views/faculty/grade_assignment.php';
+}
+
+        // public function manageAssignments() {
+        //     $conn = Database::getConnection();
+        //     $sql = "SELECT assignments.id, assignments.title, courses.name as course_name, assignments.deadline 
+        //             FROM assignments 
+        //             JOIN courses ON assignments.course_id = courses.id";
+        //     $stmt = $conn->prepare($sql);
+        //     $stmt->execute();
+        //     $assignments = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        //     require 'views/faculty/manage_assignments.php';
+        // }
     
         public function viewAssignment($assignmentId) {
             $conn = Database::getConnection();

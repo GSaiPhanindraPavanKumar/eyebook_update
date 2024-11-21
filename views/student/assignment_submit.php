@@ -1,12 +1,13 @@
 <?php
 include 'sidebar.php';
 use Models\Database;
-use Models\Student; // Add this line to include the Student class
+use Models\Student;
 
 $conn = Database::getConnection();
 
+$assignment_id = $_GET['assignment_id'];
+
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $assignment_id = $_POST["assignment_id"];
     $file = $_FILES["assignment_file"];
     $student_id = $_SESSION['student_id'];
 
@@ -66,11 +67,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 <div class="card">
                     <div class="card-body">
                         <h5 class="card-title">Submit Assignment</h5>
-                        <form action="assignment_submit.php" method="post" enctype="multipart/form-data">
-                            <div class="form-group">
-                                <label for="assignment_id">Assignment ID:</label>
-                                <input type="text" class="form-control" id="assignment_id" name="assignment_id" required>
-                            </div>
+                        <form action="assignment_submit.php?assignment_id=<?= $assignment_id ?>" method="post" enctype="multipart/form-data">
                             <div class="form-group">
                                 <label for="assignment_file">Upload Assignment File:</label>
                                 <input type="file" class="form-control-file" id="assignment_file" name="assignment_file" required>
