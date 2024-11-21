@@ -89,7 +89,6 @@ usort($facultyClassrooms, function($a, $b) {
                                                 $start_time = new DateTime($classroom['start_time'], new DateTimeZone('UTC'));
                                                 $end_time = clone $start_time;
                                                 $end_time->modify('+' . $classroom['duration'] . ' minutes');
-                                                if ($current_time <= $end_time):
                                             ?>
                                                 <tr>
                                                     <td><?php echo htmlspecialchars($classroom['topic']); ?></td>
@@ -98,12 +97,10 @@ usort($facultyClassrooms, function($a, $b) {
                                                     <td><?php echo htmlspecialchars($end_time->format('H:i:s')); ?></td>
                                                     <td><a href="<?php echo htmlspecialchars($classroom['join_url']); ?>" target="_blank" class="btn btn-primary">Join</a></td>
                                                     <td>
-                                                        <?php if ($current_time >= $start_time && $current_time <= $end_time): ?>
-                                                            <a href="/faculty/take_attendance?classroom_id=<?php echo htmlspecialchars($classroom['classroom_id']); ?>" class="btn btn-warning">Take Attendance</a>
-                                                        <?php endif; ?>
+                                                        <a href="/faculty/take_attendance?classroom_id=<?php echo htmlspecialchars($classroom['classroom_id']); ?>" class="btn btn-warning">Take Attendance</a>
                                                     </td>
                                                 </tr>
-                                            <?php endif; endforeach; ?>
+                                            <?php endforeach; ?>
                                         </tbody>
                                     </table>
                                 </div>
@@ -132,7 +129,6 @@ usort($facultyClassrooms, function($a, $b) {
                                                 $start_time = new DateTime($classroom['start_time'], new DateTimeZone('UTC'));
                                                 $end_time = clone $start_time;
                                                 $end_time->modify('+' . $classroom['duration'] . ' minutes');
-                                                if ($current_time > $end_time):
                                             ?>
                                                 <tr>
                                                     <td><?php echo htmlspecialchars($classroom['topic']); ?></td>
@@ -147,7 +143,7 @@ usort($facultyClassrooms, function($a, $b) {
                                                         <?php endif; ?>
                                                     </td>
                                                 </tr>
-                                            <?php endif; endforeach; ?>
+                                            <?php endforeach; ?>
                                         </tbody>
                                     </table>
                                 </div>
