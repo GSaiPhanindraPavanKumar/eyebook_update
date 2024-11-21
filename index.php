@@ -187,6 +187,10 @@ $router->post('/student/submit_assignment/(\d+)', function($assignment_id){
     require 'views/student/assignment_submit.php';
 });
 
+$router->get('/student/assigments', function(){
+    require 'views/student/assignment_submit.php';
+});
+
 // Faculty routes
 $router->get('/faculty/manage_assignments', 'FacultyController@manageAssignments');
 
@@ -199,21 +203,15 @@ $router->get('/faculty/grade_assignment/(\d+)/(\d+)', function($assignment_id, $
     require 'views/faculty/grade_assignment.php';
 });
 
+
 $router->post('/faculty/grade_assignment/(\d+)/(\d+)', function($assignment_id, $student_id){
     $_GET['assignment_id'] = $assignment_id;
     $_GET['student_id'] = $student_id;
     require 'views/faculty/grade_assignment.php';
 });
 
-$router->get('/student/submit_assignment/(\d+)', function($assignment_id){
-    $_GET['assignment_id'] = $assignment_id;
-    require 'views/student/assignment_submit.php';
-});
 
-$router->post('/student/submit_assignment/(\d+)', function($assignment_id){
-    $_GET['assignment_id'] = $assignment_id;
-    require 'views/student/assignment_submit.php';
-});
+$router->post('/student/submit_assignment', 'StudentController@submitAssignment');
 
 $router->post('/student/mark_as_completed', function() {
     require 'views/student/mark_as_completed.php';

@@ -105,26 +105,31 @@ class Course {
         }
     
         public static function addUnit($conn, $course_id, $unit_name, $scorm_file) {
+            // Validate input
+            if (empty($unit_name) || empty($scorm_file) || $scorm_file['error'] != 0) {
+                return ['message' => 'Unit name and SCORM package file are required'];
+            }
+        
             // Fetch the course
             $sql = "SELECT * FROM courses WHERE id = :id";
             $stmt = $conn->prepare($sql);
             $stmt->execute(['id' => $course_id]);
             $course = $stmt->fetch(PDO::FETCH_ASSOC);
-    
+        
             if (!$course) {
                 return ['message' => 'Course not found'];
             }
-    
+        
             // Decode the existing content or initialize an empty array
             $course_content = json_decode($course['course_book'], true);
             if (!is_array($course_content)) {
                 $course_content = [];
             }
-    
+        
             // Create a directory for the SCORM package
             $scorm_dir = "uploads/course-$course_id/course_book" . time() . '-' . basename($scorm_file['name'], '.zip');
             mkdir($scorm_dir, 0777, true);
-    
+        
             // Unzip the SCORM package directly to the created directory
             $zip = new ZipArchive;
             if ($zip->open($scorm_file['tmp_name']) === TRUE) {
@@ -133,26 +138,26 @@ class Course {
             } else {
                 return ['message' => 'Failed to unzip SCORM package'];
             }
-    
+        
             // Verify that the index.html file exists
             $index_path = $scorm_dir . '/index.html';
             if (!file_exists($index_path)) {
                 return ['message' => 'index.html file not found'];
             }
-    
+        
             // Replace the existing course book path if it exists
             $new_unit = [
                 'unitTitle' => $unit_name,
                 'materials' => [['scormDir' => $scorm_dir, 'indexPath' => $index_path]]
             ];
             $course_content = [$new_unit]; // Replace the entire course book content with the new unit
-    
+        
             // Update the course in the database
             $sql = "UPDATE courses SET course_book = :course_book WHERE id = :id";
             $stmt = $conn->prepare($sql);
             $content_json = json_encode($course_content);
             $stmt->execute(['course_book' => $content_json, 'id' => $course_id]);
-    
+        
             return ['message' => 'Unit added successfully with SCORM content', 'indexPath' => $index_path];
         }
     
