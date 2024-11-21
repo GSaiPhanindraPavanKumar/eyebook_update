@@ -106,8 +106,14 @@ class Course {
     
         public static function addUnit($conn, $course_id, $unit_name, $scorm_file) {
             // Validate input
-            if (empty($unit_name) || empty($scorm_file) || $scorm_file['error'] != 0) {
-                return ['message' => 'Unit name and SCORM package file are required'];
+            if (empty($unit_name)) {
+                return ['message' => 'Unit name is required'];
+            }
+            if (empty($scorm_file)) {
+                return ['message' => 'SCORM package file is required'];
+            }
+            if ($scorm_file['error'] != 0) {
+                return ['message' => 'Error uploading SCORM package file: ' . $scorm_file['error']];
             }
         
             // Fetch the course
@@ -128,7 +134,9 @@ class Course {
         
             // Create a directory for the SCORM package
             $scorm_dir = "uploads/course-$course_id/course_book" . time() . '-' . basename($scorm_file['name'], '.zip');
-            mkdir($scorm_dir, 0777, true);
+            if (!mkdir($scorm_dir, 0777, true)) {
+                return ['message' => 'Failed to create directory for SCORM package'];
+            }
         
             // Unzip the SCORM package directly to the created directory
             $zip = new ZipArchive;
