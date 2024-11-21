@@ -87,11 +87,35 @@ class Student {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public static function getAllByFaculty($conn, $facultyId) {
-        $sql = "SELECT * FROM students WHERE email = :faculty_id";
+    // public static function getAllByFaculty($conn, $facultyId) {
+    //     $sql = "SELECT * FROM students WHERE email = :faculty_id";
+    //     $stmt = $conn->prepare($sql);
+    //     $stmt->execute([':email' => $facultyId]);
+    //     return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    // }
+    public static function getAllBySectionYearAndUniversity($conn, $section, $year, $university_short_name) {
+        $sql = "SELECT students.* FROM students 
+                JOIN universities ON students.university_id = universities.id 
+                WHERE students.section = :section 
+                AND students.year = :year 
+                AND universities.short_name = :university_short_name";
         $stmt = $conn->prepare($sql);
-        $stmt->execute([':email' => $facultyId]);
+        $stmt->execute([
+            ':section' => $section,
+            ':year' => $year,
+            ':university_short_name' => $university_short_name
+        ]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public static function submitAssignment($conn, $student_id, $assignment_id, $file_path) {
+        $sql = "INSERT INTO assignment_submissions (student_id, assignment_id, file_path) VALUES (:student_id, :assignment_id, :file_path)";
+        $stmt = $conn->prepare($sql);
+        $stmt->execute([
+            ':student_id' => $student_id,
+            ':assignment_id' => $assignment_id,
+            ':file_path' => $file_path
+        ]);
     }
 }
 ?>

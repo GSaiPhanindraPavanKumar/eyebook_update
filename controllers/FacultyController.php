@@ -111,7 +111,9 @@ class FacultyController {
     public function manageStudents() {
         $conn = Database::getConnection();
         $facultyId = $_SESSION['email']; // Assuming faculty_id is stored in session
-        $students = Student::getAllByFaculty($conn, $facultyId);
+        $year = $_POST['year'] ?? null;
+        $section = $_POST['section'] ?? null;
+        $students = Student::getAllBySectionYearAndUniversity($conn, $facultyId, $year, $section);
 
         require 'views/faculty/manage_students.php';
     }
@@ -157,13 +159,6 @@ class FacultyController {
 
         $courses = Course::getCoursesByFaculty($conn);
         require 'views/faculty/create_assignment.php';
-    }
-
-    public function manageAssignments() {
-        $conn = Database::getConnection();
-        $assignments = Assignment::getAllByFaculty($conn, $_SESSION['email']);
-
-        require 'views/faculty/manage_assignments.php';
     }
 
     public function gradeAssignment($assignmentId, $studentId) {
@@ -218,4 +213,49 @@ class FacultyController {
     public function generateQuestions() {
         // ...existing code...
     }
+
+        public function manageAssignments() {
+            $conn = Database::getConnection();
+            $sql = "SELECT assignments.id, assignments.title, courses.name as course_name, assignments.deadline 
+                    FROM assignments 
+                    JOIN courses ON assignments.course_id = courses.id";
+            $stmt = $conn->prepare($sql);
+            $stmt->execute();
+            $assignments = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+            require 'views/faculty/manage_assignments.php';
+        }
+    
+        public function viewAssignment($assignmentId) {
+            $conn = Database::getConnection();
+            $sql = "SELECT * FROM assignments WHERE id = :id";
+            $stmt = $conn->prepare($sql);
+            $stmt->bindParam(':id', $assignmentId);
+            $stmt->execute();
+            $assignment = $stmt->fetch(\PDO::FETCH_ASSOC);
+    
+            $sql = "SELECT * FROM submissions WHERE assignment_id = :assignment_id";
+            $stmt = $conn->prepare($sql);
+            $stmt->bindParam(':assignment_id', $assignmentId);
+            $stmt->execute();
+            $submissions = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+    
+            require 'views/faculty/view_assignment.php';
+        }
+    
+        public function markAssignment() {
+            $conn = Database::getConnection();
+            $submissionId = $_POST['submission_id'];
+            $grade = $_POST['grade'];
+            $feedback = $_POST['feedback'];
+    
+            $sql = "UPDATE submissions SET grade = :grade, feedback = :feedback WHERE id = :id";
+            $stmt = $conn->prepare($sql);
+            $stmt->bindParam(':grade', $grade);
+            $stmt->bindParam(':feedback', $feedback);
+            $stmt->bindParam(':id', $submissionId);
+            $stmt->execute();
+    
+            header('Location: /faculty/manage_assignments');
+        }
+    
 }

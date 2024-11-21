@@ -4,3 +4,4 @@ dash
 phpunit.xml
 .vscode
 mailer.log
+uploads

@@ -1,38 +1,52 @@
 <?php include('sidebar.php'); ?>
-
-<div class="container mx-auto p-4">
-    <h1 class="text-3xl font-bold mb-6">Manage Assignments</h1>
-    <div class="bg-white p-6 rounded-lg shadow-md">
-        <div class="mb-4">
-            <input type="text" id="search" placeholder="Search assignments..." class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+<div class="main-panel">
+    <div class="content-wrapper">
+        <div class="row">
+            <div class="col-md-12 grid-margin">
+                <div class="row">
+                    <div class="col-12 col-xl-8 mb-4 mb-xl-0">
+                        <h3 class="font-weight-bold">Assignments</h3>
+                    </div>
+                </div>
+            </div>
         </div>
-        <table class="min-w-full bg-white">
-            <thead>
-                <tr>
-                    <th class="py-2 px-4 border-b">Title</th>
-                    <th class="py-2 px-4 border-b">Course</th>
-                    <th class="py-2 px-4 border-b">Deadline</th>
-                    <th class="py-2 px-4 border-b">Actions</th>
-                </tr>
-            </thead>
-            <tbody id="assignmentTable">
-                <?php foreach ($assignments as $assignment): ?>
-                    <tr>
-                        <td class="py-2 px-4 border-b"><?= htmlspecialchars($assignment['title']) ?></td>
-                        <td class="py-2 px-4 border-b"><?= htmlspecialchars($assignment['course_name']) ?></td>
-                        <td class="py-2 px-4 border-b"><?= htmlspecialchars($assignment['deadline']) ?></td>
-                        <td class="py-2 px-4 border-b">
-                            <a href="/faculty/grade_assignment/<?= $assignment['id'] ?>" class="text-blue-500 hover:underline">Grade</a>
-                        </td>
-                    </tr>
-                <?php endforeach; ?>
-            </tbody>
-        </table>
-        <div class="mt-4">
-            <button class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition duration-300">Previous</button>
-            <button class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition duration-300">Next</button>
+
+        <div class="row">
+            <div class="col-md-12 grid-margin stretch-card">
+                <div class="card shadow">
+                    <div class="card-body">
+                        <!-- <p class="card-title mb-0" style="font-size:larger">Universities</p><br> -->
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th class="py-2 px-4 border-b">Title</th>
+                                        <th class="py-2 px-4 border-b">Course</th>
+                                        <th class="py-2 px-4 border-b">Deadline</th>
+                                        <!-- <th class="py-2 px-4 border-b">Status</th> -->
+                                        <th class="py-2 px-4 border-b">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="assignmentTable">
+                                    <?php foreach ($assignments as $assignment): ?>
+                                        <tr>
+                                            <td class="py-2 px-4 border-b"><?= htmlspecialchars($assignment['title']) ?></td>
+                                            <td class="py-2 px-4 border-b"><?= htmlspecialchars($assignment['course_name']) ?></td>
+                                            <td class="py-2 px-4 border-b"><?= htmlspecialchars($assignment['deadline']) ?></td>
+                                            <!-- <td class="py-2 px-4 border-b"><?= htmlspecialchars($assignment['status']) ?></td> -->
+                                            <td class="py-2 px-4 border-b">
+                                                <a href="/faculty/view_assignment/<?= $assignment['id'] ?>" class="text-blue-500 hover:underline">View Submissions</a>
+                                                <!-- <a href="/faculty/edit_assignment/<?= $assignment['id'] ?>" class="text-blue-500 hover:underline ml-2">Edit</a> -->
+                                            </td>
+                                        </tr>
+                                    <?php endforeach; ?>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
+    <?php include 'footer.html'; ?>
 </div>
-
-<?php include('footer.html'); ?>
