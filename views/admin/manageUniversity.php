@@ -23,7 +23,7 @@
                         <p class="card-title mb-0" style="font-size:larger">Universities</p><br>
                         <div class="table-responsive">
                             <input class="form-control mb-3" id="searchInput" type="text" placeholder="🔍 Search Universities...">
-                            <form id="universityForm" method="post" action="view_university">
+                            <form id="universityForm" method="post" action="/admin/view_university">
                                 <table class="table table-hover table-borderless table-striped">
                                     <thead class="thead-light">
                                         <tr>
@@ -49,7 +49,7 @@
                                                 <td><?= htmlspecialchars($university['long_name']) ?></td>
                                                 <td><?= htmlspecialchars($university['short_name']) ?></td>
                                                 <td>
-                                                    <button type="submit" name="view" class="btn btn-outline-info btn-sm"><i class="fas fa-eye"></i>View</button>
+                                                    <a href="/admin/view_university/<?= $university['id'] ?>" class="btn btn-outline-info btn-sm"><i class="fas fa-eye"></i> View</a>
                                                 </td>
                                             </tr>
                                         <?php endforeach; ?>

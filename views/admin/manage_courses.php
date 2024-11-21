@@ -3,14 +3,26 @@ include("sidebar.php");
 use Models\Database;
 $conn = Database::getConnection();
 
-$sql = "SELECT c.id, c.name, c.description, u.long_name 
-        FROM courses c 
-        LEFT JOIN universities u ON c.university_id = u.id";
+$sql = "SELECT c.id, c.name, c.description, c.universities 
+        FROM courses c";
 $result = $conn->query($sql);
 $courses = [];
 
 if ($result->rowCount() > 0) {
     while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
+        // Decode the universities JSON field if it's not null
+        $university_ids = !is_null($row['universities']) ? json_decode($row['universities'], true) : [];
+        if (is_array($university_ids) && !empty($university_ids)) {
+            // Fetch the university names
+            $placeholders = implode(',', array_fill(0, count($university_ids), '?'));
+            $sql = "SELECT long_name FROM universities WHERE id IN ($placeholders)";
+            $stmt = $conn->prepare($sql);
+            $stmt->execute($university_ids);
+            $universities = $stmt->fetchAll(PDO::FETCH_COLUMN);
+            $row['universities'] = implode(', ', $universities);
+        } else {
+            $row['universities'] = '';
+        }
         $courses[] = $row;
     }
 }
@@ -52,7 +64,7 @@ if ($result->rowCount() > 0) {
                                             </td>
                                             <td><?php echo htmlspecialchars($course['name']); ?></td>
                                             <td><?php echo htmlspecialchars($course['description']); ?></td>
-                                            <td><?php echo htmlspecialchars($course['long_name'] ?? ''); ?></td>
+                                            <td><?php echo htmlspecialchars($course['universities']); ?></td>
                                             <td>
                                             <a href="/admin/view_course/<?php echo $course['id']; ?>" class="btn btn-primary btn-sm">View</a>
                                             </td>
