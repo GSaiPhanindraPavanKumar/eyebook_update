@@ -26,7 +26,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $classroom = $zoom->createVirtualClassroom($topic, $start_time_iso8601, $duration);
 
     if (isset($classroom['id'])) {
-        // Save the start time with the classroom
+        // Save the start time with the classroom in the correct format
         $stmt = $conn->prepare("UPDATE virtual_classrooms SET start_time = ? WHERE classroom_id = ?");
         $stmt->execute([$start_time->format('Y-m-d H:i:s'), $classroom['id']]);
 

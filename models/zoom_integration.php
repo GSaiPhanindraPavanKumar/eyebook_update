@@ -64,8 +64,11 @@ class ZoomAPI {
     }
 
     private function saveVirtualClassroomToDatabase($data) {
+        // Convert the start_time to the correct format
+        $start_time = (new DateTime($data['start_time']))->format('Y-m-d H:i:s');
+    
         $stmt = $this->conn->prepare("INSERT INTO virtual_classrooms (classroom_id, topic, start_time, duration, join_url) VALUES (?, ?, ?, ?, ?)");
-        $stmt->execute([$data['id'], $data['topic'], $data['start_time'], $data['duration'], $data['join_url']]);
+        $stmt->execute([$data['id'], $data['topic'], $start_time, $data['duration'], $data['join_url']]);
     }
 
     public function getAllClassrooms() {
