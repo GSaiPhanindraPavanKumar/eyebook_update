@@ -25,12 +25,11 @@ $userData = $stmt->fetch(PDO::FETCH_ASSOC);
 $name = isset($userData['name']) ? htmlspecialchars($userData['name']) : "Danny McLoan";
 $profileImage = isset($userData['profileImage']) ? $userData['profileImage'] : null;
 $email = isset($userData['email']) ? htmlspecialchars($userData['email']) : "danny@example.com";
-$phone = isset($userData['phone']) ? htmlspecialchars($userData['phone']) : "123-456-7890";
 $regd_no = isset($userData['regd_no']) ? htmlspecialchars($userData['regd_no']) : "123456";
 $section = isset($userData['section']) ? htmlspecialchars($userData['section']) : "A";
 $stream = isset($userData['stream']) ? htmlspecialchars($userData['stream']) : "Science";
 $year = isset($userData['year']) ? htmlspecialchars($userData['year']) : "1st Year";
-$department = isset($userData['department']) ? htmlspecialchars($userData['department']) : "Journalism";
+$dept = isset($userData['dept']) ? htmlspecialchars($userData['dept']) : "Journalism";
 $university = isset($userData['university_name']) ? htmlspecialchars($userData['university_name']) : "Unknown University";
 
 // Handle form submission for profile update
@@ -38,12 +37,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     // Update user data with the submitted form data
     $name = htmlspecialchars($_POST['name']);
     $email = htmlspecialchars($_POST['email']);
-    $phone = htmlspecialchars($_POST['phone']);
     $regd_no = htmlspecialchars($_POST['regd_no']);
     $section = htmlspecialchars($_POST['section']);
     $stream = htmlspecialchars($_POST['stream']);
     $year = htmlspecialchars($_POST['year']);
-    $department = htmlspecialchars($_POST['department']);
+    $dept = htmlspecialchars($_POST['dept']);
     
     // Handle profile image upload
     if (isset($_FILES['profileImage']) && $_FILES['profileImage']['size'] > 0) {
@@ -51,28 +49,26 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
     
     // Save the updated data to the database
-    $stmt = $conn->prepare("UPDATE students SET name=?, email=?, phone=?, regd_no=?, section=?, stream=?, year=?, department=?, profileImage=? WHERE email=?");
+    $stmt = $conn->prepare("UPDATE students SET name=?, email=?, regd_no=?, section=?, stream=?, year=?, dept=?, profileImage=? WHERE email=?");
     $stmt->bindParam(1, $name);
     $stmt->bindParam(2, $email);
-    $stmt->bindParam(3, $phone);
-    $stmt->bindParam(4, $regd_no);
-    $stmt->bindParam(5, $section);
-    $stmt->bindParam(6, $stream);
-    $stmt->bindParam(7, $year);
-    $stmt->bindParam(8, $department);
-    $stmt->bindParam(9, $profileImage, PDO::PARAM_LOB);
-    $stmt->bindParam(10, $email);
+    $stmt->bindParam(3, $regd_no);
+    $stmt->bindParam(4, $section);
+    $stmt->bindParam(5, $stream);
+    $stmt->bindParam(6, $year);
+    $stmt->bindParam(7, $dept);
+    $stmt->bindParam(8, $profileImage, PDO::PARAM_LOB);
+    $stmt->bindParam(9, $email);
     $stmt->execute();
     
     // Update the userData array for display
     $userData['name'] = $name;
     $userData['email'] = $email;
-    $userData['phone'] = $phone;
     $userData['regd_no'] = $regd_no;
     $userData['section'] = $section;
     $userData['stream'] = $stream;
     $userData['year'] = $year;
-    $userData['department'] = $department;
+    $userData['dept'] = $dept;
     $userData['profileImage'] = $profileImage;
 }
 ?>
@@ -100,12 +96,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                         <!-- Additional User Details -->
                         <div style="margin-top: 20px;">
                             <p><strong>Email:</strong> <?php echo $email; ?></p>
-                            <p><strong>Phone:</strong> <?php echo $phone; ?></p>
                             <p><strong>Registration Number:</strong> <?php echo $regd_no; ?></p>
                             <p><strong>Section:</strong> <?php echo $section; ?></p>
                             <p><strong>Stream:</strong> <?php echo $stream; ?></p>
                             <p><strong>Year:</strong> <?php echo $year; ?></p>
-                            <p><strong>Department:</strong> <?php echo $department; ?></p>
+                            <p><strong>Dept:</strong> <?php echo $dept; ?></p>
                             <p><strong>University:</strong> <?php echo $university; ?></p>
                         </div>
 
@@ -127,10 +122,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                     <input type="email" class="form-control" id="email" name="email" value="<?php echo $email; ?>" required>
                                 </div>
                                 <div class="form-group">
-                                    <label for="phone">Phone:</label>
-                                    <input type="text" class="form-control" id="phone" name="phone" value="<?php echo $phone; ?>" required>
-                                </div>
-                                <div class="form-group">
                                     <label for="regd_no">Registration Number:</label>
                                     <input type="text" class="form-control" id="regd_no" name="regd_no" value="<?php echo $regd_no; ?>" required>
                                 </div>
@@ -147,8 +138,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                     <input type="text" class="form-control" id="year" name="year" value="<?php echo $year; ?>" required>
                                 </div>
                                 <div class="form-group">
-                                    <label for="department">Department:</label>
-                                    <input type="text" class="form-control" id="department" name="department" value="<?php echo $department; ?>" required>
+                                    <label for="department">Dept:</label>
+                                    <input type="text" class="form-control" id="department" name="dept" value="<?php echo $dept; ?>" required>
                                 </div>
                                 <div class="form-group">
                                     <label for="profileImage">Profile Image:</label>

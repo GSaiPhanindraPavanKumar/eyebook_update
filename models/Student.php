@@ -87,24 +87,14 @@ class Student {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    // public static function getAllByFaculty($conn, $facultyId) {
-    //     $sql = "SELECT * FROM students WHERE email = :faculty_id";
-    //     $stmt = $conn->prepare($sql);
-    //     $stmt->execute([':email' => $facultyId]);
-    //     return $stmt->fetchAll(PDO::FETCH_ASSOC);
-    // }
-    public static function getAllBySectionYearAndUniversity($conn, $section, $year, $university_short_name) {
-        $sql = "SELECT students.* FROM students 
-                JOIN universities ON students.university_id = universities.id 
-                WHERE students.section = :section 
-                AND students.year = :year 
-                AND universities.short_name = :university_short_name";
+    public static function getAllByFaculty($conn, $facultyEmail) {
+        $sql = "SELECT students.* 
+                FROM students 
+                JOIN faculty ON students.university_id = faculty.university_id 
+                WHERE faculty.email = :facultyEmail";
         $stmt = $conn->prepare($sql);
-        $stmt->execute([
-            ':section' => $section,
-            ':year' => $year,
-            ':university_short_name' => $university_short_name
-        ]);
+        $stmt->bindParam(':facultyEmail', $facultyEmail, PDO::PARAM_STR);
+        $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 

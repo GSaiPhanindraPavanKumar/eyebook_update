@@ -10,17 +10,23 @@ if (!isset($_SESSION['student_id'])) {
 }
 $studentId = $_SESSION['student_id']; // Assuming student ID is stored in session
 
+// Fetch the student's data
+$student = Student::getById($conn, $studentId);
+$studentUniversityId = $student['university_id'];
+
 // Fetch courses from the database
-$sql = "SELECT id, name, description, course_book, status FROM courses";
+$sql = "SELECT id, name, description, course_book, status, universities FROM courses";
 $stmt = $conn->query($sql);
 $courses = [];
 
 while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-    $courses[] = $row;
+    $courseUniversities = !empty($row['universities']) ? json_decode($row['universities'], true) : [];
+    if (is_array($courseUniversities) && in_array($studentUniversityId, $courseUniversities)) {
+        $courses[] = $row;
+    }
 }
 
 // Fetch the student's completed books
-$student = Student::getById($conn, $studentId);
 $completedBooks = !empty($student['completed_books']) ? json_decode($student['completed_books'], true) : [];
 
 // Calculate progress data for each course

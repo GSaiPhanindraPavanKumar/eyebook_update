@@ -46,6 +46,7 @@ class AuthController {
                 // Check faculty credentials
                 $faculty = $this->facultyModel->login($username, $password);
                 if ($faculty) {
+                    $_SESSION['faculty_id'] = $faculty['id'];
                     $_SESSION['email'] = $username;
                     header('Location: /faculty/dashboard');
                     exit();
@@ -54,6 +55,7 @@ class AuthController {
                 // Check student credentials
                 $student = $this->studentModel->login($username, $password);
                 if ($student) {
+                    $_SESSION['student_id'] = $student['id'];
                     $_SESSION['email'] = $username;
                     header('Location: /student/dashboard');
                     exit();

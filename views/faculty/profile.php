@@ -1,22 +1,30 @@
 <?php
 include 'sidebar.php';
 use Models\Database;
-$conn = Database::getConnection();
 
-// Fetch user data and university name from the database
-$userId = $_SESSION['faculty_id']; // Assuming faculty ID is stored in session
+// Check if the user is not logged in
+if (!isset($_SESSION['email'])) {
+    header("Location: login");
+    exit;
+}
+
+// Get the email from the session
+$email = $_SESSION['email'];
+
+// Use prepared statements to prevent SQL injection
+$conn = Database::getConnection();
 $query = "SELECT faculty.*, universities.long_name AS university_name 
           FROM faculty 
           JOIN universities ON faculty.university_id = universities.id 
-          WHERE faculty.id = :userId";
+          WHERE faculty.email = :email";
 $stmt = $conn->prepare($query);
-$stmt->bindParam(':userId', $userId, PDO::PARAM_INT);
+$stmt->bindValue(':email', $email);
 $stmt->execute();
 $userData = $stmt->fetch(PDO::FETCH_ASSOC);
 
 // Check if user data is available; if not, set default placeholder values
 $name = isset($userData['name']) ? htmlspecialchars($userData['name']) : "Danny McLoan";
-$jobTitle =  "Faculty";
+$jobTitle = "Faculty";
 $profileImage = isset($userData['profileImage']) ? $userData['profileImage'] : null;
 $email = isset($userData['email']) ? htmlspecialchars($userData['email']) : "danny@example.com";
 $phone = isset($userData['phone']) ? htmlspecialchars($userData['phone']) : "123-456-7890";
@@ -38,14 +46,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
     
     // Save the updated data to the database
-    $stmt = $conn->prepare("UPDATE faculty SET name=?, jobTitle=?, email=?, phone=?, department=?, profileImage=? WHERE id=?");
+    $stmt = $conn->prepare("UPDATE faculty SET name=?, jobTitle=?, email=?, phone=?, department=?, profileImage=? WHERE email=?");
     $stmt->bindParam(1, $name);
     $stmt->bindParam(2, $jobTitle);
     $stmt->bindParam(3, $email);
     $stmt->bindParam(4, $phone);
     $stmt->bindParam(5, $department);
     $stmt->bindParam(6, $profileImage, PDO::PARAM_LOB);
-    $stmt->bindParam(7, $userId, PDO::PARAM_INT);
+    $stmt->bindParam(7, $email);
     $stmt->execute();
     
     // Update the userData array for display

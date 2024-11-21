@@ -5,14 +5,27 @@ use Models\Faculty;
 use Models\Course;
 
 $conn = Database::getConnection();
+if (!isset($_SESSION['faculty_id'])) {
+    die('Faculty ID not set in session.');
+}
+
+
+$facultyId = $_SESSION['faculty_id']; // Assuming faculty ID is stored in session
+
+// Fetch the faculty's data
+$faculty = Faculty::getById($conn, $facultyId);
+$facultyUniversityId = $faculty['university_id'];
 
 // Fetch courses from the database
-$sql = "SELECT id, name, description, course_book, status FROM courses";
+$sql = "SELECT id, name, description, course_book, status, universities FROM courses";
 $stmt = $conn->query($sql);
 $courses = [];
 
 while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-    $courses[] = $row;
+    $courseUniversities = !empty($row['universities']) ? json_decode($row['universities'], true) : [];
+    if (is_array($courseUniversities) && in_array($facultyUniversityId, $courseUniversities)) {
+        $courses[] = $row;
+    }
 }
 
 // Fetch all students
