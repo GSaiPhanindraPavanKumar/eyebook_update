@@ -66,7 +66,7 @@ class Student {
         $student = $stmt->fetch(PDO::FETCH_ASSOC);
 
         if ($student && password_verify($password, $student['password'])) {
-            $_SESSION['student_id'] = $student['id']; // Set student_id in session
+            $_SESSION['email'] = $student['email']; // Set email in session
             return $student;
         }
 
@@ -77,6 +77,13 @@ class Student {
         $sql = "SELECT * FROM students WHERE id = :id";
         $stmt = $conn->prepare($sql);
         $stmt->execute(['id' => $id]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+    public static function getByEmail($conn, $email) {
+        $sql = "SELECT * FROM students WHERE email = :email";
+        $stmt = $conn->prepare($sql);
+        $stmt->execute([':email' => $email]);
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
@@ -99,13 +106,32 @@ class Student {
     }
 
     public static function submitAssignment($conn, $student_id, $assignment_id, $file_path) {
-        $sql = "INSERT INTO assignment_submissions (student_id, assignment_id, file_path) VALUES (:student_id, :assignment_id, :file_path)";
+        $sql = "INSERT INTO assignment_submissions (student_id, assignment_id, file_path) VALUES (:student_id, :assignment_id, :file_path)
+                ON DUPLICATE KEY UPDATE file_path = :file_path";
         $stmt = $conn->prepare($sql);
         $stmt->execute([
             ':student_id' => $student_id,
             ':assignment_id' => $assignment_id,
             ':file_path' => $file_path
         ]);
+    }
+
+    public static function updatePassword($conn, $student_id, $new_password) {
+        $stmt = $conn->prepare("UPDATE students SET password = :new_password WHERE id = :admin_id");
+        $stmt->execute([
+            ':new_password' => $new_password,
+            ':admin_id' => $student_id
+        ]);
+    }
+
+    public static function getAssignmentsByStudentId($conn, $student_id) {
+        $sql = "SELECT a.*, s.file_path, s.grade 
+                FROM assignments a
+                LEFT JOIN assignment_submissions s ON a.id = s.assignment_id AND s.student_id = :student_id
+                WHERE a.course_id IN (SELECT course_id FROM student_courses WHERE student_id = :student_id)";
+        $stmt = $conn->prepare($sql);
+        $stmt->execute([':student_id' => $student_id]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 }
 ?>

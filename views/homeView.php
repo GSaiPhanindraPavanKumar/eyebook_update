@@ -44,10 +44,11 @@
           <button class="navbar-toggler collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
           <div class="collapse navbar-collapse" id="navbarSupportedContent">
             <ul class="navbar-nav me-auto ms-lg-4 ms-xl-7 border-bottom border-lg-bottom-0 pt-2 pt-lg-0">
-              <li class="nav-item"><a class="nav-link fw-bold active" aria-current="page" href="#">About</a></li>
+              <!-- <li class="nav-item"><a class="nav-link fw-bold active" aria-current="page" href="#">About</a></li>
               <li class="nav-item"><a class="nav-link fw-medium" href="#">Help</a></li>
               <li class="nav-item"><a class="nav-link fw-medium" href="#">Features</a></li>
-              <li class="nav-item"><a class="nav-link fw-medium" href="#">Signup</a></li>
+              <li class="nav-item"><a class="nav-link fw-medium" href="#">Signup</a></li> -->
+              <h3>EyeBook</h3>
             </ul>
             <form class="d-flex py-3 py-lg-0"><a class="btn btn-light rounded-pill shadow fw-bold" href="login" role="button">Login
                 <svg class="bi bi-arrow-right" xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="#9C69E2" viewBox="0 0 16 16">

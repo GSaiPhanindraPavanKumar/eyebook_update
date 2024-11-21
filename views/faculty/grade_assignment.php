@@ -1,22 +1,72 @@
-<?php include('sidebar.php'); ?>
+<?php
+include 'sidebar.php';
+use Models\Database;
+use Models\Assignment;
 
-<div class="container mx-auto p-4">
-    <h1 class="text-3xl font-bold mb-6">Grade Assignment</h1>
-    <div class="bg-white p-6 rounded-lg shadow-md">
-        <h2 class="text-2xl font-bold mb-4">Submission</h2>
-        <p><strong>Student:</strong> <?= htmlspecialchars($submission['student_name']) ?></p>
-        <p><strong>File:</strong> <a href="<?= htmlspecialchars($submission['file_path']) ?>" target="_blank" class="text-blue-500 hover:underline">Download</a></p>
-        <form method="POST" action="/faculty/grade_assignment/<?= $submission['assignment_id'] ?>/<?= $submission['student_id'] ?>">
-            <div class="mb-4">
-                <label for="grade" class="block text-sm font-medium text-gray-700">Grade</label>
-                <input type="number" id="grade" name="grade" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+$conn = Database::getConnection();
+
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $submission_id = $_POST["submission_id"];
+    $grade = $_POST["grade"];
+    $feedback = $_POST["feedback"];
+
+    $sql = "UPDATE submissions SET grade = :grade, feedback = :feedback WHERE id = :id";
+    $stmt = $conn->prepare($sql);
+    $stmt->bindParam(':grade', $grade);
+    $stmt->bindParam(':feedback', $feedback);
+    $stmt->bindParam(':id', $submission_id);
+    $stmt->execute();
+
+    echo "<div class='alert alert-success'>Grade and feedback have been updated.</div>";
+}
+
+$assignment_id = $_GET['assignment_id'];
+$student_id = $_GET['student_id'];
+
+$sql = "SELECT * FROM submissions WHERE assignment_id = :assignment_id AND student_id = :student_id";
+$stmt = $conn->prepare($sql);
+$stmt->bindParam(':assignment_id', $assignment_id);
+$stmt->bindParam(':student_id', $student_id);
+$stmt->execute();
+$submission = $stmt->fetch(PDO::FETCH_ASSOC);
+?>
+
+<div class="main-panel">
+    <div class="content-wrapper">
+        <div class="row">
+            <div class="col-md-12 grid-margin">
+                <div class="row">
+                    <div class="col-12 col-xl-8 mb-4 mb-xl-0">
+                        <h3 class="font-weight-bold">Grade Assignment</h3>
+                    </div>
+                </div>
             </div>
-            <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition duration-300">Submit Grade</button>
-        </form>
-        <div class="mt-4">
-            <a href="/faculty/manage_assignments" class="text-blue-500 hover:underline">Back to Assignments</a>
+        </div>
+        <div class="row">
+            <div class="col-md-12 grid-margin stretch-card">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Grade Assignment</h5>
+                        <form action="grade_assignment.php" method="post">
+                            <input type="hidden" name="submission_id" value="<?= $submission['id'] ?>">
+                            <div class="form-group">
+                                <label for="grade">Grade:</label>
+                                <input type="text" class="form-control" id="grade" name="grade" value="<?= htmlspecialchars($submission['grade']) ?>" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="feedback">Feedback:</label>
+                                <textarea class="form-control" id="feedback" name="feedback" required><?= htmlspecialchars($submission['feedback']) ?></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Submit Grade</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
+    <!-- content-wrapper ends -->
+    <?php include 'footer.html'; ?>
 </div>
 
-<?php include('footer.html'); ?>
+<!-- Include Bootstrap CSS -->
+<link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
