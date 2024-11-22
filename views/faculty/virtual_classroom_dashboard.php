@@ -70,7 +70,7 @@ usort($facultyClassrooms, function($a, $b) {
                         <div class="col-md-12 grid-margin stretch-card">
                             <div class="card">
                                 <div class="card-body">
-                                    <h4 class="card-title">Ongoing and Upcoming Classes</h4>
+                                    <h4 class="card-title">Today's and Upcoming Classes</h4>
                                     <table class="table table-hover">
                                         <thead class="thead-dark">
                                             <tr>
@@ -89,6 +89,7 @@ usort($facultyClassrooms, function($a, $b) {
                                                 $start_time = new DateTime($classroom['start_time'], new DateTimeZone('UTC'));
                                                 $end_time = clone $start_time;
                                                 $end_time->modify('+' . $classroom['duration'] . ' minutes');
+                                                if ($current_time <= $end_time):
                                             ?>
                                                 <tr>
                                                     <td><?php echo htmlspecialchars($classroom['topic']); ?></td>
@@ -97,10 +98,12 @@ usort($facultyClassrooms, function($a, $b) {
                                                     <td><?php echo htmlspecialchars($end_time->format('H:i:s')); ?></td>
                                                     <td><a href="<?php echo htmlspecialchars($classroom['join_url']); ?>" target="_blank" class="btn btn-primary">Join</a></td>
                                                     <td>
-                                                        <a href="/faculty/take_attendance?classroom_id=<?php echo htmlspecialchars($classroom['classroom_id']); ?>" class="btn btn-warning">Take Attendance</a>
+                                                        <?php if ($current_time->format('Y-m-d') == $start_time->format('Y-m-d')): ?>
+                                                            <a href="/faculty/take_attendance?classroom_id=<?php echo htmlspecialchars($classroom['classroom_id']); ?>" class="btn btn-warning">Take Attendance</a>
+                                                        <?php endif; ?>
                                                     </td>
                                                 </tr>
-                                            <?php endforeach; ?>
+                                            <?php endif; endforeach; ?>
                                         </tbody>
                                     </table>
                                 </div>
@@ -112,7 +115,7 @@ usort($facultyClassrooms, function($a, $b) {
                         <div class="col-md-12 grid-margin stretch-card">
                             <div class="card">
                                 <div class="card-body">
-                                    <h4 class="card-title">Completed Classes</h4>
+                                    <h4 class="card-title">Past Classes</h4>
                                     <table class="table table-hover">
                                         <thead class="thead-dark">
                                             <tr>
@@ -129,6 +132,7 @@ usort($facultyClassrooms, function($a, $b) {
                                                 $start_time = new DateTime($classroom['start_time'], new DateTimeZone('UTC'));
                                                 $end_time = clone $start_time;
                                                 $end_time->modify('+' . $classroom['duration'] . ' minutes');
+                                                if ($current_time > $end_time):
                                             ?>
                                                 <tr>
                                                     <td><?php echo htmlspecialchars($classroom['topic']); ?></td>
@@ -143,7 +147,7 @@ usort($facultyClassrooms, function($a, $b) {
                                                         <?php endif; ?>
                                                     </td>
                                                 </tr>
-                                            <?php endforeach; ?>
+                                            <?php endif; endforeach; ?>
                                         </tbody>
                                     </table>
                                 </div>
