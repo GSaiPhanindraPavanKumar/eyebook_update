@@ -243,7 +243,7 @@ if ($userData) {
 
                 <li class="nav-item"><hr></li>
                 <li class="nav-item">
-                    <a class="nav-link" href="/student/change_password">
+                    <a class="nav-link" href="/student/updatePassword">
                         <i class="ti-settings menu-icon"></i>
                         <span class="menu-title">Change Password</span>
                     </a>
