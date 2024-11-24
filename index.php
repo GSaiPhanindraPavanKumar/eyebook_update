@@ -163,10 +163,10 @@ $router->get('/student/profile', function(){
 });
 
 $router->get('/student/discussion_forum/(\d+)', function(){
-    require 'views/faculty/discussion_forum.php';
+    require 'views/student/discussion_forum.php';
 });
 $router->post('/student/discussion_forum/(\d+)', function(){
-    require 'views/faculty/discussion_forum.php';
+    require 'views/student/discussion_forum.php';
 });
 
 $router->get('/student/my_courses', function(){
