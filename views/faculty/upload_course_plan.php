@@ -1,5 +1,7 @@
 <?php
 use Models\Database;
+use Aws\S3\S3Client;
+use Aws\Exception\AwsException;
 
 $conn = Database::getConnection();
 
@@ -10,15 +12,38 @@ if ($course_id == 0) {
 }
 
 if (isset($_FILES['course_plan_file']) && $_FILES['course_plan_file']['error'] == UPLOAD_ERR_OK) {
-    $upload_dir = "uploads/course-$course_id/courseplan/"; // Adjust the path to your uploads directory
-    if (!is_dir($upload_dir)) {
-        mkdir($upload_dir, 0777, true); // Create the uploads directory if it doesn't exist
-    }
-    $file_name = basename($_FILES['course_plan_file']['name']);
-    $target_file = $upload_dir . time() . '-' . $file_name;
+    // AWS S3 configuration
+    $bucketName = 'mobileappliaction';
+    $region = 'us-east-1';
+    $accessKey = 'AKIAUNJHJGMDLG4ZWEWS';
+    $secretKey = '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';
 
-    if (move_uploaded_file($_FILES['course_plan_file']['tmp_name'], $target_file)) {
-        $course_plan_url = "uploads/course-$course_id/courseplan/" . time() . '-' . $file_name;
+    // Initialize S3 client
+    $s3Client = new S3Client([
+        'region' => $region,
+        'version' => 'latest',
+        'credentials' => [
+            'key' => $accessKey,
+            'secret' => $secretKey,
+        ],
+    ]);
+
+    // Upload course plan file to S3
+    $filePath = $_FILES['course_plan_file']['tmp_name'];
+    $fileName = basename($_FILES['course_plan_file']['name']);
+    $timestamp = time();
+    $key = "course_documents/{$course_id}/course_plan/{$timestamp}-{$fileName}";
+
+    try {
+        $result = $s3Client->putObject([
+            'Bucket' => $bucketName,
+            'Key' => $key,
+            'SourceFile' => $filePath,
+            'ContentType' => 'application/pdf',
+        ]);
+
+        // Get the URL of the uploaded file
+        $course_plan_url = $result['ObjectURL'];
 
         // Update the course_plan column in the database
         $sql = "UPDATE courses SET course_plan = JSON_OBJECT('url', ?) WHERE id = ?";
@@ -31,8 +56,8 @@ if (isset($_FILES['course_plan_file']) && $_FILES['course_plan_file']['error'] =
         } else {
             echo "Error updating record: " . $stmt->errorInfo()[2];
         }
-    } else {
-        echo "Error uploading file.";
+    } catch (AwsException $e) {
+        echo "Error uploading file to S3: " . $e->getMessage();
     }
 } else {
     echo "No file uploaded or upload error.";

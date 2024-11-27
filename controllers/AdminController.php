@@ -15,6 +15,9 @@ use Models\Meetings;
 use PDO;
 use ZipArchive;
 
+use Aws\S3\S3Client;
+use Aws\Exception\AwsException;
+
 use Exception;
 use PDOException;
 
@@ -239,6 +242,8 @@ class AdminController {
     }
 
     public function addUnit() {
+        set_time_limit(600); // Set the maximum execution time to 600 seconds
+    
         $conn = Database::getConnection();
     
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
@@ -262,52 +267,117 @@ class AdminController {
                 exit;
             }
     
-            // Decode the existing content or initialize an empty array
-            $course_content = json_decode($course['course_book'], true);
-            if (!is_array($course_content)) {
-                $course_content = [];
-            }
+            // AWS S3 configuration
+            $bucketName = 'mobileappliaction';
+            $region = 'us-east-1';
+            $accessKey = 'AKIAUNJHJGMDLG4ZWEWS';
+            $secretKey = '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';
     
-            // Create a directory for the SCORM package
-            $scorm_dir = "uploads/course-$course_id/course_book" . time() . '-' . basename($scorm_file['name'], '.zip');
-            mkdir($scorm_dir, 0777, true);
+            // Initialize S3 client
+            $s3Client = new S3Client([
+                'region' => $region,
+                'version' => 'latest',
+                'credentials' => [
+                    'key' => $accessKey,
+                    'secret' => $secretKey,
+                ],
+            ]);
     
-            // Unzip the SCORM package directly to the created directory
-            $zip = new ZipArchive;
-            if ($zip->open($scorm_file['tmp_name']) === TRUE) {
-                $zip->extractTo($scorm_dir);
-                $zip->close();
-            } else {
-                echo json_encode(['message' => 'Failed to unzip SCORM package']);
+            // Upload SCORM file to S3
+            $filePath = $scorm_file['tmp_name'];
+            $fileName = basename($scorm_file['name']);
+            $timestamp = time();
+            $key = "course_documents/{$course_id}/course_book/{$timestamp}-{$fileName}";
+    
+            try {
+                $result = $s3Client->putObject([
+                    'Bucket' => $bucketName,
+                    'Key' => $key,
+                    'SourceFile' => $filePath,
+                    'ContentType' => 'application/zip',
+                ]);
+    
+                // Get the URL of the uploaded file
+                $fileUrl = $result['ObjectURL'];
+    
+                // Unzip the uploaded SCORM package in the S3 bucket
+                $unzipFolderName = pathinfo($fileName, PATHINFO_FILENAME);
+                $unzipKey = "course_documents/{$course_id}/course_book/{$timestamp}/{$unzipFolderName}/";
+                $this->unzipS3Object($s3Client, $bucketName, $key, $unzipKey);
+    
+                // Save the public access link of the index.html file in the database
+                $indexUrl = "https://{$bucketName}.s3.{$region}.amazonaws.com/{$unzipKey}index.html";
+                $indexUrl = preg_replace('#/+#', '/', $indexUrl);  // Replace multiple slashes with a single one
+    
+                // Update the course_book column in the courses table
+                $course_book = json_decode($course['course_book'], true) ?? [];
+                $course_book[] = [
+                    'unit_name' => $unit_name,
+                    'scorm_url' => $indexUrl,
+                ];
+                $course_book_json = json_encode($course_book);
+    
+                $sql = "UPDATE courses SET course_book = :course_book WHERE id = :id";
+                $stmt = $conn->prepare($sql);
+                $stmt->execute([
+                    'course_book' => $course_book_json,
+                    'id' => $course_id,
+                ]);
+    
+                echo json_encode(['message' => 'Unit added successfully', 'scorm_url' => $indexUrl]);
+    
+                header("Location: /admin/view_course/$course_id");
                 exit;
+            } catch (AwsException $e) {
+                echo json_encode(['message' => 'Error uploading file to S3: ' . $e->getMessage()]);
             }
-    
-            // Verify that the index.html file exists
-            $index_path = $scorm_dir . '/index.html';
-            if (!file_exists($index_path)) {
-                echo json_encode(['message' => 'index.html file not found']);
-                exit;
-            }
-    
-            // Add the new unit to the course content
-            $new_unit = [
-                'unitTitle' => $unit_name,
-                'materials' => [['scormDir' => $scorm_dir, 'indexPath' => $index_path]]
-            ];
-            $course_content[] = $new_unit;
-    
-            // Update the course in the database
-            $sql = "UPDATE courses SET course_book = ? WHERE id = ?";
-            $stmt = $conn->prepare($sql);
-            $content_json = json_encode($course_content);
-            $stmt->execute([$content_json, $course_id]);
-    
-            echo json_encode(['message' => 'Unit added successfully with SCORM content', 'indexPath' => $index_path]);
-    
-            header("Location: /admin/view_course/$course_id");
-            exit;
         }
     }
+    
+    private function unzipS3Object($s3Client, $bucketName, $key, $unzipKey) {
+        // Download the zip file to a temporary location
+        $tempFile = tempnam(sys_get_temp_dir(), 'scorm');
+        $s3Client->getObject([
+            'Bucket' => $bucketName,
+            'Key' => $key,
+            'SaveAs' => $tempFile,
+        ]);
+    
+        // Unzip the file
+        $zip = new ZipArchive;
+        if ($zip->open($tempFile) === TRUE) {
+            for ($i = 0; $i < $zip->numFiles; $i++) {
+                $filename = $zip->getNameIndex($i);
+                $fileinfo = pathinfo($filename);
+    
+                // Extract the file to a temporary location
+                $extractTo = tempnam(sys_get_temp_dir(), 'scorm');
+                file_put_contents($extractTo, $zip->getFromIndex($i));
+    
+                // Determine correct Content-Type
+                $mimeType = mime_content_type($extractTo);
+                if (!$mimeType) {
+                    $mimeType = 'text/html'; // Fallback
+                }
+    
+                // Upload the extracted file to S3
+                $s3Client->putObject([
+                    'Bucket' => $bucketName,
+                    'Key' => $unzipKey . $filename,
+                    'SourceFile' => $extractTo,
+                    'ContentType' => $mimeType,
+                ]);
+    
+                // Delete the temporary file
+                unlink($extractTo);
+            }
+            $zip->close();
+        }
+    
+        // Delete the temporary zip file
+        unlink($tempFile);
+    }
+    
 
     public function assignCourse() {
         $conn = Database::getConnection();
@@ -437,13 +507,13 @@ class AdminController {
 
     public function viewUniversity($university_id) {
         $conn = Database::getConnection();
-    
+
         // Fetch university details
         $university = University::getById($conn, $university_id);
         $spoc = Spoc::getByUniversityId($conn, $university_id);
         $student_count = Student::getCountByUniversityId($conn, $university_id);
         $course_count = Course::getCountByUniversityId($conn, $university_id);
-    
+
         require 'views/admin/view_university.php';
     }
 

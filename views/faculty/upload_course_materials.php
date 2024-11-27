@@ -1,9 +1,13 @@
 <?php
 use Models\Database;
+use Aws\S3\S3Client;
+use Aws\Exception\AwsException;
 
 $conn = Database::getConnection();
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    set_time_limit(600); // Set the maximum execution time to 600 seconds
+
     $course_id = isset($_POST['course_id']) ? intval($_POST['course_id']) : 0;
     $upload_type = isset($_POST['upload_type']) ? $_POST['upload_type'] : 'single';
 
@@ -17,15 +21,38 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
 
         if (isset($_FILES['course_materials_file']) && $_FILES['course_materials_file']['error'] == UPLOAD_ERR_OK) {
-            $upload_dir = "uploads/course-$course_id/unit-$unit_number/"; // Dynamic directory based on course ID and unit number
-            if (!is_dir($upload_dir)) {
-                mkdir($upload_dir, 0777, true); // Create the uploads directory if it doesn't exist
-            }
-            $file_name = basename($_FILES['course_materials_file']['name']);
-            $target_file = $upload_dir . time() . '-' . $file_name;
+            // AWS S3 configuration
+            $bucketName = 'mobileappliaction';
+            $region = 'us-east-1';
+            $accessKey = 'AKIAUNJHJGMDLG4ZWEWS';
+            $secretKey = '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';
 
-            if (move_uploaded_file($_FILES['course_materials_file']['tmp_name'], $target_file)) {
-                $course_materials_url = "uploads/course-$course_id/unit-$unit_number/" . time() . '-' . $file_name;
+            // Initialize S3 client
+            $s3Client = new S3Client([
+                'region' => $region,
+                'version' => 'latest',
+                'credentials' => [
+                    'key' => $accessKey,
+                    'secret' => $secretKey,
+                ],
+            ]);
+
+            // Upload course materials file to S3
+            $filePath = $_FILES['course_materials_file']['tmp_name'];
+            $fileName = basename($_FILES['course_materials_file']['name']);
+            $timestamp = time();
+            $key = "course_documents/{$course_id}/unit-{$unit_number}/{$timestamp}-{$fileName}";
+
+            try {
+                $result = $s3Client->putObject([
+                    'Bucket' => $bucketName,
+                    'Key' => $key,
+                    'SourceFile' => $filePath,
+                    'ContentType' => 'application/pdf',
+                ]);
+
+                // Construct the full URL of the uploaded file
+                $course_materials_url = "https://{$bucketName}.s3.{$region}.amazonaws.com/{$key}";
 
                 // Fetch existing course materials
                 $sql = "SELECT course_materials FROM courses WHERE id = ?";
@@ -44,7 +71,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     'topic' => $topic,
                     'materials' => [
                         [
-                            'title' => $file_name,
+                            'title' => $fileName,
                             'indexPath' => $course_materials_url
                         ]
                     ]
@@ -64,8 +91,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 } else {
                     echo json_encode(['message' => 'Error updating record: ' . $stmt->errorInfo()[2]]);
                 }
-            } else {
-                echo json_encode(['message' => 'Error uploading file']);
+            } catch (AwsException $e) {
+                echo json_encode(['message' => 'Error uploading file to S3: ' . $e->getMessage()]);
             }
         } else {
             echo json_encode(['message' => 'No file uploaded or upload error']);
@@ -79,22 +106,80 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
 
         if (isset($_FILES['bulk_course_materials_file']) && $_FILES['bulk_course_materials_file']['error'] == UPLOAD_ERR_OK) {
-            $zip_name = time(). '-' .pathinfo($_FILES['bulk_course_materials_file']['name'], PATHINFO_FILENAME);
-            $upload_dir = "uploads/course-$course_id/unit-$unit_number/$zip_name/"; // Dynamic directory based on course ID, unit number, and zip file name
-            if (!is_dir($upload_dir)) {
-                mkdir($upload_dir, 0777, true); // Create the uploads directory if it doesn't exist
-            }
-            $file_name = basename($_FILES['bulk_course_materials_file']['name']);
-            $target_file = $upload_dir . time() . '-' . $file_name;
+            // AWS S3 configuration
+            $bucketName = 'mobileappliaction';
+            $region = 'us-east-1';
+            $accessKey = 'AKIAUNJHJGMDLG4ZWEWS';
+            $secretKey = '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';
 
-            if (move_uploaded_file($_FILES['bulk_course_materials_file']['tmp_name'], $target_file)) {
+            // Initialize S3 client
+            $s3Client = new S3Client([
+                'region' => $region,
+                'version' => 'latest',
+                'credentials' => [
+                    'key' => $accessKey,
+                    'secret' => $secretKey,
+                ],
+            ]);
+
+            // Upload bulk course materials file to S3
+            $filePath = $_FILES['bulk_course_materials_file']['tmp_name'];
+            $fileName = basename($_FILES['bulk_course_materials_file']['name']);
+            $timestamp = time();
+            $key = "course_documents/{$course_id}/unit-{$unit_number}/{$timestamp}-{$fileName}";
+
+            try {
+                $result = $s3Client->putObject([
+                    'Bucket' => $bucketName,
+                    'Key' => $key,
+                    'SourceFile' => $filePath,
+                    'ContentType' => 'application/zip',
+                ]);
+
+                // Construct the full URL of the uploaded file
+                $bulk_materials_url = "https://{$bucketName}.s3.{$region}.amazonaws.com/{$key}";
+
+                // Download the zip file to a temporary location
+                $tempFile = tempnam(sys_get_temp_dir(), 'scorm');
+                $s3Client->getObject([
+                    'Bucket' => $bucketName,
+                    'Key' => $key,
+                    'SaveAs' => $tempFile,
+                ]);
+
+                // Unzip the file
                 $zip = new ZipArchive;
-                if ($zip->open($target_file) === TRUE) {
-                    $zip->extractTo($upload_dir);
+                if ($zip->open($tempFile) === TRUE) {
+                    $unzipKey = "course_documents/{$course_id}/unit-{$unit_number}/{$timestamp}-{$fileName}/";
+                    for ($i = 0; $i < $zip->numFiles; $i++) {
+                        $filename = $zip->getNameIndex($i);
+                        $fileinfo = pathinfo($filename);
+
+                        // Extract the file to a temporary location
+                        $extractTo = tempnam(sys_get_temp_dir(), 'scorm');
+                        file_put_contents($extractTo, $zip->getFromIndex($i));
+
+                        // Determine correct Content-Type
+                        $mimeType = mime_content_type($extractTo);
+                        if (!$mimeType) {
+                            $mimeType = 'application/octet-stream'; // Fallback
+                        }
+
+                        // Upload the extracted file to S3
+                        $s3Client->putObject([
+                            'Bucket' => $bucketName,
+                            'Key' => $unzipKey . $filename,
+                            'SourceFile' => $extractTo,
+                            'ContentType' => $mimeType,
+                        ]);
+
+                        // Delete the temporary file
+                        unlink($extractTo);
+                    }
                     $zip->close();
 
-                    // Remove the uploaded zip file
-                    unlink($target_file);
+                    // Delete the temporary zip file
+                    unlink($tempFile);
 
                     // Fetch existing course materials
                     $sql = "SELECT course_materials FROM courses WHERE id = ?";
@@ -108,22 +193,25 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     }
 
                     // Add new materials to the course materials
-                    $dir = opendir($upload_dir);
-                    while (($file = readdir($dir)) !== false) {
-                        if ($file != '.' && $file != '..' && is_file($upload_dir . $file)) {
-                            $course_materials[] = [
-                                'unitNumber' => $unit_number,
-                                'topic' => pathinfo($file, PATHINFO_FILENAME),
-                                'materials' => [
-                                    [
-                                        'title' => $file,
-                                        'indexPath' => "uploads/course-$course_id/unit-$unit_number/$zip_name/" . $file
-                                    ]
+                    $objects = $s3Client->listObjectsV2([
+                        'Bucket' => $bucketName,
+                        'Prefix' => $unzipKey,
+                    ]);
+
+                    foreach ($objects['Contents'] as $object) {
+                        $file = basename($object['Key']);
+                        $fileUrl = "https://{$bucketName}.s3.{$region}.amazonaws.com/{$object['Key']}";
+                        $course_materials[] = [
+                            'unitNumber' => $unit_number,
+                            'topic' => pathinfo($file, PATHINFO_FILENAME),
+                            'materials' => [
+                                [
+                                    'title' => $file,
+                                    'indexPath' => $fileUrl
                                 ]
-                            ];
-                        }
+                            ]
+                        ];
                     }
-                    closedir($dir);
 
                     // Update the course_materials column in the database
                     $course_materials_json = json_encode($course_materials);
@@ -141,8 +229,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 } else {
                     echo json_encode(['message' => 'Failed to unzip file']);
                 }
-            } else {
-                echo json_encode(['message' => 'Error uploading file']);
+            } catch (AwsException $e) {
+                echo json_encode(['message' => 'Error uploading file to S3: ' . $e->getMessage()]);
             }
         } else {
             echo json_encode(['message' => 'No file uploaded or upload error']);

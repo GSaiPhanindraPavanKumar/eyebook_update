@@ -16,15 +16,21 @@ class StudentController {
             die('Invalid course ID');
         }
         $course = Course::getById($conn, $course_id);
-
+    
         // Fetch the student data
         if (!isset($_SESSION['email'])) {
             die('Email not set in session.');
         }
         $student = Student::getByEmail($conn, $_SESSION['email']);
-
+    
+        // Ensure course_book is an array
+        if (!is_array($course['course_book'])) {
+            $course['course_book'] = json_decode($course['course_book'], true) ?? [];
+        }
+    
         require 'views/student/view_course.php';
     }
+    
     public function viewBook($hashedId) {
         $conn = Database::getConnection();
         $course_id = base64_decode($hashedId);
@@ -32,20 +38,19 @@ class StudentController {
             die('Invalid course ID');
         }
         $course = Course::getById($conn, $course_id);
-
+    
         if (!$course || empty($course['course_book'])) {
             echo 'SCORM content not found.';
             exit;
         }
-
-        // Assuming the first unit and first material for simplicity
+    
+        // Assuming the first unit for simplicity
         $unit = $course['course_book'][0];
-        $material = $unit['materials'][0];
-        $index_path = 'https://eyebook.phemesoft.com/' . $material['indexPath'];
-        // $index_path = 'http://localhost/new/eyebook_update/' . $material['indexPath'];
-
+        $index_path = $unit['scorm_url'];
+    
         require 'views/student/book_view.php';
     }
+    
     function getCoursesWithProgress($studentId) {
         $conn = Database::getConnection();
         $stmt = $conn->prepare("SELECT * FROM courses WHERE status = 'ongoing'");

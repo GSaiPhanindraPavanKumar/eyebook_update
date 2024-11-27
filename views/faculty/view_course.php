@@ -243,10 +243,10 @@ function showBulkUpload() {
 
 function redirectToCoursePlan() {
     var coursePlan = <?php echo json_encode($course['course_plan']); ?>;
-    var baseUrl = "https://eyebook.phemesoft.com/"; // Replace with your actual base URL
+    // var baseUrl = "https://eyebook.phemesoft.com/"; // Replace with your actual base URL
     var coursePlanUrl = "";
     if (coursePlan && coursePlan.url) {
-        coursePlanUrl = baseUrl + coursePlan.url;
+        coursePlanUrl = coursePlan.url;
     }
 
     if (coursePlanUrl) {
@@ -257,8 +257,8 @@ function redirectToCoursePlan() {
 }
 
 function redirectToCourseBook(url) {
-    var baseUrl = "https://eyebook.phemesoft.com/"; // Replace with your actual base URL
-    var courseBookUrl = baseUrl + "book_view.php?index_path=" + encodeURIComponent(url);
+    // var baseUrl = "https://eyebook.phemesoft.com/"; // Replace with your actual base URL
+    var courseBookUrl = encodeURIComponent(url);
 
     if (url) {
         window.location.href = courseBookUrl;
@@ -268,8 +268,8 @@ function redirectToCourseBook(url) {
 }
 
 function redirectToCourseMaterial(url) {
-    var baseUrl = "https://eyebook.phemesoft.com/"; // Replace with your actual base URL
-    var courseMaterialUrl = baseUrl + url;
+    //var baseUrl = "https://eyebook.phemesoft.com/"; // Replace with your actual base URL
+    var courseMaterialUrl = url;
 
     if (url) {
         window.open(courseMaterialUrl, '_blank');

@@ -150,5 +150,10 @@ class Spoc {
         $stmt = $conn->prepare("UPDATE spocs SET password = ?, reset_token = NULL, reset_token_expiry = NULL WHERE email = ?");
         $stmt->execute([$new_password, $email]);
     }
+    public static function getByUniversityId($conn, $university_id) {
+        $stmt = $conn->prepare("SELECT * FROM spocs WHERE university_id = :university_id");
+        $stmt->execute([':university_id' => $university_id]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
 }
 ?>

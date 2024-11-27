@@ -1,7 +1,10 @@
 <?php
 require_once __DIR__ . '/../../models/Database.php';
+require_once __DIR__ . '/../../vendor/autoload.php';
 
 use Models\Database;
+use Aws\S3\S3Client;
+use Aws\Exception\AwsException;
 
 $conn = Database::getConnection();
 
@@ -26,49 +29,49 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         exit;
     }
 
-    // Decode the existing content or initialize an empty array
-    $course_content = json_decode($course['course_book'], true);
-    if (!is_array($course_content)) {
-        $course_content = [];
+    // AWS S3 configuration
+    $bucketName = 'mobileappliaction';
+    $region = 'us-east-1';
+    $accessKey = 'AKIAUNJHJGMDLG4ZWEWS';
+    $secretKey = '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';
+
+    // Initialize S3 client
+    $s3Client = new S3Client([
+        'region' => $region,
+        'version' => 'latest',
+        'credentials' => [
+            'key' => $accessKey,
+            'secret' => $secretKey,
+        ],
+    ]);
+
+    // Upload SCORM file to S3
+    $filePath = $scorm_file['tmp_name'];
+    $fileName = basename($scorm_file['name']);
+    $key = "scorm_packages/{$course_id}/{$fileName}";
+
+    try {
+        $result = $s3Client->putObject([
+            'Bucket' => $bucketName,
+            'Key' => $key,
+            'SourceFile' => $filePath,
+            'ACL' => 'public-read', // Optional: Set the ACL to public-read if you want the file to be publicly accessible
+        ]);
+
+        // Get the URL of the uploaded file
+        $fileUrl = $result['ObjectURL'];
+
+        // Save the unit details to the database
+        $sql = "INSERT INTO units (course_id, name, scorm_url) VALUES (:course_id, :name, :scorm_url)";
+        $stmt = $conn->prepare($sql);
+        $stmt->execute([
+            'course_id' => $course_id,
+            'name' => $unit_name,
+            'scorm_url' => $fileUrl,
+        ]);
+
+        echo json_encode(['message' => 'Unit added successfully', 'scorm_url' => $fileUrl]);
+    } catch (AwsException $e) {
+        echo json_encode(['message' => 'Error uploading file to S3: ' . $e->getMessage()]);
     }
-
-    // Create a directory for the SCORM package
-    $scorm_dir = "uploads/course-$course_id/course_book" . time() . '-' . basename($scorm_file['name'], '.zip');
-    mkdir($scorm_dir, 0777, true);
-
-    // Unzip the SCORM package directly to the created directory
-    $zip = new ZipArchive;
-    if ($zip->open($scorm_file['tmp_name']) === TRUE) {
-        $zip->extractTo($scorm_dir);
-        $zip->close();
-    } else {
-        echo json_encode(['message' => 'Failed to unzip SCORM package']);
-        exit;
-    }
-
-    // Verify that the index.html file exists
-    $index_path = $scorm_dir . '/index.html';
-    if (!file_exists($index_path)) {
-        echo json_encode(['message' => 'index.html file not found']);
-        exit;
-    }
-
-    // Add the new unit to the course content
-    $new_unit = [
-        'unitTitle' => $unit_name,
-        'materials' => [['scormDir' => $scorm_dir, 'indexPath' => $index_path]]
-    ];
-    $course_content[] = $new_unit;
-
-    // Update the course in the database
-    $sql = "UPDATE courses SET course_book = :course_book WHERE id = :id";
-    $stmt = $conn->prepare($sql);
-    $content_json = json_encode($course_content);
-    $stmt->execute(['course_book' => $content_json, 'id' => $course_id]);
-
-    echo json_encode(['message' => 'Unit added successfully with SCORM content', 'indexPath' => $index_path]);
-
-    header("Location: view_course.php?id=$course_id");
-    exit;
 }
-?>

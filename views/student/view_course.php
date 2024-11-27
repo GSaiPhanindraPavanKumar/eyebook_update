@@ -52,22 +52,18 @@
                                 if (!empty($course['course_book'])) {
                                     $serialNumber = 1; 
                                     foreach ($course['course_book'] as $unit) {
-                                        if (isset($unit['materials'])) {
-                                            foreach ($unit['materials'] as $material) {
-                                                $isCompleted = in_array($material['indexPath'], $studentCompletedBooks);
-                                                echo "<tr>";
-                                                echo "<td>" . $serialNumber++ . "</td>"; // Increment the serial number
-                                                echo "<td>" . htmlspecialchars($unit['unitTitle']) . "</td>";
-                                                $full_url = $material['indexPath'];
-                                                echo "<td><a href='/student/view_book/" . $hashedId . "?index_path=" . urlencode($full_url) . "' class='btn btn-primary'>View Course Book</a></td>";
-                                                if ($course['status'] !== 'archived') {
-                                                    echo "<td><button class='btn btn-success' onclick='markAsCompleted(\"" . htmlspecialchars($full_url) . "\", " . ($isCompleted ? "true" : "false") . ", this)'>" . ($isCompleted ? "Completed" : "Mark as Completed") . "</button></td>";
-                                                } else {
-                                                    echo "<td>" . ($isCompleted ? "Completed" : "") . "</td>";
-                                                }
-                                                echo "</tr>";
-                                            }
+                                        $isCompleted = in_array($unit['scorm_url'], $studentCompletedBooks);
+                                        echo "<tr>";
+                                        echo "<td>" . $serialNumber++ . "</td>"; // Increment the serial number
+                                        echo "<td>" . htmlspecialchars($unit['unit_name']) . "</td>";
+                                        $full_url = $unit['scorm_url'];
+                                        echo "<td><a href='/student/view_book/" . $hashedId . "?index_path=" . urlencode($full_url) . "' class='btn btn-primary'>View Course Book</a></td>";
+                                        if ($course['status'] !== 'archived') {
+                                            echo "<td><button class='btn btn-success' onclick='markAsCompleted(\"" . htmlspecialchars($full_url) . "\", " . ($isCompleted ? "true" : "false") . ", this)'>" . ($isCompleted ? "Completed" : "Mark as Completed") . "</button></td>";
+                                        } else {
+                                            echo "<td>" . ($isCompleted ? "Completed" : "") . "</td>";
                                         }
+                                        echo "</tr>";
                                     }
                                 } else {
                                     echo "<tr><td colspan='4'>No course books available.</td></tr>";
