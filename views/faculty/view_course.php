@@ -47,7 +47,6 @@
                                 $hashedId = base64_encode($course['id']);
                                 $hashedId = str_replace(['+', '/', '='], ['-', '_', ''], $hashedId);
                                 ?>
-                                <!-- <a href="/faculty/view_book/<?php echo $hashedId; ?>" class="card-link">View Course</a> -->
                             <?php endif; ?>
                         </div>
 
@@ -64,19 +63,15 @@
                                 if (!empty($course['course_book'])) {
                                     $serialNumber = 1; 
                                     foreach ($course['course_book'] as $unit) {
-                                        if (isset($unit['materials'])) {
-                                            foreach ($unit['materials'] as $material) {
-                                                echo "<tr>";
-                                                echo "<td>" . $serialNumber++ . "</td>"; // Increment the serial number
-                                                echo "<td>" . htmlspecialchars($unit['unitTitle']) . "</td>";
-                                                $full_url = $material['indexPath'];
-                                                echo "<td><a href='https://eyebook.phemesoft.com/"  . $full_url . "' class='btn btn-primary'>View Course Book</a></td>";
-                                                echo "</tr>";
-                                            }
-                                        }
+                                        echo "<tr>";
+                                        echo "<td>" . $serialNumber++ . "</td>"; // Increment the serial number
+                                        echo "<td>" . htmlspecialchars($unit['unit_name']) . "</td>";
+                                        $full_url = $unit['scorm_url'];
+                                        echo "<td><a href='/student/view_book/" . $hashedId . "?index_path=" . urlencode($full_url) . "' class='btn btn-primary'>View Course Book</a></td>";
+                                        echo "</tr>";
                                     }
                                 } else {
-                                    echo "<tr><td colspan='3'>No course books available.</td></tr>";
+                                    echo "<tr><td colspan='4'>No course books available.</td></tr>";
                                 }
                                 ?>
                             </tbody>

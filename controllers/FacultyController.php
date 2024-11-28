@@ -60,6 +60,16 @@ class FacultyController {
             die('Invalid course ID');
         }
         $course = Course::getById($conn, $course_id);
+
+        if (!isset($_SESSION['email'])) {
+            die('Email not set in session.');
+        }
+        $student = Student::getByEmail($conn, $_SESSION['email']);
+    
+        // Ensure course_book is an array
+        if (!is_array($course['course_book'])) {
+            $course['course_book'] = json_decode($course['course_book'], true) ?? [];
+        }
         
         require 'views/faculty/view_course.php';
     }
@@ -77,13 +87,10 @@ class FacultyController {
             exit;
         }
     
-        // Assuming the first unit and first material for simplicity
+        // Assuming the course_book is an array of units with scorm_url
         $unit = $course['course_book'][0];
-        $material = $unit['materials'][0];
-        $index_path = 'http://localhost/eye_final/' . $material['indexPath'];
+        $index_path = $unit['scorm_url'];
 
-        // $index_path = 'https://eyebook.phemesoft.com/' . $material['indexPath'];
-    
         require 'views/faculty/book_view.php';
     }
 
