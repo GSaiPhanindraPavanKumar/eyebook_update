@@ -121,7 +121,7 @@ class FacultyController {
         require 'views/faculty/virtual_classroom_dashboard.php';
     }
     public function createVirtualClassroom() {
-        require 'views/faculty/create_virtual_classroom.php';
+        // require 'views/faculty/create_virtual_classroom.php';
     }
     public function downloadAttendance() {
         require 'views/faculty/download_attendance.php';

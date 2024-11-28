@@ -20,6 +20,7 @@ use Aws\Exception\AwsException;
 
 use Exception;
 use PDOException;
+use ZoomAPI;
 
 class AdminController {
     public function index() {
@@ -515,6 +516,13 @@ class AdminController {
         $course_count = Course::getCountByUniversityId($conn, $university_id);
 
         require 'views/admin/view_university.php';
+    }
+    public function createVirtualClassroom() {
+        require 'views/admin/create_virtual_classroom.php';
+    }
+
+    public function virtualClassroom() {
+        require 'views/admin/virtual_classroom_dashboard.php';
     }
 
 }

@@ -48,28 +48,6 @@ usort($facultyClassrooms, function($a, $b) {
                         <div class="col-md-12 grid-margin stretch-card">
                             <div class="card">
                                 <div class="card-body">
-                                    <h4 class="card-title">Create Virtual Classroom</h4>
-                                    <form method="POST" action="/faculty/create_virtual_classroom">
-                                        <div class="form-group">
-                                            <input type="text" class="form-control" name="topic" placeholder="Classroom Topic" required>
-                                        </div>
-                                        <div class="form-group">
-                                            <input type="datetime-local" class="form-control" name="start_time" required>
-                                        </div>
-                                        <div class="form-group">
-                                            <input type="number" class="form-control" name="duration" placeholder="Duration (minutes)" required>
-                                        </div>
-                                        <button type="submit" class="btn btn-success">Create Virtual Classroom</button>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="row">
-                        <div class="col-md-12 grid-margin stretch-card">
-                            <div class="card">
-                                <div class="card-body">
                                     <h4 class="card-title">Today's and Upcoming Classes</h4>
                                     <table class="table table-hover">
                                         <thead class="thead-dark">

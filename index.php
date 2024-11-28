@@ -46,7 +46,9 @@ $router->post('/admin/handleTodo', 'AdminController@handleTodo');
 $router->get('/admin/viewStudentProfile/(\d+)', 'AdminController@viewStudentProfile');
 
 $router->get('/admin/view_university/(\d+)', 'AdminController@viewUniversity');
-
+$router->get('/admin/create_virtual_classroom', 'AdminController@createVirtualClassroom');
+$router->post('/admin/create_virtual_classroom', 'AdminController@createVirtualClassroom');
+$router->get('/admin/virtual_classroom', 'AdminController@virtualClassroom');
 
 
 $router->get('/spoc', 'SpocController@dashboard');
@@ -107,7 +109,6 @@ $router->get('/faculty/download_assessment_report/(\d+)', function($assessmentId
 });
 
 $router->get('/faculty/virtual_classroom', 'FacultyController@virtualClassroom');
-$router->post('/faculty/create_virtual_classroom', 'FacultyController@createVirtualClassroom');
 $router->get('/faculty/download_attendance', 'FacultyController@downloadAttendance');
 
 $router->post('/faculty/Update_profile','FacultyController@profile');

@@ -11,7 +11,7 @@ use Models\Database;
 
 $conn = Database::getConnection();
 
-// Establish database connection
+// Initialize ZoomAPI
 $zoom = new ZoomAPI(ZOOM_CLIENT_ID, ZOOM_CLIENT_SECRET, ZOOM_ACCOUNT_ID, $conn);
 $allClassrooms = $zoom->getAllClassrooms();
 
@@ -93,7 +93,7 @@ $attendancePercentage = $totalClasses > 0 ? ($attendedClasses / $totalClasses) *
                         <div class="col-md-12 grid-margin stretch-card">
                             <div class="card">
                                 <div class="card-body">
-                                    <h4 class="card-title">Virtual Classes</h4>
+                                    <h4 class="card-title">Today's and Upcoming Classes</h4>
                                     <table class="table table-hover">
                                         <thead class="thead-dark">
                                             <tr>
@@ -107,11 +107,13 @@ $attendancePercentage = $totalClasses > 0 ? ($attendedClasses / $totalClasses) *
                                         </thead>
                                         <tbody>
                                             <?php
+                                            $current_time = new DateTime('now', new DateTimeZone('UTC'));
                                             foreach ($allClassrooms as $classroom):
                                                 $start_time = new DateTime($classroom['start_time'], new DateTimeZone('UTC'));
                                                 $end_time = clone $start_time;
                                                 $end_time->modify('+' . $classroom['duration'] . ' minutes');
-                                                $attendance = $attendanceStatus[$classroom['classroom_id']] ?? null;
+                                                if ($current_time <= $end_time):
+                                                    $attendance = $attendanceStatus[$classroom['classroom_id']] ?? null;
                                             ?>
                                                 <tr>
                                                     <td><?php echo htmlspecialchars($classroom['topic']); ?></td>
@@ -129,7 +131,54 @@ $attendancePercentage = $totalClasses > 0 ? ($attendedClasses / $totalClasses) *
                                                         <?php endif; ?>
                                                     </td>
                                                 </tr>
-                                            <?php endforeach; ?>
+                                            <?php endif; endforeach; ?>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-12 grid-margin stretch-card">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h4 class="card-title">Past Classes</h4>
+                                    <table class="table table-hover">
+                                        <thead class="thead-dark">
+                                            <tr>
+                                                <th>Topic</th>
+                                                <th>Date</th>
+                                                <th>Start Time</th>
+                                                <th>End Time</th>
+                                                <th>Attendance</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <?php
+                                            foreach ($allClassrooms as $classroom):
+                                                $start_time = new DateTime($classroom['start_time'], new DateTimeZone('UTC'));
+                                                $end_time = clone $start_time;
+                                                $end_time->modify('+' . $classroom['duration'] . ' minutes');
+                                                if ($current_time > $end_time):
+                                                    $attendance = $attendanceStatus[$classroom['classroom_id']] ?? null;
+                                            ?>
+                                                <tr>
+                                                    <td><?php echo htmlspecialchars($classroom['topic']); ?></td>
+                                                    <td><?php echo htmlspecialchars($start_time->format('Y-m-d')); ?></td>
+                                                    <td><?php echo htmlspecialchars($start_time->format('H:i:s')); ?></td>
+                                                    <td><?php echo htmlspecialchars($end_time->format('H:i:s')); ?></td>
+                                                    <td>
+                                                        <?php if ($attendance === 'present'): ?>
+                                                            <span class="attendance-present">Present</span>
+                                                        <?php elseif ($attendance === 'absent'): ?>
+                                                            <span class="attendance-absent">Absent</span>
+                                                        <?php else: ?>
+                                                            <span>Not Uploaded</span>
+                                                        <?php endif; ?>
+                                                    </td>
+                                                </tr>
+                                            <?php endif; endforeach; ?>
                                         </tbody>
                                     </table>
                                 </div>

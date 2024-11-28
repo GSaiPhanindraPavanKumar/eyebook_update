@@ -31,6 +31,7 @@ class AuthController {
                 $admin = $this->adminModel->login($username, $password);
                 if ($admin) {
                     $_SESSION['admin'] = $admin;
+                    $_SESSION['admin_id'] = $admin['id'];
                     header('Location: /admin/dashboard');
                     exit();
                 }
