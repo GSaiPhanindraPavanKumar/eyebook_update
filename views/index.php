@@ -3,10 +3,9 @@
 
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
-$message = '';
+$message = $message ?? ''; // Ensure $message is defined
 
 ?>
-
 
 <!DOCTYPE html>
 <html lang="en">

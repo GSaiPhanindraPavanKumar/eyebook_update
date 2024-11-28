@@ -155,5 +155,18 @@ class Student {
         $stmt->execute($params);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+    public static function getCountByUniversityId($conn, $university_id) {
+        $sql = "SELECT COUNT(*) as student_count FROM students WHERE university_id = ?";
+        $stmt = $conn->prepare($sql);
+        $stmt->execute([$university_id]);
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $result['student_count'] ?? 0;
+    }
+    public function updateLastLogin($student_id) {
+        $conn = Database::getConnection();
+        $sql = "UPDATE students SET last_login = NOW() WHERE id = ?";
+        $stmt = $conn->prepare($sql);
+        $stmt->execute([$student_id]);
+    }
 }
 ?>

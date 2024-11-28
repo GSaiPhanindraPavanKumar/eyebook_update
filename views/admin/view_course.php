@@ -49,6 +49,10 @@ include "sidebar.php";
                                             <li>No universities assigned.</li>
                                         <?php endif; ?>
                                     </ul>
+                                    <div class="actions mt-4">
+                                        <a href="/admin/edit_course/<?php echo $course['id']; ?>" class="btn btn-warning">Edit Course</a>
+                                        <a href="/admin/delete_course/<?php echo $course['id']; ?>" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this course?');">Delete Course</a>
+                                    </div>
                                 <?php else: ?>
                                     <p>Course not found.</p>
                                 <?php endif; ?>

@@ -29,6 +29,10 @@ class Admin {
         $stmt = $conn->prepare($query);
         $stmt->execute(['id' => $_SESSION['admin']['id']]);
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        // Debugging: Check if last_login is retrieved
+        error_log('Last login: ' . $user['last_login']);
+        
         return $user;
     }
 
@@ -40,6 +44,13 @@ class Admin {
             ':admin_id' => $admin_id
         ]);
     }
+
+    public function updateLastLogin($admin_id) {
+    $conn = Database::getConnection();
+    $sql = "UPDATE admins SET last_login = NOW() WHERE id = ?";
+    $stmt = $conn->prepare($sql);
+    $stmt->execute([$admin_id]);
+}
 
     // public function userprofile() {
     //     // Assuming the correct column name is 'username' instead of 'email'

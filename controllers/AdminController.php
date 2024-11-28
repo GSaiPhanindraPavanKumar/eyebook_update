@@ -32,6 +32,10 @@ class AdminController {
         $conn = Database::getConnection();
         $adminModel = new AdminModel();
         $admin = $adminModel->getUserProfile($conn);
+        
+        // Debugging: Check if last_login is set in $admin
+        error_log('Last login in controller: ' . $admin['last_login']);
+        
         require 'views/admin/userProfile.php';
     }
 
@@ -121,17 +125,44 @@ class AdminController {
         }
     }
 
-    public function deleteUniversity() {
+    public function editUniversity($university_id) {
         $conn = Database::getConnection();
-
-        if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['delete'])) {
-            $id = $_POST['delete'];
-
-            University::delete($conn, $id);
-
-            header('Location: /admin/manageUniversity');
-            exit();
+        $message = '';
+    
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            $long_name = $_POST['long_name'];
+            $short_name = $_POST['short_name'];
+            $location = $_POST['location'];
+            $country = $_POST['country'];
+            $spoc_name = $_POST['spoc_name'];
+            $spoc_email = $_POST['spoc_email'];
+            $spoc_phone = $_POST['spoc_phone'];
+    
+            $sql = "UPDATE universities SET long_name = ?, short_name = ?, location = ?, country = ? WHERE id = ?";
+            $stmt = $conn->prepare($sql);
+            $stmt->execute([$long_name, $short_name, $location, $country, $university_id]);
+    
+            $sql = "UPDATE spocs SET name = ?, email = ?, phone = ? WHERE university_id = ?";
+            $stmt = $conn->prepare($sql);
+            $stmt->execute([$spoc_name, $spoc_email, $spoc_phone, $university_id]);
+    
+            $message = "University and SPOC details updated successfully!";
         }
+    
+        $university = University::getById($conn, $university_id);
+        $spoc = Spoc::getByUniversityId($conn, $university_id);
+        require 'views/admin/edit_university.php';
+    }
+    
+    public function deleteUniversity($university_id) {
+        $conn = Database::getConnection();
+    
+        $sql = "DELETE FROM universities WHERE id = ?";
+        $stmt = $conn->prepare($sql);
+        $stmt->execute([$university_id]);
+    
+        header('Location: /admin/manage_university');
+        exit();
     }
 
     public function updatePassword() {
@@ -153,63 +184,91 @@ class AdminController {
 
 
 
-        public function uploadStudents() {
-            $conn = Database::getConnection();
-            $duplicateRecords = [];
-        
-            if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['file'])) {
-                $file = $_FILES['file']['tmp_name'];
-                $university_id = $_POST['university_id'];
-        
-                $spreadsheet = IOFactory::load($file);
-                $sheet = $spreadsheet->getActiveSheet();
-                $rows = $sheet->toArray();
-        
-                // Assuming the first row contains headers
-                $headers = array_shift($rows);
-        
-                foreach ($rows as $row) {
-                    $data = array_combine($headers, $row);
-                    $result = Student::uploadStudents($conn, $data, $university_id);
-                    if ($result['duplicate']) {
-                        $duplicateRecords[] = $result['data'];
-                    } else {
-                        // Send account creation email
-                        // $mailer = new Mailer();
-                        // $subject = 'Welcome to EyeBook!';
-                        // $body = "Dear {$data['name']},<br><br>Your account has been created successfully.<br><br>Username: {$data['email']}<br>Password: {$data['password']}<br><br>Best Regards,<br>EyeBook Team";
-                        // $mailer->sendMail($data['email'], $subject, $body);
-                    }
-                }
-        
-                if (empty($duplicateRecords)) {
-                    $message = "Students uploaded successfully.";
-                    $message_type = "success";
-                } else if (!empty($duplicateRecords)) {
-                    $message = "Some records were not uploaded due to duplicates.";
-                    $message_type = "warning";
+    public function uploadStudents() {
+        $conn = Database::getConnection();
+        $duplicateRecords = [];
+    
+        if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['file'])) {
+            $file = $_FILES['file']['tmp_name'];
+            $university_id = $_POST['university_id'];
+    
+            $spreadsheet = IOFactory::load($file);
+            $sheet = $spreadsheet->getActiveSheet();
+            $rows = $sheet->toArray();
+    
+            // Assuming the first row contains headers
+            $headers = array_shift($rows);
+    
+            foreach ($rows as $row) {
+                $data = array_combine($headers, $row);
+                $result = Student::uploadStudents($conn, $data, $university_id);
+                if ($result['duplicate']) {
+                    $duplicateRecords[] = $result['data'];
                 } else {
-                    $message = "Failed to upload students.";
-                    $message_type = "danger";
+                    // Send account creation email
+                    // $mailer = new Mailer();
+                    // $subject = 'Welcome to EyeBook!';
+                    // $body = "Dear {$data['name']},<br><br>Your account has been created successfully.<br><br>Username: {$data['email']}<br>Password: {$data['password']}<br><br>Best Regards,<br>EyeBook Team";
+                    // $mailer->sendMail($data['email'], $subject, $body);
                 }
-            } 
-        
-            $universities = University::getAll($conn);
-            require 'views/admin/uploadStudents.php';
+            }
+    
+            if (empty($duplicateRecords)) {
+                $message = "Students uploaded successfully.";
+                $message_type = "success";
+            } else if (!empty($duplicateRecords)) {
+                $message = "Some records were not uploaded due to duplicates.";
+                $message_type = "warning";
+            } else {
+                $message = "Failed to upload students.";
+                $message_type = "danger";
+            }
+        } 
+    
+        $universities = University::getAll($conn);
+        require 'views/admin/uploadStudents.php';
+    }
+
+    public function resetStudentPasswords() {
+        $conn = Database::getConnection();
+    
+        if (isset($_POST['bulk_reset_password'])) {
+            $selectedStudents = $_POST['selected'] ?? [];
+    
+            foreach ($selectedStudents as $studentId) {
+                $student = Student::getById($conn, $studentId);
+                if ($student) {
+                    $newPassword = $student['email']; // Reset password to email
+                    $hashedPassword = password_hash($newPassword, PASSWORD_BCRYPT);
+    
+                    $sql = "UPDATE students SET password = ? WHERE id = ?";
+                    $stmt = $conn->prepare($sql);
+                    $stmt->execute([$hashedPassword, $studentId]);
+                }
+            }
+    
+            header('Location: /admin/manage_students');
+            exit();
         }
+    }
     
     public function addCourse() {
         $conn = Database::getConnection();
+        $message = '';
+        $message_type = '';
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $name = $_POST['name'];
             $description = $_POST['description'];
-            $is_paid =  0;
-            $price =  0; // Set default value for price
-            $message = Course::create($conn, $name, $description, $is_paid, $price);
+            $message = Course::create($conn, $name, $description);
+            if ($message === "Course created successfully!") {
+                $message_type = 'success';
+            } else {
+                $message_type = 'error';
+            }
         }
         require 'views/admin/add_courses.php';
     }
-    
+
     public function manageCourse() {
         $conn = Database::getConnection();
         $courses = Course::getAllWithUniversity($conn);
@@ -378,6 +437,58 @@ class AdminController {
         // Delete the temporary zip file
         unlink($tempFile);
     }
+
+    public function editStudent($student_id) {
+        $conn = Database::getConnection();
+        $message = '';
+    
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            $regd_no = $_POST['regd_no'];
+            $name = $_POST['name'];
+            $email = $_POST['email'];
+            $section = $_POST['section'];
+            $stream = $_POST['stream'];
+            $year = $_POST['year'];
+            $dept = $_POST['dept'];
+    
+            $sql = "UPDATE students SET regd_no = ?, name = ?, email = ?, section = ?, stream = ?, year = ?, dept = ? WHERE id = ?";
+            $stmt = $conn->prepare($sql);
+            $stmt->execute([$regd_no, $name, $email, $section, $stream, $year, $dept, $student_id]);
+    
+            $message = "Student details updated successfully!";
+        }
+    
+        $student = Student::getById($conn, $student_id);
+        require 'views/admin/edit_student.php';
+    }
+    
+    public function deleteStudent($student_id) {
+        $conn = Database::getConnection();
+    
+        $sql = "DELETE FROM students WHERE id = ?";
+        $stmt = $conn->prepare($sql);
+        $stmt->execute([$student_id]);
+    
+        header('Location: /admin/manage_students');
+        exit();
+    }
+    
+    public function resetStudentPassword($student_id) {
+        $conn = Database::getConnection();
+    
+        $student = Student::getById($conn, $student_id);
+        if ($student) {
+            $newPassword = $student['email']; // Reset password to email
+            $hashedPassword = password_hash($newPassword, PASSWORD_BCRYPT);
+    
+            $sql = "UPDATE students SET password = ? WHERE id = ?";
+            $stmt = $conn->prepare($sql);
+            $stmt->execute([$hashedPassword, $student_id]);
+        }
+    
+        header('Location: /admin/viewStudentProfile/' . $student_id);
+        exit();
+    }
     
 
     public function assignCourse() {
@@ -494,35 +605,60 @@ class AdminController {
         }
     }
 
-    public function viewStudentProfile($studentId) {
-        $this->checkAuth();
+    public function viewStudentProfile($student_id) {
         $conn = Database::getConnection();
-        $student = Student::getById($conn, $studentId);
-        if (!$student) {
-            // Handle student not found
-            header('Location: /admin/manageStudents');
-            exit();
-        }
+        $student = Student::getById($conn, $student_id);
+        $university = University::getById($conn, $student['university_id']);
         require 'views/admin/viewStudentProfile.php';
     }
 
     public function viewUniversity($university_id) {
         $conn = Database::getConnection();
-
+    
         // Fetch university details
         $university = University::getById($conn, $university_id);
         $spoc = Spoc::getByUniversityId($conn, $university_id);
         $student_count = Student::getCountByUniversityId($conn, $university_id);
         $course_count = Course::getCountByUniversityId($conn, $university_id);
-
+    
         require 'views/admin/view_university.php';
     }
+
     public function createVirtualClassroom() {
         require 'views/admin/create_virtual_classroom.php';
     }
 
     public function virtualClassroom() {
         require 'views/admin/virtual_classroom_dashboard.php';
+    }
+    public function editCourse($course_id) {
+        $conn = Database::getConnection();
+        $message = '';
+
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            $name = $_POST['name'];
+            $description = $_POST['description'];
+
+            $sql = "UPDATE courses SET name = ?, description = ? WHERE id = ?";
+            $stmt = $conn->prepare($sql);
+            $stmt->execute([$name, $description, $course_id]);
+
+            $message = "Course updated successfully!";
+        }
+
+        $course = Course::getById($conn, $course_id);
+        require 'views/admin/edit_course.php';
+    }
+
+    public function deleteCourse($course_id) {
+        $conn = Database::getConnection();
+
+        $sql = "DELETE FROM courses WHERE id = ?";
+        $stmt = $conn->prepare($sql);
+        $stmt->execute([$course_id]);
+
+        header('Location: /admin/manage_courses');
+        exit();
     }
 
 }

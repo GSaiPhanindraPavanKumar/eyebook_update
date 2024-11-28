@@ -1,6 +1,5 @@
 <?php 
 include "sidebar.php"; 
-$message = '';
 ?>
 
 <!-- HTML Content -->
@@ -20,13 +19,17 @@ $message = '';
                 <div class="card">
                     <div class="card-body">
                         <h5 class="card-title">Create Course</h5>
-                        <?php if ($message): ?>
-                            <div class="alert alert-info"><?php echo $message; ?></div>
-                            <script>
-                                setTimeout(function() {
-                                    window.location.href = 'add_courses';
-                                }, 3000); // Redirect after 3 seconds
-                            </script>
+                        <?php if (isset($message)): ?>
+                            <div class="alert alert-<?php echo $message_type; ?>" role="alert">
+                                <?php echo htmlspecialchars($message); ?>
+                            </div>
+                            <?php if ($message_type == 'success'): ?>
+                                <script>
+                                    setTimeout(function() {
+                                        window.location.href = 'manage_courses';
+                                    }, 3000);
+                                </script>
+                            <?php endif; ?>
                         <?php endif; ?>
                         <form action="add_courses" method="post">
                             <div class="form-group">
@@ -37,16 +40,20 @@ $message = '';
                                 <label for="description">Course Description</label>
                                 <textarea class="form-control" id="description" name="description" required></textarea>
                             </div>
-                            <!-- <div class="form-group">
-                                <label for="is_paid">Is Paid Course</label>
-                                <input type="checkbox" id="is_paid" name="is_paid" onchange="togglePriceField()">
-                            </div>
-                            <div class="form-group" id="price-group" style="display: none;">
-                                <label for="price">Price</label>
-                                <input type="number" class="form-control" id="price" name="price" step="0.01">
-                            </div> -->
                             <button type="submit" class="btn btn-primary">Add Course</button>
                         </form>
+
+                        <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+                        <script>
+                            <?php if (isset($message)): ?>
+                                toastr.<?php echo $message_type; ?>("<?php echo htmlspecialchars($message); ?>");
+                                <?php if ($message_type == 'success'): ?>
+                                    setTimeout(function() {
+                                        window.location.href = 'manage_courses';
+                                    }, 3000);
+                                <?php endif; ?>
+                            <?php endif; ?>
+                        </script>
                     </div>
                 </div>
             </div>
@@ -58,16 +65,3 @@ $message = '';
 
 <!-- Include Bootstrap CSS -->
 <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-
-<!-- JavaScript to toggle price field -->
-<!-- <script>
-function togglePriceField() {
-    var isPaidCheckbox = document.getElementById('is_paid');
-    var priceGroup = document.getElementById('price-group');
-    if (isPaidCheckbox.checked) {
-        priceGroup.style.display = 'block';
-    } else {
-        priceGroup.style.display = 'none';
-    }
-}
-</script> -->

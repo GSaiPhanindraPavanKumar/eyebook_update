@@ -155,5 +155,11 @@ class Spoc {
         $stmt->execute([':university_id' => $university_id]);
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
+    public function updateLastLogin($spoc_id) {
+        $conn = Database::getConnection();
+        $sql = "UPDATE students SET last_login = NOW() WHERE id = ?";
+        $stmt = $conn->prepare($sql);
+        $stmt->execute([$spoc_id]);
+    }
 }
 ?>

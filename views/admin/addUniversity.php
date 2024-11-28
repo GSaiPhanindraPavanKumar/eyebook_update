@@ -1,6 +1,8 @@
 <?php
 include "sidebar.php";
 ?>
+
+<!-- HTML Content -->
 <div class="main-panel">
     <div class="content-wrapper">
         <div class="row">
@@ -16,8 +18,7 @@ include "sidebar.php";
             <div class="col-md-12 grid-margin stretch-card">
                 <div class="card">
                     <div class="card-body">
-                        <p class="card-title mb-0" style="font-size:x-large; font-weight:bold; color:#343a40;">Create University</p><br>
-                        
+                        <h5 class="card-title">Create University</h5>
                         <?php if (isset($message)): ?>
                             <div class="alert alert-<?php echo $message_type; ?>" role="alert">
                                 <?php echo htmlspecialchars($message); ?>
@@ -30,64 +31,47 @@ include "sidebar.php";
                                 </script>
                             <?php endif; ?>
                         <?php endif; ?>
-
-                        <form method="POST" action="addUniversity">
-                            <div class="row">
-                                <!-- Left column -->
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label for="long_name">Long Name</label>
-                                        <input type="text" id="long_name" name="long_name" class="form-control border-secondary" required>
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="short_name">Short Name</label>
-                                        <input type="text" id="short_name" name="short_name" class="form-control border-secondary" required>
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="location">Location</label>
-                                        <input type="text" id="location" name="location" class="form-control border-secondary" required>
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="country">Country</label>
-                                        <input type="text" id="country" name="country" class="form-control border-secondary" required>
-                                    </div>
-                                </div>
-
-                                <!-- Right column -->
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label for="spoc_name">SPOC Name</label>
-                                        <input type="text" id="spoc_name" name="spoc_name" class="form-control border-secondary" required>
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="spoc_email">SPOC Email</label>
-                                        <input type="email" id="spoc_email" name="spoc_email" class="form-control border-secondary" required>
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="spoc_phone">SPOC Phone</label>
-                                        <input type="text" id="spoc_phone" name="spoc_phone" class="form-control border-secondary" required>
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="spoc_password">SPOC Password</label>
-                                        <input type="password" id="spoc_password" name="spoc_password" class="form-control border-secondary" required>
-                                    </div>
-                                </div>
+                        <form action="add_university" method="post">
+                            <div class="form-group">
+                                <label for="long_name">Long Name <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="long_name" name="long_name" required>
                             </div>
-
-                            <div class="form-group text-center mt-4">
-                                <button type="submit" class="btn btn-primary btn" style="background-color:#007bff; border:none;">
-                                    Create University
-                                </button>
+                            <div class="form-group">
+                                <label for="short_name">Short Name <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="short_name" name="short_name" required>
                             </div>
+                            <div class="form-group">
+                                <label for="location">Location <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="location" name="location" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="country">Country <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="country" name="country" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="spoc_name">SPOC Name</label>
+                                <input type="text" class="form-control" id="spoc_name" name="spoc_name">
+                            </div>
+                            <div class="form-group">
+                                <label for="spoc_email">SPOC Email</label>
+                                <input type="email" class="form-control" id="spoc_email" name="spoc_email">
+                            </div>
+                            <div class="form-group">
+                                <label for="spoc_phone">SPOC Phone</label>
+                                <input type="text" class="form-control" id="spoc_phone" name="spoc_phone">
+                            </div>
+                            <button type="submit" class="btn btn-primary">Add University</button>
                         </form>
 
                         <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
                         <script>
                             <?php if (isset($message)): ?>
                                 toastr.<?php echo $message_type; ?>("<?php echo htmlspecialchars($message); ?>");
-                                setTimeout(function() {
-                                    window.location.href = 'manageUniversity.php';
-                                }, 3000);
+                                <?php if ($message_type == 'success'): ?>
+                                    setTimeout(function() {
+                                        window.location.href = 'manage_university';
+                                    }, 3000);
+                                <?php endif; ?>
                             <?php endif; ?>
                         </script>
                     </div>
@@ -95,28 +79,9 @@ include "sidebar.php";
             </div>
         </div>
     </div>
+    <!-- content-wrapper ends -->
     <?php include 'footer.html'; ?>
 </div>
 
-<!-- Bootstrap CSS -->
-<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-
-<!-- Custom Styling -->
-<style>
-    .form-control {
-        border-radius: 5px;
-        font-size: 16px;
-    }
-    .btn-primary {
-        font-weight: bold;
-        padding: 10px 20px;
-        transition: background-color 0.3s ease;
-    }
-    .btn-primary:hover {
-        background-color: #0056b3;
-    }
-    .alert {
-        font-size: 16px;
-        border-radius: 5px;
-    }
-</style>
+<!-- Include Bootstrap CSS -->
+<link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">

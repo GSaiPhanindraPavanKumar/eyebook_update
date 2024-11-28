@@ -22,7 +22,7 @@
                             <div class="media-body">
                                 <h5 class="mt-0"><?php echo htmlspecialchars($admin['name'] ?? ''); ?></h5>
                                 <p><?php echo htmlspecialchars($admin['username'] ?? ''); ?></p>
-                                <!-- <p><?php echo htmlspecialchars($admin['phone'] ?? ''); ?></p> -->
+                                <p>Last login: <?php echo htmlspecialchars($admin['last_login'] ?? ''); ?></p>
                             </div>
                         </div>
                         <a href="/admin/updatePassword" class="btn btn-primary mt-3">Change Password</a>
@@ -50,4 +50,3 @@
     </div>
     <?php include("footer.html"); ?>
 </div>
-

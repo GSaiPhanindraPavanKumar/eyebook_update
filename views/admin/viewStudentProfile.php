@@ -1,4 +1,3 @@
-
 <?php include 'sidebar.php'; ?>
 <div class="main-panel">
     <div class="content-wrapper">
@@ -30,8 +29,32 @@
                                     <th>Email:</th>
                                     <td><?= htmlspecialchars($student['email']) ?></td>
                                 </tr>
-                                <!-- Add more fields as necessary -->
+                                <tr>
+                                    <th>Section:</th>
+                                    <td><?= htmlspecialchars($student['section']) ?></td>
+                                </tr>
+                                <tr>
+                                    <th>Stream:</th>
+                                    <td><?= htmlspecialchars($student['stream']) ?></td>
+                                </tr>
+                                <tr>
+                                    <th>Year:</th>
+                                    <td><?= htmlspecialchars($student['year']) ?></td>
+                                </tr>
+                                <tr>
+                                    <th>Department:</th>
+                                    <td><?= htmlspecialchars($student['dept']) ?></td>
+                                </tr>
+                                <tr>
+                                    <th>University:</th>
+                                    <td><?= htmlspecialchars($university['long_name'] ?? 'N/A') ?></td>
+                                </tr>
                             </table>
+                        </div>
+                        <div class="actions mt-4">
+                            <a href="/admin/edit_student/<?= $student['id'] ?>" class="btn btn-warning">Edit Student</a>
+                            <a href="/admin/delete_student/<?= $student['id'] ?>" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this student?');">Delete Student</a>
+                            <a href="/admin/reset_student_password/<?= $student['id'] ?>" class="btn btn-secondary">Reset Password</a>
                         </div>
                     </div>
                 </div>

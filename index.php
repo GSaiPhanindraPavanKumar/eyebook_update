@@ -49,6 +49,18 @@ $router->get('/admin/view_university/(\d+)', 'AdminController@viewUniversity');
 $router->get('/admin/create_virtual_classroom', 'AdminController@createVirtualClassroom');
 $router->post('/admin/create_virtual_classroom', 'AdminController@createVirtualClassroom');
 $router->get('/admin/virtual_classroom', 'AdminController@virtualClassroom');
+$router->get('/admin/edit_course/(\d+)', 'AdminController@editCourse');
+$router->post('/admin/edit_course/(\d+)', 'AdminController@editCourse');
+$router->get('/admin/delete_course/(\d+)', 'AdminController@deleteCourse');
+
+$router->get('/admin/edit_university/(\d+)', 'AdminController@editUniversity');
+$router->post('/admin/edit_university/(\d+)', 'AdminController@editUniversity');
+$router->get('/admin/delete_university/(\d+)', 'AdminController@deleteUniversity');
+$router->post('/admin/resetStudentPasswords', 'AdminController@resetStudentPasswords');
+$router->get('/admin/edit_student/(\d+)', 'AdminController@editStudent');
+$router->post('/admin/edit_student/(\d+)', 'AdminController@editStudent');
+$router->get('/admin/delete_student/(\d+)', 'AdminController@deleteStudent');
+$router->get('/admin/reset_student_password/(\d+)', 'AdminController@resetStudentPassword');
 
 
 $router->get('/spoc', 'SpocController@dashboard');

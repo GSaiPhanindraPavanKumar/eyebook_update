@@ -22,60 +22,59 @@ class AuthController {
     }
 
     public function login() {
+        $message = ''; // Initialize the message variable
+    
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if (isset($_POST['username']) && isset($_POST['password'])) {
                 $username = $_POST['username'];
                 $password = $_POST['password'];
-
+    
                 // Check admin credentials
                 $admin = $this->adminModel->login($username, $password);
                 if ($admin) {
                     $_SESSION['admin'] = $admin;
                     $_SESSION['admin_id'] = $admin['id'];
+                    $this->adminModel->updateLastLogin($admin['id']);
                     header('Location: /admin/dashboard');
                     exit();
                 }
-
+    
                 // Check spoc credentials
                 $spoc = $this->spocModel->login($username, $password);
                 if ($spoc) {
                     $_SESSION['email'] = $username;
+                    $this->spocModel->updateLastLogin($spoc['id']);
                     header('Location: /spoc/dashboard');
                     exit();
                 }
-
+    
                 // Check faculty credentials
                 $faculty = $this->facultyModel->login($username, $password);
                 if ($faculty) {
                     $_SESSION['faculty_id'] = $faculty['id'];
                     $_SESSION['email'] = $username;
+                    $this->facultyModel->updateLastLogin($faculty['id']);
                     header('Location: /faculty/dashboard');
                     exit();
                 }
-
+    
                 // Check student credentials
                 $student = $this->studentModel->login($username, $password);
                 if ($student) {
                     $_SESSION['student_id'] = $student['id'];
                     $_SESSION['email'] = $username;
+                    $this->studentModel->updateLastLogin($student['id']);
                     header('Location: /student/dashboard');
                     exit();
                 }
-
+    
                 // If neither admin, spoc, faculty, nor student credentials match
                 $message = 'Invalid username or password';
             } else {
                 $message = 'Username and password are required';
             }
-        } else if ($_SERVER['REQUEST_METHOD'] === 'GET') {
-            require 'views/index.php';
         }
-    }
-
-    public function logout() {
-        session_destroy();
-        header('Location: /login');
-        exit();
+    
+        require 'views/index.php'; // Pass the message to the view
     }
 }
-?>

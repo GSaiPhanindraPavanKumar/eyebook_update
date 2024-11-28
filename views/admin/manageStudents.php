@@ -1,4 +1,14 @@
-<?php include 'sidebar.php'; ?>
+<?php 
+include 'sidebar.php'; 
+use Models\Database;
+use Models\University;
+use Models\Student;
+
+$conn = Database::getConnection();
+$universities = University::getAll($conn);
+$students = Student::getAll($conn);
+?>
+
 <div class="main-panel">
     <div class="content-wrapper">
         <div class="row">
@@ -30,10 +40,11 @@
                                         <option value="regd_no">Registration Number</option>
                                         <option value="name">Name</option>
                                         <option value="email">Email</option>
+                                        <option value="university">University</option>
                                     </select>
                                 </div>
                             </div>
-                            <form id="studentForm" method="post" action="manageStudentActions.php">
+                            <form id="studentForm" method="post" action="/admin/resetStudentPasswords">
                                 <table class="table table-hover table-borderless table-striped">
                                     <thead class="thead-light">
                                         <tr>
@@ -42,6 +53,7 @@
                                             <th data-sort="regd_no">Registration Number <i class="fas fa-sort"></i></th>
                                             <th data-sort="name">Name <i class="fas fa-sort"></i></th>
                                             <th data-sort="email">Email <i class="fas fa-sort"></i></th>
+                                            <th data-sort="university">University <i class="fas fa-sort"></i></th>
                                             <th>Actions</th>
                                         </tr>
                                     </thead>
@@ -55,16 +67,23 @@
                                         $total_pages = ceil($total_students / $limit);
                                         $students_paginated = array_slice($students, $offset, $limit);
 
-                                        foreach ($students_paginated as $student): ?>
+                                        foreach ($students_paginated as $student):
+                                            $university_short_name = '';
+                                            foreach ($universities as $university) {
+                                                if ($university['id'] == $student['university_id']) {
+                                                    $university_short_name = $university['short_name'];
+                                                    break;
+                                                }
+                                            }
+                                        ?>
                                             <tr>
                                                 <td><input type="checkbox" name="selected[]" value="<?= $student['id'] ?>"></td>
                                                 <td><?= $serialNumber++ ?></td>
                                                 <td data-filter="regd_no"><?= htmlspecialchars($student['regd_no']) ?></td>
                                                 <td data-filter="name"><?= htmlspecialchars($student['name']) ?></td>
                                                 <td data-filter="email"><?= htmlspecialchars($student['email']) ?></td>
+                                                <td data-filter="university"><?= htmlspecialchars($university_short_name) ?></td>
                                                 <td>
-                                                    <!-- <button type="button" class="btn btn-outline-info btn-sm edit-btn" data-id="<?= $student['id'] ?>" data-regd_no="<?= $student['regd_no'] ?>" data-name="<?= $student['name'] ?>" data-email="<?= $student['email'] ?>"><i class="fas fa-edit"></i> Edit</button>
-                                                    <button type="submit" name="delete" value="<?= $student['id'] ?>" class="btn btn-outline-danger btn-sm"><i class="fas fa-trash"></i> Delete</button> -->
                                                     <a href="viewStudentProfile/<?= $student['id'] ?>" class="btn btn-outline-primary btn-sm"><i class="fas fa-eye"></i> View</a>
                                                 </td>
                                             </tr>
@@ -73,7 +92,7 @@
                                 </table>
                                 <div id="noRecords" style="display: none;" class="text-center">No records found</div>
                                 <div class="text-right">
-                                    <button type="submit" name="bulk_update" class="btn btn-warning">Update Selected</button>
+                                    <button type="submit" name="bulk_reset_password" class="btn btn-warning">Selected Reset Password</button>
                                     <button type="submit" name="bulk_delete" class="btn btn-danger">Delete Selected</button>
                                 </div>
                             </form>
