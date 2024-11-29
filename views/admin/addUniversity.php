@@ -31,7 +31,7 @@ include "sidebar.php";
                                 </script>
                             <?php endif; ?>
                         <?php endif; ?>
-                        <form action="add_university" method="post">
+                        <form action="addUniversity" method="post">
                             <div class="form-group">
                                 <label for="long_name">Long Name <span class="text-danger">*</span></label>
                                 <input type="text" class="form-control" id="long_name" name="long_name" required>
@@ -59,6 +59,14 @@ include "sidebar.php";
                             <div class="form-group">
                                 <label for="spoc_phone">SPOC Phone</label>
                                 <input type="text" class="form-control" id="spoc_phone" name="spoc_phone">
+                            </div>
+                            <div class="form-group">
+                                <label for="spoc_password">SPOC Password</label>
+                                <input type="password" class="form-control" id="spoc_password" name="spoc_password">
+                            </div>
+                            <div class="form-group">
+                                <label for="logo">University Logo (optional)</label>
+                                <input type="file" class="form-control" id="logo" name="logo" accept="image/*">
                             </div>
                             <button type="submit" class="btn btn-primary">Add University</button>
                         </form>

@@ -45,6 +45,48 @@ class SpocController {
         require 'views/spoc/manage_students.php';
     }
 
+    public function manageFaculties() {
+        $conn = Database::getConnection();
+        $spocModel = new Spoc($conn);
+
+        $username = $_SESSION['email'];
+        $userData = $spocModel->getUserData($username);
+        $university_id = $userData['university_id'];
+
+        $search = isset($_GET['search']) ? $_GET['search'] : '';
+        $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+        $limit = 10;
+        $offset = ($page - 1) * $limit;
+
+        $faculty = $this->fetchFaculty($conn, $university_id, $search, $limit, $offset);
+        $totalFaculty = $this->countFaculty($conn, $university_id, $search);
+        $totalPages = ceil($totalFaculty / $limit);
+
+        require 'views/spoc/manage_faculty.php';
+    }
+
+    private function fetchFaculty($conn, $university_id, $search = '', $limit = 10, $offset = 0) {
+        $sql = "SELECT * FROM faculty WHERE university_id = :university_id AND (name LIKE :search OR email LIKE :search) LIMIT :limit OFFSET :offset";
+        $stmt = $conn->prepare($sql);
+        $likeSearch = "%$search%";
+        $stmt->bindParam(':university_id', $university_id, PDO::PARAM_INT);
+        $stmt->bindParam(':search', $likeSearch, PDO::PARAM_STR);
+        $stmt->bindParam(':limit', $limit, PDO::PARAM_INT);
+        $stmt->bindParam(':offset', $offset, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    private function countFaculty($conn, $university_id, $search = '') {
+        $sql = "SELECT COUNT(*) as count FROM faculty WHERE university_id = :university_id AND (name LIKE :search OR email LIKE :search)";
+        $stmt = $conn->prepare($sql);
+        $likeSearch = "%$search%";
+        $stmt->bindParam(':university_id', $university_id, PDO::PARAM_INT);
+        $stmt->bindParam(':search', $likeSearch, PDO::PARAM_STR);
+        $stmt->execute();
+        return $stmt->fetch(PDO::FETCH_ASSOC)['count'];
+    }
+
     public function userProfile() {
         $conn = Database::getConnection();
         $spocModel = new Spoc($conn);

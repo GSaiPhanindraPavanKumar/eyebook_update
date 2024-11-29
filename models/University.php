@@ -30,7 +30,7 @@ class University {
 
     
     
-    public static function addUniversity($conn, $long_name, $short_name, $location, $country, $spoc_name, $spoc_email, $spoc_phone, $spoc_password) {
+    public static function addUniversity($conn, $long_name, $short_name, $location, $country, $spoc_name, $spoc_email, $spoc_phone, $spoc_password, $logo_url = null) {
         try {
             // Begin transaction
             $conn->beginTransaction();
@@ -42,34 +42,37 @@ class University {
                 return ['message' => 'University short name already exists.', 'message_type' => 'error'];
             }
     
-            // Check if the SPOC email already exists
-            $stmt = $conn->prepare("SELECT COUNT(*) FROM spocs WHERE email = :email");
-            $stmt->execute([':email' => $spoc_email]);
-            if ($stmt->fetchColumn() > 0) {
-                return ['message' => 'SPOC email already exists.', 'message_type' => 'error'];
-            }
-    
             // Insert into universities table
-            $stmt = $conn->prepare("INSERT INTO universities (long_name, short_name, location, country) VALUES (:long_name, :short_name, :location, :country)");
+            $stmt = $conn->prepare("INSERT INTO universities (long_name, short_name, location, country, logo_url) VALUES (:long_name, :short_name, :location, :country, :logo_url)");
             $stmt->execute([
                 ':long_name' => $long_name,
                 ':short_name' => $short_name,
                 ':location' => $location,
-                ':country' => $country
+                ':country' => $country,
+                ':logo_url' => $logo_url
             ]);
     
             // Get the last inserted university ID
             $university_id = $conn->lastInsertId();
     
-            // Insert into spocs table
-            $stmt = $conn->prepare("INSERT INTO spocs (name, email, phone, password, university_id) VALUES (:name, :email, :phone, :password, :university_id)");
-            $stmt->execute([
-                ':name' => $spoc_name,
-                ':email' => $spoc_email,
-                ':phone' => $spoc_phone,
-                ':password' => $spoc_password,
-                ':university_id' => $university_id
-            ]);
+            // Insert into spocs table if email and password are provided
+            if (!empty($spoc_email) && !empty($spoc_password)) {
+                // Check if the SPOC email already exists
+                $stmt = $conn->prepare("SELECT COUNT(*) FROM spocs WHERE email = :email");
+                $stmt->execute([':email' => $spoc_email]);
+                if ($stmt->fetchColumn() > 0) {
+                    return ['message' => 'SPOC email already exists.', 'message_type' => 'error'];
+                }
+    
+                $stmt = $conn->prepare("INSERT INTO spocs (name, email, phone, password, university_id) VALUES (:name, :email, :phone, :password, :university_id)");
+                $stmt->execute([
+                    ':name' => $spoc_name,
+                    ':email' => $spoc_email,
+                    ':phone' => $spoc_phone,
+                    ':password' => $spoc_password,
+                    ':university_id' => $university_id
+                ]);
+            }
     
             // Commit transaction
             $conn->commit();

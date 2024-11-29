@@ -51,7 +51,7 @@ $message = $message ?? ''; // Ensure $message is defined
                     </div>
                     <form id="loginForm" action="/login" method="POST">
                         <div class="input-group custom">
-                            <input type="text" class="form-control form-control-lg" placeholder="Username" name="username" id="username" required>
+                            <input type="text" class="form-control form-control-lg" placeholder="Username/Email id" name="username" id="username" required>
                         </div>
                         <div class="input-group custom">
                             <input type="password" class="form-control form-control-lg" placeholder="**********" name="password" id="password" required>

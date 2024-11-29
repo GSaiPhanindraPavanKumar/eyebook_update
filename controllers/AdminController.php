@@ -72,34 +72,77 @@ class AdminController {
             $spoc_email = $_POST['spoc_email'];
             $spoc_phone = $_POST['spoc_phone'];
             $spoc_pass = $_POST['spoc_password'];
-            $spoc_password = password_hash($spoc_pass, PASSWORD_BCRYPT);
+            $spoc_password = !empty($spoc_pass) ? password_hash($spoc_pass, PASSWORD_BCRYPT) : null;
+            $logo_url = null;
+    
+            if (isset($_FILES['logo']) && $_FILES['logo']['error'] == UPLOAD_ERR_OK) {
+                $logo = $_FILES['logo'];
+                $logo_path = $this->uploadLogoToS3($logo, $short_name);
+                if ($logo_path) {
+                    $logo_url = $logo_path;
+                }
+            }
     
             if (University::existsByShortName($conn, $short_name)) {
                 $message = "Duplicate entry for short name: " . $short_name;
                 $message_type = "warning";
-            } else if (Spoc::existsByEmail($conn, $spoc_email)) {
+            } else if (!empty($spoc_email) && !filter_var($spoc_email, FILTER_VALIDATE_EMAIL)) {
+                $message = "Invalid email address: " . $spoc_email;
+                $message_type = "error";
+            } else if (!empty($spoc_email) && Spoc::existsByEmail($conn, $spoc_email)) {
                 $message = "Duplicate entry for email: " . $spoc_email;
                 $message_type = "warning";
             } else {
                 $university = new University($conn);
-                $result = $university->addUniversity($conn, $long_name, $short_name, $location, $country, $spoc_name, $spoc_email, $spoc_phone, $spoc_password);
+                $result = $university->addUniversity($conn, $long_name, $short_name, $location, $country, $spoc_name, $spoc_email, $spoc_phone, $spoc_password, $logo_url);
                 $message = $result['message'];
                 $message_type = $result['message_type'];
     
                 // Validate email address before sending
-                if (filter_var($spoc_email, FILTER_VALIDATE_EMAIL)) {
+                if (!empty($spoc_email) && filter_var($spoc_email, FILTER_VALIDATE_EMAIL)) {
                     $mailer = new Mailer();
                     $subject = 'Welcome to EyeBook!';
                     $body = "Dear $spoc_name,<br><br>Your account has been created successfully as an SPOC for <b>$long_name<b>.<br><br>Username: $spoc_email <br>Password: $spoc_pass<br><br>Best Regards,<br>EyeBook Team";
                     $mailer->sendMail($spoc_email, $subject, $body);
-                } else {
-                    $message = "Invalid email address: " . $spoc_email;
-                    $message_type = "error";
                 }
             }
         }
     
         require 'views/admin/addUniversity.php';
+    }
+    
+    private function uploadLogoToS3($logo, $short_name) {
+        $bucketName = 'mobileappliaction';
+        $region = 'us-east-1';
+        $accessKey = 'AKIAUNJHJGMDEHC7DV5L';
+        $secretKey = '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';
+    
+        $s3Client = new S3Client([
+            'region' => $region,
+            'version' => 'latest',
+            'credentials' => [
+                'key' => $accessKey,
+                'secret' => $secretKey,
+            ],
+        ]);
+    
+        $filePath = $logo['tmp_name'];
+        $fileName = basename($logo['name']);
+        $key = "logo/university/{$short_name}/{$fileName}";
+    
+        try {
+            $result = $s3Client->putObject([
+                'Bucket' => $bucketName,
+                'Key' => $key,
+                'SourceFile' => $filePath,
+                'ContentType' => $logo['type'],
+                'ACL' => 'public-read',
+            ]);
+    
+            return $result['ObjectURL'];
+        } catch (AwsException $e) {
+            return null;
+        }
     }
 
     public function manageUniversity() {
@@ -128,6 +171,7 @@ class AdminController {
     public function editUniversity($university_id) {
         $conn = Database::getConnection();
         $message = '';
+        $message_type = '';
     
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $long_name = $_POST['long_name'];
@@ -137,16 +181,49 @@ class AdminController {
             $spoc_name = $_POST['spoc_name'];
             $spoc_email = $_POST['spoc_email'];
             $spoc_phone = $_POST['spoc_phone'];
+            $spoc_pass = $_POST['spoc_password'];
+            $spoc_password = !empty($spoc_pass) ? password_hash($spoc_pass, PASSWORD_BCRYPT) : null;
+            $logo_url = null;
     
-            $sql = "UPDATE universities SET long_name = ?, short_name = ?, location = ?, country = ? WHERE id = ?";
-            $stmt = $conn->prepare($sql);
-            $stmt->execute([$long_name, $short_name, $location, $country, $university_id]);
+            if (isset($_FILES['logo']) && $_FILES['logo']['error'] == UPLOAD_ERR_OK) {
+                $logo = $_FILES['logo'];
+                $logo_path = $this->uploadLogoToS3($logo, $short_name);
+                if ($logo_path) {
+                    $logo_url = $logo_path;
+                }
+            }
     
-            $sql = "UPDATE spocs SET name = ?, email = ?, phone = ? WHERE university_id = ?";
+            // Fetch the current logo URL if a new logo is not uploaded
+            if (!$logo_url) {
+                $current_university = University::getById($conn, $university_id);
+                $logo_url = $current_university['logo_url'];
+            }
+    
+            $sql = "UPDATE universities SET long_name = ?, short_name = ?, location = ?, country = ?, logo_url = ? WHERE id = ?";
             $stmt = $conn->prepare($sql);
-            $stmt->execute([$spoc_name, $spoc_email, $spoc_phone, $university_id]);
+            $stmt->execute([$long_name, $short_name, $location, $country, $logo_url, $university_id]);
+    
+            // Update SPOC details if provided
+            if (!empty($spoc_email) || !empty($spoc_name) || !empty($spoc_phone) || !empty($spoc_password)) {
+                // Check if SPOC already exists for the university
+                $spoc_exists = Spoc::getByUniversityId($conn, $university_id);
+                if ($spoc_exists) {
+                    $sql = "UPDATE spocs SET name = ?, email = ?, phone = ?, password = IFNULL(?, password) WHERE university_id = ?";
+                    $stmt = $conn->prepare($sql);
+                    $stmt->execute([$spoc_name, $spoc_email, $spoc_phone, $spoc_password, $university_id]);
+                } else {
+                    $sql = "INSERT INTO spocs (name, email, phone, password, university_id) VALUES (?, ?, ?, ?, ?)";
+                    $stmt = $conn->prepare($sql);
+                    $stmt->execute([$spoc_name, $spoc_email, $spoc_phone, $spoc_password, $university_id]);
+                }
+            }
     
             $message = "University and SPOC details updated successfully!";
+            $message_type = "success";
+    
+            // Redirect to view university page after successful update
+            header("Location: /admin/view_university/$university_id");
+            exit();
         }
     
         $university = University::getById($conn, $university_id);
@@ -330,8 +407,8 @@ class AdminController {
             // AWS S3 configuration
             $bucketName = 'mobileappliaction';
             $region = 'us-east-1';
-            $accessKey = 'AKIAUNJHJGMDLG4ZWEWS';
-            $secretKey = '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';
+            $accessKey = 'AKIAUNJHJGMDEHC7DV5L';
+            $secretKey = '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';
     
             // Initialize S3 client
             $s3Client = new S3Client([
@@ -362,11 +439,11 @@ class AdminController {
     
                 // Unzip the uploaded SCORM package in the S3 bucket
                 $unzipFolderName = pathinfo($fileName, PATHINFO_FILENAME);
-                $unzipKey = "course_documents/{$course_id}/course_book/{$timestamp}/{$unzipFolderName}/";
+                $unzipKey = "course_documents/{$course_id}/course_book/{$timestamp}-{$unzipFolderName}/";
                 $this->unzipS3Object($s3Client, $bucketName, $key, $unzipKey);
     
                 // Save the public access link of the index.html file in the database
-                $indexUrl = "https://{$bucketName}.s3.{$region}.amazonaws.com/{$unzipKey}index.html";
+                $indexUrl = "https://{$bucketName}.s3.{$region}.amazonaws.com/{$unzipKey}/index.html";
                 $indexUrl = preg_replace('#/+#', '/', $indexUrl);  // Replace multiple slashes with a single one
     
                 // Update the course_book column in the courses table
@@ -415,10 +492,7 @@ class AdminController {
                 file_put_contents($extractTo, $zip->getFromIndex($i));
     
                 // Determine correct Content-Type
-                $mimeType = mime_content_type($extractTo);
-                if (!$mimeType) {
-                    $mimeType = 'text/html'; // Fallback
-                }
+                $mimeType = $this->getMimeType($extractTo);
     
                 // Upload the extracted file to S3
                 $s3Client->putObject([
@@ -436,6 +510,36 @@ class AdminController {
     
         // Delete the temporary zip file
         unlink($tempFile);
+    }
+
+    private function getMimeType($filePath) {
+        $finfo = finfo_open(FILEINFO_MIME_TYPE);
+        $mimeType = finfo_file($finfo, $filePath);
+        finfo_close($finfo);
+    
+        $extension = pathinfo($filePath, PATHINFO_EXTENSION);
+    
+        // Fallback MIME types
+        $mimeTypes = [
+            'js' => 'application/javascript',
+            'css' => 'text/css',
+            'html' => 'text/html',
+            'json' => 'application/json',
+            'jpg' => 'image/jpeg',
+            'jpeg' => 'image/jpeg',
+            'png' => 'image/png',
+            'gif' => 'image/gif',
+            'svg' => 'image/svg+xml',
+            'zip' => 'application/zip',
+            'xml' => 'application/xml',
+        ];
+    
+        // If finfo_file returns an incorrect value, use the fallback MIME type
+        if ($mimeType === 'text/plain' || $mimeType === 'application/octet-stream') {
+            $mimeType = $mimeTypes[$extension] ?? 'application/octet-stream';
+        }
+    
+        return $mimeType;
     }
 
     public function editStudent($student_id) {

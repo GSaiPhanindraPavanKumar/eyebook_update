@@ -17,6 +17,13 @@ include('sidebar.php');
             <div class="col-md-12 grid-margin stretch-card">
                 <div class="card shadow">
                     <div class="card-body">
+                        <div class="text-center mb-4">
+                            <?php if (!empty($university['logo_url'])): ?>
+                                <img src="<?php echo htmlspecialchars($university['logo_url']); ?>" alt="University Logo" style="max-width: 200px;">
+                            <?php else: ?>
+                                <p>No logo available.</p>
+                            <?php endif; ?>
+                        </div>
                         <p class="card-title mb-0" style="font-size:larger">Profile Details</p><br>
                         <div class="table-responsive">
                             <table class="table table-borderless">
@@ -38,23 +45,19 @@ include('sidebar.php');
                                 </tr>
                                 <tr>
                                     <th>SPOC Name:</th>
-                                    <td><?php echo htmlspecialchars($spoc['name']); ?></td>
+                                    <td><?php echo isset($spoc['name']) ? htmlspecialchars($spoc['name']) : 'N/A'; ?></td>
                                 </tr>
                                 <tr>
                                     <th>SPOC Email:</th>
-                                    <td><?php echo htmlspecialchars($spoc['email']); ?></td>
+                                    <td><?php echo isset($spoc['email']) ? htmlspecialchars($spoc['email']) : 'N/A'; ?></td>
                                 </tr>
                                 <tr>
                                     <th>SPOC Phone:</th>
-                                    <td><?php echo htmlspecialchars($spoc['phone']); ?></td>
+                                    <td><?php echo isset($spoc['phone']) ? htmlspecialchars($spoc['phone']) : 'N/A'; ?></td>
                                 </tr>
                                 <tr>
                                     <th>Student Count:</th>
                                     <td><?php echo htmlspecialchars($student_count); ?></td>
-                                </tr>
-                                <tr>
-                                    <th>Course Count:</th>
-                                    <td><?php echo htmlspecialchars($course_count); ?></td>
                                 </tr>
                             </table>
                         </div>

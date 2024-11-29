@@ -21,8 +21,15 @@ include "sidebar.php";
                         <h5 class="card-title">Edit University</h5>
                         <?php if ($message): ?>
                             <div class="alert alert-info"><?php echo $message; ?></div>
+                            <?php if ($message_type == 'success'): ?>
+                                <script>
+                                    setTimeout(function() {
+                                        window.location.href = '/admin/view_university/<?php echo $university['id']; ?>';
+                                    }, 3000);
+                                </script>
+                            <?php endif; ?>
                         <?php endif; ?>
-                        <form action="/admin/edit_university/<?php echo $university['id']; ?>" method="post">
+                        <form action="/admin/edit_university/<?php echo $university['id']; ?>" method="post" enctype="multipart/form-data">
                             <div class="form-group">
                                 <label for="long_name">Long Name <span class="text-danger">*</span></label>
                                 <input type="text" class="form-control" id="long_name" name="long_name" value="<?php echo htmlspecialchars($university['long_name']); ?>" required>
@@ -41,15 +48,23 @@ include "sidebar.php";
                             </div>
                             <div class="form-group">
                                 <label for="spoc_name">SPOC Name</label>
-                                <input type="text" class="form-control" id="spoc_name" name="spoc_name" value="<?php echo htmlspecialchars($spoc['name']); ?>">
+                                <input type="text" class="form-control" id="spoc_name" name="spoc_name" value="<?php echo isset($spoc['name']) ? htmlspecialchars($spoc['name']) : ''; ?>">
                             </div>
                             <div class="form-group">
                                 <label for="spoc_email">SPOC Email</label>
-                                <input type="email" class="form-control" id="spoc_email" name="spoc_email" value="<?php echo htmlspecialchars($spoc['email']); ?>">
+                                <input type="email" class="form-control" id="spoc_email" name="spoc_email" value="<?php echo isset($spoc['email']) ? htmlspecialchars($spoc['email']) : ''; ?>">
                             </div>
                             <div class="form-group">
                                 <label for="spoc_phone">SPOC Phone</label>
-                                <input type="text" class="form-control" id="spoc_phone" name="spoc_phone" value="<?php echo htmlspecialchars($spoc['phone']); ?>">
+                                <input type="text" class="form-control" id="spoc_phone" name="spoc_phone" value="<?php echo isset($spoc['phone']) ? htmlspecialchars($spoc['phone']) : ''; ?>">
+                            </div>
+                            <div class="form-group">
+                                <label for="spoc_password">SPOC Password</label>
+                                <input type="password" class="form-control" id="spoc_password" name="spoc_password">
+                            </div>
+                            <div class="form-group">
+                                <label for="logo">University Logo (optional)</label>
+                                <input type="file" class="form-control" id="logo" name="logo" accept="image/*">
                             </div>
                             <button type="submit" class="btn btn-primary">Update University</button>
                             <a href="/admin/view_university/<?php echo $university['id']; ?>" class="btn btn-secondary">Cancel</a>
