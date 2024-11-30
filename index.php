@@ -9,6 +9,11 @@ if (getenv('APP_ENV') === 'production') {
 
 require_once 'vendor/autoload.php';
 
+use Dotenv\Dotenv;
+
+$dotenv = Dotenv::createImmutable(__DIR__);
+$dotenv->load();
+
 use Bramus\Router\Router;
 
 session_start();

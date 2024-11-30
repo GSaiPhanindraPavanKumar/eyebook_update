@@ -112,11 +112,11 @@ class AdminController {
     }
     
     private function uploadLogoToS3($logo, $short_name) {
-        $bucketName = 'mobileappliaction';
-        $region = 'us-east-1';
-        $accessKey = 'AKIAUNJHJGMDEHC7DV5L';
-        $secretKey = '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';
-    
+        $bucketName = getenv('AWS_BUCKET_NAME');
+        $region = getenv('AWS_REGION');
+        $accessKey = getenv('AWS_ACCESS_KEY_ID');
+        $secretKey = getenv('AWS_SECRET_ACCESS_KEY');
+        
         $s3Client = new S3Client([
             'region' => $region,
             'version' => 'latest',
@@ -405,10 +405,10 @@ class AdminController {
             }
     
             // AWS S3 configuration
-            $bucketName = 'mobileappliaction';
-            $region = 'us-east-1';
-            $accessKey = 'AKIAUNJHJGMDEHC7DV5L';
-            $secretKey = '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';
+            $bucketName = getenv('AWS_BUCKET_NAME');
+            $region = getenv('AWS_REGION');
+            $accessKey = getenv('AWS_ACCESS_KEY_ID');
+            $secretKey = getenv('AWS_SECRET_ACCESS_KEY');
     
             // Initialize S3 client
             $s3Client = new S3Client([
