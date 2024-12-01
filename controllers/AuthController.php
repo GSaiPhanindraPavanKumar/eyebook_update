@@ -77,4 +77,23 @@ class AuthController {
     
         require 'views/index.php'; // Pass the message to the view
     }
+
+    public function logout() {
+        // Check if a session is already started
+        if (session_status() == PHP_SESSION_NONE) {
+            session_start();
+        }
+        
+        // Destroy the session
+        session_unset();
+        session_destroy();
+    
+        // Redirect to the login page after 1 second
+        echo '<script>
+                setTimeout(function() {
+                    window.location.href = "/login";
+                }, 1000);
+              </script>';
+        echo 'You have been logged out. Redirecting to login page...';
+    }
 }

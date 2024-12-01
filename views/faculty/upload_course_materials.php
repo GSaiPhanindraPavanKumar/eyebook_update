@@ -1,7 +1,36 @@
 <?php
 use Models\Database;
+use Models\Notification;
+use Models\Student;
 use Aws\S3\S3Client;
 use Aws\Exception\AwsException;
+
+require_once 'vendor/autoload.php';
+require_once __DIR__ . '/../../aws_config.php';
+
+$bucketName = AWS_BUCKET_NAME;
+$region = AWS_REGION;
+$accessKey = AWS_ACCESS_KEY_ID;
+$secretKey = AWS_SECRET_ACCESS_KEY;
+
+// Debugging: Log the values of the configuration variables
+error_log('AWS_BUCKET_NAME: ' . $bucketName);
+error_log('AWS_REGION: ' . $region);
+error_log('AWS_ACCESS_KEY_ID: ' . $accessKey);
+error_log('AWS_SECRET_ACCESS_KEY: ' . $secretKey);
+
+if (!$bucketName || !$region || !$accessKey || !$secretKey) {
+    throw new Exception('Missing AWS configuration in aws_config.php file');
+}
+
+$s3Client = new S3Client([
+    'region' => 'us-east-1',
+    'version' => 'latest',
+    'credentials' => [
+        'key' => $accessKey,
+        'secret' => $secretKey,
+    ],
+]);
 
 $conn = Database::getConnection();
 
@@ -10,6 +39,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     $course_id = isset($_POST['course_id']) ? intval($_POST['course_id']) : 0;
     $upload_type = isset($_POST['upload_type']) ? $_POST['upload_type'] : 'single';
+
+    // Fetch the university ID from the course
+    $sql = "SELECT university_id FROM courses WHERE id = ?";
+    $stmt = $conn->prepare($sql);
+    $stmt->execute([$course_id]);
+    $course = $stmt->fetch(PDO::FETCH_ASSOC);
+    $university_id = $course['university_id'];
 
     if ($upload_type == 'single') {
         $unit_number = isset($_POST['unit_number']) ? intval($_POST['unit_number']) : 0;
@@ -22,10 +58,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
         if (isset($_FILES['course_materials_file']) && $_FILES['course_materials_file']['error'] == UPLOAD_ERR_OK) {
             // AWS S3 configuration
-            $bucketName = 'mobileappliaction';
-            $region = 'us-east-1';
-            $accessKey = 'AKIAUNJHJGMDLG4ZWEWS';
-            $secretKey = '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';
+            $bucketName = AWS_BUCKET_NAME;
+            $region = AWS_REGION;
+            $accessKey = AWS_ACCESS_KEY_ID;
+            $secretKey = AWS_SECRET_ACCESS_KEY;
 
             // Initialize S3 client
             $s3Client = new S3Client([
@@ -59,7 +95,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 $stmt = $conn->prepare($sql);
                 $stmt->execute([$course_id]);
                 $course = $stmt->fetch(PDO::FETCH_ASSOC);
-                $course_materials = json_decode($course['course_materials'], true);
+                $course_materials = json_decode($course['course_materials'] ?? '[]', true);
 
                 if (!is_array($course_materials)) {
                     $course_materials = [];
@@ -83,6 +119,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 $sql = "UPDATE courses SET course_materials = ? WHERE id = ?";
                 $stmt = $conn->prepare($sql);
                 if ($stmt->execute([$course_materials_json, $course_id])) {
+                    // Create notifications for students
+                    $students = Student::getByUniversityId($conn, $university_id);
+                    foreach ($students as $student) {
+                        Notification::create($conn, $student['id'], "New course materials have been uploaded for your course.");
+                    }
+
                     echo json_encode(['message' => 'Course materials uploaded successfully', 'url' => $course_materials_url]);
                     $hashedId = base64_encode($course_id);
                     $hashedId = str_replace(['+', '/', '='], ['-', '_', ''], $hashedId);
@@ -107,10 +149,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
         if (isset($_FILES['bulk_course_materials_file']) && $_FILES['bulk_course_materials_file']['error'] == UPLOAD_ERR_OK) {
             // AWS S3 configuration
-            $bucketName = 'mobileappliaction';
-            $region = 'us-east-1';
-            $accessKey = 'AKIAUNJHJGMDLG4ZWEWS';
-            $secretKey = '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';
+            $bucketName = AWS_BUCKET_NAME;
+            $region = AWS_REGION;
+            $accessKey = AWS_ACCESS_KEY_ID;
+            $secretKey = AWS_SECRET_ACCESS_KEY;
 
             // Initialize S3 client
             $s3Client = new S3Client([
@@ -186,7 +228,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     $stmt = $conn->prepare($sql);
                     $stmt->execute([$course_id]);
                     $course = $stmt->fetch(PDO::FETCH_ASSOC);
-                    $course_materials = json_decode($course['course_materials'], true);
+                    $course_materials = json_decode($course['course_materials'] ?? '[]', true);
 
                     if (!is_array($course_materials)) {
                         $course_materials = [];
@@ -218,6 +260,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     $sql = "UPDATE courses SET course_materials = ? WHERE id = ?";
                     $stmt = $conn->prepare($sql);
                     if ($stmt->execute([$course_materials_json, $course_id])) {
+                        // Create notifications for students
+                        $students = Student::getByUniversityId($conn, $university_id);
+                        foreach ($students as $student) {
+                            Notification::create($conn, $student['id'], "New bulk course materials have been uploaded for your course.");
+                        }
+
                         echo json_encode(['message' => 'Course materials uploaded successfully']);
                         $hashedId = base64_encode($course_id);
                         $hashedId = str_replace(['+', '/', '='], ['-', '_', ''], $hashedId);

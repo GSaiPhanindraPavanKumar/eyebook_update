@@ -3,11 +3,13 @@ include("sidebar.php");
 use Models\Database;
 use Models\Student;
 use Models\Course;
+use Models\Notification;
 
 $email = $_SESSION['email'];
 
 // Fetch user data
-$userData = getUserDataByEmail($email);
+$conn = Database::getConnection();
+$userData = Student::getUserDataByEmail($conn, $email);
 
 // Fetch today's classes
 $todaysClasses = getTodaysClasses();
@@ -23,6 +25,8 @@ $leastProgressCourses = array_filter($ongoingCourses, function($course) {
 });
 $leastProgressCourses = array_slice($leastProgressCourses, 0, 5); // Get the least 5 progress courses
 
+// Fetch notifications
+$notifications = Notification::getByStudentId($conn, $studentId);
 ?>
 
 <!-- HTML Content -->
@@ -57,6 +61,24 @@ $leastProgressCourses = array_slice($leastProgressCourses, 0, 5); // Get the lea
                                 <p><strong>University:</strong> <?php echo htmlspecialchars($userData['university']); ?></p>
                             </div>
                         </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <!-- Notifications -->
+            <div class="col-md-12 grid-margin stretch-card">
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="card-title">Notifications</h4>
+                        <ul class="list-group">
+                            <?php foreach ($notifications as $notification): ?>
+                                <li class="list-group-item">
+                                    <?php echo htmlspecialchars($notification['message']); ?>
+                                    <span class="text-muted float-right"><?php echo htmlspecialchars($notification['created_at']); ?></span>
+                                </li>
+                            <?php endforeach; ?>
+                        </ul>
                     </div>
                 </div>
             </div>

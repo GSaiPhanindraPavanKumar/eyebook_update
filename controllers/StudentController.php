@@ -44,13 +44,121 @@ class StudentController {
             exit;
         }
     
-        // Assuming the first unit for simplicity
-        $unit = $course['course_book'][0];
-        $index_path = $unit['scorm_url'];
+        // Ensure course_book is an array
+        if (!is_array($course['course_book'])) {
+            $course['course_book'] = json_decode($course['course_book'], true) ?? [];
+        }
+    
+        // Get the index_path from the query parameter
+        $index_path = $_GET['index_path'] ?? $course['course_book'][0]['scorm_url'];
     
         require 'views/student/book_view.php';
     }
     
+    public function viewCoursePlan($hashedId) {
+        $conn = Database::getConnection();
+        $course_id = base64_decode($hashedId);
+        if (!is_numeric($course_id)) {
+            die('Invalid course ID');
+        }
+        $course = Course::getById($conn, $course_id);
+    
+        if (!$course || empty($course['course_plan'])) {
+            echo 'Course plan not found.';
+            exit;
+        }
+    
+        // Get the index_path for the course plan
+        $index_path = $course['course_plan']['url'];
+    
+        require 'views/student/pdf_view.php';
+    }
+    public function profile() {
+        $conn = Database::getConnection();
+    
+        // Check if the user is not logged in
+        if (!isset($_SESSION['email'])) {
+            header("Location: /login");
+            exit;
+        }
+    
+        // Get the email from the session
+        $email = $_SESSION['email'];
+    
+        // Use prepared statements to prevent SQL injection
+        $stmt = $conn->prepare("SELECT students.*, universities.long_name AS university_name 
+                                FROM students 
+                                JOIN universities ON students.university_id = universities.id 
+                                WHERE students.email = :email");
+        $stmt->bindValue(':email', $email);
+        $stmt->execute();
+        $userData = $stmt->fetch(PDO::FETCH_ASSOC);
+    
+        // Check if user data is available; if not, set default placeholder values
+        $name = isset($userData['name']) ? htmlspecialchars($userData['name']) : "Danny McLoan";
+        $profileImage = isset($userData['profileImage']) ? $userData['profileImage'] : null;
+        $email = isset($userData['email']) ? htmlspecialchars($userData['email']) : "danny@example.com";
+        $regd_no = isset($userData['regd_no']) ? htmlspecialchars($userData['regd_no']) : "123456";
+        $section = isset($userData['section']) ? htmlspecialchars($userData['section']) : "A";
+        $stream = isset($userData['stream']) ? htmlspecialchars($userData['stream']) : "Science";
+        $year = isset($userData['year']) ? htmlspecialchars($userData['year']) : "1st Year";
+        $dept = isset($userData['dept']) ? htmlspecialchars($userData['dept']) : "Journalism";
+        $university = isset($userData['university_name']) ? htmlspecialchars($userData['university_name']) : "Unknown University";
+    
+        // Handle form submission for profile update
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            // Update user data with the submitted form data
+            $name = htmlspecialchars($_POST['name']);
+            $email = htmlspecialchars($_POST['email']);
+            $regd_no = htmlspecialchars($_POST['regd_no']);
+            $section = htmlspecialchars($_POST['section']);
+            $stream = htmlspecialchars($_POST['stream']);
+            $year = htmlspecialchars($_POST['year']);
+            $dept = htmlspecialchars($_POST['dept']);
+    
+            // Save the updated data to the database
+            $stmt = $conn->prepare("UPDATE students SET name=?, email=?, regd_no=?, section=?, stream=?, year=?, dept=? WHERE email=?");
+            $stmt->bindParam(1, $name);
+            $stmt->bindParam(2, $email);
+            $stmt->bindParam(3, $regd_no);
+            $stmt->bindParam(4, $section);
+            $stmt->bindParam(5, $stream);
+            $stmt->bindParam(6, $year);
+            $stmt->bindParam(7, $dept);
+            $stmt->bindParam(8, $email);
+            $stmt->execute();
+    
+            // Update the userData array for display
+            $userData['name'] = $name;
+            $userData['email'] = $email;
+            $userData['regd_no'] = $regd_no;
+            $userData['section'] = $section;
+            $userData['stream'] = $stream;
+            $userData['year'] = $year;
+            $userData['dept'] = $dept;
+        }
+    
+        require 'views/student/profile.php';
+    }
+    
+    public function viewMaterial($hashedId) {
+        $conn = Database::getConnection();
+        $course_id = base64_decode($hashedId);
+        if (!is_numeric($course_id)) {
+            die('Invalid course ID');
+        }
+        $course = Course::getById($conn, $course_id);
+    
+        if (!$course || empty($course['course_materials'])) {
+            echo 'Course materials not found.';
+            exit;
+        }
+    
+        // Get the index_path from the query parameter
+        $index_path = $_GET['index_path'] ?? $course['course_materials'][0]['materials'][0]['indexPath'];
+    
+        require 'views/student/pdf_view.php';
+    }
     function getCoursesWithProgress($studentId) {
         $conn = Database::getConnection();
         $stmt = $conn->prepare("SELECT * FROM courses WHERE status = 'ongoing'");

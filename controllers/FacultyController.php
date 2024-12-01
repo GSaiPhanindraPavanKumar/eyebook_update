@@ -31,13 +31,11 @@ class FacultyController {
 
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $name = htmlspecialchars($_POST['name']);
-            $jobTitle = 'Faculty';
             $email = htmlspecialchars($_POST['email']);
             $phone = htmlspecialchars($_POST['phone']);
             $department = htmlspecialchars($_POST['department']);
-            $profileImage = isset($_FILES['profileImage']) && $_FILES['profileImage']['size'] > 0 ? file_get_contents($_FILES['profileImage']['tmp_name']) : $userData['profileImage'];
 
-            Faculty::update($conn, $userId, $name, $jobTitle, $email, $phone, $department, $profileImage);
+            Faculty::update($conn, $userId, $name, $email, $phone, $department);
 
             // Refresh user data
             $userData = Faculty::getById($conn, $userId);
@@ -87,11 +85,53 @@ class FacultyController {
             exit;
         }
     
-        // Assuming the course_book is an array of units with scorm_url
-        $unit = $course['course_book'][0];
-        $index_path = $unit['scorm_url'];
-
+        // Ensure course_book is an array
+        if (!is_array($course['course_book'])) {
+            $course['course_book'] = json_decode($course['course_book'], true) ?? [];
+        }
+    
+        // Get the index_path from the query parameter
+        $index_path = $_GET['index_path'] ?? $course['course_book'][0]['scorm_url'];
+    
         require 'views/faculty/book_view.php';
+    }
+
+    public function viewCoursePlan($hashedId) {
+        $conn = Database::getConnection();
+        $course_id = base64_decode($hashedId);
+        if (!is_numeric($course_id)) {
+            die('Invalid course ID');
+        }
+        $course = Course::getById($conn, $course_id);
+    
+        if (!$course || empty($course['course_plan'])) {
+            echo 'Course plan not found.';
+            exit;
+        }
+    
+        // Get the index_path for the course plan
+        $index_path = $course['course_plan']['url'];
+    
+        require 'views/faculty/pdf_view.php';
+    }
+    
+    public function viewMaterial($hashedId) {
+        $conn = Database::getConnection();
+        $course_id = base64_decode($hashedId);
+        if (!is_numeric($course_id)) {
+            die('Invalid course ID');
+        }
+        $course = Course::getById($conn, $course_id);
+    
+        if (!$course || empty($course['course_materials'])) {
+            echo 'Course materials not found.';
+            exit;
+        }
+    
+        // Get the index_path from the query parameter
+        $index_path = $_GET['index_path'] ?? $course['course_materials'][0]['materials'][0]['indexPath'];
+    
+        require 'views/faculty/pdf_view.php';
     }
 
     public static function grade($conn, $assignmentId, $studentId, $grade, $feedback) {

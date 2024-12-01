@@ -30,10 +30,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
 
     // AWS S3 configuration
-    $bucketName = 'mobileappliaction';
-    $region = 'us-east-1';
-    $accessKey = 'AKIAUNJHJGMDLG4ZWEWS';
-    $secretKey = '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';
+    $bucketName = getenv('AWS_BUCKET_NAME');
+    $region = getenv('AWS_REGION');
+    $accessKey = getenv('AWS_ACCESS_KEY_ID');
+    $secretKey = getenv('AWS_SECRET_ACCESS_KEY');
 
     // Initialize S3 client
     $s3Client = new S3Client([

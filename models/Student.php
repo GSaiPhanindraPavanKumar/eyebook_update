@@ -18,6 +18,29 @@ class Student {
         $stmt = $conn->query($sql);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+    public static function getUserDataByEmail($conn, $email) {
+        $sql = "SELECT students.*, universities.long_name as university 
+                FROM students 
+                JOIN universities ON students.university_id = universities.id 
+                WHERE students.email = :email";
+        $stmt = $conn->prepare($sql);
+        $stmt->execute(['email' => $email]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+    public static function getByUniversityId($conn, $universityId) {
+        $sql = "SELECT * FROM students WHERE university_id = :university_id";
+        $stmt = $conn->prepare($sql);
+        $stmt->execute(['university_id' => $universityId]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public static function getByCourseId($conn, $courseId) {
+        $sql = "SELECT * FROM students WHERE FIND_IN_SET(:course_id, course_ids)";
+        $stmt = $conn->prepare($sql);
+        $stmt->execute(['course_id' => $courseId]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
 
     public static function uploadStudents($conn, $data, $university_id) {
         // Check for duplicates

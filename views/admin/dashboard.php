@@ -1,8 +1,6 @@
 <?php
 include("sidebar.php");
-
 ?>
-
 
 <!-- HTML Content -->
 <div class="main-panel">
@@ -13,28 +11,12 @@ include("sidebar.php");
                     <div class="col-12 col-xl-8 mb-4 mb-xl-0">
                         <h3 class="font-weight-bold">Hello, <em><?php echo htmlspecialchars($user['name']); ?></em></h3>
                     </div>
-                    <!-- <div class="col-12 col-xl-4">
-                 <div class="justify-content-end d-flex">
-                  <div class="dropdown flex-md-grow-1 flex-xl-grow-0">
-                    <button class="btn btn-sm btn-light bg-white dropdown-toggle" type="button" id="dropdownMenuDate2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
-                     <i class="mdi mdi-calendar"></i> Today (10 Jan 2021)
-                    </button>
-                    <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuDate2">
-                      <a class="dropdown-item" href="#">January - March</a>
-                      <a class="dropdown-item" href="#">March - June</a>
-                      <a class="dropdown-item" href="#">June - August</a>
-                      <a class="dropdown-item" href="#">August - November</a>
-                    </div>
-                  </div>
-                 </div>
-                </div> -->
                 </div>
             </div>
         </div>
         <div class="row">
             <div class="col-md-6 grid-margin stretch-card">
                 <div class="card tale-bg">
-
                     <canvas id="myPieChart" width="200" height="150" style="width: 200px; height: 150px;"></canvas>
                 </div>
             </div>
@@ -95,368 +77,6 @@ include("sidebar.php");
                 </div>
             </div>
         </div>
-        <!-- <div class="row">
-            <div class="col-md-6 grid-margin stretch-card">
-                <div class="card">
-                    <div class="card-body">
-                        <p class="card-title">Order Details</p>
-                        <p class="font-weight-500">The total number of sessions within the date range. It is the period time a user is actively engaged with your website, page or app, etc</p>
-                        <div class="d-flex flex-wrap mb-5">
-                            <div class="mr-5 mt-3">
-                                <p class="text-muted">Order value</p>
-                                <h3 class="text-primary fs-30 font-weight-medium">12.3k</h3>
-                            </div>
-                            <div class="mr-5 mt-3">
-                                <p class="text-muted">Orders</p>
-                                <h3 class="text-primary fs-30 font-weight-medium">14k</h3>
-                            </div>
-                            <div class="mr-5 mt-3">
-                                <p class="text-muted">Users</p>
-                                <h3 class="text-primary fs-30 font-weight-medium">71.56%</h3>
-                            </div>
-                            <div class="mt-3">
-                                <p class="text-muted">Downloads</p>
-                                <h3 class="text-primary fs-30 font-weight-medium">34040</h3>
-                            </div>
-                        </div>
-                        <canvas id="order-chart"></canvas>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-6 grid-margin stretch-card">
-                <div class="card">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between">
-                            <p class="card-title">Sales Report</p>
-                            <a href="#" class="text-info">View all</a>
-                        </div>
-                        <p class="font-weight-500">The total number of sessions within the date range. It is the period time a user is actively engaged with your website, page or app, etc</p>
-                        <div id="sales-legend" class="chartjs-legend mt-4 mb-2"></div>
-                        <canvas id="sales-chart"></canvas>
-                    </div>
-                </div>
-            </div>
-        </div> -->
-        <!-- <div class="row">
-            <div class="col-md-12 grid-margin stretch-card">
-                <div class="card position-relative">
-                    <div class="card-body">
-                        <div id="detailedReports" class="carousel slide detailed-report-carousel position-static pt-2" data-ride="carousel">
-                            <div class="carousel-inner">
-                                <div class="carousel-item active">
-                                    <div class="row">
-                                        <div class="col-md-12 col-xl-3 d-flex flex-column justify-content-start">
-                                            <div class="ml-xl-4 mt-3">
-                                                <p class="card-title">Detailed Reports</p>
-                                                <h1 class="text-primary">$34040</h1>
-                                                <h3 class="font-weight-500 mb-xl-4 text-primary">North America</h3>
-                                                <p class="mb-2 mb-xl-0">The total number of sessions within the date range. It is the period time a user is actively engaged with your website, page or app, etc</p>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-12 col-xl-9">
-                                            <div class="row">
-                                                <div class="col-md-6 border-right">
-                                                    <div class="table-responsive mb-3 mb-md-0 mt-3">
-                                                        <table class="table table-borderless report-table">
-                                                            <tr>
-                                                                <td class="text-muted">Illinois</td>
-                                                                <td class="w-100 px-0">
-                                                                    <div class="progress progress-md mx-4">
-                                                                        <div class="progress-bar bg-primary" role="progressbar" style="width: 70%" aria-valuenow="70" aria-valuemin="0" aria-valuemax="100"></div>
-                                                                    </div>
-                                                                </td>
-                                                                <td>
-                                                                    <h5 class="font-weight-bold mb-0">713</h5>
-                                                                </td>
-                                                            </tr>
-                                                            <tr>
-                                                                <td class="text-muted">Washington</td>
-                                                                <td class="w-100 px-0">
-                                                                    <div class="progress progress-md mx-4">
-                                                                        <div class="progress-bar bg-warning" role="progressbar" style="width: 30%" aria-valuenow="30" aria-valuemin="0" aria-valuemax="100"></div>
-                                                                    </div>
-                                                                </td>
-                                                                <td>
-                                                                    <h5 class="font-weight-bold mb-0">583</h5>
-                                                                </td>
-                                                            </tr>
-                                                            <tr>
-                                                                <td class="text-muted">Mississippi</td>
-                                                                <td class="w-100 px-0">
-                                                                    <div class="progress progress-md mx-4">
-                                                                        <div class="progress-bar bg-danger" role="progressbar" style="width: 95%" aria-valuenow="95" aria-valuemin="0" aria-valuemax="100"></div>
-                                                                    </div>
-                                                                </td>
-                                                                <td>
-                                                                    <h5 class="font-weight-bold mb-0">924</h5>
-                                                                </td>
-                                                            </tr>
-                                                            <tr>
-                                                                <td class="text-muted">California</td>
-                                                                <td class="w-100 px-0">
-                                                                    <div class="progress progress-md mx-4">
-                                                                        <div class="progress-bar bg-info" role="progressbar" style="width: 60%" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100"></div>
-                                                                    </div>
-                                                                </td>
-                                                                <td>
-                                                                    <h5 class="font-weight-bold mb-0">664</h5>
-                                                                </td>
-                                                            </tr>
-                                                            <tr>
-                                                                <td class="text-muted">Maryland</td>
-                                                                <td class="w-100 px-0">
-                                                                    <div class="progress progress-md mx-4">
-                                                                        <div class="progress-bar bg-primary" role="progressbar" style="width: 40%" aria-valuenow="40" aria-valuemin="0" aria-valuemax="100"></div>
-                                                                    </div>
-                                                                </td>
-                                                                <td>
-                                                                    <h5 class="font-weight-bold mb-0">560</h5>
-                                                                </td>
-                                                            </tr>
-                                                            <tr>
-                                                                <td class="text-muted">Alaska</td>
-                                                                <td class="w-100 px-0">
-                                                                    <div class="progress progress-md mx-4">
-                                                                        <div class="progress-bar bg-danger" role="progressbar" style="width: 75%" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100"></div>
-                                                                    </div>
-                                                                </td>
-                                                                <td>
-                                                                    <h5 class="font-weight-bold mb-0">793</h5>
-                                                                </td>
-                                                            </tr>
-                                                        </table>
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-6 mt-3">
-                                                    <canvas id="north-america-chart"></canvas>
-                                                    <div id="north-america-legend"></div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="carousel-item">
-                                    <div class="row">
-                                        <div class="col-md-12 col-xl-3 d-flex flex-column justify-content-start">
-                                            <div class="ml-xl-4 mt-3">
-                                                <p class="card-title">Detailed Reports</p>
-                                                <h1 class="text-primary">$34040</h1>
-                                                <h3 class="font-weight-500 mb-xl-4 text-primary">North America</h3>
-                                                <p class="mb-2 mb-xl-0">The total number of sessions within the date range. It is the period time a user is actively engaged with your website, page or app, etc</p>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-12 col-xl-9">
-                                            <div class="row">
-                                                <div class="col-md-6 border-right">
-                                                    <div class="table-responsive mb-3 mb-md-0 mt-3">
-                                                        <table class="table table-borderless report-table">
-                                                            <tr>
-                                                                <td class="text-muted">Illinois</td>
-                                                                <td class="w-100 px-0">
-                                                                    <div class="progress progress-md mx-4">
-                                                                        <div class="progress-bar bg-primary" role="progressbar" style="width: 70%" aria-valuenow="70" aria-valuemin="0" aria-valuemax="100"></div>
-                                                                    </div>
-                                                                </td>
-                                                                <td>
-                                                                    <h5 class="font-weight-bold mb-0">713</h5>
-                                                                </td>
-                                                            </tr>
-                                                            <tr>
-                                                                <td class="text-muted">Washington</td>
-                                                                <td class="w-100 px-0">
-                                                                    <div class="progress progress-md mx-4">
-                                                                        <div class="progress-bar bg-warning" role="progressbar" style="width: 30%" aria-valuenow="30" aria-valuemin="0" aria-valuemax="100"></div>
-                                                                    </div>
-                                                                </td>
-                                                                <td>
-                                                                    <h5 class="font-weight-bold mb-0">583</h5>
-                                                                </td>
-                                                            </tr>
-                                                            <tr>
-                                                                <td class="text-muted">Mississippi</td>
-                                                                <td class="w-100 px-0">
-                                                                    <div class="progress progress-md mx-4">
-                                                                        <div class="progress-bar bg-danger" role="progressbar" style="width: 95%" aria-valuenow="95" aria-valuemin="0" aria-valuemax="100"></div>
-                                                                    </div>
-                                                                </td>
-                                                                <td>
-                                                                    <h5 class="font-weight-bold mb-0">924</h5>
-                                                                </td>
-                                                            </tr>
-                                                            <tr>
-                                                                <td class="text-muted">California</td>
-                                                                <td class="w-100 px-0">
-                                                                    <div class="progress progress-md mx-4">
-                                                                        <div class="progress-bar bg-info" role="progressbar" style="width: 60%" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100"></div>
-                                                                    </div>
-                                                                </td>
-                                                                <td>
-                                                                    <h5 class="font-weight-bold mb-0">664</h5>
-                                                                </td>
-                                                            </tr>
-                                                            <tr>
-                                                                <td class="text-muted">Maryland</td>
-                                                                <td class="w-100 px-0">
-                                                                    <div class="progress progress-md mx-4">
-                                                                        <div class="progress-bar bg-primary" role="progressbar" style="width: 40%" aria-valuenow="40" aria-valuemin="0" aria-valuemax="100"></div>
-                                                                    </div>
-                                                                </td>
-                                                                <td>
-                                                                    <h5 class="font-weight-bold mb-0">560</h5>
-                                                                </td>
-                                                            </tr>
-                                                            <tr>
-                                                                <td class="text-muted">Alaska</td>
-                                                                <td class="w-100 px-0">
-                                                                    <div class="progress progress-md mx-4">
-                                                                        <div class="progress-bar bg-danger" role="progressbar" style="width: 75%" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100"></div>
-                                                                    </div>
-                                                                </td>
-                                                                <td>
-                                                                    <h5 class="font-weight-bold mb-0">793</h5>
-                                                                </td>
-                                                            </tr>
-                                                        </table>
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-6 mt-3">
-                                                    <canvas id="south-america-chart"></canvas>
-                                                    <div id="south-america-legend"></div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <a class="carousel-control-prev" href="#detailedReports" role="button" data-slide="prev">
-                                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                                <span class="sr-only">Previous</span>
-                            </a>
-                            <a class="carousel-control-next" href="#detailedReports" role="button" data-slide="next">
-                                <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                                <span class="sr-only">Next</span>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div> -->
-        <div class="row">
-            <div class="col-md-7 grid-margin stretch-card">
-                <div class="card">
-                    <div class="card-body">
-                        <p class="card-title mb-0">SPOC</p>
-                        <div class="table-responsive">
-                            <table class="table table-striped table-borderless">
-                                <thead>
-                                    <tr>
-                                        <th>Name</th>
-                                        <th>Email</th>
-                                        <th>Phone</th>
-                                        <!-- <th>University ID</th> -->
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <?php
-                                    if (!empty($spocs)) {
-                                        // Output data of each row
-                                        foreach ($spocs as $row) {
-                                            echo "<tr>";
-                                            echo "<td>" . htmlspecialchars($row['name']) . "</td>";
-                                            echo "<td>" . htmlspecialchars($row['email']) . "</td>";
-                                            echo "<td>" . htmlspecialchars($row['phone']) . "</td>";
-                                            // echo "<td>" . htmlspecialchars($university_name) . "</td>";
-                                            echo "</tr>";
-                                        }
-                                    } else {
-                                        echo "<tr><td colspan='3'>No data available</td></tr>";
-                                    }
-                                    ?>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-5 grid-margin stretch-card">
-                <div class="card">
-                    <div class="card-body">
-                        <h4 class="card-title">To Do Lists</h4>
-                        <div class="list-wrapper pt-2">
-                            <ul id="todo-list" class="d-flex flex-column-reverse todo-list todo-list-custom">
-                                <?php foreach ($todos as $todo): ?>
-                                    <li data-id="<?php echo $todo['id']; ?>">
-                                        <div class="form-check form-check-flat">
-                                            <label class="form-check-label">
-                                                <?php echo htmlspecialchars($todo['title']); ?>
-                                            </label>
-                                        </div>
-                                        <i class="remove ti-close" onclick="deleteTodo(<?php echo $todo['id']; ?>)"></i>
-                                    </li>
-                                <?php endforeach; ?>
-                            </ul>
-                            <form id="add-todo-form" method="POST">
-                            <input type="text" name="title" placeholder="Add new task">
-                            <button type="submit">Add</button>
-                        </form>
-                        </div>
-
-                        
-                        <script>
-                        document.getElementById('add-todo-form').addEventListener('submit', function(e) {
-                            e.preventDefault();
-                            const title = this.title.value;
-                            if (title) {
-                                const formData = new FormData();
-                                formData.append('action', 'add');
-                                formData.append('title', title);
-                        
-                                fetch('/admin/handleTodo', {
-                                    method: 'POST',
-                                    body: formData
-                                }).then(response => response.json())
-                                  .then(data => updateTodoList(data));
-                            }
-                        });
-                        
-                        function deleteTodo(id) {
-                            const formData = new FormData();
-                            formData.append('action', 'delete');
-                            formData.append('id', id);
-                        
-                            fetch('/admin/handleTodo', {
-                                method: 'POST',
-                                body: formData
-                            }).then(response => response.json())
-                              .then(data => updateTodoList(data));
-                        }
-                        
-                        function updateTodoList(todos) {
-                            const todoList = document.getElementById('todo-list');
-                            todoList.innerHTML = '';
-                            todos.forEach(todo => {
-                                const li = document.createElement('li');
-                                li.setAttribute('data-id', todo.id);
-                                li.innerHTML = `
-                                    <div class="form-check form-check-flat">
-                                        <label class="form-check-label">
-                                            ${todo.title}
-                                        </label>
-                                    </div>
-                                    <i class="remove ti-close" onclick="deleteTodo(${todo.id})"></i>
-                                `;
-                                todoList.appendChild(li);
-                            });
-                        }
-                        </script>
-                        <!-- <div class="add-items d-flex mb-0 mt-2">
-                            <input type="text" class="form-control todo-list-input" placeholder="Add new task">
-                            <button class="add btn btn-icon text-primary todo-list-add-btn bg-transparent"><i class="icon-circle-plus"></i></button>
-                        </div> -->
-                    </div>
-                </div>
-            </div>
-        </div>
         <div class="row">
             <div class="col-md-4 stretch-card grid-margin">
                 <div class="card">
@@ -494,45 +114,15 @@ include("sidebar.php");
                     <div class="col-md-12 grid-margin stretch-card">
                         <div class="card">
                             <div class="card-body">
-                                <p class="card-title">Charts</p>
-                                <div class="charts-data">
-                                    <div class="mt-3">
-                                        <p class="mb-0">Data 1</p>
-                                        <div class="d-flex justify-content-between align-items-center">
-                                            <div class="progress progress-md flex-grow-1 mr-4">
-                                                <div class="progress-bar bg-inf0" role="progressbar" style="width: 95%" aria-valuenow="95" aria-valuemin="0" aria-valuemax="100"></div>
-                                            </div>
-                                            <p class="mb-0">5k</p>
-                                        </div>
-                                    </div>
-                                    <div class="mt-3">
-                                        <p class="mb-0">Data 2</p>
-                                        <div class="d-flex justify-content-between align-items-center">
-                                            <div class="progress progress-md flex-grow-1 mr-4">
-                                                <div class="progress-bar bg-info" role="progressbar" style="width: 35%" aria-valuenow="35" aria-valuemin="0" aria-valuemax="100"></div>
-                                            </div>
-                                            <p class="mb-0">1k</p>
-                                        </div>
-                                    </div>
-                                    <div class="mt-3">
-                                        <p class="mb-0">Data 3</p>
-                                        <div class="d-flex justify-content-between align-items-center">
-                                            <div class="progress progress-md flex-grow-1 mr-4">
-                                                <div class="progress-bar bg-info" role="progressbar" style="width: 48%" aria-valuenow="48" aria-valuemin="0" aria-valuemax="100"></div>
-                                            </div>
-                                            <p class="mb-0">992</p>
-                                        </div>
-                                    </div>
-                                    <div class="mt-3">
-                                        <p class="mb-0">Data 4</p>
-                                        <div class="d-flex justify-content-between align-items-center">
-                                            <div class="progress progress-md flex-grow-1 mr-4">
-                                                <div class="progress-bar bg-info" role="progressbar" style="width: 25%" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
-                                            </div>
-                                            <p class="mb-0">687</p>
-                                        </div>
-                                    </div>
-                                </div>
+                                <p class="card-title">User Usage Chart</p>
+                                <select id="timeRange" class="form-control mb-3">
+                                    <option value="today">Today</option>
+                                    <option value="month">This Month</option>
+                                    <option value="quarter">This Quarter</option>
+                                    <option value="year">This Year</option>
+                                </select>
+                                <canvas id="userUsageChart" width="350" height="200"></canvas>
+                                <a href="/admin/download_usage_report" class="btn btn-secondary mt-3">Download Detailed Report</a>
                             </div>
                         </div>
                     </div>
@@ -545,7 +135,6 @@ include("sidebar.php");
                                         <h3>
                                             <?php echo $meeting_count; ?>
                                         </h3>
-                                        <!-- <p class="text-white font-weight-500 mb-0">The total number of sessions within the date range.It is calculated as the sum . </p> -->
                                     </div>
                                 </div>
                             </div>
@@ -612,4 +201,46 @@ include("sidebar.php");
             }
         }
     });
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var ctx = document.getElementById('userUsageChart').getContext('2d');
+    var userUsageChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: <?php echo json_encode(array_keys($usageData)); ?>, // e.g., ['Admin', 'SPOC', 'Faculty', 'Student']
+            datasets: [{
+                label: 'User Usage',
+                data: <?php echo json_encode(array_values($usageData)); ?>, // e.g., [10, 20, 30, 40]
+                backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0'],
+                borderColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0'],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'top',
+                },
+                title: {
+                    display: true,
+                    text: 'User Usage'
+                }
+            }
+        }
+    });
+
+    document.getElementById('timeRange').addEventListener('change', function() {
+        var timeRange = this.value;
+        fetch('/admin/getUsageData?timeRange=' + timeRange)
+            .then(response => response.json())
+            .then(data => {
+                userUsageChart.data.labels = data.labels;
+                userUsageChart.data.datasets[0].data = data.data;
+                userUsageChart.update();
+            });
+    });
+});
 </script>

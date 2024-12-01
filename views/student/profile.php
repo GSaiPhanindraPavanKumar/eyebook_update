@@ -43,13 +43,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $year = htmlspecialchars($_POST['year']);
     $dept = htmlspecialchars($_POST['dept']);
     
-    // Handle profile image upload
-    if (isset($_FILES['profileImage']) && $_FILES['profileImage']['size'] > 0) {
-        $profileImage = file_get_contents($_FILES['profileImage']['tmp_name']);
-    }
-    
     // Save the updated data to the database
-    $stmt = $conn->prepare("UPDATE students SET name=?, email=?, regd_no=?, section=?, stream=?, year=?, dept=?, profileImage=? WHERE email=?");
+    $stmt = $conn->prepare("UPDATE students SET name=?, email=?, regd_no=?, section=?, stream=?, year=?, dept=? WHERE email=?");
     $stmt->bindParam(1, $name);
     $stmt->bindParam(2, $email);
     $stmt->bindParam(3, $regd_no);
@@ -57,8 +52,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $stmt->bindParam(5, $stream);
     $stmt->bindParam(6, $year);
     $stmt->bindParam(7, $dept);
-    $stmt->bindParam(8, $profileImage, PDO::PARAM_LOB);
-    $stmt->bindParam(9, $email);
+    $stmt->bindParam(8, $email);
     $stmt->execute();
     
     // Update the userData array for display
@@ -69,7 +63,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $userData['stream'] = $stream;
     $userData['year'] = $year;
     $userData['dept'] = $dept;
-    $userData['profileImage'] = $profileImage;
 }
 ?>
 
@@ -112,7 +105,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
                         <!-- Edit Profile Form -->
                         <div id="editProfileForm" style="display: none; margin-top: 20px;">
-                            <form action="profile.php" method="post" enctype="multipart/form-data">
+                            <form action="/student/profile" method="post" enctype="multipart/form-data">
                                 <div class="form-group">
                                     <label for="name">Name:</label>
                                     <input type="text" class="form-control" id="name" name="name" value="<?php echo $name; ?>" required>
@@ -140,10 +133,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                 <div class="form-group">
                                     <label for="department">Dept:</label>
                                     <input type="text" class="form-control" id="department" name="dept" value="<?php echo $dept; ?>" required>
-                                </div>
-                                <div class="form-group">
-                                    <label for="profileImage">Profile Image:</label>
-                                    <input type="file" class="form-control" id="profileImage" name="profileImage" accept="image/*">
                                 </div>
                                 <button type="submit" class="btn btn-primary">Save Changes</button>
                                 <button type="button" class="btn btn-secondary" onclick="document.getElementById('editProfileForm').style.display='none'">Cancel</button>
