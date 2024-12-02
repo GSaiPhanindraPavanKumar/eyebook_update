@@ -79,17 +79,6 @@ include("sidebar.php");
                                         required />
                                 </div>
                                 <div class="col-md-6 mb-3">
-                                    <label class="form-label">Year</label>
-                                    <input
-                                        type="text"
-                                        name="year"
-                                        value="<?php echo isset($_POST['year']) ? htmlspecialchars($_POST['year']) : ''; ?>"
-                                        class="form-control"
-                                        required />
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
                                     <label class="form-label">Department</label>
                                     <input
                                         type="text"
@@ -98,6 +87,8 @@ include("sidebar.php");
                                         class="form-control"
                                         required />
                                 </div>
+                            </div>
+                            <div class="row">
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label">Password</label>
                                     <input

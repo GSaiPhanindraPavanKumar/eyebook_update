@@ -70,7 +70,16 @@ $router->get('/admin/edit_student/(\d+)', 'AdminController@editStudent');
 $router->post('/admin/edit_student/(\d+)', 'AdminController@editStudent');
 $router->get('/admin/delete_student/(\d+)', 'AdminController@deleteStudent');
 $router->get('/admin/reset_student_password/(\d+)', 'AdminController@resetStudentPassword');
-
+$router->get('/admin/upload_faculty', 'AdminController@uploadFaculty');
+$router->post('/admin/uploadSingleFaculty', 'AdminController@uploadSingleFaculty');
+$router->post('/admin/uploadFaculty', 'AdminController@uploadFaculty');
+$router->get('/admin/manage_faculty', 'AdminController@manageFaculty');
+$router->get('/admin/viewFacultyProfile/(\d+)', 'AdminController@viewFacultyProfile');
+$router->get('/admin/edit_faculty/(\d+)', 'AdminController@editFaculty');
+$router->post('/admin/edit_faculty/(\d+)', 'AdminController@editFaculty');
+$router->post('/admin/reset_faculty_password/(\d+)', 'AdminController@resetFacultyPassword');
+$router->post('/admin/resetFacultyPasswords', 'AdminController@resetFacultyPasswords');
+$router->get('/admin/delete_faculty/(\d+)', 'AdminController@deleteFaculty');
 
 $router->get('/spoc', 'SpocController@dashboard');
 $router->get('/spoc/dashboard', 'SpocController@dashboard');

@@ -51,7 +51,6 @@ $leastProgressCourses = array_slice($leastProgressCourses, 0, 5); // Get the lea
                             </div>
                             <div class="col-md-6">
                                 <p><strong>Phone:</strong> <?php echo htmlspecialchars($userData['phone']); ?></p>
-                                <p><strong>Year:</strong> <?php echo htmlspecialchars($userData['year']); ?></p>
                                 <p><strong>Department:</strong> <?php echo htmlspecialchars($userData['department']); ?></p>
                                 <p><strong>University:</strong> <?php echo htmlspecialchars($userData['university_name']); ?></p>
                             </div>

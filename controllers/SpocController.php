@@ -104,12 +104,11 @@ class SpocController {
             $phone = $_POST['phone'];
             $section = $_POST['section'];
             $stream = $_POST['stream'];
-            $year = $_POST['year'];
             $department = $_POST['department'];
             $university_id = $profile['university_id'];
             $password = password_hash($_POST['password'], PASSWORD_BCRYPT);
-
-            $spocModel->addFaculty($conn, $name, $email, $phone, $section, $stream, $year, $department, $university_id, $password);
+    
+            $spocModel->addFaculty($conn, $name, $email, $phone, $section, $stream, $department, $university_id, $password);
             $message = "Faculty added successfully.";
             $message_type = "success";
             header('Location: /spoc/addFaculty');

@@ -151,6 +151,19 @@ $adminModel = new \Models\Admin();
                     </div>
                 </li>
                 <li class="nav-item">
+                    <a class="nav-link" data-toggle="collapse" href="#faculty" aria-expanded="false" aria-controls="faculty">
+                        <i class="icon-layout menu-icon"></i>
+                        <span class="menu-title">Faculty</span>
+                        <i class="menu-arrow"></i>
+                    </a>
+                    <div class="collapse" id="faculty">
+                        <ul class="nav flex-column sub-menu">
+                            <li class="nav-item"> <a class="nav-link" href="/admin/upload_faculty">Upload Faculty</a></li>
+                            <li class="nav-item"> <a class="nav-link" href="/admin/manage_faculty">Manage Faculty</a></li>
+                        </ul>
+                    </div>
+                </li>
+                <li class="nav-item">
                     <a class="nav-link" data-toggle="collapse" href="#student" aria-expanded="false" aria-controls="student">
                         <i class="icon-bar-graph menu-icon"></i>
                         <span class="menu-title" >Student</span>

@@ -83,7 +83,6 @@ $totalPages = ceil($totalFaculty / $limit);
                                         <th>Phone</th>
                                         <th>Section</th>
                                         <th>Stream</th>
-                                        <th>Year</th>
                                         <th>Department</th>
                                         <th>University ID</th>
                                     </tr>
@@ -98,14 +97,13 @@ $totalPages = ceil($totalFaculty / $limit);
                                                 <td><?php echo htmlspecialchars($member['phone']); ?></td>
                                                 <td><?php echo htmlspecialchars($member['section']); ?></td>
                                                 <td><?php echo htmlspecialchars($member['stream']); ?></td>
-                                                <td><?php echo htmlspecialchars($member['year']); ?></td>
                                                 <td><?php echo htmlspecialchars($member['department']); ?></td>
                                                 <td><?php echo $member['university_id']; ?></td>
                                             </tr>
                                         <?php endforeach; ?>
                                     <?php else: ?>
                                         <tr>
-                                            <td colspan="9">No faculty members found.</td>
+                                            <td colspan="8">No faculty members found.</td>
                                         </tr>
                                     <?php endif; ?>
                                 </tbody>

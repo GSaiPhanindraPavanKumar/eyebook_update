@@ -4,6 +4,8 @@
 
 // Include the database connection
 use Models\Database;
+use Models\Notification;
+
 $conn = Database::getConnection();
 
 // Check if the user is not logged in
@@ -27,6 +29,8 @@ $userData = $stmt->fetch(PDO::FETCH_ASSOC);
 // Check if user details are found
 if ($userData) {
     // User details found, proceed with the rest of the code
+    $studentId = $userData['id'];
+    $notifications = Notification::getByStudentId($conn, $studentId);
 } else {
     echo "Invalid Credentials";
 }
@@ -69,7 +73,38 @@ if ($userData) {
             </button>
 
             <ul class="navbar-nav navbar-nav-right">
-
+                <li class="nav-item dropdown">
+                    <a class="nav-link count-indicator dropdown-toggle" id="notificationDropdown" href="#" data-toggle="dropdown">
+                        <i class="icon-bell mx-0"></i>
+                        <span class="count"><?php echo count($notifications); ?></span>
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-right navbar-dropdown preview-list" aria-labelledby="notificationDropdown">
+                        <p class="mb-0 font-weight-normal float-left dropdown-header">Notifications</p>
+                        <?php if (!empty($notifications)): ?>
+                            <?php foreach ($notifications as $notification): ?>
+                                <a class="dropdown-item preview-item">
+                                    <div class="preview-thumbnail">
+                                        <div class="preview-icon bg-info">
+                                            <i class="ti-info-alt mx-0"></i>
+                                        </div>
+                                    </div>
+                                    <div class="preview-item-content">
+                                        <h6 class="preview-subject font-weight-normal"><?php echo htmlspecialchars($notification['message']); ?></h6>
+                                        <p class="font-weight-light small-text mb-0 text-muted">
+                                            <?php echo htmlspecialchars($notification['created_at']); ?>
+                                        </p>
+                                    </div>
+                                </a>
+                            <?php endforeach; ?>
+                        <?php else: ?>
+                            <a class="dropdown-item preview-item">
+                                <div class="preview-item-content">
+                                    <h6 class="preview-subject font-weight-normal">No notifications</h6>
+                                </div>
+                            </a>
+                        <?php endif; ?>
+                    </div>
+                </li>
                 <li class="nav-item nav-profile dropdown">
                     <a class="nav-link dropdown-toggle" href="#" data-toggle="dropdown" id="profileDropdown">
                         <img src="../../views/public\images\user.jpg" alt="profile"/>
@@ -83,14 +118,12 @@ if ($userData) {
                             <i class="ti-power-off text-primary"></i>
                             Logout
                         </a>
-
+                    </div>
                 </li>
-
             </ul>
             <button class="navbar-toggler navbar-toggler-right d-lg-none align-self-center" type="button" data-toggle="offcanvas">
-          <span class="icon-menu"></span>
-        </button>
-                    </div>
+                <span class="icon-menu"></span>
+            </button>
         </div>
     </nav>
     <div class="container-fluid page-body-wrapper">

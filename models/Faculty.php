@@ -39,20 +39,14 @@ class Faculty {
         return false;
     }
 
-
     public static function getByEmail($conn, $email) {
-
         $sql = "SELECT * FROM faculty WHERE email = :email";
-
         $stmt = $conn->prepare($sql);
-
         $stmt->bindParam(':email', $email);
-
         $stmt->execute();
-
-        return $stmt->fetch(\PDO::FETCH_ASSOC);
-
+        return $stmt->fetch(PDO::FETCH_ASSOC);
     }
+
     public function getUserProfile($conn) {
         $query = 'SELECT * FROM faculty where email = :email';
         $stmt = $conn->prepare($query);

@@ -7,6 +7,7 @@ use Models\Spoc;
 use Models\Course;
 use Models\University;
 use Models\Database;
+use Models\Faculty;
 use Models\Todo;
 use Models\Mailer;
 use PhpOffice\PhpSpreadsheet\IOFactory;
@@ -565,6 +566,277 @@ class AdminController {
         $universities = University::getAll($conn);
     
         require 'views/admin/view_course.php';
+    }
+
+    public function uploadSingleFaculty() {
+        $conn = Database::getConnection();
+        $universities = University::getAll($conn);
+        $message = '';
+        $message_type = '';
+    
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            $university_id = $_POST['university_id'];
+            $name = $_POST['name'];
+            $email = $_POST['email'];
+            $phone = $_POST['phone'];
+            $section = $_POST['section'];
+            $stream = $_POST['stream'];
+            $department = $_POST['department'];
+            $password = password_hash($_POST['password'], PASSWORD_BCRYPT);
+    
+            // Check for duplicate email
+            $sql = "SELECT COUNT(*) as count FROM faculty WHERE email = :email";
+            $stmt = $conn->prepare($sql);
+            $stmt->execute([':email' => $email]);
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+    
+            if ($result['count'] > 0) {
+                $message = "Email already exists.";
+                $message_type = "danger";
+            } else {
+                // Insert faculty record
+                $sql = "INSERT INTO faculty (name, email, phone, section, stream, department, university_id, password) VALUES (:name, :email, :phone, :section, :stream, :department, :university_id, :password)";
+                $stmt = $conn->prepare($sql);
+                $stmt->execute([
+                    ':name' => $name,
+                    ':email' => $email,
+                    ':phone' => $phone,
+                    ':section' => $section,
+                    ':stream' => $stream,
+                    ':department' => $department,
+                    ':university_id' => $university_id,
+                    ':password' => $password
+                ]);
+    
+                $message = "Faculty uploaded successfully.";
+                $message_type = "success";
+            }
+        }
+    
+        require 'views/admin/upload_faculty.php';
+    }
+    
+    public function uploadFaculty() {
+        $conn = Database::getConnection();
+        $universities = University::getAll($conn);
+        $duplicateRecords = [];
+        $message = '';
+        $message_type = '';
+    
+        if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['file'])) {
+            $file = $_FILES['file']['tmp_name'];
+            $university_id = $_POST['university_id'];
+    
+            $spreadsheet = IOFactory::load($file);
+            $sheet = $spreadsheet->getActiveSheet();
+            $rows = $sheet->toArray();
+    
+            $duplicateRecords = [];
+            $successCount = 0;
+    
+            foreach ($rows as $index => $row) {
+                if ($index == 0) {
+                    // Skip header row
+                    continue;
+                }
+    
+                $name = $row[0];
+                $email = $row[1];
+                $phone = $row[2];
+                $section = $row[3];
+                $stream = $row[4];
+                $department = $row[5];
+                $password = password_hash($row[6], PASSWORD_BCRYPT);
+    
+                // Check for duplicate email
+                if (Faculty::existsByEmail($conn, $email)) {
+                    $duplicateRecords[] = [
+                        'name' => $name,
+                        'email' => $email,
+                        'phone' => $phone,
+                        'section' => $section,
+                        'stream' => $stream,
+                        'department' => $department,
+                        'university_id' => $university_id
+                    ];
+                    continue;
+                }
+    
+                // Insert faculty record
+                $sql = "INSERT INTO faculty (name, email, phone, section, stream, department, university_id, password) VALUES (:name, :email, :phone, :section, :stream, :department, :university_id, :password)";
+                $stmt = $conn->prepare($sql);
+                $stmt->execute([
+                    ':name' => $name,
+                    ':email' => $email,
+                    ':phone' => $phone,
+                    ':section' => $section,
+                    ':stream' => $stream,
+                    ':department' => $department,
+                    ':university_id' => $university_id,
+                    ':password' => $password
+                ]);
+    
+                $successCount++;
+            }
+    
+            if (empty($duplicateRecords)) {
+                $message = "Faculty members uploaded successfully.";
+                $message_type = "success";
+            } else {
+                $message = "Some records were not uploaded due to duplicates.";
+                $message_type = "warning";
+            }
+        }
+    
+        require 'views/admin/upload_faculty.php';
+    }
+    
+    public function manageFaculty() {
+        $conn = Database::getConnection();
+        $universities = University::getAll($conn);
+        $duplicateRecords = [];
+        $message = '';
+        $message_type = '';
+
+        $search = isset($_GET['search']) ? $_GET['search'] : '';
+        $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+        $limit = 10;
+        $offset = ($page - 1) * $limit;
+
+        function fetchFaculty($conn, $search = '', $limit = 10, $offset = 0) {
+            $sql = "SELECT * FROM faculty WHERE name LIKE :search OR email LIKE :search LIMIT :limit OFFSET :offset";
+            $stmt = $conn->prepare($sql);
+            $likeSearch = "%$search%";
+            $stmt->bindParam(':search', $likeSearch, PDO::PARAM_STR);
+            $stmt->bindParam(':limit', $limit, PDO::PARAM_INT);
+            $stmt->bindParam(':offset', $offset, PDO::PARAM_INT);
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        }
+
+        function countFaculty($conn, $search = '') {
+            $sql = "SELECT COUNT(*) as count FROM faculty WHERE name LIKE :search OR email LIKE :search";
+            $stmt = $conn->prepare($sql);
+            $likeSearch = "%$search%";
+            $stmt->bindParam(':search', $likeSearch, PDO::PARAM_STR);
+            $stmt->execute();
+            return $stmt->fetch(PDO::FETCH_ASSOC)['count'];
+        }
+
+        $faculty = fetchFaculty($conn, $search, $limit, $offset);
+        $totalFaculty = countFaculty($conn, $search);
+        $totalPages = ceil($totalFaculty / $limit);
+
+        include 'views/admin/manage_faculty.php';
+    }
+
+    public function viewFacultyProfile($faculty_id) {
+        $conn = Database::getConnection();
+        $sql = "SELECT faculty.*, universities.long_name as university FROM faculty 
+                JOIN universities ON faculty.university_id = universities.id 
+                WHERE faculty.id = :faculty_id";
+        $stmt = $conn->prepare($sql);
+        $stmt->execute([':faculty_id' => $faculty_id]);
+        $faculty = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$faculty) {
+            die("Faculty not found.");
+        }
+
+        include 'views/admin/viewFacultyProfile.php';
+    }
+
+    public function editFaculty($faculty_id) {
+        $conn = Database::getConnection();
+        $message = '';
+        $message_type = '';
+
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            $name = $_POST['name'];
+            $email = $_POST['email'];
+            $phone = $_POST['phone'];
+            $department = $_POST['department'];
+
+            $sql = "UPDATE faculty SET name = ?, email = ?, phone = ?, department = ? WHERE id = ?";
+            $stmt = $conn->prepare($sql);
+            $stmt->execute([$name, $email, $phone, $department, $faculty_id]);
+
+            $message = "Faculty details updated successfully!";
+            $message_type = "success";
+
+            // Redirect to view faculty profile page after successful update
+            header("Location: /admin/viewFacultyProfile/$faculty_id");
+            exit();
+        }
+
+        $sql = "SELECT * FROM faculty WHERE id = ?";
+        $stmt = $conn->prepare($sql);
+        $stmt->execute([$faculty_id]);
+        $faculty = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$faculty) {
+            die("Faculty not found.");
+        }
+
+        include 'views/admin/edit_faculty.php';
+    }
+
+    public function resetFacultyPasswords() {
+        $conn = Database::getConnection();
+
+        if (isset($_POST['bulk_reset_password'])) {
+            $selectedFaculty = $_POST['selected'] ?? [];
+
+            foreach ($selectedFaculty as $facultyId) {
+                $faculty = Faculty::getById($conn, $facultyId);
+                if ($faculty) {
+                    $newPassword = $faculty['email']; // Reset password to email
+                    $hashedPassword = password_hash($newPassword, PASSWORD_BCRYPT);
+
+                    $sql = "UPDATE faculty SET password = ? WHERE id = ?";
+                    $stmt = $conn->prepare($sql);
+                    $stmt->execute([$hashedPassword, $facultyId]);
+                }
+            }
+
+            header('Location: /admin/manage_faculty');
+            exit();
+        }
+    }
+
+    public function deleteFaculty($faculty_id) {
+        $conn = Database::getConnection();
+
+        $sql = "DELETE FROM faculty WHERE id = ?";
+        $stmt = $conn->prepare($sql);
+        $stmt->execute([$faculty_id]);
+
+        header('Location: /admin/manage_faculty');
+        exit();
+    }
+
+    public function resetFacultyPassword($faculty_id) {
+        $conn = Database::getConnection();
+
+        $faculty = Faculty::getById($conn, $faculty_id);
+        if ($faculty) {
+            $newPassword = $faculty['email']; // Reset password to email
+            $hashedPassword = password_hash($newPassword, PASSWORD_BCRYPT);
+
+            $sql = "UPDATE faculty SET password = ? WHERE id = ?";
+            $stmt = $conn->prepare($sql);
+            $stmt->execute([$hashedPassword, $faculty_id]);
+
+            $message = "Password reset successfully!";
+            $message_type = "success";
+        } else {
+            $message = "Faculty not found.";
+            $message_type = "danger";
+        }
+
+        // Redirect back to the faculty profile page with a message
+        header("Location: /admin/viewFacultyProfile/$faculty_id?message=$message&message_type=$message_type");
+        exit();
     }
 
     public function addUnit() {
