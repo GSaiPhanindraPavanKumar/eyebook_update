@@ -26,7 +26,11 @@
                                     <button type="button" class="btn btn-primary" onclick="toggleCoursePlanForm()">Upload</button>
                                 <?php endif; ?>
                                 <?php if (!empty($course['course_plan'])) : ?>
-                                    <button class="btn btn-primary" onclick="redirectToCoursePlan()">View</button>
+                                    <?php
+                                    $hashedId = base64_encode($course['id']);
+                                    $hashedId = str_replace(['+', '/', '='], ['-', '_', ''], $hashedId);
+                                    ?>
+                                    <a href="/faculty/view_course_plan/<?php echo $hashedId; ?>" class="btn btn-primary">View</a>
                                 <?php endif; ?>
                             </div>
                         </div>
@@ -67,7 +71,7 @@
                                         echo "<td>" . $serialNumber++ . "</td>"; // Increment the serial number
                                         echo "<td>" . htmlspecialchars($unit['unit_name']) . "</td>";
                                         $full_url = $unit['scorm_url'];
-                                        echo "<td><a href='/student/view_book/" . $hashedId . "?index_path=" . urlencode($full_url) . "' class='btn btn-primary'>View Course Book</a></td>";
+                                        echo "<td><a href='/faculty/view_book/" . $hashedId . "?index_path=" . urlencode($full_url) . "' class='btn btn-primary'>View Course Book</a></td>";
                                         echo "</tr>";
                                     }
                                 } else {
@@ -142,7 +146,7 @@
                                                 echo "<td>" . htmlspecialchars($unit['unitNumber']) . "</td>";
                                                 echo "<td>" . htmlspecialchars($unit['topic']) . "</td>";
                                                 $full_url = $material['indexPath'];
-                                                echo "<td><a href='#' class='btn btn-primary' onclick='redirectToCourseMaterial(\"" . htmlspecialchars($full_url) . "\")'>View</a></td>";
+                                                echo "<td><a href='/faculty/view_material/" . $hashedId . "?index_path=" . urlencode($full_url) . "' class='btn btn-primary'>View Material</a></td>";
                                                 echo "</tr>";
                                             }
                                         }
@@ -238,7 +242,6 @@ function showBulkUpload() {
 
 function redirectToCoursePlan() {
     var coursePlan = <?php echo json_encode($course['course_plan']); ?>;
-    // var baseUrl = "https://eyebook.phemesoft.com/"; // Replace with your actual base URL
     var coursePlanUrl = "";
     if (coursePlan && coursePlan.url) {
         coursePlanUrl = coursePlan.url;
@@ -252,7 +255,6 @@ function redirectToCoursePlan() {
 }
 
 function redirectToCourseBook(url) {
-    // var baseUrl = "https://eyebook.phemesoft.com/"; // Replace with your actual base URL
     var courseBookUrl = encodeURIComponent(url);
 
     if (url) {
@@ -263,7 +265,6 @@ function redirectToCourseBook(url) {
 }
 
 function redirectToCourseMaterial(url) {
-    //var baseUrl = "https://eyebook.phemesoft.com/"; // Replace with your actual base URL
     var courseMaterialUrl = url;
 
     if (url) {

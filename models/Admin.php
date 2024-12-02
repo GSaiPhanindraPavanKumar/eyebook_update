@@ -36,6 +36,12 @@ class Admin {
         return $user;
     }
 
+    public static function getAll($conn) {
+        $sql = "SELECT id, name, email, last_login FROM admins";
+        $stmt = $conn->query($sql);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
 
     public static function updatePassword($conn, $admin_id, $new_password) {
         $stmt = $conn->prepare("UPDATE admins SET password = :new_password WHERE id = :admin_id");

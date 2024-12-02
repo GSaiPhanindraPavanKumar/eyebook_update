@@ -22,7 +22,11 @@
                         <div class="d-flex justify-content-between align-items-center">
                             <h5>Course Plan</h5>
                             <?php if (!empty($course['course_plan'])) : ?>
-                                <button class="btn btn-primary" onclick="redirectToCoursePlan()">View</button>
+                                <?php
+                                $hashedId = base64_encode($course['id']);
+                                $hashedId = str_replace(['+', '/', '='], ['-', '_', ''], $hashedId);
+                                ?>
+                                <a href="/student/view_course_plan/<?php echo $hashedId; ?>" class="btn btn-primary">View</a>
                             <?php endif; ?>
                         </div>
 
@@ -94,7 +98,7 @@
                                                 echo "<td>" . htmlspecialchars($unit['unitNumber']) . "</td>";
                                                 echo "<td>" . htmlspecialchars($unit['topic']) . "</td>";
                                                 $full_url = $material['indexPath'];
-                                                echo "<td><a href='#' class='btn btn-primary' onclick='redirectToCourseMaterial(\"" . htmlspecialchars($full_url) . "\")'>View</a></td>";
+                                                echo "<td><a href='/student/view_material/" . $hashedId . "?index_path=" . urlencode($full_url) . "' class='btn btn-primary'>View Material</a></td>";
                                                 echo "</tr>";
                                             }
                                         }
@@ -117,10 +121,9 @@
 <script>
 function redirectToCoursePlan() {
     var coursePlan = <?php echo json_encode($course['course_plan'] ?? []); ?>;
-    var baseUrl = "https://eyebook.phemesoft.com/"; // Replace with your actual base URL
     var coursePlanUrl = "";
     if (coursePlan && coursePlan.url) {
-        coursePlanUrl = baseUrl + coursePlan.url;
+        coursePlanUrl = coursePlan.url;
     }
 
     if (coursePlanUrl) {
@@ -131,8 +134,7 @@ function redirectToCoursePlan() {
 }
 
 function redirectToCourseBook(hashedId) {
-    var baseUrl = "https://eyebook.phemesoft.com/"; // Replace with your actual base URL
-    var courseBookUrl = baseUrl + "book_view.php?course_id=" + hashedId;
+    var courseBookUrl = "book_view.php?course_id=" + hashedId;
 
     if (hashedId) {
         window.location.href = courseBookUrl;
@@ -142,8 +144,7 @@ function redirectToCourseBook(hashedId) {
 }
 
 function redirectToCourseMaterial(url) {
-    var baseUrl = "https://eyebook.phemesoft.com/"; // Replace with your actual base URL
-    var courseMaterialUrl = baseUrl + url;
+    var courseMaterialUrl = url;
 
     if (url) {
         window.open(courseMaterialUrl, '_blank');

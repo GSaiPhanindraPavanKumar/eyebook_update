@@ -5,3 +5,5 @@ phpunit.xml
 .vscode
 mailer.log
 uploads
+.env
+aws_config.php

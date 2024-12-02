@@ -1,4 +1,12 @@
 <?php
+
+require_once 'vendor/autoload.php';
+
+
+use Dotenv\Dotenv;
+
+$dotenv = Dotenv::createImmutable(__DIR__);
+$dotenv->load();
 if (getenv('APP_ENV') === 'production') {
     error_reporting(0);
     ini_set('display_errors', 0);
@@ -7,12 +15,7 @@ if (getenv('APP_ENV') === 'production') {
     ini_set('display_errors', 1);
 }
 
-require_once 'vendor/autoload.php';
 
-use Dotenv\Dotenv;
-
-$dotenv = Dotenv::createImmutable(__DIR__);
-$dotenv->load();
 
 use Bramus\Router\Router;
 
@@ -49,7 +52,8 @@ $router->get('/admin/manage_students', 'AdminController@manageStudents');
 $router->get('/admin/view_student/(\d+)', 'AdminController@viewStudent');
 $router->post('/admin/handleTodo', 'AdminController@handleTodo');
 $router->get('/admin/viewStudentProfile/(\d+)', 'AdminController@viewStudentProfile');
-
+$router->get('/admin/getUsageData', 'AdminController@getUsageData');
+$router->get('/admin/download_usage_report', 'AdminController@downloadUsageReport');
 $router->get('/admin/view_university/(\d+)', 'AdminController@viewUniversity');
 $router->get('/admin/create_virtual_classroom', 'AdminController@createVirtualClassroom');
 $router->post('/admin/create_virtual_classroom', 'AdminController@createVirtualClassroom');
@@ -85,6 +89,7 @@ $router->get('/spoc/manage_students', 'SpocController@manageStudents');
 $router->get('/faculty/dashboard', 'FacultyController@dashboard');
 $router->get('/faculty/updatePassword', 'FacultyController@updatePassword');
 $router->get('/faculty/profile', 'FacultyController@profile');
+$router->post('/faculty/profile', 'FacultyController@profile');
 $router->get('/faculty/my_courses', 'FacultyController@myCourses');
 $router->get('/faculty/view_course/([a-zA-Z0-9]+)', 'FacultyController@viewCourse');
 $router->get('/faculty/manage_students', 'FacultyController@manageStudents');
@@ -145,6 +150,7 @@ $router->post('/faculty/view_course/upload_course_materials', function(){
     require 'views/faculty/upload_course_materials.php';
 });
 
+$router->get('/faculty/view_course_plan/(\w+)', 'FacultyController@viewCoursePlan');
 $router->post('/faculty/view_course/upload_course_plan', function(){
     require 'views/faculty/upload_course_plan.php';
 });
@@ -159,8 +165,8 @@ $router->get('/faculty/download_assessment_report/(\d+)', function($assessmentId
 
 
 $router->get('/faculty/view_book/([a-zA-Z0-9]+)', 'FacultyController@viewBook');
-$router->get('/faculty/view_material/([a-zA-Z0-9]+)', 'FacultyController@viewBook');
-
+$router->get('/faculty/view_course_plan/(\w+)', 'FacultyController@viewCoursePlan');
+$router->get('/faculty/view_material/(\w+)', 'FacultyController@viewMaterial');
 $router->get('/faculty/view_reports', 'FacultyController@viewReports');
 $router->get('/faculty/download_report/(\d+)', 'FacultyController@downloadReport');
 
@@ -184,9 +190,8 @@ $router->post('/student/updatePassword', function(){
     require 'views/student/updatePassword.php';
 });
 
-$router->get('/student/profile', function(){
-    require 'views/student/profile.php';
-});
+$router->get('/student/profile', 'StudentController@profile');
+$router->post('/student/profile', 'StudentController@profile');
 
 $router->get('/student/discussion_forum/(\d+)', function(){
     require 'views/student/discussion_forum.php';
@@ -202,6 +207,8 @@ $router->get('/student/my_courses', function(){
 $router->get('/student/manage_assignments', 'StudentController@manageAssignments');
 $router->get('/student/submit_assignment/(\d+)', 'StudentController@submitAssignment');
 $router->post('/student/submit_assignment/(\d+)', 'StudentController@submitAssignment');
+$router->get('/student/view_course_plan/(\w+)', 'StudentController@viewCoursePlan');
+$router->get('/student/view_material/(\w+)', 'StudentController@viewMaterial');
 
 $router->get('/student/submit_assignment/(\d+)', function($assignment_id){
     $_GET['assignment_id'] = $assignment_id;
@@ -259,6 +266,7 @@ $router->get('/student/virtual_classroom', function(){
     require 'views/student/student_dashboard.php';
 });
 
+$router->get('/logout', 'AuthController@logout');
 $router->get('/admin/logout', 'AuthController@logout');
 $router->get('/spoc/logout', 'AuthController@logout');
 $router->get('/faculty/logout', 'AuthController@logout');

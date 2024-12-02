@@ -22,6 +22,34 @@ use Exception;
 use PDOException;
 use ZoomAPI;
 
+
+require_once 'vendor/autoload.php';
+require_once __DIR__ . '/../aws_config.php';
+
+$bucketName = AWS_BUCKET_NAME;
+$region = AWS_REGION;
+$accessKey = AWS_ACCESS_KEY_ID;
+$secretKey = AWS_SECRET_ACCESS_KEY;
+
+// Debugging: Log the values of the configuration variables
+error_log('AWS_BUCKET_NAME: ' . $bucketName);
+error_log('AWS_REGION: ' . $region);
+error_log('AWS_ACCESS_KEY_ID: ' . $accessKey);
+error_log('AWS_SECRET_ACCESS_KEY: ' . $secretKey);
+
+if (!$bucketName || !$region || !$accessKey || !$secretKey) {
+    throw new Exception('Missing AWS configuration in aws_config.php file');
+}
+
+$s3Client = new S3Client([
+    'region' => 'us-east-1',
+    'version' => 'latest',
+    'credentials' => [
+        'key' => $accessKey,
+        'secret' => $secretKey,
+    ],
+]);
+
 class AdminController {
     public function index() {
         $admin = new AdminModel();
@@ -43,21 +71,190 @@ class AdminController {
         $conn = Database::getConnection();
         $adminModel = new AdminModel();
         $user = $adminModel->getUserProfile($conn);
-
+    
         $university_count = University::getCount($conn);
         $student_count = Student::getCount($conn);
         $spoc_count = Spoc::getCount($conn);
         $course_count = Course::getCount($conn);
         $meeting_count = Meetings::getCount($conn);
-
-
-
+    
         $spocs = Spoc::getAll($conn);
         $universities = University::getAll($conn);
         $courses = Course::getAll($conn);
-        $todos = Todo::getAll($conn); 
-
+        $todos = Todo::getAll($conn);
+    
+        // Fetch usage data
+        $usageData = $this->fetchUsageData($conn, 'today');
+        $usageLabels = array_keys($usageData);
+        $usageValues = array_values($usageData);
+    
         require 'views/admin/dashboard.php';
+    }
+
+    public function getUsageData() {
+        $conn = Database::getConnection();
+        $timeRange = $_GET['timeRange'] ?? 'today';
+    
+        $usageData = $this->fetchUsageData($conn, $timeRange);
+        $labels = array_keys($usageData);
+        $counts = array_values($usageData);
+    
+        echo json_encode(['labels' => $labels, 'data' => $counts]);
+    }
+
+    private function fetchUsageData($conn, $timeRange) {
+        switch ($timeRange) {
+            case 'today':
+                $sql = "SELECT 'Admin' as user_type, COUNT(*) as count FROM admins WHERE DATE(last_login) = CURDATE()
+                        UNION ALL
+                        SELECT 'SPOC' as user_type, COUNT(*) as count FROM spocs WHERE DATE(last_login) = CURDATE()
+                        UNION ALL
+                        SELECT 'Faculty' as user_type, COUNT(*) as count FROM faculty WHERE DATE(last_login) = CURDATE()
+                        UNION ALL
+                        SELECT 'Student' as user_type, COUNT(*) as count FROM students WHERE DATE(last_login) = CURDATE()";
+                break;
+            case 'month':
+                $sql = "SELECT 'Admin' as user_type, COUNT(*) as count FROM admins WHERE MONTH(last_login) = MONTH(CURDATE())
+                        UNION ALL
+                        SELECT 'SPOC' as user_type, COUNT(*) as count FROM spocs WHERE MONTH(last_login) = MONTH(CURDATE())
+                        UNION ALL
+                        SELECT 'Faculty' as user_type, COUNT(*) as count FROM faculty WHERE MONTH(last_login) = MONTH(CURDATE())
+                        UNION ALL
+                        SELECT 'Student' as user_type, COUNT(*) as count FROM students WHERE MONTH(last_login) = MONTH(CURDATE())";
+                break;
+            case 'quarter':
+                $sql = "SELECT 'Admin' as user_type, COUNT(*) as count FROM admins WHERE QUARTER(last_login) = QUARTER(CURDATE())
+                        UNION ALL
+                        SELECT 'SPOC' as user_type, COUNT(*) as count FROM spocs WHERE QUARTER(last_login) = QUARTER(CURDATE())
+                        UNION ALL
+                        SELECT 'Faculty' as user_type, COUNT(*) as count FROM faculty WHERE QUARTER(last_login) = QUARTER(CURDATE())
+                        UNION ALL
+                        SELECT 'Student' as user_type, COUNT(*) as count FROM students WHERE QUARTER(last_login) = QUARTER(CURDATE())";
+                break;
+            case 'year':
+                $sql = "SELECT 'Admin' as user_type, COUNT(*) as count FROM admins WHERE YEAR(last_login) = YEAR(CURDATE())
+                        UNION ALL
+                        SELECT 'SPOC' as user_type, COUNT(*) as count FROM spocs WHERE YEAR(last_login) = YEAR(CURDATE())
+                        UNION ALL
+                        SELECT 'Faculty' as user_type, COUNT(*) as count FROM faculty WHERE YEAR(last_login) = YEAR(CURDATE())
+                        UNION ALL
+                        SELECT 'Student' as user_type, COUNT(*) as count FROM students WHERE YEAR(last_login) = YEAR(CURDATE())";
+                break;
+            default:
+                $sql = "SELECT 'Admin' as user_type, COUNT(*) as count FROM admins WHERE DATE(last_login) = CURDATE()
+                        UNION ALL
+                        SELECT 'SPOC' as user_type, COUNT(*) as count FROM spocs WHERE DATE(last_login) = CURDATE()
+                        UNION ALL
+                        SELECT 'Faculty' as user_type, COUNT(*) as count FROM faculty WHERE DATE(last_login) = CURDATE()
+                        UNION ALL
+                        SELECT 'Student' as user_type, COUNT(*) as count FROM students WHERE DATE(last_login) = CURDATE()";
+                break;
+        }
+    
+        $stmt = $conn->query($sql);
+        $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    
+        $usageData = [];
+        foreach ($data as $row) {
+            $usageData[$row['user_type']] = $row['count'];
+        }
+    
+        return $usageData;
+    }
+
+    public function downloadUsageReport() {
+        $conn = Database::getConnection();
+    
+        // Fetch data for each user type
+        $admins = $this->fetchUserData($conn, 'admins', 'today');
+        $spocs = $this->fetchUserData($conn, 'spocs', 'today');
+        $faculty = $this->fetchUserData($conn, 'faculty', 'today');
+        $students = $this->fetchUserData($conn, 'students', 'today');
+    
+        // Fetch usage summary data
+        $usageData = $this->fetchUsageData($conn, 'today');
+        $usageSummary = [];
+        foreach ($usageData as $userType => $count) {
+            $usageSummary[] = [$userType, $count];
+        }
+    
+        // Create a new Spreadsheet object
+        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+    
+        // Add summary data to the first sheet
+        $summarySheet = $spreadsheet->getActiveSheet();
+        $summarySheet->setTitle('Summary');
+        $summarySheet->fromArray(['User Type', 'Count'], NULL, 'A1');
+        $summarySheet->fromArray($usageSummary, NULL, 'A2');
+    
+        // Add data to the Admin sheet
+        $adminSheet = $spreadsheet->createSheet();
+        $adminSheet->setTitle('Admins');
+        $adminSheet->fromArray(['Name', 'Username'], NULL, 'A1'); // Updated header
+        $adminSheet->fromArray($admins, NULL, 'A2');
+    
+        // Add data to the SPOC sheet
+        $spocSheet = $spreadsheet->createSheet();
+        $spocSheet->setTitle('SPOCs');
+        $spocSheet->fromArray(['Name', 'Email', 'University'], NULL, 'A1');
+        $spocSheet->fromArray($spocs, NULL, 'A2');
+    
+        // Add data to the Faculty sheet
+        $facultySheet = $spreadsheet->createSheet();
+        $facultySheet->setTitle('Faculty');
+        $facultySheet->fromArray(['Name', 'Email', 'University', 'Section'], NULL, 'A1');
+        $facultySheet->fromArray($faculty, NULL, 'A2');
+    
+        // Add data to the Student sheet
+        $studentSheet = $spreadsheet->createSheet();
+        $studentSheet->setTitle('Students');
+        $studentSheet->fromArray(['Name', 'Email', 'University', 'Section'], NULL, 'A1');
+        $studentSheet->fromArray($students, NULL, 'A2');
+    
+        // Set the first sheet as the active sheet
+        $spreadsheet->setActiveSheetIndex(0);
+    
+        // Generate the Excel file
+        $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+        $filename = 'user_usage_report_' . date('Ymd') . '.xlsx';
+    
+        // Send the file to the browser for download
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment;filename="' . $filename . '"');
+        header('Cache-Control: max-age=0');
+        $writer->save('php://output');
+        exit();
+    }
+    
+    private function fetchUserData($conn, $userType, $timeRange) {
+        switch ($userType) {
+            case 'admins':
+                $sql = "SELECT name, username FROM admins WHERE DATE(last_login) = CURDATE()";
+                break;
+            case 'spocs':
+                $sql = "SELECT spocs.name, spocs.email, universities.long_name as university 
+                        FROM spocs 
+                        JOIN universities ON spocs.university_id = universities.id 
+                        WHERE DATE(spocs.last_login) = CURDATE()";
+                break;
+            case 'faculty':
+                $sql = "SELECT faculty.name, faculty.email, universities.long_name as university, faculty.section 
+                        FROM faculty 
+                        JOIN universities ON faculty.university_id = universities.id 
+                        WHERE DATE(faculty.last_login) = CURDATE()";
+                break;
+            case 'students':
+                $sql = "SELECT students.name, students.email, universities.long_name as university, students.section 
+                        FROM students 
+                        JOIN universities ON students.university_id = universities.id 
+                        WHERE DATE(students.last_login) = CURDATE()";
+                break;
+            default:
+                return [];
+        }
+    
+        $stmt = $conn->query($sql);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     public function addUniversity() {
@@ -73,15 +270,6 @@ class AdminController {
             $spoc_phone = $_POST['spoc_phone'];
             $spoc_pass = $_POST['spoc_password'];
             $spoc_password = !empty($spoc_pass) ? password_hash($spoc_pass, PASSWORD_BCRYPT) : null;
-            $logo_url = null;
-    
-            if (isset($_FILES['logo']) && $_FILES['logo']['error'] == UPLOAD_ERR_OK) {
-                $logo = $_FILES['logo'];
-                $logo_path = $this->uploadLogoToS3($logo, $short_name);
-                if ($logo_path) {
-                    $logo_url = $logo_path;
-                }
-            }
     
             if (University::existsByShortName($conn, $short_name)) {
                 $message = "Duplicate entry for short name: " . $short_name;
@@ -94,7 +282,7 @@ class AdminController {
                 $message_type = "warning";
             } else {
                 $university = new University($conn);
-                $result = $university->addUniversity($conn, $long_name, $short_name, $location, $country, $spoc_name, $spoc_email, $spoc_phone, $spoc_password, $logo_url);
+                $result = $university->addUniversity($conn, $long_name, $short_name, $location, $country, $spoc_name, $spoc_email, $spoc_phone, $spoc_password);
                 $message = $result['message'];
                 $message_type = $result['message_type'];
     
@@ -112,11 +300,11 @@ class AdminController {
     }
     
     private function uploadLogoToS3($logo, $short_name) {
-        $bucketName = getenv('AWS_BUCKET_NAME');
-        $region = getenv('AWS_REGION');
-        $accessKey = getenv('AWS_ACCESS_KEY_ID');
-        $secretKey = getenv('AWS_SECRET_ACCESS_KEY');
-        
+        $bucketName = AWS_BUCKET_NAME;
+        $region = AWS_REGION;
+        $accessKey = AWS_ACCESS_KEY_ID;
+        $secretKey = AWS_SECRET_ACCESS_KEY;
+    
         $s3Client = new S3Client([
             'region' => $region,
             'version' => 'latest',
@@ -141,6 +329,7 @@ class AdminController {
     
             return $result['ObjectURL'];
         } catch (AwsException $e) {
+            error_log('AWS S3 Upload Error: ' . $e->getMessage());
             return null;
         }
     }
@@ -405,10 +594,10 @@ class AdminController {
             }
     
             // AWS S3 configuration
-            $bucketName = getenv('AWS_BUCKET_NAME');
-            $region = getenv('AWS_REGION');
-            $accessKey = getenv('AWS_ACCESS_KEY_ID');
-            $secretKey = getenv('AWS_SECRET_ACCESS_KEY');
+            $bucketName = AWS_BUCKET_NAME;
+            $region = AWS_REGION;
+            $accessKey = AWS_ACCESS_KEY_ID;
+            $secretKey = AWS_SECRET_ACCESS_KEY;
     
             // Initialize S3 client
             $s3Client = new S3Client([
@@ -511,13 +700,14 @@ class AdminController {
         // Delete the temporary zip file
         unlink($tempFile);
     }
-
+    
     private function getMimeType($filePath) {
         $finfo = finfo_open(FILEINFO_MIME_TYPE);
         $mimeType = finfo_file($finfo, $filePath);
         finfo_close($finfo);
     
-        $extension = pathinfo($filePath, PATHINFO_EXTENSION);
+        // Normalize file extension
+        $extension = strtolower(pathinfo($filePath, PATHINFO_EXTENSION));
     
         // Fallback MIME types
         $mimeTypes = [
@@ -534,13 +724,10 @@ class AdminController {
             'xml' => 'application/xml',
         ];
     
-        // If finfo_file returns an incorrect value, use the fallback MIME type
-        if ($mimeType === 'text/plain' || $mimeType === 'application/octet-stream') {
-            $mimeType = $mimeTypes[$extension] ?? 'application/octet-stream';
-        }
+        // Fallback if incorrect detection
+        return $mimeTypes[$extension] ?? $mimeType;
+    }    
     
-        return $mimeType;
-    }
 
     public function editStudent($student_id) {
         $conn = Database::getConnection();

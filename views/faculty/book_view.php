@@ -9,15 +9,7 @@ include 'sidebar.php';
             <div class="col-md-12 grid-margin stretch-card">
                 <div class="card">
                     <div class="card-body">
-                        <h4 class="card-title">Course Book</h4>
-                        <div class="list-group">
-                            <?php foreach ($units as $unit): ?>
-                                <a href="<?php echo htmlspecialchars($unit['scorm_url'], ENT_QUOTES, 'UTF-8'); ?>" target="book-iframe" class="list-group-item list-group-item-action">
-                                    <?php echo htmlspecialchars($unit['unit_name'], ENT_QUOTES, 'UTF-8'); ?>
-                                </a>
-                            <?php endforeach; ?>
-                        </div>
-                        <iframe id="book-iframe" src="<?php echo htmlspecialchars($units[0]['scorm_url'], ENT_QUOTES, 'UTF-8'); ?>" style="width: 100%; height: 80vh;"></iframe>
+                        <iframe id="book-iframe" src="<?php echo htmlspecialchars($index_path, ENT_QUOTES, 'UTF-8'); ?>" style="width: 100%; height: 80vh;"></iframe>
                     </div>
                 </div>
             </div>

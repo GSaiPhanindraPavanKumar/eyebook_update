@@ -81,16 +81,14 @@ class Faculty {
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    public static function update($conn, $id, $name, $jobTitle, $email, $phone, $department, $profileImage) {
-        $query = "UPDATE faculty SET name=?, jobTitle=?, email=?, phone=?, department=?, profileImage=? WHERE id=?";
+    public static function update($conn, $id, $name, $email, $phone, $department) {
+        $query = "UPDATE faculty SET name=?, email=?, phone=?, department=? WHERE id=?";
         $stmt = $conn->prepare($query);
         $stmt->bindParam(1, $name);
-        $stmt->bindParam(2, $jobTitle);
-        $stmt->bindParam(3, $email);
-        $stmt->bindParam(4, $phone);
-        $stmt->bindParam(5, $department);
-        $stmt->bindParam(6, $profileImage, PDO::PARAM_LOB);
-        $stmt->bindParam(7, $id, PDO::PARAM_INT);
+        $stmt->bindParam(2, $email);
+        $stmt->bindParam(3, $phone);
+        $stmt->bindParam(4, $department);
+        $stmt->bindParam(5, $id, PDO::PARAM_INT);
         $stmt->execute();
     }
 
@@ -100,11 +98,11 @@ class Faculty {
         $stmt->execute(['university_id' => $university_id]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+
     public function updateLastLogin($faculty_id) {
         $conn = Database::getConnection();
         $sql = "UPDATE faculty SET last_login = NOW() WHERE id = ?";
         $stmt = $conn->prepare($sql);
         $stmt->execute([$faculty_id]);
     }
-        
 }
