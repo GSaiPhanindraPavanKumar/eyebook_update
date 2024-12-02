@@ -65,7 +65,7 @@ class Assignment {
         }
 
         public static function getAssignmentsByStudentId($conn, $student_id) {
-            $sql = "SELECT a.*, s.file_path, s.grade 
+            $sql = "SELECT a.*, s.file_content, s.grade 
                     FROM assignments a
                     LEFT JOIN assignment_submissions s ON a.id = s.assignment_id AND s.student_id = :student_id";
                    // -- WHERE a.course_id IN (SELECT course_id FROM courses WHERE student_id = :student_id)";
