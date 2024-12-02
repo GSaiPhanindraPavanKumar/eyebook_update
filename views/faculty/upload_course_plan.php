@@ -8,6 +8,11 @@ use Aws\Exception\AwsException;
 require_once 'vendor/autoload.php';
 require_once __DIR__ . '/../../aws_config.php';
 
+// Increase file upload size limit
+ini_set('upload_max_filesize', '100M');
+ini_set('post_max_size', '100M');
+ini_set('memory_limit', '256M'); // Increase memory limit if needed
+
 $bucketName = AWS_BUCKET_NAME;
 $region = AWS_REGION;
 $accessKey = AWS_ACCESS_KEY_ID;

@@ -3,12 +3,16 @@ include("sidebar.php");
 use Models\Database;
 use Models\Student;
 use Models\Course;
+use Models\VirtualClassroom;
 
 $email = $_SESSION['email'];
 
 // Fetch user data
 $conn = Database::getConnection();
 $userData = Student::getUserDataByEmail($conn, $email);
+
+// Ensure university_short_name is set
+$universityShortName = isset($userData['university_short_name']) ? htmlspecialchars($userData['university_short_name']) : '';
 
 // Fetch today's classes
 $todaysClasses = getTodaysClasses();
@@ -23,6 +27,44 @@ $leastProgressCourses = array_filter($ongoingCourses, function($course) {
     return !empty($course['course_book']) && $course['progress'] < 100;
 });
 $leastProgressCourses = array_slice($leastProgressCourses, 0, 5); // Get the least 5 progress courses
+
+// Fetch all virtual classes for the calendar
+$virtualClasses = getAllVirtualClasses();
+
+// Filter virtual classes for the upcoming week
+$upcomingClasses = array_filter($virtualClasses, function($class) {
+    $startTime = strtotime($class['start_time']);
+    $now = time();
+    $oneWeekLater = strtotime('+1 week', $now);
+    return $startTime >= $now && $startTime <= $oneWeekLater;
+});
+
+// Curated list of educational, inspiring, and motivational quotes
+$quotes = [
+    "Education is the most powerful weapon which you can use to change the world. - Nelson Mandela",
+    "The beautiful thing about learning is that no one can take it away from you. - B.B. King",
+    "The mind is not a vessel to be filled but a fire to be ignited. - Plutarch",
+    "The only way to do great work is to love what you do. - Steve Jobs",
+    "Success is not the key to happiness. Happiness is the key to success. - Albert Schweitzer",
+    "Your time is limited, don't waste it living someone else's life. - Steve Jobs",
+    "The best way to predict the future is to invent it. - Alan Kay",
+    "Life is what happens when you're busy making other plans. - John Lennon",
+    "The purpose of our lives is to be happy. - Dalai Lama",
+    "Get busy living or get busy dying. - Stephen King",
+    "You have within you right now, everything you need to deal with whatever the world can throw at you. - Brian Tracy",
+    "Believe you can and you're halfway there. - Theodore Roosevelt",
+    "The only limit to our realization of tomorrow is our doubts of today. - Franklin D. Roosevelt",
+    "The future belongs to those who believe in the beauty of their dreams. - Eleanor Roosevelt",
+    "The best way to find yourself is to lose yourself in the service of others. - Mahatma Gandhi",
+    "The only person you are destined to become is the person you decide to be. - Ralph Waldo Emerson",
+    "The only way to achieve the impossible is to believe it is possible. - Charles Kingsleigh",
+    "The only limit to our realization of tomorrow is our doubts of today. - Franklin D. Roosevelt",
+    "The only way to do great work is to love what you do. - Steve Jobs",
+    "The only way to achieve the impossible is to believe it is possible. - Charles Kingsleigh"
+];
+
+// Select a random quote based on the current date
+$thoughtOfTheDay = $quotes[date('z') % count($quotes)];
 ?>
 
 <!-- HTML Content -->
@@ -32,68 +74,41 @@ $leastProgressCourses = array_slice($leastProgressCourses, 0, 5); // Get the lea
             <div class="col-md-12 grid-margin">
                 <div class="row">
                     <div class="col-12 col-xl-8 mb-4 mb-xl-0">
-                        <h3 class="font-weight-bold">Hello, <em><?php echo htmlspecialchars($userData['name']); ?></em></h3>
+                        <h3 class="font-weight-bold">Hello, <em><?php echo htmlspecialchars($userData['name']); ?> - <?php echo $universityShortName; ?></em></h3>
+                        <p class="mt-2"><?php echo htmlspecialchars($thoughtOfTheDay); ?></p>
                     </div>
                 </div>
             </div>
         </div>
         <div class="row">
-            <!-- Student Details -->
+            <!-- Calendar and Weekly Agenda -->
             <div class="col-md-12 grid-margin stretch-card">
                 <div class="card">
                     <div class="card-body">
-                        <h4 class="card-title">Student Details</h4>
                         <div class="row">
                             <div class="col-md-6">
-                                <p><strong>Name:</strong> <?php echo htmlspecialchars($userData['name']); ?></p>
-                                <p><strong>Email:</strong> <?php echo htmlspecialchars($userData['email']); ?></p>
-                                <p><strong>Registration Number:</strong> <?php echo htmlspecialchars($userData['regd_no']); ?></p>
-                                <p><strong>Section:</strong> <?php echo htmlspecialchars($userData['section']); ?></p>
+                                <h4 class="card-title">Calendar</h4>
+                                <div id="calendar" style="max-width: 100%; height: 400px;"></div>
                             </div>
                             <div class="col-md-6">
-                                <p><strong>Stream:</strong> <?php echo htmlspecialchars($userData['stream']); ?></p>
-                                <p><strong>Year:</strong> <?php echo htmlspecialchars($userData['year']); ?></p>
-                                <p><strong>Department:</strong> <?php echo htmlspecialchars($userData['dept']); ?></p>
-                                <p><strong>University:</strong> <?php echo htmlspecialchars($userData['university']); ?></p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="row">
-            <!-- Today's Classes -->
-            <div class="col-md-12 grid-margin stretch-card">
-                <div class="card">
-                    <div class="card-body">
-                        <h4 class="card-title">Today's Classes</h4>
-                        <div class="table-responsive">
-                            <table class="table table-striped">
-                                <thead>
-                                    <tr>
-                                        <th>Topic</th>
-                                        <th>Start Time</th>
-                                        <th>End Time</th>
-                                        <th>Join URL</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <?php if (!empty($todaysClasses)): ?>
-                                        <?php foreach ($todaysClasses as $class): ?>
-                                            <tr>
-                                                <td><?php echo htmlspecialchars($class['topic']); ?></td>
-                                                <td><?php echo htmlspecialchars($class['start_time']); ?></td>
-                                                <td><?php echo htmlspecialchars($class['end_time']); ?></td>
-                                                <td><a href="<?php echo htmlspecialchars($class['join_url']); ?>" target="_blank" class="btn btn-primary">Join</a></td>
-                                            </tr>
+                                <h4 class="card-title">Weekly Agenda</h4>
+                                <ul class="list-group">
+                                    <?php if (!empty($upcomingClasses)): ?>
+                                        <?php foreach ($upcomingClasses as $class): ?>
+                                            <?php
+                                            $endTime = date('Y-m-d H:i:s', strtotime($class['start_time'] . ' + ' . $class['duration'] . ' minutes'));
+                                            ?>
+                                            <li class="list-group-item">
+                                                <strong><?php echo htmlspecialchars($class['topic']); ?></strong><br>
+                                                <?php echo htmlspecialchars($class['start_time']); ?> - <?php echo htmlspecialchars($endTime); ?><br>
+                                                <a href="<?php echo htmlspecialchars($class['join_url']); ?>" target="_blank">Join</a>
+                                            </li>
                                         <?php endforeach; ?>
                                     <?php else: ?>
-                                        <tr>
-                                            <td colspan="4">No classes scheduled for today.</td>
-                                        </tr>
+                                        <li class="list-group-item">No upcoming weekly agenda.</li>
                                     <?php endif; ?>
-                                </tbody>
-                            </table>
+                                </ul>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -167,7 +182,7 @@ $leastProgressCourses = array_slice($leastProgressCourses, 0, 5); // Get the lea
 // Define the function to fetch user data from the database
 function getUserDataByEmail($email) {
     $conn = Database::getConnection();
-    $stmt = $conn->prepare("SELECT students.*, universities.long_name as university FROM students JOIN universities ON students.university_id = universities.id WHERE students.email = :email");
+    $stmt = $conn->prepare("SELECT students.*, universities.long_name as university, universities.short_name as university_short_name FROM students JOIN universities ON students.university_id = universities.id WHERE students.email = :email");
     $stmt->execute(['email' => $email]);
     return $stmt->fetch(PDO::FETCH_ASSOC);
 }
@@ -217,6 +232,35 @@ function getCoursesWithProgress($studentId, $universityId) {
 
     return $filteredCourses;
 }
+
+// Define the function to fetch all virtual classes
+function getAllVirtualClasses() {
+    $conn = Database::getConnection();
+    $stmt = $conn->prepare("SELECT topic, start_time, duration, join_url FROM virtual_classrooms");
+    $stmt->execute();
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
 ?>
 <!-- Include Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<!-- Include FullCalendar -->
+<link href='https://cdn.jsdelivr.net/npm/fullcalendar@5.10.1/main.min.css' rel='stylesheet' />
+<script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.10.1/main.min.js'></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var calendarEl = document.getElementById('calendar');
+    var calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'dayGridMonth',
+        events: <?php echo json_encode(array_map(function($class) {
+            return [
+                'title' => $class['topic'],
+                'start' => $class['start_time'],
+                'end' => date('Y-m-d\TH:i:s', strtotime($class['start_time'] . ' + ' . $class['duration'] . ' minutes')),
+                'url' => $class['join_url']
+            ];
+        }, $virtualClasses)); ?>,
+        eventDisplay: 'block' // Ensure event titles are always visible
+    });
+    calendar.render();
+});
+</script>

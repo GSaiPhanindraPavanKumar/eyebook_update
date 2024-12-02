@@ -19,7 +19,7 @@ class Student {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
     public static function getUserDataByEmail($conn, $email) {
-        $sql = "SELECT students.*, universities.long_name as university 
+        $sql = "SELECT students.*, universities.long_name as university, universities.short_name as university_short_name 
                 FROM students 
                 JOIN universities ON students.university_id = universities.id 
                 WHERE students.email = :email";
