@@ -24,6 +24,7 @@ class Database {
         $this->password = '#*Eyebook@123*#';
 
 
+
     }
 
     public function connect() {

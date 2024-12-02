@@ -93,16 +93,17 @@ $router->post('/faculty/profile', 'FacultyController@profile');
 $router->get('/faculty/my_courses', 'FacultyController@myCourses');
 $router->get('/faculty/view_course/([a-zA-Z0-9]+)', 'FacultyController@viewCourse');
 $router->get('/faculty/manage_students', 'FacultyController@manageStudents');
-$router->get('/faculty/create_assignment', function(){
-    require 'views/faculty/assignment_create.php';
-});
-$router->post('/faculty/create_assignment', function(){
-    require 'views/faculty/assignment_create.php';
-});
+
+
 
 $router->get('/faculty/manage_assignments', 'FacultyController@manageAssignments');
+$router->get('/faculty/create_assignment', 'FacultyController@createAssignment');
+$router->post('/faculty/create_assignment', 'FacultyController@createAssignment');
 $router->get('/faculty/view_assignment/(\d+)', 'FacultyController@viewAssignment');
-$router->post('/faculty/mark_assignment', 'FacultyController@markAssignment');
+$router->get('/faculty/grade_assignment/(\d+)/(\d+)', 'FacultyController@gradeAssignment');
+$router->post('/faculty/grade_assignment/(\d+)/(\d+)', 'FacultyController@gradeAssignment');
+
+$router->get('/faculty/download_report/(\d+)/(\w+)', 'FacultyController@downloadReport');
 
 $router->post('/faculty/updatePassword', 'FacultyController@updatePassword');
 $router->get('/faculty/discussion_forum/(\d+)', function(){
@@ -168,6 +169,13 @@ $router->get('/faculty/view_course_plan/(\w+)', 'FacultyController@viewCoursePla
 $router->get('/faculty/view_material/(\w+)', 'FacultyController@viewMaterial');
 $router->get('/faculty/view_reports', 'FacultyController@viewReports');
 $router->get('/faculty/download_report/(\d+)', 'FacultyController@downloadReport');
+
+
+
+$router->get('/student/manage_assignments', 'StudentController@manageAssignments');
+$router->get('/student/submit_assignment/(\d+)', 'StudentController@submitAssignment');
+$router->post('/student/submit_assignment/(\d+)', 'StudentController@submitAssignment');
+$router->get('/student/view_grades', 'StudentController@viewGrades');
 
 $router->get('/student/dashboard', function(){
     require 'views/student/dashboard.php';

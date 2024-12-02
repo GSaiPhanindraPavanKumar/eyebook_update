@@ -163,13 +163,13 @@ if ($userData) {
                         <ul class="nav flex-column sub-menu">
                             <li class="nav-item"><a class="nav-link" href="/student/my_courses">My Courses</a></li>
                             <li class="nav-item"><a class="nav-link" href="/student/virtual_classroom">Virtual Classroom</a></li>
-                            <!-- <li class="nav-item"><a class="nav-link" href="/student/student.php">Assessments</a></li> -->
+                            <li class="nav-item"><a class="nav-link" href="/student/manage_assignments">Assignments</a></li>
                             <!-- <li class="nav-item"><a class="nav-link" href="#">Meetings</a></li>  -->
                         </ul>
                     </div>
                 </li>
                 <!-- <li class="nav-item">
-                    <a class="nav-link" data-toggle="collapse" href="#student" aria-expanded="false" aria-controls="student">
+                    <a class="nav-link" data-toggle="collapse" href="#a" aria-expanded="false" aria-controls="student">
                         <i class="icon-bar-graph menu-icon"></i>
                         <span class="menu-title" >Student</span>
                         <i class="menu-arrow"></i>

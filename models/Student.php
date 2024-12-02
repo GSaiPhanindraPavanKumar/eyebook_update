@@ -128,16 +128,16 @@ class Student {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public static function submitAssignment($conn, $student_id, $assignment_id, $file_path) {
-        $sql = "INSERT INTO assignment_submissions (student_id, assignment_id, file_path) VALUES (:student_id, :assignment_id, :file_path)
-                ON DUPLICATE KEY UPDATE file_path = :file_path";
-        $stmt = $conn->prepare($sql);
-        $stmt->execute([
-            ':student_id' => $student_id,
-            ':assignment_id' => $assignment_id,
-            ':file_path' => $file_path
-        ]);
-    }
+    // public static function submitAssignment($conn, $student_id, $assignment_id, $file_path) {
+    //     $sql = "INSERT INTO assignment_submissions (student_id, assignment_id, file_path) VALUES (:student_id, :assignment_id, :file_path)
+    //             ON DUPLICATE KEY UPDATE file_path = :file_path";
+    //     $stmt = $conn->prepare($sql);
+    //     $stmt->execute([
+    //         ':student_id' => $student_id,
+    //         ':assignment_id' => $assignment_id,
+    //         ':file_path' => $file_path
+    //     ]);
+    // }
 
     public static function updatePassword($conn, $student_id, $new_password) {
         $stmt = $conn->prepare("UPDATE students SET password = :new_password WHERE id = :admin_id");
@@ -190,6 +190,33 @@ class Student {
         $sql = "UPDATE students SET last_login = NOW() WHERE id = ?";
         $stmt = $conn->prepare($sql);
         $stmt->execute([$student_id]);
+    }
+
+    // In Student.php
+    public static function getAllByCourseAndSection($conn, $course_id, $section_id) {
+        $sql = "SELECT * FROM students WHERE course_id = :course_id AND section_id = :section_id";
+        $stmt = $conn->prepare($sql);
+        $stmt->execute([':course_id' => $course_id, ':section_id' => $section_id]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+    
+    // In Course.php
+    public static function getCoursesByFaculty($conn) {
+        $faculty_id = $_SESSION['faculty_id']; // Assuming faculty_id is stored in session
+        $sql = "SELECT * FROM courses WHERE faculty_id = :faculty_id";
+        $stmt = $conn->prepare($sql);
+        $stmt->execute([':faculty_id' => $faculty_id]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public static function submitAssignment($conn, $student_id, $assignment_id, $file_content) {
+        $sql = "INSERT INTO assignment_submissions (student_id, assignment_id, file_content) VALUES (:student_id, :assignment_id, :file_content)
+                ON DUPLICATE KEY UPDATE file_content = :file_content";
+        $stmt = $conn->prepare($sql);
+        $stmt->bindParam(':student_id', $student_id);
+        $stmt->bindParam(':assignment_id', $assignment_id);
+        $stmt->bindParam(':file_content', $file_content, PDO::PARAM_LOB);
+        $stmt->execute();
     }
 }
 ?>

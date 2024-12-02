@@ -79,6 +79,9 @@ class AuthController {
     }
 
     public function logout() {
+        session_destroy();
+        header('Location: /');
+        exit();
         // Check if a session is already started
         if (session_status() == PHP_SESSION_NONE) {
             session_start();
