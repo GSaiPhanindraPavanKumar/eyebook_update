@@ -1,63 +1,62 @@
-<?php include('sidebar.php'); ?>
+<?php include 'sidebar.php'; ?>
 
 <div class="main-panel">
     <div class="content-wrapper">
         <div class="row">
             <div class="col-md-12 grid-margin">
                 <div class="row">
-                    <div class="col-12 col-xl-8 mb-4 mb-xl-0">
-                        <h3 class="font-weight-bold">Assignments</h3>
+                    <div class="col-12">
+                        <h3 class="font-weight-bold">View Assignment</h3>
                     </div>
                 </div>
             </div>
         </div>
-
-        <div class="row">
-            <div class="col-md-12 grid-margin stretch-card">
-                <div class="card shadow">
-                    <div class="card-body">
-                        <!-- <p class="card-title mb-0" style="font-size:larger">Universities</p><br> -->
-                        <div class="table-responsive">
-                            <table class="table">
-                                <thead>
-                                    <tr>
-                                        <th class="py-2 px-4 border-b">Student</th>
-                                        <th class="py-2 px-4 border-b">File</th>
-                                        <th class="py-2 px-4 border-b">Grade</th>
-                                        <th class="py-2 px-4 border-b">Feedback</th>
-                                        <th class="py-2 px-4 border-b">Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="submissionTable">
-                                    <?php foreach ($submissions as $submission): ?>
-                                        <tr>
-                                            <td class="py-2 px-4 border-b"><?= htmlspecialchars($submission['student_id']) ?></td>
-                                            <td class="py-2 px-4 border-b"><a href="<?= htmlspecialchars($submission['file_path']) ?>" target="_blank" class="text-blue-500 hover:underline">Download</a></td>
-                                            <td class="py-2 px-4 border-b"><?= htmlspecialchars($submission['grade']) ?></td>
-                                            <td class="py-2 px-4 border-b"><?= htmlspecialchars($submission['feedback']) ?></td>
-                                            <td class="py-2 px-4 border-b">
-                                                <form action="/faculty/mark_assignment" method="post">
-                                                    <input type="hidden" name="submission_id" value="<?= $submission['id'] ?>">
-                                                    <div class="form-group">
-                                                        <label for="grade">Grade:</label>
-                                                        <input type="text" class="form-control" id="grade" name="grade" value="<?= htmlspecialchars($submission['grade']) ?>">
-                                                    </div>
-                                                    <div class="form-group">
-                                                        <label for="feedback">Feedback:</label>
-                                                        <textarea class="form-control" id="feedback" name="feedback"><?= htmlspecialchars($submission['feedback']) ?></textarea>
-                                                    </div>
-                                                    <button type="submit" class="btn btn-primary">Submit</button>
-                                                </form>
-                                            </td>
-                                        </tr>
-                                    <?php endforeach; ?>
-                                </tbody>
-                            </table>
-                        </div>
+        <div class="col-md-12 grid-margin stretch-card">
+            <div class="card">
+                <div class="card-body">
+                    <div class="container">
+                        <h2 class="font-weight-bold"><?php echo htmlspecialchars($assignment['title'] ?? ''); ?></h2>
+                        <p><strong>Instructions:</strong> <?php echo nl2br(htmlspecialchars($assignment['instructions'] ?? '')); ?></p>
+                        <p><strong>Due Date:</strong> <?php echo htmlspecialchars($assignment['due_date'] ?? ''); ?></p>
+                        <h3 class="font-weight-bold">Submissions</h3>
                     </div>
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Student</th>
+                                <th>File</th>
+                                <th>Grade</th>
+                                <th>Feedback</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($submissions as $submission): ?>
+                                <tr>
+                                    <td><?php echo htmlspecialchars($submission['student_name'] ?? ''); ?></td>
+                                    <td>
+                                        <?php if (!empty($submission['file_content'])): ?>
+                                            <a href="data:application/pdf;base64,<?php echo base64_encode($submission['file_content']); ?>" download="submission_<?php echo $submission['student_id']; ?>.pdf" class="btn btn-outline-primary btn-sm">Download File</a>
+                                        <?php else: ?>
+                                            <span class="text-danger">Not Submitted</span>
+                                        <?php endif; ?>
+                                    </td>
+                                    <td><?php echo htmlspecialchars($submission['grade'] ?? ''); ?></td>
+                                    <td><?php echo htmlspecialchars($submission['feedback'] ?? ''); ?></td>
+                                    <td>
+                                        <a href="/faculty/grade_assignment/<?php echo $assignment['id']; ?>/<?php echo $submission['student_id']; ?>" class="btn btn-primary btn-sm">Grade</a>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
     </div>
+    <!-- content-wrapper ends -->
     <?php include 'footer.html'; ?>
 </div>
+
+<!-- Include Font Awesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">

@@ -1,52 +1,59 @@
-<?php include('sidebar.php'); ?>
+<?php include 'sidebar.php'; ?>
+
 <div class="main-panel">
     <div class="content-wrapper">
         <div class="row">
+        <div class="row">
             <div class="col-md-12 grid-margin">
                 <div class="row">
-                    <div class="col-12 col-xl-8 mb-4 mb-xl-0">
-                        <h3 class="font-weight-bold">Assignments</h3>
+                    <div class="col-12">
+                        <h3 class="font-weight-bold">Manage Assignments</h3>
                     </div>
+                    <!-- <div class="col-12 col-xl-6 text-right">
+                        <a href="/faculty/create_assignment" class="btn btn-primary">
+                            <i class="fas fa-plus-circle"></i> Create Assignment
+                        </a>
+                    </div> -->
                 </div>
             </div>
         </div>
+            <div class="col-md-12 grid-margin stretch-card"><br>
+                <div class="card">
 
-        <div class="row">
-            <div class="col-md-12 grid-margin stretch-card">
-                <div class="card shadow">
-                    <div class="card-body">
-                        <!-- <p class="card-title mb-0" style="font-size:larger">Universities</p><br> -->
-                        <div class="table-responsive">
-                            <table class="table">
-                                <thead>
+                    <!-- <a href="/faculty/create_assignment" class="btn btn-primary">Create Assignment</a> -->
+                    <div class="card-body" style="text-align: center;">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Title</th>
+                                    <th>Course</th>
+                                    <th>Due Date</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach ($assignments as $assignment): ?>
                                     <tr>
-                                        <th class="py-2 px-4 border-b">Title</th>
-                                        <th class="py-2 px-4 border-b">Course</th>
-                                        <th class="py-2 px-4 border-b">Deadline</th>
-                                        <!-- <th class="py-2 px-4 border-b">Status</th> -->
-                                        <th class="py-2 px-4 border-b">Actions</th>
+                                        <td><?php echo htmlspecialchars($assignment['title']); ?></td>
+                                        <td><?php echo htmlspecialchars($assignment['course_name']); ?></td>
+                                        <td><?php echo htmlspecialchars($assignment['due_date']); ?></td>
+                                        <td>
+                                            <a href="/faculty/view_assignment/<?php echo $assignment['id']; ?>" class="btn btn-info">View</a>
+                                            <!-- <a href="/faculty/download_report/<?php echo $assignment['id']; ?>/pdf" class="btn btn-secondary">Preview PDF</a> -->
+                                            <a href="/faculty/download_report/<?php echo $assignment['id']; ?>/excel" class="btn btn-secondary">Download Excel</a>
+                                        </td>
                                     </tr>
-                                </thead>
-                                <tbody id="assignmentTable">
-                                    <?php foreach ($assignments as $assignment): ?>
-                                        <tr>
-                                            <td class="py-2 px-4 border-b"><?= htmlspecialchars($assignment['title']) ?></td>
-                                            <td class="py-2 px-4 border-b"><?= htmlspecialchars($assignment['course_name']) ?></td>
-                                            <td class="py-2 px-4 border-b"><?= htmlspecialchars($assignment['deadline']) ?></td>
-                                            <!-- <td class="py-2 px-4 border-b"><?= htmlspecialchars($assignment['status']) ?></td> -->
-                                            <td class="py-2 px-4 border-b">
-                                                <a href="/faculty/view_assignment/<?= $assignment['id'] ?>" class="text-blue-500 hover:underline">View Submissions</a>
-                                                <!-- <a href="/faculty/edit_assignment/<?= $assignment['id'] ?>" class="text-blue-500 hover:underline ml-2">Edit</a> -->
-                                            </td>
-                                        </tr>
-                                    <?php endforeach; ?>
-                                </tbody>
-                            </table>
-                        </div>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+    <!-- content-wrapper ends -->
     <?php include 'footer.html'; ?>
 </div>
+
+<!-- Include Font Awesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">

@@ -92,65 +92,45 @@ class StudentController {
         require 'views/student/updatePassword.php';
     }
 
-    public function manageAssignments() {
-        $conn = Database::getConnection();
-        $student = Student::getByEmail($conn, $_SESSION['email']);
-        $assignments = Assignment::getAllByStudentId($conn, $student['id']);
-        require 'views/student/manage_assignments.php';
-    }
-
-            public function submitAssignment() {
-                $conn = Database::getConnection();
-                $student_email = $_SESSION['email'];
+    
+        public function manageAssignments() {
+            $conn = Database::getConnection();
+            $student_id = $_SESSION['email'];
+            $assignments = Assignment::getAssignmentsByStudentId($conn, $student_id);
+            require 'views/student/manage_assignments.php';
+        }
+    
+        public function submitAssignment($assignmentId) {
+            $conn = Database::getConnection();
+            $student_id = $_SESSION['student_id'];
+            $messages = [];
         
-                if ($_SERVER["REQUEST_METHOD"] == "POST") {
-                    $assignment_id = $_POST["assignment_id"];
-                    $file = $_FILES["submission_file"];
-                    $target_dir = "uploads/assignments/submissions/";
-                    $file_extension = strtolower(pathinfo($file["name"], PATHINFO_EXTENSION));
-                    $new_file_name = $student_email . '_' . date('YmdHis') . '.' . $file_extension;
-                    $target_file = $target_dir . $new_file_name;
-                    $uploadOk = 1;
+            if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+                $file_content = null;
         
-                    // Check if directory exists, if not create it
-                    if (!is_dir($target_dir)) {
-                        mkdir($target_dir, 0777, true);
-                    }
+                if (isset($_FILES['assignment_file']) && $_FILES['assignment_file']['error'] == 0) {
+                    $file_content = file_get_contents($_FILES['assignment_file']['tmp_name']);
+                }
         
-                    // Check file type
-                    if ($file_extension != "pdf" && $file_extension != "doc" && $file_extension != "docx" && $file_extension != "jpg") {
-                        echo "<div class='alert alert-danger'>Sorry, only PDF, DOC, DOCX, and JPG files are allowed.</div>";
-                        $uploadOk = 0;
-                    }
-        
-                    // Check if file already exists
-                    if (file_exists($target_file)) {
-                        echo "<div class='alert alert-danger'>Sorry, file already exists.</div>";
-                        $uploadOk = 0;
-                    }
-        
-                    // Check file size (limit to 5MB)
-                    if ($file["size"] > 5000000) {
-                        echo "<div class='alert alert-danger'>Sorry, your file is too large.</div>";
-                        $uploadOk = 0;
-                    }
-        
-                    if ($uploadOk == 0) {
-                        echo "<div class='alert alert-danger'>Sorry, your file was not uploaded.</div>";
-                    } else {
-                        if (move_uploaded_file($file["tmp_name"], $target_file)) {
-                            $file_path = $target_file;
-                            if (Student::submitAssignment($conn, $student_email, $assignment_id, $file_path)) {
-                                echo "<div class='alert alert-success'>The file ". htmlspecialchars(basename($new_file_name)). " has been uploaded.</div>";
-                            } else {
-                                echo "<div class='alert alert-danger'>Sorry, there was an error saving your submission.</div>";
-                            }
-                        } else {
-                            echo "<div class='alert alert-danger'>Sorry, there was an error uploading your file.</div>";
-                        }
-                    }
+                try {
+                    Student::submitAssignment($conn, $student_id, $assignmentId, $file_content);
+                    $messages[] = "Assignment submitted successfully.";
+                } catch (PDOException $e) {
+                    $messages[] = "Error submitting assignment: " . $e->getMessage();
                 }
             }
+        
+            $assignment = Assignment::getById($conn, $assignmentId);
+            require 'views/student/assignment_submit.php';
+        }
+        
+        public function viewGrades() {
+            $conn = Database::getConnection();
+            $student_id = $_SESSION['student_id'];
+            $grades = Assignment::getGradesByStudentId($conn, $student_id);
+            require 'views/student/view_grades.php';
+        }
+
     
-}
+    }
 ?>

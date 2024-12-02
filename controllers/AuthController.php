@@ -77,4 +77,10 @@ class AuthController {
     
         require 'views/index.php'; // Pass the message to the view
     }
+
+    public function logout() {
+        session_destroy();
+        header('Location: /');
+        exit();
+    }
 }
