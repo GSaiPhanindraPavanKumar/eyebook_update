@@ -3,12 +3,12 @@ include 'sidebar.php';
 use Models\Database;
 use Models\Faculty;
 use Models\Course;
+use Models\Student;
 
 $conn = Database::getConnection();
 if (!isset($_SESSION['faculty_id'])) {
     die('Faculty ID not set in session.');
 }
-
 
 $facultyId = $_SESSION['faculty_id']; // Assuming faculty ID is stored in session
 
@@ -16,22 +16,18 @@ $facultyId = $_SESSION['faculty_id']; // Assuming faculty ID is stored in sessio
 $faculty = Faculty::getById($conn, $facultyId);
 $facultyUniversityId = $faculty['university_id'];
 
+// Fetch the assigned courses for the faculty
+$assignedCourses = Faculty::getAssignedCourses($conn, $facultyId);
+
 // Fetch courses from the database
-$sql = "SELECT id, name, description, course_book, status, universities FROM courses";
-$stmt = $conn->query($sql);
 $courses = [];
-
-while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-    $courseUniversities = !empty($row['universities']) ? json_decode($row['universities'], true) : [];
-    if (is_array($courseUniversities) && in_array($facultyUniversityId, $courseUniversities)) {
-        $courses[] = $row;
-    }
+if (!empty($assignedCourses)) {
+    $placeholders = implode(',', array_fill(0, count($assignedCourses), '?'));
+    $sql = "SELECT id, name, description, course_book, status FROM courses WHERE id IN ($placeholders)";
+    $stmt = $conn->prepare($sql);
+    $stmt->execute($assignedCourses);
+    $courses = $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
-
-// Fetch all students
-$sql = "SELECT id, completed_books FROM students";
-$stmt = $conn->query($sql);
-$students = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 // Calculate progress data for each course
 $progressData = [];
@@ -41,7 +37,10 @@ foreach ($courses as $course) {
     $totalProgress = 0;
     $studentCount = 0;
 
-    foreach ($students as $student) {
+    // Fetch assigned students for the course
+    $assignedStudents = Course::getAssignedStudents($conn, $courseId);
+
+    foreach ($assignedStudents as $student) {
         $completedBooks = !empty($student['completed_books']) ? json_decode($student['completed_books'], true) : [];
         $studentCompletedBooks = $completedBooks[$courseId] ?? [];
         $progress = $totalBooks > 0 ? (count($studentCompletedBooks) / $totalBooks) * 100 : 0;

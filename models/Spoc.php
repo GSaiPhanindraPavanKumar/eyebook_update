@@ -23,6 +23,13 @@ class Spoc {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    public static function getByEmail($conn, $email) {
+        $sql = "SELECT * FROM spocs WHERE email = :email";
+        $stmt = $conn->prepare($sql);
+        $stmt->execute([':email' => $email]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
     public static function existsByEmail($conn, $email) {
         $sql = "SELECT COUNT(*) as count FROM spocs WHERE email = :email";
         $stmt = $conn->prepare($sql);

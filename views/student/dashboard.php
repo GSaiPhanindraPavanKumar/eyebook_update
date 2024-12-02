@@ -19,7 +19,7 @@ $todaysClasses = getTodaysClasses();
 
 // Fetch courses and progress
 $studentId = $_SESSION['student_id'];
-$courses = getCoursesWithProgress($studentId, $userData['university_id']);
+$courses = getCoursesWithProgress($studentId);
 $ongoingCourses = array_filter($courses, function($course) {
     return $course['status'] === 'ongoing';
 });
@@ -121,53 +121,57 @@ $thoughtOfTheDay = $quotes[date('z') % count($quotes)];
                     <div class="card-body">
                         <h4 class="card-title text-center">Least Progress Courses</h4>
                         <div class="d-flex justify-content-center">
-                            <?php foreach ($leastProgressCourses as $course): ?>
-                                <div class="col-md-2">
-                                    <div class="card mb-4" style="height: 200px;">
-                                        <div class="card-body text-center">
-                                            <h5 class="card-title"><?php echo htmlspecialchars($course['name']); ?></h5>
-                                            <canvas id="progressChart<?php echo $course['id']; ?>" width="60" height="60"></canvas>
-                                            <script>
-                                                document.addEventListener('DOMContentLoaded', function() {
-                                                    console.log("Course ID: <?php echo $course['id']; ?>, Progress: <?php echo $course['progress']; ?>");
-                                                    var ctx = document.getElementById('progressChart<?php echo $course['id']; ?>').getContext('2d');
-                                                    var progressChart = new Chart(ctx, {
-                                                        type: 'doughnut',
-                                                        data: {
-                                                            datasets: [{
-                                                                data: [<?php echo $course['progress']; ?>, <?php echo 100 - $course['progress']; ?>],
-                                                                backgroundColor: ['#36a2eb', '#ff6384']
-                                                            }],
-                                                            labels: ['Completed', 'Remaining']
-                                                        },
-                                                        options: {
-                                                            responsive: true,
-                                                            maintainAspectRatio: false,
-                                                            cutoutPercentage: 70,
-                                                            legend: {
-                                                                display: false
+                            <?php if (!empty($leastProgressCourses)): ?>
+                                <?php foreach ($leastProgressCourses as $course): ?>
+                                    <div class="col-md-2">
+                                        <div class="card mb-4" style="height: 200px;">
+                                            <div class="card-body text-center">
+                                                <h5 class="card-title"><?php echo htmlspecialchars($course['name']); ?></h5>
+                                                <canvas id="progressChart<?php echo $course['id']; ?>" width="60" height="60"></canvas>
+                                                <script>
+                                                    document.addEventListener('DOMContentLoaded', function() {
+                                                        console.log("Course ID: <?php echo $course['id']; ?>, Progress: <?php echo $course['progress']; ?>");
+                                                        var ctx = document.getElementById('progressChart<?php echo $course['id']; ?>').getContext('2d');
+                                                        var progressChart = new Chart(ctx, {
+                                                            type: 'doughnut',
+                                                            data: {
+                                                                datasets: [{
+                                                                    data: [<?php echo $course['progress']; ?>, <?php echo 100 - $course['progress']; ?>],
+                                                                    backgroundColor: ['#36a2eb', '#ff6384']
+                                                                }],
+                                                                labels: ['Completed', 'Remaining']
                                                             },
-                                                            tooltips: {
-                                                                callbacks: {
-                                                                    label: function(tooltipItem, data) {
-                                                                        var dataset = data.datasets[tooltipItem.datasetIndex];
-                                                                        var total = dataset.data.reduce(function(previousValue, currentValue) {
-                                                                            return previousValue + currentValue;
-                                                                        });
-                                                                        var currentValue = dataset.data[tooltipItem.index];
-                                                                        var percentage = Math.floor(((currentValue / total) * 100) + 0.5);
-                                                                        return percentage + "%";
+                                                            options: {
+                                                                responsive: true,
+                                                                maintainAspectRatio: false,
+                                                                cutoutPercentage: 70,
+                                                                legend: {
+                                                                    display: false
+                                                                },
+                                                                tooltips: {
+                                                                    callbacks: {
+                                                                        label: function(tooltipItem, data) {
+                                                                            var dataset = data.datasets[tooltipItem.datasetIndex];
+                                                                            var total = dataset.data.reduce(function(previousValue, currentValue) {
+                                                                                return previousValue + currentValue;
+                                                                            });
+                                                                            var currentValue = dataset.data[tooltipItem.index];
+                                                                            var percentage = Math.floor(((currentValue / total) * 100) + 0.5);
+                                                                            return percentage + "%";
+                                                                        }
                                                                     }
                                                                 }
                                                             }
-                                                        }
+                                                        });
                                                     });
-                                                });
-                                            </script>
+                                                </script>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            <?php endforeach; ?>
+                                <?php endforeach; ?>
+                            <?php else: ?>
+                                <p>No courses with progress available.</p>
+                            <?php endif; ?>
                         </div>
                     </div>
                 </div>
@@ -202,35 +206,39 @@ function getTodaysClasses() {
 }
 
 // Define the function to fetch courses with progress
-function getCoursesWithProgress($studentId, $universityId) {
+function getCoursesWithProgress($studentId) {
     $conn = Database::getConnection();
-    $stmt = $conn->prepare("SELECT * FROM courses WHERE status = 'ongoing'");
-    $stmt->execute();
-    $courses = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    $stmt = $conn->prepare("SELECT completed_books FROM students WHERE id = :student_id");
+    // Fetch the assigned courses for the student
+    $stmt = $conn->prepare("SELECT assigned_courses, completed_books FROM students WHERE id = :student_id");
     $stmt->execute(['student_id' => $studentId]);
     $student = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    $assignedCourses = !empty($student['assigned_courses']) ? json_decode($student['assigned_courses'], true) : [];
     $completedBooks = !empty($student['completed_books']) ? json_decode($student['completed_books'], true) : [];
 
-    $filteredCourses = [];
-    foreach ($courses as $course) {
-        $courseUniversities = !empty($course['universities']) ? json_decode($course['universities'], true) : [];
-        if (is_array($courseUniversities) && in_array($universityId, $courseUniversities)) {
-            $courseId = $course['id'];
-            $courseBooks = !empty($course['course_book']) ? json_decode($course['course_book'], true) : [];
-            $totalBooks = is_array($courseBooks) ? count($courseBooks) : 0;
-            $completedBooksCount = is_array($completedBooks[$courseId] ?? []) ? count($completedBooks[$courseId] ?? []) : 0;
-            $course['progress'] = ($totalBooks > 0) ? ($completedBooksCount / $totalBooks) * 100 : 0;
-            $filteredCourses[] = $course;
-        }
+    if (empty($assignedCourses)) {
+        return [];
     }
 
-    usort($filteredCourses, function($a, $b) {
+    $placeholders = implode(',', array_fill(0, count($assignedCourses), '?'));
+    $stmt = $conn->prepare("SELECT id, name, description, course_book, status FROM courses WHERE id IN ($placeholders)");
+    $stmt->execute($assignedCourses);
+    $courses = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    foreach ($courses as &$course) {
+        $courseId = $course['id'];
+        $courseBooks = !empty($course['course_book']) ? json_decode($course['course_book'], true) : [];
+        $totalBooks = is_array($courseBooks) ? count($courseBooks) : 0;
+        $completedBooksCount = is_array($completedBooks[$courseId] ?? []) ? count($completedBooks[$courseId] ?? []) : 0;
+        $course['progress'] = ($totalBooks > 0) ? ($completedBooksCount / $totalBooks) * 100 : 0;
+    }
+
+    usort($courses, function($a, $b) {
         return $a['progress'] <=> $b['progress'];
     });
 
-    return $filteredCourses;
+    return $courses;
 }
 
 // Define the function to fetch all virtual classes

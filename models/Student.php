@@ -28,6 +28,40 @@ class Student {
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
+    public static function getAssignedCourses($conn, $student_id) {
+        $sql = "SELECT assigned_courses FROM students WHERE id = :id";
+        $stmt = $conn->prepare($sql);
+        $stmt->execute([':id' => $student_id]);
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $result['assigned_courses'] ? json_decode($result['assigned_courses'], true) : [];
+    }
+
+    public static function assignCourse($conn, $student_id, $course_id) {
+        $assigned_courses = self::getAssignedCourses($conn, $student_id);
+        if (!in_array($course_id, $assigned_courses)) {
+            $assigned_courses[] = $course_id;
+            $sql = "UPDATE students SET assigned_courses = :assigned_courses WHERE id = :id";
+            $stmt = $conn->prepare($sql);
+            $stmt->execute([
+                ':assigned_courses' => json_encode($assigned_courses),
+                ':id' => $student_id
+            ]);
+        }
+    }
+    
+    public static function unassignCourse($conn, $student_id, $course_id) {
+        $assigned_courses = self::getAssignedCourses($conn, $student_id);
+        if (in_array($course_id, $assigned_courses)) {
+            $assigned_courses = array_diff($assigned_courses, [$course_id]);
+            $sql = "UPDATE students SET assigned_courses = :assigned_courses WHERE id = :id";
+            $stmt = $conn->prepare($sql);
+            $stmt->execute([
+                ':assigned_courses' => json_encode($assigned_courses),
+                ':id' => $student_id
+            ]);
+        }
+    }
+
     public static function getByUniversityId($conn, $universityId) {
         $sql = "SELECT * FROM students WHERE university_id = :university_id";
         $stmt = $conn->prepare($sql);

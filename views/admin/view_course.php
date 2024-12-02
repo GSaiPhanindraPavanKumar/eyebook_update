@@ -33,20 +33,18 @@ include "sidebar.php";
                                 <?php if ($course): ?>
                                     <p><strong>Course Name:</strong> <?php echo htmlspecialchars($course['name'] ?? 'N/A'); ?></p>
                                     <p><strong>Description:</strong> <?php echo htmlspecialchars($course['description'] ?? 'N/A'); ?></p>
-                                    <h5 class="mt-3">Assigned Universities</h5>
+                                    <h5 class="mt-3">Assigned University</h5>
                                     <ul>
-                                        <?php if (!empty($course['universities'])): ?>
-                                            <?php foreach ($course['universities'] as $university_id): ?>
-                                                <?php
-                                                $university = array_filter($universities, function($u) use ($university_id) {
-                                                    return $u['id'] == $university_id;
-                                                });
-                                                $university = array_shift($university);
-                                                ?>
-                                                <li><?php echo htmlspecialchars($university['long_name']); ?></li>
-                                            <?php endforeach; ?>
+                                        <?php if (!empty($course['university_id'])): ?>
+                                            <?php
+                                            $university = array_filter($universities, function($u) use ($course) {
+                                                return $u['id'] == $course['university_id'];
+                                            });
+                                            $university = array_shift($university);
+                                            ?>
+                                            <li><?php echo htmlspecialchars($university['long_name']); ?></li>
                                         <?php else: ?>
-                                            <li>No universities assigned.</li>
+                                            <li>No university assigned.</li>
                                         <?php endif; ?>
                                     </ul>
                                     <div class="actions mt-4">
@@ -73,8 +71,8 @@ include "sidebar.php";
                                 </form>
                             </div>
                             <div class="tab-pane fade" id="assign-universities" role="tabpanel" aria-labelledby="assign-universities-tab">
-                                <h5 class="mt-3">Assign Course to Universities</h5>
-                                <form method="POST" action="/admin/assign_course">
+                                <h5 class="mt-3">Assign Course to University</h5>
+                                <form id="assignCourseForm" method="POST" action="/admin/assign_course">
                                     <div class="form-group">
                                         <label for="university">Select University</label>
                                         <select class="form-control" id="university" name="university_id" required>
@@ -85,6 +83,7 @@ include "sidebar.php";
                                         </select>
                                     </div>
                                     <input type="hidden" name="course_id" value="<?php echo $course['id']; ?>">
+                                    <input type="hidden" name="confirm" id="confirm" value="false">
                                     <button type="submit" class="btn btn-primary">Assign Course</button>
                                 </form>
                             </div>
@@ -111,3 +110,38 @@ include "sidebar.php";
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script>
+document.getElementById('assignCourseForm').addEventListener('submit', function(event) {
+    event.preventDefault();
+    var form = this;
+    var formData = new FormData(form);
+    fetch(form.action, {
+        method: form.method,
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.confirm) {
+            if (confirm(data.message)) {
+                document.getElementById('confirm').value = 'true';
+                fetch(form.action, {
+                    method: form.method,
+                    body: new FormData(form)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    alert(data.message);
+                    if (data.message === 'Course reassigned to university successfully' || data.message === 'Course assigned to university successfully') {
+                        location.reload(); // Refresh the page
+                    }
+                });
+            }
+        } else {
+            alert(data.message);
+            if (data.message === 'Course assigned to university successfully') {
+                location.reload(); // Refresh the page
+            }
+        }
+    });
+});
+</script>

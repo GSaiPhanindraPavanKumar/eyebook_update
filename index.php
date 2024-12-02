@@ -80,6 +80,7 @@ $router->post('/admin/edit_faculty/(\d+)', 'AdminController@editFaculty');
 $router->post('/admin/reset_faculty_password/(\d+)', 'AdminController@resetFacultyPassword');
 $router->post('/admin/resetFacultyPasswords', 'AdminController@resetFacultyPasswords');
 $router->get('/admin/delete_faculty/(\d+)', 'AdminController@deleteFaculty');
+$router->post('/admin/uploadSingleStudent', 'AdminController@uploadSingleStudent');
 
 $router->get('/spoc', 'SpocController@dashboard');
 $router->get('/spoc/dashboard', 'SpocController@dashboard');
@@ -91,9 +92,13 @@ $router->post('/spoc/addFaculty', 'SpocController@addFaculty');
 $router->get('/spoc/manage_faculty', 'SpocController@manageFaculties');
 $router->get('/spoc/view_faculty/(\d+)', 'SpocController@viewFaculty');
 $router->post('/spoc/deleteFaculty', 'SpocController@deleteFaculty');
-
+$router->get('/spoc/manage_courses', 'SpocController@manageCourses');
 $router->get('/spoc/manage_students', 'SpocController@manageStudents');
-
+$router->get('/spoc/view_course/([a-zA-Z0-9]+)', 'SpocController@viewCourse');
+$router->post('/spoc/assign_faculty', 'SpocController@assignFaculty');
+$router->post('/spoc/assign_students', 'SpocController@assignStudents');
+$router->post('/spoc/unassign_faculty', 'SpocController@unassignFaculty');
+$router->post('/spoc/unassign_students', 'SpocController@unassignStudents');
 
 $router->get('/faculty/dashboard', 'FacultyController@dashboard');
 $router->get('/faculty/updatePassword', 'FacultyController@updatePassword');

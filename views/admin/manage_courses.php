@@ -3,25 +3,22 @@ include("sidebar.php");
 use Models\Database;
 $conn = Database::getConnection();
 
-$sql = "SELECT c.id, c.name, c.universities 
+$sql = "SELECT c.id, c.name, c.university_id 
         FROM courses c";
 $result = $conn->query($sql);
 $courses = [];
 
 if ($result->rowCount() > 0) {
     while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
-        // Decode the universities JSON field if it's not null
-        $university_ids = !is_null($row['universities']) ? json_decode($row['universities'], true) : [];
-        if (is_array($university_ids) && !empty($university_ids)) {
-            // Fetch the university names
-            $placeholders = implode(',', array_fill(0, count($university_ids), '?'));
-            $sql = "SELECT long_name FROM universities WHERE id IN ($placeholders)";
+        // Fetch the university names
+        if (!is_null($row['university_id'])) {
+            $sql = "SELECT long_name FROM universities WHERE id = ?";
             $stmt = $conn->prepare($sql);
-            $stmt->execute($university_ids);
-            $universities = $stmt->fetchAll(PDO::FETCH_COLUMN);
-            $row['universities'] = implode(', ', $universities);
+            $stmt->execute([$row['university_id']]);
+            $university = $stmt->fetch(PDO::FETCH_ASSOC);
+            $row['university'] = $university['long_name'] ?? '';
         } else {
-            $row['universities'] = '';
+            $row['university'] = '';
         }
         $courses[] = $row;
     }
@@ -59,7 +56,7 @@ if ($result->rowCount() > 0) {
                                         <tr>
                                             <th data-sort="serialNumber">S.no <i class="fas fa-sort"></i></th>
                                             <th data-sort="courseName">Course Name <i class="fas fa-sort"></i></th>
-                                            <th data-sort="universities">Universities <i class="fas fa-sort"></i></th>
+                                            <th data-sort="university">University <i class="fas fa-sort"></i></th>
                                             <th>Actions</th>
                                         </tr>
                                     </thead>
@@ -70,7 +67,7 @@ if ($result->rowCount() > 0) {
                                             <tr>
                                                 <td><?= $serialNumber++ ?></td>
                                                 <td><?= htmlspecialchars($course['name']) ?></td>
-                                                <td><?= htmlspecialchars($course['universities']) ?></td>
+                                                <td><?= htmlspecialchars($course['university']) ?></td>
                                                 <td>
                                                     <a href="/admin/view_course/<?= $course['id'] ?>" class="btn btn-outline-info btn-sm"><i class="fas fa-eye"></i> View</a>
                                                     <a href="/admin/edit_course/<?= $course['id'] ?>" class="btn btn-outline-warning btn-sm"><i class="fas fa-edit"></i> Edit</a>

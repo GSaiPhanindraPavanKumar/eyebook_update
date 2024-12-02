@@ -1059,16 +1059,51 @@ class AdminController {
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $course_id = $_POST['course_id'];
             $university_id = $_POST['university_id'];
-            $result = Course::assignCourseToUniversity($conn, $course_id, $university_id);
+            $confirm = isset($_POST['confirm']) ? $_POST['confirm'] === 'true' : false;
+    
+            $result = Course::assignCourseToUniversity($conn, $course_id, $university_id, $confirm);
+    
             if ($result['message'] === 'Course assigned to university successfully') {
-                header("Location: /admin/view_course/$course_id");
+                echo json_encode(['message' => $result['message']]);
+                exit();
+            } elseif (isset($result['confirm']) && $result['confirm']) {
+                // Show confirmation message
+                echo json_encode(['message' => $result['message'], 'confirm' => true]);
                 exit();
             } else {
                 echo json_encode(['message' => $result['message']]);
-                exit;
+                exit();
             }
         }
     }
+
+    public function uploadSingleStudent() {
+        $conn = Database::getConnection();
+        $data = [
+            'regd_no' => $_POST['regd_no'],
+            'name' => $_POST['name'],
+            'email' => $_POST['email'],
+            'section' => $_POST['section'],
+            'stream' => $_POST['stream'],
+            'year' => $_POST['year'],
+            'dept' => $_POST['dept'],
+            'password' => $_POST['password']
+        ];
+        $university_id = $_POST['university_id'];
+    
+        $result = Student::uploadStudents($conn, $data, $university_id);
+    
+        if ($result['duplicate']) {
+            $message = "Duplicate record found: " . htmlspecialchars($data['regd_no']) . " - " . htmlspecialchars($data['email']);
+            $message_type = "warning";
+        } else {
+            $message = "Student uploaded successfully.";
+            $message_type = "success";
+        }
+    
+        require 'views/admin/uploadStudents.php';
+    }
+
     
     public function createAssessment() {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {

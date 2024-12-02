@@ -17,6 +17,42 @@ class Faculty {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    public static function getAssignedCourses($conn, $faculty_id) {
+        $sql = "SELECT assigned_courses FROM faculty WHERE id = :id";
+        $stmt = $conn->prepare($sql);
+        $stmt->execute([':id' => $faculty_id]);
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $result['assigned_courses'] ? json_decode($result['assigned_courses'], true) : [];
+    }
+
+    public static function assignCourse($conn, $faculty_id, $course_id) {
+        $assigned_courses = self::getAssignedCourses($conn, $faculty_id);
+        if (!in_array($course_id, $assigned_courses)) {
+            $assigned_courses[] = $course_id;
+            $sql = "UPDATE faculty SET assigned_courses = :assigned_courses WHERE id = :id";
+            $stmt = $conn->prepare($sql);
+            $stmt->execute([
+                ':assigned_courses' => json_encode($assigned_courses),
+                ':id' => $faculty_id
+            ]);
+        }
+    }
+
+    public static function unassignCourse($conn, $faculty_id, $course_id) {
+        $assigned_courses = self::getAssignedCourses($conn, $faculty_id);
+        if (in_array($course_id, $assigned_courses)) {
+            $assigned_courses = array_diff($assigned_courses, [$course_id]);
+            $sql = "UPDATE faculty SET assigned_courses = :assigned_courses WHERE id = :id";
+            $stmt = $conn->prepare($sql);
+            $stmt->execute([
+                ':assigned_courses' => json_encode($assigned_courses),
+                ':id' => $faculty_id
+            ]);
+        }
+    }
+
+    
+
     public static function existsByEmail($conn, $email) {
         $sql = "SELECT COUNT(*) as count FROM faculty WHERE email = :email";
         $stmt = $conn->prepare($sql);

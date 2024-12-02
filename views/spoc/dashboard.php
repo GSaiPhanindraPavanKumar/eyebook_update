@@ -21,7 +21,7 @@
             <div class="col-md-6 grid-margin stretch-card">
                 <div class="card">
                     <div class="card-body">
-                        <canvas id="courseSpocChart" width="400" height="400"></canvas>
+                        <canvas id="courseFacultyChart" width="400" height="400"></canvas>
                     </div>
                 </div>
             </div>
@@ -120,13 +120,13 @@
         }
     });
 
-    var ctx2 = document.getElementById('courseSpocChart').getContext('2d');
-    var courseSpocChart = new Chart(ctx2, {
+    var ctx2 = document.getElementById('courseFacultyChart').getContext('2d');
+    var courseFacultyChart = new Chart(ctx2, {
         type: 'pie',
         data: {
-            labels: ['Courses', 'SPOCs'],
+            labels: ['Courses', 'Faculties'],
             datasets: [{
-                data: [<?php echo $course_count; ?>, <?php echo $spoc_count; ?>],
+                data: [<?php echo $course_count; ?>, <?php echo $faculty_count; ?>],
                 backgroundColor: ['#FFCE56', '#4BC0C0'],
             }]
         },
@@ -138,7 +138,7 @@
                 },
                 title: {
                     display: true,
-                    text: 'Courses vs SPOCs'
+                    text: 'Courses vs Faculties'
                 }
             }
         }

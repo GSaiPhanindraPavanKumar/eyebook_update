@@ -14,16 +14,17 @@ $studentId = $_SESSION['student_id']; // Assuming student ID is stored in sessio
 $student = Student::getById($conn, $studentId);
 $studentUniversityId = $student['university_id'];
 
-// Fetch courses from the database
-$sql = "SELECT id, name, description, course_book, status, universities FROM courses";
-$stmt = $conn->query($sql);
-$courses = [];
+// Fetch the assigned courses for the student
+$assignedCourses = Student::getAssignedCourses($conn, $studentId);
 
-while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-    $courseUniversities = !empty($row['universities']) ? json_decode($row['universities'], true) : [];
-    if (is_array($courseUniversities) && in_array($studentUniversityId, $courseUniversities)) {
-        $courses[] = $row;
-    }
+// Fetch courses from the database
+$courses = [];
+if (!empty($assignedCourses)) {
+    $placeholders = implode(',', array_fill(0, count($assignedCourses), '?'));
+    $sql = "SELECT id, name, description, course_book, status FROM courses WHERE id IN ($placeholders)";
+    $stmt = $conn->prepare($sql);
+    $stmt->execute($assignedCourses);
+    $courses = $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 
 // Fetch the student's completed books

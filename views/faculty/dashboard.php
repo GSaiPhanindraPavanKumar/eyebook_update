@@ -13,7 +13,7 @@ $userData = getUserDataByEmail($email);
 $todaysClasses = getTodaysClasses();
 
 // Fetch ongoing courses and progress
-$courses = getCoursesWithProgress();
+$courses = getCoursesWithProgress($userData['id']);
 $ongoingCourses = array_filter($courses, function($course) {
     return $course['status'] === 'ongoing';
 });
@@ -188,16 +188,18 @@ function getTodaysClasses() {
 
 // Define the function to fetch courses with progress
 
-
-function getCoursesWithProgress() {
+function getCoursesWithProgress($faculty_id) {
     $conn = Database::getConnection();
-    $stmt = $conn->prepare("SELECT * FROM courses");
-    $stmt->execute();
-    $courses = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $assignedCourses = Faculty::getAssignedCourses($conn, $faculty_id);
 
-    $stmt = $conn->prepare("SELECT id, completed_books FROM students");
-    $stmt->execute();
-    $students = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    if (empty($assignedCourses)) {
+        return [];
+    }
+
+    $placeholders = implode(',', array_fill(0, count($assignedCourses), '?'));
+    $stmt = $conn->prepare("SELECT * FROM courses WHERE id IN ($placeholders)");
+    $stmt->execute($assignedCourses);
+    $courses = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     foreach ($courses as &$course) {
         $courseId = $course['id'];
@@ -206,10 +208,13 @@ function getCoursesWithProgress() {
         $totalProgress = 0;
         $studentCount = 0;
 
-        foreach ($students as $student) {
+        // Fetch assigned students for the course
+        $assignedStudents = Course::getAssignedStudents($conn, $courseId);
+
+        foreach ($assignedStudents as $student) {
             $completedBooks = !empty($student['completed_books']) ? json_decode($student['completed_books'], true) : [];
-            $completedBooksCount = is_array($completedBooks[$courseId] ?? []) ? count($completedBooks[$courseId] ?? []) : 0;
-            $progress = ($totalBooks > 0) ? ($completedBooksCount / $totalBooks) * 100 : 0;
+            $studentCompletedBooks = $completedBooks[$courseId] ?? [];
+            $progress = $totalBooks > 0 ? (count($studentCompletedBooks) / $totalBooks) * 100 : 0;
             $totalProgress += $progress;
             $studentCount++;
         }

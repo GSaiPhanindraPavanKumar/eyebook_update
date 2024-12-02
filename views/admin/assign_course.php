@@ -4,6 +4,7 @@ include("sidebar.php");
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $course_id = $_POST['course_id'];
     $university_id = $_POST['university_id'];
+    $confirm_replace = isset($_POST['confirm_replace']) ? $_POST['confirm_replace'] : 'no';
 
     // Fetch the course
     $sql = "SELECT * FROM courses WHERE id = ?";
@@ -21,6 +22,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     // Ensure universities field is an array
     $course['universities'] = $course['universities'] ? json_decode($course['universities'], true) : [];
 
+    // Check if the course is already assigned to another university
+    if (!empty($course['universities']) && !in_array($university_id, $course['universities']) && $confirm_replace !== 'yes') {
+        echo json_encode(['message' => 'Course is already assigned to another university. Do you want to replace the assignment?']);
+        exit;
+    }
+
     // Fetch the university
     $sql = "SELECT * FROM universities WHERE id = ?";
     $stmt = $conn->prepare($sql);
@@ -34,10 +41,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         exit;
     }
 
-    // Add the university to the course's universities array if not already present
-    if (!in_array($university_id, $course['universities'])) {
-        $course['universities'][] = $university_id;
-    }
+    // Assign the course to the new university
+    $course['universities'] = [$university_id];
 
     // Update the course in the database
     $sql = "UPDATE courses SET universities = ? WHERE id = ?";

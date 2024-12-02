@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 namespace Controllers;
 
@@ -6,6 +6,7 @@ use Models\Spoc;
 use Models\Database;
 use Models\Faculty;
 use Models\Student;
+use Models\Course;
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 use PDO;
@@ -14,21 +15,17 @@ class SpocController {
     public function dashboard() {
         $conn = Database::getConnection();
         $spocModel = new Spoc($conn);
-
+    
         $username = $_SESSION['email'];
         $userData = $spocModel->getUserData($username);
         $university_id = $userData['university_id'];
-
+    
         $faculty_count = $spocModel->getFacultyCount($university_id);
         $student_count = $spocModel->getStudentCount($university_id);
-        $spoc_count = $spocModel->getSpocCount();
-        $course_count = $spocModel->getCourseCount();
-        $spocs = $spocModel->getAllSpocs();
+        $course_count = Course::getCountByUniversityId($conn, $university_id); // Fetch course count for the university
         $faculties = Faculty::getAllByUniversity($conn, $university_id); // Fetch all faculties for the university
-        $students = Student::getAllByUniversity($conn, $university_id); // Fetch all students for the university
-        $universities = $spocModel->getAllUniversities();
-        $courses = $spocModel->getAllCourses();
-
+        $courses = Course::getAllByUniversity($conn, $university_id); // Fetch all courses for the university
+    
         require 'views/spoc/dashboard.php';
     }
 
@@ -43,6 +40,117 @@ class SpocController {
         $students = Student::getAllByUniversity($conn, $university_id); // Fetch all students for the university
 
         require 'views/spoc/manage_students.php';
+    }
+
+    public function manageCourses() {
+        $conn = Database::getConnection();
+        $spocModel = new Spoc($conn);
+    
+        $username = $_SESSION['email'];
+        $userData = $spocModel->getUserData($username);
+        $university_id = $userData['university_id'];
+    
+        $courses = Course::getAllByUniversity($conn, $university_id); // Fetch all courses for the university
+    
+        require 'views/spoc/manage_courses.php';
+    }
+
+    
+    public function viewCourse($encoded_course_id) {
+        $conn = Database::getConnection();
+        $course_id = base64_decode(str_replace(['-', '_'], ['+', '/'], $encoded_course_id));
+        
+        if (!$course_id) {
+            die('Invalid course ID.');
+        }
+    
+        $course = Course::getById($conn, $course_id);
+        
+        if (!$course) {
+            die('Course not found.');
+        }
+    
+        $username = $_SESSION['email'];
+        $spocModel = new Spoc($conn);
+        $userData = $spocModel->getUserData($username);
+        $university_id = $userData['university_id'];
+    
+        $allFaculty = Faculty::getAllByUniversity($conn, $university_id); // Fetch all faculty of the university
+        $allStudents = Student::getAllByUniversity($conn, $university_id); // Fetch all students of the university
+    
+        $assignedFaculty = array_filter($allFaculty, function($faculty) use ($course_id) {
+            $assigned_courses = $faculty['assigned_courses'] ? json_decode($faculty['assigned_courses'], true) : [];
+            return in_array($course_id, $assigned_courses);
+        });
+    
+        $assignedStudents = array_filter($allStudents, function($student) use ($course_id) {
+            $assigned_courses = $student['assigned_courses'] ? json_decode($student['assigned_courses'], true) : [];
+            return in_array($course_id, $assigned_courses);
+        });
+    
+        require 'views/spoc/view_course.php';
+    }
+
+    public function assignFaculty() {
+        $conn = Database::getConnection();
+        $course_id = $_POST['course_id'];
+        $faculty_ids = $_POST['faculty_ids'];
+    
+        foreach ($faculty_ids as $faculty_id) {
+            Faculty::assignCourse($conn, $faculty_id, $course_id);
+            Course::assignFaculty($conn, $course_id, $faculty_id);
+        }
+    
+        $encoded_course_id = str_replace(['+', '/', '='], ['-', '_', ''], base64_encode($course_id));
+        header('Location: /spoc/view_course/' . $encoded_course_id);
+        exit();
+    }
+    
+    public function assignStudents() {
+        $conn = Database::getConnection();
+        $course_id = $_POST['course_id'];
+        $student_ids = $_POST['student_ids'];
+    
+        foreach ($student_ids as $student_id) {
+            Student::assignCourse($conn, $student_id, $course_id);
+        }
+        Course::assignStudents($conn, $course_id, $student_ids);
+    
+        $encoded_course_id = str_replace(['+', '/', '='], ['-', '_', ''], base64_encode($course_id));
+        header('Location: /spoc/view_course/' . $encoded_course_id);
+        exit();
+    }
+
+    public function unassignFaculty() {
+        $conn = Database::getConnection();
+        $course_id = $_POST['course_id'];
+        $faculty_ids = $_POST['faculty_ids'];
+    
+        foreach ($faculty_ids as $faculty_id) {
+            Faculty::unassignCourse($conn, $faculty_id, $course_id);
+        }
+        Course::unassignFaculty($conn, $course_id, $faculty_ids);
+    
+        $encoded_course_id = str_replace(['+', '/', '='], ['-', '_', ''], base64_encode($course_id));
+        header('Location: /spoc/view_course/' . $encoded_course_id);
+        exit();
+    }
+    
+    public function unassignStudents() {
+        $conn = Database::getConnection();
+        $course_id = $_POST['course_id'];
+        $student_ids = $_POST['student_ids'] ?? [];
+    
+        if (!empty($student_ids)) {
+            foreach ($student_ids as $student_id) {
+                Student::unassignCourse($conn, $student_id, $course_id);
+            }
+            Course::unassignStudents($conn, $course_id, $student_ids);
+        }
+    
+        $encoded_course_id = str_replace(['+', '/', '='], ['-', '_', ''], base64_encode($course_id));
+        header('Location: /spoc/view_course/' . $encoded_course_id);
+        exit();
     }
 
     public function manageFaculties() {

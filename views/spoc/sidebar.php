@@ -143,6 +143,20 @@ if ($userData) {
                     </div>
                 </li>
 
+                <li class="nav-item">
+                    <a class="nav-link" data-toggle="collapse" href="#courses" aria-expanded="false" aria-controls="courses">
+                        <i class="icon-columns menu-icon"></i>
+                        <span class="menu-title">Courses</span>
+                        <i class="menu-arrow"></i>
+                    </a>
+                    <div class="collapse" id="courses">
+                        <ul class="nav flex-column sub-menu">
+                            <li class="nav-item"><a class="nav-link" href="manage_courses">Manage Courses</a></li>
+                        </ul>
+                    </div>
+                </li>
+
+
 
                 <!-- <li class="nav-item">
                     <a class="nav-link" data-toggle="collapse" href="#courses" aria-expanded="false" aria-controls="courses">
