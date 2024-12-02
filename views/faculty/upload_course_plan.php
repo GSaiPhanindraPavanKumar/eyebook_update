@@ -47,62 +47,66 @@ $stmt->execute([$course_id]);
 $course = $stmt->fetch(PDO::FETCH_ASSOC);
 $university_id = $course['university_id'];
 
-if (isset($_FILES['course_plan_file']) && $_FILES['course_plan_file']['error'] == UPLOAD_ERR_OK) {
-    // AWS S3 configuration
-    $bucketName = AWS_BUCKET_NAME;
-    $region = AWS_REGION;
-    $accessKey = AWS_ACCESS_KEY_ID;
-    $secretKey = AWS_SECRET_ACCESS_KEY;
+if (isset($_FILES['course_plan_file'])) {
+    if ($_FILES['course_plan_file']['error'] == UPLOAD_ERR_OK) {
+        // AWS S3 configuration
+        $bucketName = AWS_BUCKET_NAME;
+        $region = AWS_REGION;
+        $accessKey = AWS_ACCESS_KEY_ID;
+        $secretKey = AWS_SECRET_ACCESS_KEY;
 
-    // Initialize S3 client
-    $s3Client = new S3Client([
-        'region' => $region,
-        'version' => 'latest',
-        'credentials' => [
-            'key' => $accessKey,
-            'secret' => $secretKey,
-        ],
-    ]);
-
-    // Upload course plan file to S3
-    $filePath = $_FILES['course_plan_file']['tmp_name'];
-    $fileName = basename($_FILES['course_plan_file']['name']);
-    $timestamp = time();
-    $key = "course_documents/{$course_id}/course_plan/{$timestamp}-{$fileName}";
-
-    try {
-        $result = $s3Client->putObject([
-            'Bucket' => $bucketName,
-            'Key' => $key,
-            'SourceFile' => $filePath,
-            'ContentType' => 'application/pdf',
+        // Initialize S3 client
+        $s3Client = new S3Client([
+            'region' => $region,
+            'version' => 'latest',
+            'credentials' => [
+                'key' => $accessKey,
+                'secret' => $secretKey,
+            ],
         ]);
 
-        // Get the URL of the uploaded file
-        $course_plan_url = $result['ObjectURL'];
+        // Upload course plan file to S3
+        $filePath = $_FILES['course_plan_file']['tmp_name'];
+        $fileName = basename($_FILES['course_plan_file']['name']);
+        $timestamp = time();
+        $key = "course_documents/{$course_id}/course_plan/{$timestamp}-{$fileName}";
 
-        // Update the course_plan column in the database
-        $sql = "UPDATE courses SET course_plan = JSON_OBJECT('url', ?) WHERE id = ?";
-        $stmt = $conn->prepare($sql);
-        if ($stmt->execute([$course_plan_url, $course_id])) {
-            // Create notifications for students
-            $students = Student::getByUniversityId($conn, $university_id);
-            foreach ($students as $student) {
-                Notification::create($conn, $student['id'], "A new course plan has been uploaded for your course.");
+        try {
+            $result = $s3Client->putObject([
+                'Bucket' => $bucketName,
+                'Key' => $key,
+                'SourceFile' => $filePath,
+                'ContentType' => 'application/pdf',
+            ]);
+
+            // Get the URL of the uploaded file
+            $course_plan_url = $result['ObjectURL'];
+
+            // Update the course_plan column in the database
+            $sql = "UPDATE courses SET course_plan = JSON_OBJECT('url', ?) WHERE id = ?";
+            $stmt = $conn->prepare($sql);
+            if ($stmt->execute([$course_plan_url, $course_id])) {
+                // Create notifications for students
+                $students = Student::getByUniversityId($conn, $university_id);
+                foreach ($students as $student) {
+                    Notification::create($conn, $student['id'], "A new course plan has been uploaded for your course.");
+                }
+
+                $hashedId = base64_encode($course_id);
+                $hashedId = str_replace(['+', '/', '='], ['-', '_', ''], $hashedId);
+                header("Location: /faculty/view_course/$hashedId");
+                exit;
+            } else {
+                echo "Error updating record: " . $stmt->errorInfo()[2];
             }
-
-            $hashedId = base64_encode($course_id);
-            $hashedId = str_replace(['+', '/', '='], ['-', '_', ''], $hashedId);
-            header("Location: /faculty/view_course/$hashedId");
-            exit;
-        } else {
-            echo "Error updating record: " . $stmt->errorInfo()[2];
+        } catch (AwsException $e) {
+            echo "Error uploading file to S3: " . $e->getMessage();
         }
-    } catch (AwsException $e) {
-        echo "Error uploading file to S3: " . $e->getMessage();
+    } else {
+        echo "File upload error: " . $_FILES['course_plan_file']['error'];
     }
 } else {
-    echo "No file uploaded or upload error.";
+    echo "No file uploaded.";
 }
 
 $conn = null;
