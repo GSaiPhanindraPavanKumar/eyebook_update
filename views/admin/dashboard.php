@@ -1,5 +1,14 @@
 <?php
 include("sidebar.php");
+use Models\Database;
+use Models\VirtualClassroom;
+
+// Fetch all virtual classes
+$virtualClassroomModel = new VirtualClassroom(Database::getConnection());
+$virtualClasses = $virtualClassroomModel->getAll();
+$upcomingClasses = array_filter($virtualClasses, function($class) {
+    return strtotime($class['start_time']) > time();
+});
 ?>
 
 <!-- HTML Content -->
@@ -14,10 +23,46 @@ include("sidebar.php");
                 </div>
             </div>
         </div>
+        <!-- Add this section -->
+        <div class="row">
+            <!-- Calendar and Weekly Agenda -->
+            <div class="col-md-12 grid-margin stretch-card">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h4 class="card-title">Calendar</h4>
+                                <div id="calendar" style="max-width: 100%; height: 400px;"></div>
+                            </div>
+                            <div class="col-md-6">
+                                <h4 class="card-title">Weekly Agenda</h4>
+                                <ul class="list-group">
+                                    <?php if (!empty($upcomingClasses)): ?>
+                                        <?php foreach ($upcomingClasses as $class): ?>
+                                            <?php
+                                            $endTime = date('Y-m-d H:i:s', strtotime($class['start_time'] . ' + ' . $class['duration'] . ' minutes'));
+                                            ?>
+                                            <li class="list-group-item">
+                                                <strong><?php echo htmlspecialchars($class['topic']); ?></strong><br>
+                                                <?php echo htmlspecialchars($class['start_time']); ?> - <?php echo htmlspecialchars($endTime); ?><br>
+                                                <a href="<?php echo htmlspecialchars($class['join_url']); ?>" target="_blank">Join</a>
+                                            </li>
+                                        <?php endforeach; ?>
+                                    <?php else: ?>
+                                        <li class="list-group-item">No upcoming weekly agenda.</li>
+                                    <?php endif; ?>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Existing content -->
         <div class="row">
             <div class="col-md-6 grid-margin stretch-card">
                 <div class="card tale-bg">
-                    <canvas id="myPieChart" width="200" height="150" style="width: 200px; height: 150px;"></canvas>
+                    <canvas id="myPieChart" width="200" height="100" style="width: 200px; height: 100px;"></canvas>
                 </div>
             </div>
             <div class="col-md-6 grid-margin transparent">
@@ -242,5 +287,27 @@ document.addEventListener('DOMContentLoaded', function() {
                 userUsageChart.update();
             });
     });
+});
+</script>
+
+<!-- Include FullCalendar -->
+<link href='https://cdn.jsdelivr.net/npm/fullcalendar@5.10.1/main.min.css' rel='stylesheet' />
+<script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.10.1/main.min.js'></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var calendarEl = document.getElementById('calendar');
+    var calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'dayGridMonth',
+        events: <?php echo json_encode(array_map(function($class) {
+            return [
+                'title' => $class['topic'],
+                'start' => $class['start_time'],
+                'end' => date('Y-m-d\TH:i:s', strtotime($class['start_time'] . ' + ' . $class['duration'] . ' minutes')),
+                'url' => $class['join_url']
+            ];
+        }, $virtualClasses)); ?>,
+        eventDisplay: 'block' // Ensure event titles are always visible
+    });
+    calendar.render();
 });
 </script>

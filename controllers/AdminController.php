@@ -570,8 +570,46 @@ class AdminController {
     
         // Fetch universities details
         $universities = University::getAll($conn);
+        $university_id = $course['university_id'];
+        $allFaculty = Faculty::getAllByUniversity($conn, $university_id); // Fetch all faculty of the university
+        $allStudents = Student::getAllByUniversity($conn, $university_id); // Fetch all students of the university
+    
+        $assignedFaculty = array_filter($allFaculty, function($faculty) use ($course_id) {
+            $assigned_courses = $faculty['assigned_courses'] ? json_decode($faculty['assigned_courses'], true) : [];
+            return in_array($course_id, $assigned_courses);
+        });
+    
+        $assignedStudents = array_filter($allStudents, function($student) use ($course_id) {
+            $assigned_courses = $student['assigned_courses'] ? json_decode($student['assigned_courses'], true) : [];
+            return in_array($course_id, $assigned_courses);
+        });
+
     
         require 'views/admin/view_course.php';
+    }
+
+    public function viewBook($hashedId) {
+        $conn = Database::getConnection();
+        $course_id = base64_decode($hashedId);
+        if (!is_numeric($course_id)) {
+            die('Invalid course ID');
+        }
+        $course = Course::getById($conn, $course_id);
+    
+        if (!$course || empty($course['course_book'])) {
+            echo 'SCORM content not found.';
+            exit;
+        }
+    
+        // Ensure course_book is an array
+        if (!is_array($course['course_book'])) {
+            $course['course_book'] = json_decode($course['course_book'], true) ?? [];
+        }
+    
+        // Get the index_path from the query parameter
+        $index_path = $_GET['index_path'] ?? $course['course_book'][0]['scorm_url'];
+    
+        require 'views/admin/book_view.php';
     }
 
     public function uploadSingleFaculty() {
@@ -1058,38 +1096,6 @@ class AdminController {
         header('Location: /admin/viewStudentProfile/' . $student_id);
         exit();
     }
-
-    public function unassignFaculty() {
-        $conn = Database::getConnection();
-        $course_id = $_POST['course_id'];
-        $faculty_ids = $_POST['faculty_ids'] ?? [];
-    
-        if (!empty($faculty_ids)) {
-            foreach ($faculty_ids as $faculty_id) {
-                Faculty::unassignCourse($conn, $faculty_id, $course_id);
-            }
-            Course::unassignFaculty($conn, $course_id, $faculty_ids);
-        }
-    
-        header('Location: /admin/view_course/' . $course_id);
-        exit();
-    }
-    
-    public function unassignStudents() {
-        $conn = Database::getConnection();
-        $course_id = $_POST['course_id'];
-        $student_ids = $_POST['student_ids'] ?? [];
-    
-        if (!empty($student_ids)) {
-            foreach ($student_ids as $student_id) {
-                Student::unassignCourse($conn, $student_id, $course_id);
-            }
-            Course::unassignStudents($conn, $course_id, $student_ids);
-        }
-    
-        header('Location: /admin/view_course/' . $course_id);
-        exit();
-    }
     
 
     public function assignCourse() {
@@ -1113,6 +1119,15 @@ class AdminController {
                 exit();
             }
         }
+    }
+    
+    public function unassignCourse() {
+        $conn = Database::getConnection();
+        $course_id = $_POST['course_id'];
+        $university_id = $_POST['university_id'];
+    
+        $result = Course::unassignCourseFromUniversity($conn, $course_id, $university_id);
+        echo json_encode($result);
     }
 
     public function uploadSingleStudent() {
@@ -1140,6 +1155,68 @@ class AdminController {
         }
     
         require 'views/admin/uploadStudents.php';
+    }
+
+    public function assignFaculty() {
+        $conn = Database::getConnection();
+        $course_id = $_POST['course_id'];
+        $faculty_ids = $_POST['faculty_ids'];
+    
+        foreach ($faculty_ids as $faculty_id) {
+            Faculty::assignCourse($conn, $faculty_id, $course_id);
+            Course::assignFaculty($conn, $course_id, $faculty_id);
+        }
+    
+        $encoded_course_id = str_replace(['+', '/', '='], ['-', '_', ''], base64_encode($course_id));
+        header("Location: /admin/view_course/$course_id");
+        exit();
+    }
+
+    public function assignStudents() {
+        $conn = Database::getConnection();
+        $course_id = $_POST['course_id'];
+        $student_ids = $_POST['student_ids'];
+    
+        foreach ($student_ids as $student_id) {
+            Student::assignCourse($conn, $student_id, $course_id);
+        }
+        Course::assignStudents($conn, $course_id, $student_ids);
+    
+        $encoded_course_id = str_replace(['+', '/', '='], ['-', '_', ''], base64_encode($course_id));
+        header("Location: /admin/view_course/$course_id");
+        exit();
+    }
+
+    public function unassignFaculty() {
+        $conn = Database::getConnection();
+        $course_id = $_POST['course_id'];
+        $faculty_ids = $_POST['faculty_ids'];
+    
+        foreach ($faculty_ids as $faculty_id) {
+            Faculty::unassignCourse($conn, $faculty_id, $course_id);
+        }
+        Course::unassignFaculty($conn, $course_id, $faculty_ids);
+    
+        $encoded_course_id = str_replace(['+', '/', '='], ['-', '_', ''], base64_encode($course_id));
+        header("Location: /admin/view_course/$course_id");
+        exit();
+    }
+    
+    public function unassignStudents() {
+        $conn = Database::getConnection();
+        $course_id = $_POST['course_id'];
+        $student_ids = $_POST['student_ids'] ?? [];
+    
+        if (!empty($student_ids)) {
+            foreach ($student_ids as $student_id) {
+                Student::unassignCourse($conn, $student_id, $course_id);
+            }
+            Course::unassignStudents($conn, $course_id, $student_ids);
+        }
+    
+        $encoded_course_id = str_replace(['+', '/', '='], ['-', '_', ''], base64_encode($course_id));
+        header("Location: /admin/view_course/$course_id");
+        exit();
     }
 
     

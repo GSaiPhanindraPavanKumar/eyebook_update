@@ -22,6 +22,14 @@ $leastProgressCourses = array_filter($ongoingCourses, function($course) {
 });
 $leastProgressCourses = array_slice($leastProgressCourses, 0, 5); // Get the least 5 progress courses
 
+// Fetch all virtual classes for the faculty
+$virtualClasses = getAllVirtualClasses($userData['id']);
+$upcomingClasses = array_filter($virtualClasses, function($class) {
+    return strtotime($class['start_time']) > time();
+});
+
+// Ensure university_short_name is set
+$universityShortName = isset($userData['university_short_name']) ? htmlspecialchars($userData['university_short_name']) : '';
 ?>
 
 <!-- HTML Content -->
@@ -31,28 +39,40 @@ $leastProgressCourses = array_slice($leastProgressCourses, 0, 5); // Get the lea
             <div class="col-md-12 grid-margin">
                 <div class="row">
                     <div class="col-12 col-xl-8 mb-4 mb-xl-0">
-                        <h3 class="font-weight-bold">Hello, <em><?php echo htmlspecialchars($userData['name']); ?></em></h3>
+                        <h3 class="font-weight-bold">Hello, <em><?php echo htmlspecialchars($userData['name']); ?> - <?php echo $universityShortName; ?></em></h3>
                     </div>
                 </div>
             </div>
         </div>
+        <!-- Add this section -->
         <div class="row">
-            <!-- Faculty Details -->
+            <!-- Calendar and Weekly Agenda -->
             <div class="col-md-12 grid-margin stretch-card">
                 <div class="card">
                     <div class="card-body">
-                        <h4 class="card-title">Faculty Details</h4>
                         <div class="row">
                             <div class="col-md-6">
-                                <p><strong>Name:</strong> <?php echo htmlspecialchars($userData['name']); ?></p>
-                                <p><strong>Email:</strong> <?php echo htmlspecialchars($userData['email']); ?></p>
-                                <p><strong>Section:</strong> <?php echo htmlspecialchars($userData['section']); ?></p>
-                                <p><strong>Stream:</strong> <?php echo htmlspecialchars($userData['stream']); ?></p>
+                                <h4 class="card-title">Calendar</h4>
+                                <div id="calendar" style="max-width: 100%; height: 400px;"></div>
                             </div>
                             <div class="col-md-6">
-                                <p><strong>Phone:</strong> <?php echo htmlspecialchars($userData['phone']); ?></p>
-                                <p><strong>Department:</strong> <?php echo htmlspecialchars($userData['department']); ?></p>
-                                <p><strong>University:</strong> <?php echo htmlspecialchars($userData['university_name']); ?></p>
+                                <h4 class="card-title">Weekly Agenda</h4>
+                                <ul class="list-group">
+                                    <?php if (!empty($upcomingClasses)): ?>
+                                        <?php foreach ($upcomingClasses as $class): ?>
+                                            <?php
+                                            $endTime = date('Y-m-d H:i:s', strtotime($class['start_time'] . ' + ' . $class['duration'] . ' minutes'));
+                                            ?>
+                                            <li class="list-group-item">
+                                                <strong><?php echo htmlspecialchars($class['topic']); ?></strong><br>
+                                                <?php echo htmlspecialchars($class['start_time']); ?> - <?php echo htmlspecialchars($endTime); ?><br>
+                                                <a href="<?php echo htmlspecialchars($class['join_url']); ?>" target="_blank">Join</a>
+                                            </li>
+                                        <?php endforeach; ?>
+                                    <?php else: ?>
+                                        <li class="list-group-item">No upcoming weekly agenda.</li>
+                                    <?php endif; ?>
+                                </ul>
                             </div>
                         </div>
                     </div>
@@ -163,16 +183,14 @@ $leastProgressCourses = array_slice($leastProgressCourses, 0, 5); // Get the lea
 
 <?php
 // Define the function to fetch user data from the database
-
 function getUserDataByEmail($email) {
     $conn = Database::getConnection();
-    $stmt = $conn->prepare("SELECT faculty.*, universities.long_name as university_name FROM faculty JOIN universities ON faculty.university_id = universities.id WHERE faculty.email = :email");
+    $stmt = $conn->prepare("SELECT faculty.*, universities.long_name as university_name, universities.short_name as university_short_name FROM faculty JOIN universities ON faculty.university_id = universities.id WHERE faculty.email = :email");
     $stmt->execute(['email' => $email]);
     return $stmt->fetch(PDO::FETCH_ASSOC);
 }
 
 // Define the function to fetch today's classes
-
 function getTodaysClasses($facultyId) {
     $conn = Database::getConnection();
 
@@ -204,7 +222,6 @@ function getTodaysClasses($facultyId) {
 }
 
 // Define the function to fetch courses with progress
-
 function getCoursesWithProgress($faculty_id) {
     $conn = Database::getConnection();
     $assignedCourses = Faculty::getAssignedCourses($conn, $faculty_id);
@@ -245,6 +262,55 @@ function getCoursesWithProgress($faculty_id) {
 
     return $courses;
 }
+
+// Define the function to fetch all virtual classes for the faculty
+function getAllVirtualClasses($facultyId) {
+    $conn = Database::getConnection();
+
+    // Get the assigned course IDs for the faculty
+    $assignedCourses = Faculty::getAssignedCourses($conn, $facultyId);
+
+    if (empty($assignedCourses)) {
+        return [];
+    }
+
+    // Get the virtual class IDs for the assigned courses
+    $virtualClassIds = Course::getVirtualClassIds($conn, $assignedCourses);
+
+    if (empty($virtualClassIds)) {
+        return [];
+    }
+
+    // Fetch all virtual classes for the assigned virtual class IDs
+    $placeholders = implode(',', array_fill(0, count($virtualClassIds), '?'));
+    $stmt = $conn->prepare("
+        SELECT topic, start_time, duration, join_url
+        FROM virtual_classrooms
+        WHERE id IN ($placeholders)
+        ORDER BY start_time ASC
+    ");
+    $stmt->execute($virtualClassIds);
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
 ?>
-<!-- Include Chart.js -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<!-- Include FullCalendar -->
+<link href='https://cdn.jsdelivr.net/npm/fullcalendar@5.10.1/main.min.css' rel='stylesheet' />
+<script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.10.1/main.min.js'></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var calendarEl = document.getElementById('calendar');
+    var calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'dayGridMonth',
+        events: <?php echo json_encode(array_map(function($class) {
+            return [
+                'title' => $class['topic'],
+                'start' => $class['start_time'],
+                'end' => date('Y-m-d\TH:i:s', strtotime($class['start_time'] . ' + ' . $class['duration'] . ' minutes')),
+                'url' => $class['join_url']
+            ];
+        }, $virtualClasses)); ?>,
+        eventDisplay: 'block' // Ensure event titles are always visible
+    });
+    calendar.render();
+});
+</script>

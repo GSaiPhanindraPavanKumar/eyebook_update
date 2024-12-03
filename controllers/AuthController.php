@@ -44,6 +44,7 @@ class AuthController {
                 if ($spoc) {
                     $_SESSION['email'] = $username;
                     $this->spocModel->updateLastLogin($spoc['id']);
+                    $this->spocModel->updateLastLogin($spoc['id']);
                     header('Location: /spoc/dashboard');
                     exit();
                 }

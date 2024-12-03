@@ -153,6 +153,30 @@ class SpocController {
         exit();
     }
 
+    public function viewBook($hashedId) {
+        $conn = Database::getConnection();
+        $course_id = base64_decode($hashedId);
+        if (!is_numeric($course_id)) {
+            die('Invalid course ID');
+        }
+        $course = Course::getById($conn, $course_id);
+    
+        if (!$course || empty($course['course_book'])) {
+            echo 'SCORM content not found.';
+            exit;
+        }
+    
+        // Ensure course_book is an array
+        if (!is_array($course['course_book'])) {
+            $course['course_book'] = json_decode($course['course_book'], true) ?? [];
+        }
+    
+        // Get the index_path from the query parameter
+        $index_path = $_GET['index_path'] ?? $course['course_book'][0]['scorm_url'];
+    
+        require 'views/spoc/book_view.php';
+    }
+
     public function manageFaculties() {
         $conn = Database::getConnection();
         $spocModel = new Spoc($conn);

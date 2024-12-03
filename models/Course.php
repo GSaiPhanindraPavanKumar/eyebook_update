@@ -139,12 +139,23 @@ class Course {
     }
 
     public static function getAssignedFaculty($conn, $course_id) {
-        $sql = "SELECT f.id, f.name, f.email FROM faculty f
-                JOIN course_faculty cf ON f.id = cf.faculty_id
-                WHERE cf.course_id = :course_id";
+        $sql = "SELECT assigned_faculty FROM courses WHERE id = :course_id";
         $stmt = $conn->prepare($sql);
         $stmt->execute([':course_id' => $course_id]);
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if ($result && !empty($result['assigned_faculty'])) {
+            $assignedFaculty = json_decode($result['assigned_faculty'], true);
+            if (!empty($assignedFaculty)) {
+                $placeholders = implode(',', array_fill(0, count($assignedFaculty), '?'));
+                $sql = "SELECT id, name, email FROM faculty WHERE id IN ($placeholders)";
+                $stmt = $conn->prepare($sql);
+                $stmt->execute($assignedFaculty);
+                return $stmt->fetchAll(PDO::FETCH_ASSOC);
+            }
+        }
+
+        return [];
     }
 
     public static function getVirtualClassIds($conn, $courseIds) {
@@ -313,6 +324,56 @@ class Course {
         $stmt->execute(['university_id' => $university_id, 'id' => $course_id]);
     
         return ['message' => 'Course assigned to university successfully'];
+    }
+
+    public static function unassignCourseFromUniversity($conn, $course_id, $university_id) {
+        $sql = "SELECT university_id FROM courses WHERE id = :id";
+        $stmt = $conn->prepare($sql);
+        $stmt->execute(['id' => $course_id]);
+        $course = $stmt->fetch(PDO::FETCH_ASSOC);
+    
+        if (!$course) {
+            return ['message' => 'Course not found'];
+        }
+    
+        $assigned_universities = $course['university_id'] ? json_decode($course['university_id'], true) : [];
+        if (!is_array($assigned_universities)) {
+            $assigned_universities = [];
+        }
+        if (in_array($university_id, $assigned_universities)) {
+            $assigned_universities = array_diff($assigned_universities, [$university_id]);
+            $sql = "UPDATE courses SET university_id = :university_id WHERE id = :id";
+            $stmt = $conn->prepare($sql);
+            $stmt->execute([
+                ':university_id' => json_encode(array_values($assigned_universities)),
+                ':id' => $course_id
+            ]);
+        }
+    
+        return ['message' => 'Course unassigned from university successfully'];
+    }
+
+    public static function getAssignedUniversities($conn, $course_id) {
+        $sql = "SELECT university_id FROM courses WHERE id = :id";
+        $stmt = $conn->prepare($sql);
+        $stmt->execute(['id' => $course_id]);
+        $course = $stmt->fetch(PDO::FETCH_ASSOC);
+    
+        if ($course && !empty($course['university_id'])) {
+            $university_ids = json_decode($course['university_id'], true);
+            if (!is_array($university_ids)) {
+                $university_ids = [];
+            }
+            if (!empty($university_ids)) {
+                $placeholders = implode(',', array_fill(0, count($university_ids), '?'));
+                $sql = "SELECT id, long_name FROM universities WHERE id IN ($placeholders)";
+                $stmt = $conn->prepare($sql);
+                $stmt->execute($university_ids);
+                return $stmt->fetchAll(PDO::FETCH_ASSOC);
+            }
+        }
+    
+        return [];
     }
 
     public static function getCountByUniversityId($conn, $university_id) {

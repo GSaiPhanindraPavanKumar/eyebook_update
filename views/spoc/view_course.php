@@ -35,6 +35,37 @@
                                 <p><strong>Description:</strong> <?php echo htmlspecialchars($course['description'] ?? 'N/A'); ?></p>
                                 <p><strong>Status:</strong> <?php echo htmlspecialchars($course['status'] ?? 'N/A'); ?></p>
 
+                                <!-- Course Book Section -->
+                                <h4 class="card-title mt-3">Course Book</h4>
+                                <table class="table table-hover mt-2">
+                                    <thead class="thead-dark">
+                                        <tr>
+                                            <th scope="col">S. No.</th>
+                                            <th scope="col">Unit Title</th>
+                                            <th scope="col">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <?php
+                                        if (!empty($course['course_book'])) {
+                                            $serialNumber = 1; 
+                                            $hashedId = base64_encode($course['id']);
+                                            $hashedId = str_replace(['+', '/', '='], ['-', '_', ''], $hashedId);
+                                            foreach ($course['course_book'] as $unit) {
+                                                echo "<tr>";
+                                                echo "<td>" . $serialNumber++ . "</td>"; // Increment the serial number
+                                                echo "<td>" . htmlspecialchars($unit['unit_name']) . "</td>";
+                                                $full_url = $unit['scorm_url'];
+                                                echo "<td><a href='/spoc/view_book/" . $hashedId . "?index_path=" . urlencode($full_url) . "' class='btn btn-primary'>View Course Book</a></td>";
+                                                echo "</tr>";
+                                            }
+                                        } else {
+                                            echo "<tr><td colspan='4'>No course books available.</td></tr>";
+                                        }
+                                        ?>
+                                    </tbody>
+                                </table>
+
                                 <h4 class="card-title mt-3 d-flex justify-content-between align-items-center">
                                     Assigned Faculty
                                     <form method="POST" action="/spoc/unassign_faculty">

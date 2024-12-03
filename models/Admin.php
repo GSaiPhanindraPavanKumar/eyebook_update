@@ -52,11 +52,11 @@ class Admin {
     }
 
     public function updateLastLogin($admin_id) {
-    $conn = Database::getConnection();
-    $sql = "UPDATE admins SET last_login = NOW() WHERE id = ?";
-    $stmt = $conn->prepare($sql);
-    $stmt->execute([$admin_id]);
-}
+        $conn = Database::getConnection();
+        $sql = "UPDATE admins SET last_login = NOW() WHERE id = ?";
+        $stmt = $conn->prepare($sql);
+        $stmt->execute([$admin_id]);
+    }
 
     // public function userprofile() {
     //     // Assuming the correct column name is 'username' instead of 'email'
