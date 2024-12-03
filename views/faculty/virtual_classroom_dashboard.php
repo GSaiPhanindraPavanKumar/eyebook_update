@@ -31,7 +31,7 @@ if (!empty($assignedCourses)) {
     $stmt = $conn->prepare($sql);
     $stmt->execute($assignedCourses);
     while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-        $ids = json_decode($row['virtual_class_id'], true);
+        $ids = !empty($row['virtual_class_id']) ? json_decode($row['virtual_class_id'], true) : [];
         if (is_array($ids)) {
             $virtualClassIds = array_merge($virtualClassIds, $ids);
         }
