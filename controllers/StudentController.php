@@ -50,7 +50,7 @@ class StudentController {
         }
     
         // Get the index_path from the query parameter
-        $index_path = $course['course_book'][0]['scorm_url'];
+        $index_path = $_GET['index_path'] ?? $course['course_book'][0]['scorm_url'];
     
         require 'views/student/book_view.php';
     }

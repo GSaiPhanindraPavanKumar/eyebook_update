@@ -9,7 +9,7 @@ include 'sidebar.php';
             <div class="col-md-12 grid-margin stretch-card">
                 <div class="card">
                     <div class="card-body">
-                        <iframe id="book-iframe" src="<?php echo htmlspecialchars($index_path, ENT_QUOTES, 'UTF-8'); ?>" style="width: 100%; height: 80vh;"></iframe>
+                        <iframe id="book-iframe" src="<?php echo htmlspecialchars($index_path, ENT_QUOTES, 'UTF-8'); ?>" style="width: 100%; height: 80vh;" frameborder="0"></iframe>
                     </div>
                 </div>
             </div>
