@@ -1349,9 +1349,7 @@ class AdminController {
 
             // Convert local time to UTC and then to ISO 8601 format
             $start_time = new \DateTime($start_time_local, new \DateTimeZone('Asia/Kolkata')); // Set the local time zone
-            $start_time_utc = clone $start_time;
-            $start_time_utc->setTimezone(new \DateTimeZone('UTC')); // Convert to UTC
-            $start_time_iso8601 = $start_time_utc->format(\DateTime::ATOM);
+            $start_time_iso8601 = $start_time->format(\DateTime::ATOM);
 
             $zoom = new ZoomAPI(ZOOM_CLIENT_ID, ZOOM_CLIENT_SECRET, ZOOM_ACCOUNT_ID, $conn);
             $classroom = $zoom->createVirtualClassroom($topic, $start_time_iso8601, $duration);
