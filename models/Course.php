@@ -301,14 +301,6 @@ class Course {
             return ['message' => 'Course not found'];
         }
     
-        // Check for assigned students and faculty
-        $assigned_students = json_decode($course['assigned_students'], true) ?? [];
-        $assigned_faculty = json_decode($course['assigned_faculty'], true) ?? [];
-    
-        if (!empty($assigned_students) || !empty($assigned_faculty)) {
-            return ['message' => 'Please unassign all the assigned students and faculties before reassigning the course to another university.'];
-        }
-    
         $current_university_id = $course['university_id'];
         if ($current_university_id && $current_university_id != $university_id) {
             if (!$confirm) {
