@@ -17,7 +17,7 @@ $sql = "SELECT assigned_courses FROM faculty WHERE id = :faculty_id";
 $stmt = $conn->prepare($sql);
 $stmt->execute(['faculty_id' => $facultyId]);
 $assignedCourses = $stmt->fetchColumn();
-$assignedCourses = json_decode($assignedCourses, true);
+$assignedCourses = $assignedCourses ? json_decode($assignedCourses, true) : [];
 
 if (empty($assignedCourses)) {
     $assignedCourses = [];
