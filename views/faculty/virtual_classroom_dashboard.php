@@ -1,5 +1,4 @@
 <?php
-// Include sidebar
 include('sidebar.php');
 
 // Load configuration
@@ -10,14 +9,68 @@ use Models\Database;
 
 $conn = Database::getConnection();
 
-// Include Zoom integration
-require_once __DIR__ . '/../../models/zoom_integration.php';
+// Fetch faculty ID from session
+$facultyId = $_SESSION['faculty_id'];
 
-// Initialize ZoomAPI
-$zoom = new ZoomAPI(ZOOM_CLIENT_ID, ZOOM_CLIENT_SECRET, ZOOM_ACCOUNT_ID, $conn);
+// Step 1: Get the assigned course IDs from the faculty table
+$sql = "SELECT assigned_courses FROM faculty WHERE id = :faculty_id";
+$stmt = $conn->prepare($sql);
+$stmt->execute(['faculty_id' => $facultyId]);
+$assignedCourses = $stmt->fetchColumn();
+$assignedCourses = json_decode($assignedCourses, true);
 
-// Fetch all classrooms
-$facultyClassrooms = $zoom->getAllClassrooms();
+if (empty($assignedCourses)) {
+    $assignedCourses = [];
+}
+
+// Step 2: Get the virtual class IDs from the courses table
+$virtualClassIds = [];
+if (!empty($assignedCourses)) {
+    $placeholders = implode(',', array_fill(0, count($assignedCourses), '?'));
+    $sql = "SELECT virtual_class_id FROM courses WHERE id IN ($placeholders)";
+    $stmt = $conn->prepare($sql);
+    $stmt->execute($assignedCourses);
+    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+        $ids = json_decode($row['virtual_class_id'], true);
+        if (is_array($ids)) {
+            $virtualClassIds = array_merge($virtualClassIds, $ids);
+        }
+    }
+    $virtualClassIds = array_unique($virtualClassIds);
+}
+
+// Step 3: Fetch the virtual class details from the virtual classes table using the id column
+$facultyClassrooms = [];
+if (!empty($virtualClassIds)) {
+    $placeholders = implode(',', array_fill(0, count($virtualClassIds), '?'));
+    $sql = "SELECT * FROM virtual_classrooms WHERE id IN ($placeholders) ORDER BY start_time DESC";
+    $stmt = $conn->prepare($sql);
+    $stmt->execute($virtualClassIds);
+    $facultyClassrooms = $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
+// Fetch course names for each virtual classroom
+foreach ($facultyClassrooms as &$classroom) {
+    $courseIds = json_decode($classroom['course_id'], true);
+    $courseNames = [];
+    foreach ($courseIds as $courseId) {
+        $sql = "SELECT name FROM courses WHERE id = :course_id";
+        $stmt = $conn->prepare($sql);
+        $stmt->execute(['course_id' => $courseId]);
+        $course = $stmt->fetch(PDO::FETCH_ASSOC);
+        if ($course) {
+            $courseNames[] = $course['name'];
+        }
+    }
+    $classroom['course_names'] = implode(', ', $courseNames);
+
+    // Check if attendance has been recorded for the class
+    $sql = "SELECT attendance FROM virtual_classrooms WHERE id = :classroom_id";
+    $stmt = $conn->prepare($sql);
+    $stmt->execute(['classroom_id' => $classroom['id']]);
+    $attendance = $stmt->fetchColumn();
+    $classroom['attendance_taken'] = !empty($attendance);
+}
 
 // Sort classrooms by start_time in descending order
 usort($facultyClassrooms, function($a, $b) {
@@ -30,6 +83,13 @@ usort($facultyClassrooms, function($a, $b) {
 <head>
     <title>Virtual Classroom Dashboard</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        .table th, .table td {
+            width: 150px;
+            word-wrap: break-word;
+            white-space: normal;
+        }
+    </style>
 </head>
 <body>
     <div class="container-fluid">
@@ -53,6 +113,7 @@ usort($facultyClassrooms, function($a, $b) {
                                         <thead class="thead-dark">
                                             <tr>
                                                 <th>Topic</th>
+                                                <th>Course Name</th>
                                                 <th>Start Date</th>
                                                 <th>Start Time</th>
                                                 <th>End Time</th>
@@ -71,13 +132,16 @@ usort($facultyClassrooms, function($a, $b) {
                                             ?>
                                                 <tr>
                                                     <td><?php echo htmlspecialchars($classroom['topic']); ?></td>
+                                                    <td><?php echo htmlspecialchars($classroom['course_names']); ?></td>
                                                     <td><?php echo htmlspecialchars($start_time->format('Y-m-d')); ?></td>
                                                     <td><?php echo htmlspecialchars($start_time->format('H:i:s')); ?></td>
                                                     <td><?php echo htmlspecialchars($end_time->format('H:i:s')); ?></td>
                                                     <td><a href="<?php echo htmlspecialchars($classroom['join_url']); ?>" target="_blank" class="btn btn-primary">Join</a></td>
                                                     <td>
-                                                        <?php if ($current_time->format('Y-m-d') == $start_time->format('Y-m-d')): ?>
-                                                            <a href="/faculty/take_attendance?classroom_id=<?php echo htmlspecialchars($classroom['classroom_id']); ?>" class="btn btn-warning">Take Attendance</a>
+                                                        <?php if ($classroom['attendance_taken']): ?>
+                                                            <a href="/faculty/download_attendance?classroom_id=<?php echo htmlspecialchars($classroom['id']); ?>" class="btn btn-primary">Download</a>
+                                                        <?php else: ?>
+                                                            <a href="/faculty/take_attendance?classroom_id=<?php echo htmlspecialchars($classroom['id']); ?>" class="btn btn-warning">Take Attendance</a>
                                                         <?php endif; ?>
                                                     </td>
                                                 </tr>
@@ -98,6 +162,7 @@ usort($facultyClassrooms, function($a, $b) {
                                         <thead class="thead-dark">
                                             <tr>
                                                 <th>Topic</th>
+                                                <th>Course Name</th>
                                                 <th>Start Date</th>
                                                 <th>Start Time</th>
                                                 <th>End Time</th>
@@ -114,14 +179,15 @@ usort($facultyClassrooms, function($a, $b) {
                                             ?>
                                                 <tr>
                                                     <td><?php echo htmlspecialchars($classroom['topic']); ?></td>
+                                                    <td><?php echo htmlspecialchars($classroom['course_names']); ?></td>
                                                     <td><?php echo htmlspecialchars($start_time->format('Y-m-d')); ?></td>
                                                     <td><?php echo htmlspecialchars($start_time->format('H:i:s')); ?></td>
                                                     <td><?php echo htmlspecialchars($end_time->format('H:i:s')); ?></td>
                                                     <td>
-                                                        <?php if (empty($classroom['attendance'])): ?>
-                                                            <a href="/faculty/take_attendance?classroom_id=<?php echo htmlspecialchars($classroom['classroom_id']); ?>" class="btn btn-warning">Take Attendance</a>
+                                                        <?php if ($classroom['attendance_taken']): ?>
+                                                            <a href="/faculty/download_attendance?classroom_id=<?php echo htmlspecialchars($classroom['id']); ?>" class="btn btn-primary">Download</a>
                                                         <?php else: ?>
-                                                            <a href="/faculty/download_attendance?classroom_id=<?php echo htmlspecialchars($classroom['classroom_id']); ?>" class="btn btn-primary">Download</a>
+                                                            <a href="/faculty/take_attendance?classroom_id=<?php echo htmlspecialchars($classroom['id']); ?>" class="btn btn-warning">Take Attendance</a>
                                                         <?php endif; ?>
                                                     </td>
                                                 </tr>

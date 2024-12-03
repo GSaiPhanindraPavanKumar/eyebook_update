@@ -1,6 +1,8 @@
 <?php
 require_once __DIR__ . '/../../models/Database.php';
 use Models\Database;
+use Models\Faculty;
+use Models\Course;
 use Models\Student;
 use Models\VirtualClassroom;
 
@@ -9,13 +11,27 @@ $conn = Database::getConnection();
 $classroomId = $_GET['classroom_id'] ?? null;
 
 if ($classroomId) {
-    // Fetch classroom details
-    $stmt = $conn->prepare("SELECT * FROM virtual_classrooms WHERE classroom_id = ?");
+    // Fetch classroom details using the correct column name 'id'
+    $stmt = $conn->prepare("SELECT * FROM virtual_classrooms WHERE id = ?");
     $stmt->execute([$classroomId]);
     $classroom = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    // Fetch all students
-    $students = Student::getAll($conn);
+    if (!$classroom) {
+        echo "Error: Classroom not found.";
+        exit();
+    }
+
+    // Fetch faculty ID from session
+    $facultyId = $_SESSION['faculty_id'];
+
+    // Fetch assigned courses for the faculty
+    $assignedCourses = Faculty::getAssignedCourses($conn, $facultyId);
+
+    // Fetch assigned student IDs for the assigned courses
+    $assignedStudentIds = Course::getAssignedStudentIds($conn, $assignedCourses);
+
+    // Fetch student details for the assigned student IDs
+    $students = Student::getByIds($conn, $assignedStudentIds);
 } else {
     echo "Error: Classroom ID not provided.";
     exit();
@@ -75,9 +91,9 @@ if ($classroomId) {
         <div class="card mb-4">
             <div class="card-body">
                 <h2 class="card-title">Classroom Details</h2>
-                <p><strong>Topic:</strong> <?php echo htmlspecialchars($classroom['topic']); ?></p>
-                <p><strong>Start Time:</strong> <?php echo htmlspecialchars($classroom['start_time']); ?></p>
-                <p><strong>Duration:</strong> <?php echo htmlspecialchars($classroom['duration']); ?> minutes</p>
+                <p><strong>Topic:</strong> <?php echo htmlspecialchars($classroom['topic'] ?? ''); ?></p>
+                <p><strong>Start Time:</strong> <?php echo htmlspecialchars($classroom['start_time'] ?? ''); ?></p>
+                <p><strong>Duration:</strong> <?php echo htmlspecialchars($classroom['duration'] ?? ''); ?> minutes</p>
             </div>
         </div>
 

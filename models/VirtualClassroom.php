@@ -11,8 +11,8 @@ class VirtualClassroom {
     }
 
     public function create($data) {
-        $stmt = $this->conn->prepare("INSERT INTO virtual_classrooms (classroom_id, topic, start_time, duration, join_url) VALUES (?, ?, ?, ?, ?)");
-        $stmt->execute([$data['id'], $data['topic'], $data['start_time'], $data['duration'], $data['join_url']]);
+        $stmt = $this->conn->prepare("INSERT INTO virtual_classrooms (classroom_id, topic, start_time, duration, join_url, course_id) VALUES (?, ?, ?, ?, ?, ?)");
+        $stmt->execute([$data['id'], $data['topic'], $data['start_time'], $data['duration'], $data['join_url'], json_encode($data['course_id'])]);
     }
 
     public function getAll() {
@@ -20,15 +20,34 @@ class VirtualClassroom {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function updateStartTime($classroomId, $startTime) {
-        $stmt = $this->conn->prepare("UPDATE virtual_classrooms SET start_time = ? WHERE classroom_id = ?");
-        $stmt->execute([$startTime, $classroomId]);
+    public function getVirtualClassroomsByIds($virtualClassIds) {
+        if (empty($virtualClassIds)) {
+            return [];
+        }
+
+        $placeholders = implode(',', array_fill(0, count($virtualClassIds), '?'));
+        $sql = "SELECT * FROM virtual_classrooms WHERE classroom_id IN ($placeholders) ORDER BY start_time DESC";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->execute($virtualClassIds);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function getByIds($virtualClassIds) {
+        if (empty($virtualClassIds)) {
+            return [];
+        }
+
+        $placeholders = implode(',', array_fill(0, count($virtualClassIds), '?'));
+        $sql = "SELECT * FROM virtual_classrooms WHERE classroom_id IN ($placeholders) ORDER BY start_time DESC";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->execute($virtualClassIds);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     public function getAttendance($classroomId) {
-        $stmt = $this->conn->prepare("SELECT * FROM attendance WHERE classroom_id = ?");
+        $stmt = $this->conn->prepare("SELECT attendance FROM virtual_classrooms WHERE classroom_id = ?");
         $stmt->execute([$classroomId]);
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        return $stmt->fetchColumn();
     }
 
     public function getVirtualClassesForStudent($studentId, $date) {
@@ -42,4 +61,3 @@ class VirtualClassroom {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 }
-?>

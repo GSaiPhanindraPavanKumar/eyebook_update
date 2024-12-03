@@ -69,7 +69,7 @@ if ($result->rowCount() > 0) {
                                                 <td><?= htmlspecialchars($course['name']) ?></td>
                                                 <td><?= htmlspecialchars($course['university']) ?></td>
                                                 <td>
-                                                    <a href="/admin/view_course/<?= $course['id'] ?>" class="btn btn-outline-info btn-sm"><i class="fas fa-eye"></i> View</a>
+                                                <a href="/admin/view_course/<?= $course['id'] ?>" class="btn btn-outline-info btn-sm"><i class="fas fa-eye"></i> View</a>
                                                     <a href="/admin/edit_course/<?= $course['id'] ?>" class="btn btn-outline-warning btn-sm"><i class="fas fa-edit"></i> Edit</a>
                                                     <a href="/admin/delete_course/<?= $course['id'] ?>" class="btn btn-outline-danger btn-sm" onclick="return confirm('Are you sure you want to delete this course?');"><i class="fas fa-trash"></i> Delete</a>
                                                 </td>

@@ -9,7 +9,7 @@ $attendance = $_POST['attendance'] ?? [];
 
 if ($classroomId && !empty($attendance)) {
     // Save attendance to the database
-    $stmt = $conn->prepare("UPDATE virtual_classrooms SET attendance = ? WHERE classroom_id = ?");
+    $stmt = $conn->prepare("UPDATE virtual_classrooms SET attendance = ? WHERE id = ?");
     $stmt->execute([json_encode($attendance), $classroomId]);
 
     // Redirect back to the dashboard

@@ -25,6 +25,14 @@ class Faculty {
         return $result['assigned_courses'] ? json_decode($result['assigned_courses'], true) : [];
     }
 
+    public static function getAssignedCoursesForFaculty($conn, $faculty_id) {
+        $sql = "SELECT assigned_courses FROM faculty WHERE id = :id";
+        $stmt = $conn->prepare($sql);
+        $stmt->execute([':id' => $faculty_id]);
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $result['assigned_courses'] ? json_decode($result['assigned_courses'], true) : [];
+    }
+
     public static function assignCourse($conn, $faculty_id, $course_id) {
         $assigned_courses = self::getAssignedCourses($conn, $faculty_id);
         if (!in_array($course_id, $assigned_courses)) {
@@ -45,7 +53,7 @@ class Faculty {
             $sql = "UPDATE faculty SET assigned_courses = :assigned_courses WHERE id = :id";
             $stmt = $conn->prepare($sql);
             $stmt->execute([
-                ':assigned_courses' => json_encode($assigned_courses),
+                ':assigned_courses' => json_encode(array_values($assigned_courses)), // Ensure the array is re-indexed
                 ':id' => $faculty_id
             ]);
         }

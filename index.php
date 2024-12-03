@@ -61,6 +61,8 @@ $router->get('/admin/virtual_classroom', 'AdminController@virtualClassroom');
 $router->get('/admin/edit_course/(\d+)', 'AdminController@editCourse');
 $router->post('/admin/edit_course/(\d+)', 'AdminController@editCourse');
 $router->get('/admin/delete_course/(\d+)', 'AdminController@deleteCourse');
+$router->post('/admin/unassign_faculty', 'AdminController@unassignFaculty');
+$router->post('/admin/unassign_students', 'AdminController@unassignStudents');
 
 $router->get('/admin/edit_university/(\d+)', 'AdminController@editUniversity');
 $router->post('/admin/edit_university/(\d+)', 'AdminController@editUniversity');

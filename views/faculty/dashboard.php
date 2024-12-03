@@ -10,7 +10,7 @@ $email = $_SESSION['email'];
 $userData = getUserDataByEmail($email);
 
 // Fetch today's classes
-$todaysClasses = getTodaysClasses();
+$todaysClasses = getTodaysClasses($userData['id']);
 
 // Fetch ongoing courses and progress
 $courses = getCoursesWithProgress($userData['id']);
@@ -173,16 +173,33 @@ function getUserDataByEmail($email) {
 
 // Define the function to fetch today's classes
 
-function getTodaysClasses() {
+function getTodaysClasses($facultyId) {
     $conn = Database::getConnection();
+
+    // Get the assigned course IDs for the faculty
+    $assignedCourses = Faculty::getAssignedCourses($conn, $facultyId);
+
+    if (empty($assignedCourses)) {
+        return [];
+    }
+
+    // Get the virtual class IDs for the assigned courses
+    $virtualClassIds = Course::getVirtualClassIds($conn, $assignedCourses);
+
+    if (empty($virtualClassIds)) {
+        return [];
+    }
+
+    // Fetch today's classes for the assigned virtual class IDs
+    $placeholders = implode(',', array_fill(0, count($virtualClassIds), '?'));
     $stmt = $conn->prepare("
         SELECT topic, start_time, duration, join_url,
                DATE_ADD(start_time, INTERVAL duration MINUTE) as end_time
         FROM virtual_classrooms
-        WHERE DATE(start_time) = CURDATE()
+        WHERE DATE(start_time) = CURDATE() AND id IN ($placeholders)
         ORDER BY start_time ASC
     ");
-    $stmt->execute();
+    $stmt->execute($virtualClassIds);
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 

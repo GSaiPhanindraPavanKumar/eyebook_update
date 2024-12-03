@@ -15,6 +15,7 @@ use Models\Discussion;
 use Models\Meetings;
 use PDO;
 use ZipArchive;
+use Models\VirtualClassroom;
 
 use Aws\S3\S3Client;
 use Aws\Exception\AwsException;
@@ -23,6 +24,11 @@ use Exception;
 use PDOException;
 use ZoomAPI;
 
+require_once __DIR__ . '/../models/config.php';
+require_once __DIR__ . '/../models/Database.php';
+
+// Include Zoom integration
+require_once __DIR__ . '/../models/zoom_integration.php';
 
 require_once 'vendor/autoload.php';
 require_once __DIR__ . '/../aws_config.php';
@@ -561,7 +567,7 @@ class AdminController {
         if (!is_array($course['course_materials'])) {
             $course['course_materials'] = [];
         }
-
+    
         // Fetch universities details
         $universities = University::getAll($conn);
     
@@ -1052,6 +1058,38 @@ class AdminController {
         header('Location: /admin/viewStudentProfile/' . $student_id);
         exit();
     }
+
+    public function unassignFaculty() {
+        $conn = Database::getConnection();
+        $course_id = $_POST['course_id'];
+        $faculty_ids = $_POST['faculty_ids'] ?? [];
+    
+        if (!empty($faculty_ids)) {
+            foreach ($faculty_ids as $faculty_id) {
+                Faculty::unassignCourse($conn, $faculty_id, $course_id);
+            }
+            Course::unassignFaculty($conn, $course_id, $faculty_ids);
+        }
+    
+        header('Location: /admin/view_course/' . $course_id);
+        exit();
+    }
+    
+    public function unassignStudents() {
+        $conn = Database::getConnection();
+        $course_id = $_POST['course_id'];
+        $student_ids = $_POST['student_ids'] ?? [];
+    
+        if (!empty($student_ids)) {
+            foreach ($student_ids as $student_id) {
+                Student::unassignCourse($conn, $student_id, $course_id);
+            }
+            Course::unassignStudents($conn, $course_id, $student_ids);
+        }
+    
+        header('Location: /admin/view_course/' . $course_id);
+        exit();
+    }
     
 
     public function assignCourse() {
@@ -1223,12 +1261,56 @@ class AdminController {
     }
 
     public function createVirtualClassroom() {
-        require 'views/admin/create_virtual_classroom.php';
+        $conn = Database::getConnection();
+        $courses = Course::getAllWithUniversity($conn);
+
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            $topic = $_POST['topic'];
+            $start_time_local = $_POST['start_time'];
+            $duration = $_POST['duration'];
+            $selectedCourses = $_POST['courses'];
+
+            // Convert local time to UTC and then to ISO 8601 format
+            $start_time = new \DateTime($start_time_local, new \DateTimeZone('Asia/Kolkata')); // Set the local time zone
+            $start_time_utc = clone $start_time;
+            $start_time_utc->setTimezone(new \DateTimeZone('UTC')); // Convert to UTC
+            $start_time_iso8601 = $start_time_utc->format(\DateTime::ATOM);
+
+            $zoom = new ZoomAPI(ZOOM_CLIENT_ID, ZOOM_CLIENT_SECRET, ZOOM_ACCOUNT_ID, $conn);
+            $classroom = $zoom->createVirtualClassroom($topic, $start_time_iso8601, $duration);
+
+            if (isset($classroom['id'])) {
+                // Save the virtual classroom to the database and get the virtual class ID
+                $virtualClassId = $zoom->saveVirtualClassroomToDatabase($classroom, $selectedCourses);
+
+                // Update the courses with the virtual class ID
+                foreach ($selectedCourses as $courseId) {
+                    $course = Course::getById($conn, $courseId);
+                    $virtualClassIds = !empty($course['virtual_class_id']) ? json_decode($course['virtual_class_id'], true) : [];
+                    $virtualClassIds[] = $virtualClassId;
+                    $stmt = $conn->prepare("UPDATE courses SET virtual_class_id = ? WHERE id = ?");
+                    $stmt->execute([json_encode($virtualClassIds), $courseId]);
+                }
+
+                // Redirect to the admin virtual classroom dashboard
+                header('Location: /admin/virtual_classroom');
+                exit();
+            } else {
+                echo "Error creating virtual classroom.";
+            }
+        }
+
+        require 'views/admin/virtual_classroom_dashboard.php';
     }
 
     public function virtualClassroom() {
+        $conn = Database::getConnection();
+        $adminClassrooms = (new VirtualClassroom($conn))->getAll();
+        $courses = Course::getAllWithUniversity($conn);
         require 'views/admin/virtual_classroom_dashboard.php';
     }
+
+
     public function editCourse($course_id) {
         $conn = Database::getConnection();
         $message = '';

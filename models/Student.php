@@ -130,6 +130,18 @@ class Student {
         return false;
     }
 
+    public static function getByIds($conn, $studentIds) {
+        if (empty($studentIds)) {
+            return [];
+        }
+
+        $placeholders = implode(',', array_fill(0, count($studentIds), '?'));
+        $sql = "SELECT * FROM students WHERE id IN ($placeholders)";
+        $stmt = $conn->prepare($sql);
+        $stmt->execute($studentIds);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
     public static function getById($conn, $id) {
         $sql = "SELECT * FROM students WHERE id = :id";
         $stmt = $conn->prepare($sql);

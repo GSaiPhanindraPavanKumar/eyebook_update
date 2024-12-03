@@ -15,7 +15,7 @@ $userData = Student::getUserDataByEmail($conn, $email);
 $universityShortName = isset($userData['university_short_name']) ? htmlspecialchars($userData['university_short_name']) : '';
 
 // Fetch today's classes
-$todaysClasses = getTodaysClasses();
+$todaysClasses = getTodaysClasses($userData['id']);
 
 // Fetch courses and progress
 $studentId = $_SESSION['student_id'];
@@ -29,7 +29,7 @@ $leastProgressCourses = array_filter($ongoingCourses, function($course) {
 $leastProgressCourses = array_slice($leastProgressCourses, 0, 5); // Get the least 5 progress courses
 
 // Fetch all virtual classes for the calendar
-$virtualClasses = getAllVirtualClasses();
+$virtualClasses = getAllVirtualClasses($studentId);
 
 // Filter virtual classes for the upcoming week
 $upcomingClasses = array_filter($virtualClasses, function($class) {
@@ -192,16 +192,33 @@ function getUserDataByEmail($email) {
 }
 
 // Define the function to fetch today's classes
-function getTodaysClasses() {
+function getTodaysClasses($studentId) {
     $conn = Database::getConnection();
+
+    // Get the assigned course IDs for the student
+    $assignedCourses = Student::getAssignedCourses($conn, $studentId);
+
+    if (empty($assignedCourses)) {
+        return [];
+    }
+
+    // Get the virtual class IDs for the assigned courses
+    $virtualClassIds = Course::getVirtualClassIds($conn, $assignedCourses);
+
+    if (empty($virtualClassIds)) {
+        return [];
+    }
+
+    // Fetch today's classes for the assigned virtual class IDs
+    $placeholders = implode(',', array_fill(0, count($virtualClassIds), '?'));
     $stmt = $conn->prepare("
         SELECT topic, start_time, duration, join_url,
                DATE_ADD(start_time, INTERVAL duration MINUTE) as end_time
         FROM virtual_classrooms
-        WHERE DATE(start_time) = CURDATE()
+        WHERE DATE(start_time) = CURDATE() AND id IN ($placeholders)
         ORDER BY start_time ASC
     ");
-    $stmt->execute();
+    $stmt->execute($virtualClassIds);
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 
@@ -241,11 +258,33 @@ function getCoursesWithProgress($studentId) {
     return $courses;
 }
 
-// Define the function to fetch all virtual classes
-function getAllVirtualClasses() {
+// Define the function to fetch all virtual classes for the student
+function getAllVirtualClasses($studentId) {
     $conn = Database::getConnection();
-    $stmt = $conn->prepare("SELECT topic, start_time, duration, join_url FROM virtual_classrooms");
-    $stmt->execute();
+
+    // Get the assigned course IDs for the student
+    $assignedCourses = Student::getAssignedCourses($conn, $studentId);
+
+    if (empty($assignedCourses)) {
+        return [];
+    }
+
+    // Get the virtual class IDs for the assigned courses
+    $virtualClassIds = Course::getVirtualClassIds($conn, $assignedCourses);
+
+    if (empty($virtualClassIds)) {
+        return [];
+    }
+
+    // Fetch all virtual classes for the assigned virtual class IDs
+    $placeholders = implode(',', array_fill(0, count($virtualClassIds), '?'));
+    $stmt = $conn->prepare("
+        SELECT topic, start_time, duration, join_url
+        FROM virtual_classrooms
+        WHERE id IN ($placeholders)
+        ORDER BY start_time ASC
+    ");
+    $stmt->execute($virtualClassIds);
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 ?>
