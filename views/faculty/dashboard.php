@@ -7,7 +7,8 @@ use Models\Course;
 $email = $_SESSION['email'];
 
 // Fetch user data
-$userData = getUserDataByEmail($email);
+$conn = Database::getConnection();
+$userData = Faculty::getUserDataByEmail($conn, $email);
 
 // Fetch today's classes
 $todaysClasses = getTodaysClasses($userData['id']);

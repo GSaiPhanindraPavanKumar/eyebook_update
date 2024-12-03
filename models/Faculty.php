@@ -25,6 +25,16 @@ class Faculty {
         return $result ? ($result['assigned_courses'] ? json_decode($result['assigned_courses'], true) : []) : [];
     }
 
+    public static function getUserDataByEmail($conn, $email) {
+        $sql = "SELECT faculty.*, universities.long_name as university, universities.short_name as university_short_name 
+                FROM faculty 
+                JOIN universities ON students.university_id = universities.id 
+                WHERE faculty.email = :email";
+        $stmt = $conn->prepare($sql);
+        $stmt->execute(['email' => $email]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
     public static function getAssignedCoursesForFaculty($conn, $faculty_id) {
         $sql = "SELECT assigned_courses FROM faculty WHERE id = :id";
         $stmt = $conn->prepare($sql);
