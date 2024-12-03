@@ -39,11 +39,11 @@ if (!empty($assignedCourses)) {
     $virtualClassIds = array_unique($virtualClassIds);
 }
 
-// Step 3: Fetch the virtual class details from the virtual classes table using the id column
+// Step 3: Fetch the virtual class details from the virtual classrooms table using the id column
 $facultyClassrooms = [];
 if (!empty($virtualClassIds)) {
     $placeholders = implode(',', array_fill(0, count($virtualClassIds), '?'));
-    $sql = "SELECT * FROM virtual_classrooms WHERE id IN ($placeholders) ORDER BY start_time DESC";
+    $sql = "SELECT * FROM virtual_classrooms WHERE classroom_id IN ($placeholders) ORDER BY start_time DESC";
     $stmt = $conn->prepare($sql);
     $stmt->execute($virtualClassIds);
     $facultyClassrooms = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -65,9 +65,9 @@ foreach ($facultyClassrooms as &$classroom) {
     $classroom['course_names'] = implode(', ', $courseNames);
 
     // Check if attendance has been recorded for the class
-    $sql = "SELECT attendance FROM virtual_classrooms WHERE id = :classroom_id";
+    $sql = "SELECT attendance FROM virtual_classrooms WHERE classroom_id = :classroom_id";
     $stmt = $conn->prepare($sql);
-    $stmt->execute(['classroom_id' => $classroom['id']]);
+    $stmt->execute(['classroom_id' => $classroom['classroom_id']]);
     $attendance = $stmt->fetchColumn();
     $classroom['attendance_taken'] = !empty($attendance);
 }
@@ -139,9 +139,9 @@ usort($facultyClassrooms, function($a, $b) {
                                                     <td><a href="<?php echo htmlspecialchars($classroom['join_url']); ?>" target="_blank" class="btn btn-primary">Join</a></td>
                                                     <td>
                                                         <?php if ($classroom['attendance_taken']): ?>
-                                                            <a href="/faculty/download_attendance?classroom_id=<?php echo htmlspecialchars($classroom['id']); ?>" class="btn btn-primary">Download</a>
+                                                            <a href="/faculty/download_attendance?classroom_id=<?php echo htmlspecialchars($classroom['classroom_id']); ?>" class="btn btn-primary">Download</a>
                                                         <?php else: ?>
-                                                            <a href="/faculty/take_attendance?classroom_id=<?php echo htmlspecialchars($classroom['id']); ?>" class="btn btn-warning">Take Attendance</a>
+                                                            <a href="/faculty/take_attendance?classroom_id=<?php echo htmlspecialchars($classroom['classroom_id']); ?>" class="btn btn-warning">Take Attendance</a>
                                                         <?php endif; ?>
                                                     </td>
                                                 </tr>
@@ -185,9 +185,9 @@ usort($facultyClassrooms, function($a, $b) {
                                                     <td><?php echo htmlspecialchars($end_time->format('H:i:s')); ?></td>
                                                     <td>
                                                         <?php if ($classroom['attendance_taken']): ?>
-                                                            <a href="/faculty/download_attendance?classroom_id=<?php echo htmlspecialchars($classroom['id']); ?>" class="btn btn-primary">Download</a>
+                                                            <a href="/faculty/download_attendance?classroom_id=<?php echo htmlspecialchars($classroom['classroom_id']); ?>" class="btn btn-primary">Download</a>
                                                         <?php else: ?>
-                                                            <a href="/faculty/take_attendance?classroom_id=<?php echo htmlspecialchars($classroom['id']); ?>" class="btn btn-warning">Take Attendance</a>
+                                                            <a href="/faculty/take_attendance?classroom_id=<?php echo htmlspecialchars($classroom['classroom_id']); ?>" class="btn btn-warning">Take Attendance</a>
                                                         <?php endif; ?>
                                                     </td>
                                                 </tr>
