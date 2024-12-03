@@ -91,11 +91,8 @@ if (isset($_FILES['course_plan_file'])) {
             $sql = "UPDATE courses SET course_plan = JSON_OBJECT('url', ?) WHERE id = ?";
             $stmt = $conn->prepare($sql);
             if ($stmt->execute([$course_plan_url, $course_id])) {
-                // Create notifications for students
-                $students = Student::getByUniversityId($conn, $university_id);
-                foreach ($students as $student) {
-                    Notification::create($conn, $student['id'], "A new course plan has been uploaded for your course.");
-                }
+                // Create a notification for the course
+                Notification::create($conn, $course_id, "A new course plan has been uploaded.");
 
                 $hashedId = base64_encode($course_id);
                 $hashedId = str_replace(['+', '/', '='], ['-', '_', ''], $hashedId);

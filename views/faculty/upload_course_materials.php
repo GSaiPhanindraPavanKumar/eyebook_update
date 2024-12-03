@@ -122,7 +122,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     // Create notifications for students
                     $students = Student::getByUniversityId($conn, $university_id);
                     foreach ($students as $student) {
-                        Notification::create($conn, $student['id'], "New course materials have been uploaded for your course.");
+                        Notification::create($conn, $course_id, "New course materials have been uploaded for your course.");
                     }
 
                     echo json_encode(['message' => 'Course materials uploaded successfully', 'url' => $course_materials_url]);
@@ -263,7 +263,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                         // Create notifications for students
                         $students = Student::getByUniversityId($conn, $university_id);
                         foreach ($students as $student) {
-                            Notification::create($conn, $student['id'], "New bulk course materials have been uploaded for your course.");
+                            Notification::create($conn, $course_id, "New bulk course materials have been uploaded for your course.");
                         }
 
                         echo json_encode(['message' => 'Course materials uploaded successfully']);

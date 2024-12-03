@@ -13,6 +13,7 @@ use Models\Mailer;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use Models\Discussion;
 use Models\Meetings;
+use Models\Notification;
 use PDO;
 use ZipArchive;
 use Models\VirtualClassroom;
@@ -965,6 +966,8 @@ class AdminController {
                     'course_book' => $course_book_json,
                     'id' => $course_id,
                 ]);
+
+                Notification::create($conn, $course_id, "New Course Book was Uploaded");
     
                 echo json_encode(['message' => 'Unit added successfully', 'scorm_url' => $indexUrl]);
     
@@ -1367,7 +1370,16 @@ class AdminController {
                     $virtualClassIds[] = $virtualClassId;
                     $stmt = $conn->prepare("UPDATE courses SET virtual_class_id = ? WHERE id = ?");
                     $stmt->execute([json_encode($virtualClassIds), $courseId]);
+    
+                    // Create notifications for students
+                    $students = Student::getByCourseId($conn, $courseId);
+                    foreach ($students as $student) {
+                        Notification::create($conn, $courseId, "A new virtual classroom has been created for your course.");
+                    }
                 }
+    
+                // Create a notification for the virtual classroom
+                Notification::create($conn, $selectedCourses, "A new virtual classroom has been created.");
     
                 // Redirect to the admin virtual classroom dashboard
                 header('Location: /admin/virtual_classroom');
