@@ -43,7 +43,7 @@ if (!empty($assignedCourses)) {
 $facultyClassrooms = [];
 if (!empty($virtualClassIds)) {
     $placeholders = implode(',', array_fill(0, count($virtualClassIds), '?'));
-    $sql = "SELECT * FROM virtual_classrooms WHERE classroom_id IN ($placeholders) ORDER BY start_time DESC";
+    $sql = "SELECT * FROM virtual_classrooms WHERE id IN ($placeholders) ORDER BY start_time DESC";
     $stmt = $conn->prepare($sql);
     $stmt->execute($virtualClassIds);
     $facultyClassrooms = $stmt->fetchAll(PDO::FETCH_ASSOC);
