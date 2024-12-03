@@ -22,7 +22,7 @@ class Faculty {
         $stmt = $conn->prepare($sql);
         $stmt->execute([':id' => $faculty_id]);
         $result = $stmt->fetch(PDO::FETCH_ASSOC);
-        return $result['assigned_courses'] ? json_decode($result['assigned_courses'], true) : [];
+        return $result ? ($result['assigned_courses'] ? json_decode($result['assigned_courses'], true) : []) : [];
     }
 
     public static function getAssignedCoursesForFaculty($conn, $faculty_id) {

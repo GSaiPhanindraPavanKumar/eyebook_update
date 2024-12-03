@@ -39,7 +39,11 @@ $universityShortName = isset($userData['university_short_name']) ? htmlspecialch
             <div class="col-md-12 grid-margin">
                 <div class="row">
                     <div class="col-12 col-xl-8 mb-4 mb-xl-0">
-                        <h3 class="font-weight-bold">Hello, <em><?php echo htmlspecialchars($userData['name']); ?> - <?php echo $universityShortName; ?></em></h3>
+                        <?php if ($userData): ?>
+                            <h3 class="font-weight-bold">Hello, <em><?php echo htmlspecialchars($userData['name']); ?> - <?php echo $universityShortName; ?></em></h3>
+                        <?php else: ?>
+                            <h3 class="font-weight-bold">Hello, <em>User</em></h3>
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>
