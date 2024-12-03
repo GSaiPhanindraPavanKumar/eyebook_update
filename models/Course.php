@@ -171,7 +171,7 @@ class Course {
 
         $virtualClassIds = [];
         foreach ($results as $result) {
-            $ids = json_decode($result['virtual_class_id'], true);
+            $ids = !empty($result['virtual_class_id']) ? json_decode($result['virtual_class_id'], true) : [];
             if (is_array($ids)) {
                 $virtualClassIds = array_merge($virtualClassIds, $ids);
             }
