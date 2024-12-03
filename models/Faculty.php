@@ -28,7 +28,7 @@ class Faculty {
     public static function getUserDataByEmail($conn, $email) {
         $sql = "SELECT faculty.*, universities.long_name as university, universities.short_name as university_short_name 
                 FROM faculty 
-                JOIN universities ON students.university_id = universities.id 
+                JOIN universities ON faculty.university_id = universities.id 
                 WHERE faculty.email = :email";
         $stmt = $conn->prepare($sql);
         $stmt->execute(['email' => $email]);
