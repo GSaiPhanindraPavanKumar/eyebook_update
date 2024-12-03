@@ -29,6 +29,19 @@ $router->get('/login', 'AuthController@login');
 $router->post('/login', 'AuthController@login');
 $router->get('/logout', 'AuthController@logout');
 
+$router->get('/forgot_password', function() {
+    require 'views/forgot_password.php';
+});
+$router->post('/forgot_password', function() {
+    require 'views/forgot_password.php';
+});
+$router->get('/reset_password', function() {
+    require 'views/reset_password.php';
+});
+$router->post('/reset_password', function() {
+    require 'views/reset_password.php';
+});
+
 $router->get('/admin', 'AdminController@dashboard');
 $router->get('/admin/dashboard', 'AdminController@dashboard');
 $router->get('/admin/profile', 'AdminController@userProfile');
