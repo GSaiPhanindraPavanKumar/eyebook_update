@@ -1340,24 +1340,26 @@ class AdminController {
     public function createVirtualClassroom() {
         $conn = Database::getConnection();
         $courses = Course::getAllWithUniversity($conn);
-
+    
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $topic = $_POST['topic'];
             $start_time_local = $_POST['start_time'];
             $duration = $_POST['duration'];
             $selectedCourses = $_POST['courses'];
-
-            // Convert local time to UTC and then to ISO 8601 format
-            $start_time = new \DateTime($start_time_local, new \DateTimeZone('Asia/Kolkata')); // Set the local time zone
-            $start_time_iso8601 = $start_time->format(\DateTime::ATOM);
-
+    
+            // Convert local time to UTC for Zoom
+            $start_time_local_dt = new \DateTime($start_time_local, new \DateTimeZone('Asia/Kolkata')); // Set the local time zone
+            $start_time_utc = clone $start_time_local_dt;
+            $start_time_utc->setTimezone(new \DateTimeZone('UTC'));
+            $start_time_iso8601 = $start_time_utc->format(\DateTime::ATOM);
+    
             $zoom = new ZoomAPI(ZOOM_CLIENT_ID, ZOOM_CLIENT_SECRET, ZOOM_ACCOUNT_ID, $conn);
             $classroom = $zoom->createVirtualClassroom($topic, $start_time_iso8601, $duration);
-
+    
             if (isset($classroom['id'])) {
                 // Save the virtual classroom to the database and get the virtual class ID
-                $virtualClassId = $zoom->saveVirtualClassroomToDatabase($classroom, $selectedCourses);
-
+                $virtualClassId = $zoom->saveVirtualClassroomToDatabase($classroom, $selectedCourses, $start_time_local_dt->format('Y-m-d H:i:s'));
+    
                 // Update the courses with the virtual class ID
                 foreach ($selectedCourses as $courseId) {
                     $course = Course::getById($conn, $courseId);
@@ -1366,7 +1368,7 @@ class AdminController {
                     $stmt = $conn->prepare("UPDATE courses SET virtual_class_id = ? WHERE id = ?");
                     $stmt->execute([json_encode($virtualClassIds), $courseId]);
                 }
-
+    
                 // Redirect to the admin virtual classroom dashboard
                 header('Location: /admin/virtual_classroom');
                 exit();
@@ -1374,8 +1376,8 @@ class AdminController {
                 echo "Error creating virtual classroom.";
             }
         }
-
-        require 'views/admin/virtual_classroom_dashboard.php';
+    
+        require 'views/admin/create_virtual_classroom.php';
     }
 
     public function virtualClassroom() {

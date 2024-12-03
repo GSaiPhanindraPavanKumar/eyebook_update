@@ -62,21 +62,21 @@ class ZoomAPI {
         return $data;
     }
 
-    public function saveVirtualClassroomToDatabase($data, $selectedCourses) {
-        // Convert the start_time to the correct format
-        $start_time = (new DateTime($data['start_time'], new DateTimeZone('UTC')))->format('Y-m-d H:i:s');
-
+    public function saveVirtualClassroomToDatabase($data, $selectedCourses, $start_time_local) {
+        // Use the provided local start time
+        $start_time = $start_time_local;
+    
         // Check if the classroom already exists
         $stmt = $this->conn->prepare("SELECT COUNT(*) FROM virtual_classrooms WHERE classroom_id = ?");
         $stmt->execute([$data['id']]);
         $count = $stmt->fetchColumn();
-
+    
         if ($count == 0) {
             $stmt = $this->conn->prepare("INSERT INTO virtual_classrooms (classroom_id, topic, start_time, duration, join_url, course_id) VALUES (?, ?, ?, ?, ?, ?)");
             $stmt->execute([$data['id'], $data['topic'], $start_time, $data['duration'], $data['join_url'], json_encode($selectedCourses)]);
             return $this->conn->lastInsertId(); // Return the ID of the newly created virtual class
         }
-
+    
         return null;
     }
 
