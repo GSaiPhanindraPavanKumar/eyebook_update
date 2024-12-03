@@ -62,7 +62,7 @@ $message = $message ?? ''; // Ensure $message is defined
                                     <input class="btn btn-primary btn-lg btn-block" name="login" id="login" type="submit" value="Sign In">
                                 </div>
                                 <div class="col-6 mt-3 float-right">
-                                    <div class="forgot-password"><a href="forgot_password.html" style="color: blue;">Forgot Password?</a></div>
+                                    <div class="forgot-password"><a href="/forgot_password" style="color: blue;">Forgot Password?</a></div>
                                 </div>
                             </div>
                             <div style="color: red;">
