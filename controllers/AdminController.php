@@ -1374,12 +1374,6 @@ class AdminController {
                     $virtualClassIds[] = $virtualClassId;
                     $stmt = $conn->prepare("UPDATE courses SET virtual_class_id = ? WHERE id = ?");
                     $stmt->execute([json_encode($virtualClassIds), $courseId]);
-    
-                    // Create notifications for students
-                    $students = Student::getByCourseId($conn, $courseId);
-                    foreach ($students as $student) {
-                        Notification::create($conn, $courseId, "A new virtual classroom has been created for your course.");
-                    }
                 }
     
                 // Create a notification for the virtual classroom
