@@ -951,7 +951,7 @@ class AdminController {
                 // Save the public access link of the index.html file in the database
                 $indexUrl = "https://{$bucketName}.s3.{$region}.amazonaws.com/{$unzipKey}/index.html";
                 // $indexUrl = preg_replace('#/+#', '/', $indexUrl);  // Replace multiple slashes with a single one
-                $indexUrl = preg_replace('#(https?://[^/]+)|/+#', function ($matches) {
+                $indexUrl = preg_replace_callback('#(https?://[^/]+)|/+#', function ($matches) {
                     // Preserve the protocol and domain, clean the rest
                     return isset($matches[1]) ? $matches[1] : '/';
                 }, $indexUrl);
