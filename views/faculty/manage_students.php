@@ -5,7 +5,7 @@ use Models\Faculty;
 use Models\Student;
 use Models\Course;
 
-$conn = Database::getConnection();
+$conn = (new Database())->getConnection();
 if (!isset($_SESSION['faculty_id'])) {
     die('Faculty ID not set in session.');
 }
@@ -27,8 +27,8 @@ if (!empty($assignedCourses)) {
     while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
         $courseId = $row['id'];
         $courseName = $row['course_name'];
-        $studentIds = json_decode($row['assigned_students'], true);
-        if (is_array($studentIds)) {
+        $studentIds = $row['assigned_students'] ? json_decode($row['assigned_students'], true) : [];
+        if (json_last_error() === JSON_ERROR_NONE && is_array($studentIds)) {
             foreach ($studentIds as $studentId) {
                 $assignedStudents[] = $studentId;
                 $courseNames[$studentId] = $courseName;
