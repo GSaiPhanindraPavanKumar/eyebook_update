@@ -174,46 +174,10 @@ class FacultyController {
         require 'views/faculty/download_attendance.php';
     }
     public function takeAttendance() {
-        $conn = Database::getConnection();
-        $classroomId = $_GET['classroom_id'] ?? null;
-
-        if (!$classroomId) {
-            echo "Error: Classroom ID not provided.";
-            exit;
-        }
-
-        // Fetch the classroom details
-        $stmt = $conn->prepare("SELECT * FROM virtual_classrooms WHERE classroom_id = :classroom_id");
-        $stmt->execute(['classroom_id' => $classroomId]);
-        $classroom = $stmt->fetch(PDO::FETCH_ASSOC);
-
-        if (!$classroom) {
-            echo "Error: Classroom not found.";
-            exit;
-        }
-
-        // Fetch the attendance data
-        $attendance = json_decode($classroom['attendance'] ?? '[]', true);
-
         require 'views/faculty/take_attendance.php';
     }
-
     public function saveAttendance() {
-        $conn = Database::getConnection();
-        $classroomId = $_POST['classroom_id'] ?? null;
-        $attendance = $_POST['attendance'] ?? [];
-
-        if ($classroomId && !empty($attendance)) {
-            // Save attendance to the database
-            $stmt = $conn->prepare("UPDATE virtual_classrooms SET attendance = ? WHERE classroom_id = ?");
-            $stmt->execute([json_encode($attendance), $classroomId]);
-
-            // Redirect back to the dashboard
-            header('Location: /faculty/virtual_classroom');
-            exit();
-        } else {
-            echo "Error: Classroom ID or attendance data not provided.";
-        }
+        require 'views/faculty/save_attendance.php';
     }
 
     public function manageStudents() {
