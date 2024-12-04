@@ -153,7 +153,7 @@ if ($userData) {
         
         <script>
         function openChatbot() {
-            window.location.href = 'askguru.php';
+            window.location.href = '/student/askguru';
         }
         </script>
 

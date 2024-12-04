@@ -2,7 +2,7 @@
 // Function to interact with Gemini API
 function askGemini($prompt) {
     $url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent';
-    $api_key = 'AIzaSyAmfv5ML6txGnCXH3-7AYD-UwT57yj3VmI'; // Replace with your actual Gemini API key
+    $api_key = 'AIzaSyDsWdB-vnX5w5muU0uaQOM5dKQwU85EyAQ'; // Replace with your actual Gemini API key
 
     $data = [
         'contents' => [
