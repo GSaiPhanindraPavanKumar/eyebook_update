@@ -9,6 +9,7 @@ use Models\University;
 use Models\Database;
 use Models\Assignment;
 use Models\VirtualClassroom;
+use PDO;
 use \PDOException;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
