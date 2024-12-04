@@ -1376,9 +1376,6 @@ class AdminController {
                     $stmt->execute([json_encode($virtualClassIds), $courseId]);
                 }
     
-                // Create a notification for the virtual classroom
-                Notification::create($conn, $selectedCourses, "A new virtual classroom has been created.");
-    
                 // Redirect to the admin virtual classroom dashboard
                 header('Location: /admin/virtual_classroom');
                 exit();
