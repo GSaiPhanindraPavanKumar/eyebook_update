@@ -305,6 +305,10 @@ $router->get('/student/virtual_classroom', function(){
     require 'views/student/student_dashboard.php';
 });
 
+$router->get('/student/askguru', function(){
+    require 'views/student/askguru.php';
+});
+
 $router->get('/logout', 'AuthController@logout');
 $router->get('/admin/logout', 'AuthController@logout');
 $router->get('/spoc/logout', 'AuthController@logout');
