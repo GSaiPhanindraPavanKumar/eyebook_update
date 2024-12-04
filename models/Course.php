@@ -235,7 +235,7 @@ class Course {
 
         $studentIds = [];
         foreach ($results as $result) {
-            $ids = isset($ids) ? json_decode($result['assigned_students'], true) : [];
+            $ids = !empty($result['assigned_students']) ? json_decode($result['assigned_students'], true) : [];
             if (is_array($ids)) {
                 $studentIds = array_merge($studentIds, $ids);
             }
