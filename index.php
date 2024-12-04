@@ -248,6 +248,7 @@ $router->get('/student/submit_assignment/(\d+)', 'StudentController@submitAssign
 $router->post('/student/submit_assignment/(\d+)', 'StudentController@submitAssignment');
 $router->get('/student/view_course_plan/(\w+)', 'StudentController@viewCoursePlan');
 $router->get('/student/view_material/(\w+)', 'StudentController@viewMaterial');
+$router->get('/student/view_book/(\w+)', 'StudentController@viewBook');
 
 $router->get('/student/submit_assignment/(\d+)', function($assignment_id){
     $_GET['assignment_id'] = $assignment_id;
@@ -291,7 +292,7 @@ $router->post('/student/mark_as_completed', function() {
 
 $router->get('/student/view_course/([a-zA-Z0-9]+)', 'StudentController@viewCourse');
 
-$router->get('/student/view_book/([a-zA-Z0-9]+)', 'StudentController@viewBook');
+
 
 $router->get('/student/askguru', function(){
     require 'views/student/askguru.php';

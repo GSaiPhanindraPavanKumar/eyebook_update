@@ -133,8 +133,8 @@ function redirectToCoursePlan() {
     }
 }
 
-function redirectToCourseBook(hashedId) {
-    var courseBookUrl = "book_view.php?course_id=" + hashedId;
+function redirectToCourseBook(url) {
+    var courseBookUrl = url;
 
     if (hashedId) {
         window.location.href = courseBookUrl;

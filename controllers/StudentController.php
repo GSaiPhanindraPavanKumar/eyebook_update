@@ -54,6 +54,25 @@ class StudentController {
     
         require 'views/student/book_view.php';
     }
+
+    public function viewMaterial($hashedId) {
+        $conn = Database::getConnection();
+        $course_id = base64_decode($hashedId);
+        if (!is_numeric($course_id)) {
+            die('Invalid course ID');
+        }
+        $course = Course::getById($conn, $course_id);
+    
+        if (!$course || empty($course['course_materials'])) {
+            echo 'Course materials not found.';
+            exit;
+        }
+    
+        // Get the index_path from the query parameter
+        $index_path = $_GET['index_path'] ?? $course['course_materials'][0]['materials'][0]['indexPath'];
+    
+        require 'views/student/pdf_view.php';
+    }
     
     public function viewCoursePlan($hashedId) {
         $conn = Database::getConnection();
@@ -140,25 +159,7 @@ class StudentController {
     
         require 'views/student/profile.php';
     }
-    
-    public function viewMaterial($hashedId) {
-        $conn = Database::getConnection();
-        $course_id = base64_decode($hashedId);
-        if (!is_numeric($course_id)) {
-            die('Invalid course ID');
-        }
-        $course = Course::getById($conn, $course_id);
-    
-        if (!$course || empty($course['course_materials'])) {
-            echo 'Course materials not found.';
-            exit;
-        }
-    
-        // Get the index_path from the query parameter
-        $index_path = $_GET['index_path'] ?? $course['course_materials'][0]['materials'][0]['indexPath'];
-    
-        require 'views/student/pdf_view.php';
-    }
+
     function getCoursesWithProgress($studentId) {
         $conn = Database::getConnection();
         $stmt = $conn->prepare("SELECT * FROM courses WHERE status = 'ongoing'");
