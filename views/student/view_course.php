@@ -137,7 +137,7 @@ function redirectToCourseBook(url) {
     var courseBookUrl = url;
 
     if (url) {
-        window.location.href = courseBookUrl;
+        window.open(courseBookUrl, '_blank');
     } else {
         alert('Course Book URL not available.');
     }
