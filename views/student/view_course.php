@@ -136,7 +136,7 @@ function redirectToCoursePlan() {
 function redirectToCourseBook(url) {
     var courseBookUrl = url;
 
-    if (hashedId) {
+    if (url) {
         window.location.href = courseBookUrl;
     } else {
         alert('Course Book URL not available.');

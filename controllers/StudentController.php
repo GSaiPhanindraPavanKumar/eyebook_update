@@ -45,9 +45,9 @@ class StudentController {
         }
     
         // Ensure course_book is an array
-        //if (!is_array($course['course_book'])) {
-        //    $course['course_book'] = json_decode($course['course_book'], true) ?? [];
-        //}
+        if (!is_array($course['course_book'])) {
+            $course['course_book'] = json_decode($course['course_book'], true) ?? [];
+        }
     
         // Get the index_path from the query parameter
         $index_path = $_GET['index_path'] ?? $course['course_book'][0]['scorm_url'];
