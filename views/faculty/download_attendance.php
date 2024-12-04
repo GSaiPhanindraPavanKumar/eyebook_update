@@ -7,7 +7,7 @@ $conn = Database::getConnection();
 $classroomId = $_GET['classroom_id'] ?? null;
 
 if ($classroomId) {
-    $stmt = $conn->prepare("SELECT attendance FROM virtual_classrooms WHERE classroom_id = ?");
+    $stmt = $conn->prepare("SELECT attendance FROM virtual_classrooms WHERE id = ?");
     $stmt->execute([$classroomId]);
     $attendance = $stmt->fetchColumn();
 
