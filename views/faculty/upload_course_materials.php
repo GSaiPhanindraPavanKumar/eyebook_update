@@ -119,11 +119,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 $sql = "UPDATE courses SET course_materials = ? WHERE id = ?";
                 $stmt = $conn->prepare($sql);
                 if ($stmt->execute([$course_materials_json, $course_id])) {
-                    // Create notifications for students
-                    $students = Student::getByUniversityId($conn, $university_id);
-                    foreach ($students as $student) {
-                        Notification::create($conn, $course_id, "New course materials have been uploaded for your course.");
-                    }
+                    // Create a notification for the course
+                    Notification::create($conn, $course_id, "New course materials have been uploaded for your course.");
 
                     echo json_encode(['message' => 'Course materials uploaded successfully', 'url' => $course_materials_url]);
                     $hashedId = base64_encode($course_id);
@@ -260,11 +257,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     $sql = "UPDATE courses SET course_materials = ? WHERE id = ?";
                     $stmt = $conn->prepare($sql);
                     if ($stmt->execute([$course_materials_json, $course_id])) {
-                        // Create notifications for students
-                        $students = Student::getByUniversityId($conn, $university_id);
-                        foreach ($students as $student) {
-                            Notification::create($conn, $course_id, "New bulk course materials have been uploaded for your course.");
-                        }
+                        // Create a notification for the course
+                        Notification::create($conn, $course_id, "New bulk course materials have been uploaded for your course.");
 
                         echo json_encode(['message' => 'Course materials uploaded successfully']);
                         $hashedId = base64_encode($course_id);
