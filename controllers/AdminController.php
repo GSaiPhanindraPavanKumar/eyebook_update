@@ -991,23 +991,31 @@ class AdminController {
         try {
             $xml = new SimpleXMLElement($manifestContent);
     
+            // Register namespaces
+            $namespaces = $xml->getNamespaces(true);
+    
             // Log the entire XML structure for debugging
             error_log('imsmanifest.xml content: ' . $manifestContent);
     
-            $organizations = $xml->xpath('//xmlns:organizations/xmlns:organization');
+            // Register the default namespace
+            $xml->registerXPathNamespace('default', $namespaces['']);
+    
+            // Use the registered namespace for XPath queries
+            $organizations = $xml->xpath('//default:organizations/default:organization');
             if (!$organizations) {
                 error_log('No organizations found in imsmanifest.xml');
                 return ['success' => false, 'message' => 'No organizations found in imsmanifest.xml'];
             }
     
             $defaultOrg = $organizations[0];
-            $items = $defaultOrg->xpath('./xmlns:item');
+            $defaultOrg->registerXPathNamespace('default', $namespaces['']);
+            $items = $defaultOrg->xpath('./default:item');
             if (!$items) {
                 error_log('No items found in imsmanifest.xml');
                 return ['success' => false, 'message' => 'No items found in imsmanifest.xml'];
             }
     
-            $launchFile = (string)$items[0]->resource['href'];
+            $launchFile = (string)$items[0]->attributes()->identifierref;
             return [
                 'success' => true,
                 'launch_file' => $launchFile,
