@@ -993,12 +993,14 @@ class AdminController {
     
             $organizations = $xml->xpath('//organizations/organization');
             if (!$organizations) {
+                error_log('No organizations found in imsmanifest.xml');
                 return ['success' => false, 'message' => 'No organizations found in imsmanifest.xml'];
             }
     
             $defaultOrg = $organizations[0];
             $items = $defaultOrg->xpath('./item');
             if (!$items) {
+                error_log('No items found in imsmanifest.xml');
                 return ['success' => false, 'message' => 'No items found in imsmanifest.xml'];
             }
     
@@ -1009,6 +1011,7 @@ class AdminController {
                 'course_title' => (string)$defaultOrg['title'],
             ];
         } catch (Exception $e) {
+            error_log('Error parsing imsmanifest.xml: ' . $e->getMessage());
             return ['success' => false, 'message' => 'Error parsing imsmanifest.xml: ' . $e->getMessage()];
         }
     }
