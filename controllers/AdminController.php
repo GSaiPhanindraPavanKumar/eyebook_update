@@ -942,14 +942,20 @@ class AdminController {
     
         $zip = new ZipArchive;
         if ($zip->open($zipFilePath) !== TRUE) {
+            error_log('Unable to open SCORM package');
             return ['success' => false, 'message' => 'Unable to open SCORM package'];
         }
     
         $zip->extractTo($tempDir);
         $zip->close();
     
+        // Log the contents of the temporary directory
+        $files = scandir($tempDir);
+        error_log('Extracted files: ' . print_r($files, true));
+    
         $manifestFile = $tempDir . DIRECTORY_SEPARATOR . 'imsmanifest.xml';
         if (!file_exists($manifestFile)) {
+            error_log('SCORM package missing imsmanifest.xml');
             return ['success' => false, 'message' => 'SCORM package missing imsmanifest.xml'];
         }
     
@@ -957,6 +963,7 @@ class AdminController {
         $parsedManifest = $this->parseManifest($manifestContent);
     
         if (!$parsedManifest['success']) {
+            error_log('Error parsing imsmanifest.xml: ' . $parsedManifest['message']);
             return ['success' => false, 'message' => $parsedManifest['message']];
         }
     
@@ -970,12 +977,17 @@ class AdminController {
             $key = $uploadPrefix . str_replace($tempDir . DIRECTORY_SEPARATOR, '', $filePath);
     
             $mimeType = $this->getMimeType($filePath);
-            $s3Client->putObject([
-                'Bucket' => $bucketName,
-                'Key' => $key,
-                'SourceFile' => $filePath,
-                'ContentType' => $mimeType,
-            ]);
+            try {
+                $s3Client->putObject([
+                    'Bucket' => $bucketName,
+                    'Key' => $key,
+                    'SourceFile' => $filePath,
+                    'ContentType' => $mimeType,
+                ]);
+            } catch (AwsException $e) {
+                error_log('Error uploading file to S3: ' . $e->getMessage());
+                return ['success' => false, 'message' => 'Error uploading file to S3: ' . $e->getMessage()];
+            }
     
             if (basename($filePath) === $parsedManifest['launch_file']) {
                 $indexUrl = "https://{$bucketName}.s3.{$region}.amazonaws.com/{$key}";
@@ -984,7 +996,12 @@ class AdminController {
     
         $this->deleteDir($tempDir);
     
-        return $indexUrl ? ['success' => true, 'index_url' => $indexUrl] : ['success' => false, 'message' => 'Failed to upload SCORM package'];
+        if ($indexUrl) {
+            return ['success' => true, 'index_url' => $indexUrl];
+        } else {
+            error_log('Failed to find launch file in uploaded SCORM package');
+            return ['success' => false, 'message' => 'Failed to upload SCORM package'];
+        }
     }
     
     private function parseManifest($manifestContent) {
