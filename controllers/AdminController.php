@@ -991,14 +991,17 @@ class AdminController {
         try {
             $xml = new SimpleXMLElement($manifestContent);
     
-            $organizations = $xml->xpath('//organizations/organization');
+            // Log the entire XML structure for debugging
+            error_log('imsmanifest.xml content: ' . $manifestContent);
+    
+            $organizations = $xml->xpath('//xmlns:organizations/xmlns:organization');
             if (!$organizations) {
                 error_log('No organizations found in imsmanifest.xml');
                 return ['success' => false, 'message' => 'No organizations found in imsmanifest.xml'];
             }
     
             $defaultOrg = $organizations[0];
-            $items = $defaultOrg->xpath('./item');
+            $items = $defaultOrg->xpath('./xmlns:item');
             if (!$items) {
                 error_log('No items found in imsmanifest.xml');
                 return ['success' => false, 'message' => 'No items found in imsmanifest.xml'];
@@ -1008,7 +1011,7 @@ class AdminController {
             return [
                 'success' => true,
                 'launch_file' => $launchFile,
-                'course_title' => (string)$defaultOrg['title'],
+                'course_title' => (string)$defaultOrg->title,
             ];
         } catch (Exception $e) {
             error_log('Error parsing imsmanifest.xml: ' . $e->getMessage());
