@@ -885,9 +885,7 @@ class AdminController {
     }
 
     public function addUnit() {
-        set_time_limit(600); // Set the maximum execution time to 600 seconds
-    
-        $conn = Database::getConnection();
+        set_time_limit(600); // Allow enough time for large uploads.
     
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $course_id = $_POST['course_id'] ?? null;
@@ -899,24 +897,13 @@ class AdminController {
                 exit;
             }
     
-            // Fetch the course
-            $sql = "SELECT * FROM courses WHERE id = ?";
-            $stmt = $conn->prepare($sql);
-            $stmt->execute([$course_id]);
-            $course = $stmt->fetch(PDO::FETCH_ASSOC);
-    
-            if (!$course) {
-                echo json_encode(['message' => 'Course not found']);
-                exit;
-            }
-    
-            // AWS S3 configuration
+            // AWS S3 Configuration
             $bucketName = AWS_BUCKET_NAME;
             $region = AWS_REGION;
             $accessKey = AWS_ACCESS_KEY_ID;
             $secretKey = AWS_SECRET_ACCESS_KEY;
     
-            // Initialize S3 client
+            // Initialize AWS S3 Client
             $s3Client = new S3Client([
                 'region' => $region,
                 'version' => 'latest',
@@ -926,102 +913,131 @@ class AdminController {
                 ],
             ]);
     
-            // Upload SCORM file to S3
-            $filePath = $scorm_file['tmp_name'];
-            $fileName = basename($scorm_file['name']);
+            $zipFilePath = $scorm_file['tmp_name'];
             $timestamp = time();
-            $key = "course_documents/{$course_id}/course_book/{$timestamp}-{$fileName}";
+            $uploadPrefix = "scorm_courses/{$course_id}/{$timestamp}/";
     
-            try {
-                $result = $s3Client->putObject([
-                    'Bucket' => $bucketName,
-                    'Key' => $key,
-                    'SourceFile' => $filePath,
-                    'ContentType' => 'application/zip',
-                ]);
+            // Unzip the SCORM Package and Upload to AWS S3
+            $uploadResult = $this->processScormPackage($s3Client, $bucketName, $zipFilePath, $uploadPrefix, $region);
     
-                // Get the URL of the uploaded file
-                $fileUrl = $result['ObjectURL'];
-    
-                // Unzip the uploaded SCORM package in the S3 bucket
-                $unzipFolderName = pathinfo($fileName, PATHINFO_FILENAME);
-                $unzipKey = "course_documents/{$course_id}/course_book/{$timestamp}-{$unzipFolderName}/";
-                $this->unzipS3Object($s3Client, $bucketName, $key, $unzipKey);
-    
-                // Save the public access link of the index.html file in the database
-                $indexUrl = "https://{$bucketName}.s3.{$region}.amazonaws.com/{$unzipKey}/index.html";
-                // $indexUrl = preg_replace('#/+#', '/', $indexUrl);  // Replace multiple slashes with a single one
-                $indexUrl = preg_replace_callback('#(https?://[^/]+)|/+#', function ($matches) {
-                    // Preserve the protocol and domain, clean the rest
-                    return isset($matches[1]) ? $matches[1] : '/';
-                }, $indexUrl);
-                
-                // Update the course_book column in the courses table
-                $course_book = json_decode($course['course_book'], true) ?? [];
-                $course_book[] = [
-                    'unit_name' => $unit_name,
-                    'scorm_url' => $indexUrl,
-                ];
-                $course_book_json = json_encode($course_book);
-    
-                $sql = "UPDATE courses SET course_book = :course_book WHERE id = :id";
-                $stmt = $conn->prepare($sql);
-                $stmt->execute([
-                    'course_book' => $course_book_json,
-                    'id' => $course_id,
-                ]);
-
-                Notification::create($conn, $course_id, "New Course Book was Uploaded");
-    
-                echo json_encode(['message' => 'Unit added successfully', 'scorm_url' => $indexUrl]);
-    
-                header("Location: /admin/view_course/$course_id");
+            if (!$uploadResult['success']) {
+                echo json_encode(['message' => $uploadResult['message']]);
                 exit;
-            } catch (AwsException $e) {
-                echo json_encode(['message' => 'Error uploading file to S3: ' . $e->getMessage()]);
             }
+    
+            $scormIndexUrl = $uploadResult['index_url'];
+    
+            // Save SCORM Data to Database
+            $this->saveScormUnit($course_id, $unit_name, $scormIndexUrl);
+    
+            echo json_encode(['message' => 'SCORM package uploaded successfully', 'scorm_url' => $scormIndexUrl]);
+            exit;
         }
     }
     
-    private function unzipS3Object($s3Client, $bucketName, $key, $unzipKey) {
-        // Download the zip file to a temporary location
-        $tempFile = tempnam(sys_get_temp_dir(), 'scorm');
-        $s3Client->getObject([
-            'Bucket' => $bucketName,
-            'Key' => $key,
-            'SaveAs' => $tempFile,
-        ]);
+    private function processScormPackage($s3Client, $bucketName, $zipFilePath, $uploadPrefix, $region) {
+        $tempDir = sys_get_temp_dir() . DIRECTORY_SEPARATOR . uniqid('scorm_');
+        mkdir($tempDir);
     
-        // Unzip the file
         $zip = new ZipArchive;
-        if ($zip->open($tempFile) === TRUE) {
-            for ($i = 0; $i < $zip->numFiles; $i++) {
-                $filename = $zip->getNameIndex($i);
-                $fileinfo = pathinfo($filename);
-    
-                // Extract the file to a temporary location
-                $extractTo = tempnam(sys_get_temp_dir(), 'scorm');
-                file_put_contents($extractTo, $zip->getFromIndex($i));
-    
-                // Determine correct Content-Type
-                $mimeType = $this->getMimeType($extractTo);
-    
-                // Upload the extracted file to S3
-                $s3Client->putObject([
-                    'Bucket' => $bucketName,
-                    'Key' => $unzipKey . $filename,
-                    'SourceFile' => $extractTo,
-                    'ContentType' => $mimeType,
-                ]);
-    
-                // Delete the temporary file
-                unlink($extractTo);
-            }
-            $zip->close();
+        if ($zip->open($zipFilePath) !== TRUE) {
+            return ['success' => false, 'message' => 'Unable to open SCORM package'];
         }
     
-        // Delete the temporary zip file
-        unlink($tempFile);
+        $zip->extractTo($tempDir);
+        $zip->close();
+    
+        $manifestFile = $tempDir . DIRECTORY_SEPARATOR . 'imsmanifest.xml';
+        if (!file_exists($manifestFile)) {
+            return ['success' => false, 'message' => 'SCORM package missing imsmanifest.xml'];
+        }
+    
+        $manifestContent = file_get_contents($manifestFile);
+        $parsedManifest = $this->parseManifest($manifestContent);
+    
+        if (!$parsedManifest['success']) {
+            return ['success' => false, 'message' => $parsedManifest['message']];
+        }
+    
+        // Upload the package to S3
+        $indexUrl = null;
+        $iterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($tempDir));
+        foreach ($iterator as $file) {
+            if ($file->isDir()) continue;
+    
+            $filePath = $file->getPathname();
+            $key = $uploadPrefix . str_replace($tempDir . DIRECTORY_SEPARATOR, '', $filePath);
+    
+            $mimeType = $this->getMimeType($filePath);
+            $s3Client->putObject([
+                'Bucket' => $bucketName,
+                'Key' => $key,
+                'SourceFile' => $filePath,
+                'ContentType' => $mimeType,
+            ]);
+    
+            if (basename($filePath) === $parsedManifest['launch_file']) {
+                $indexUrl = "https://{$bucketName}.s3.{$region}.amazonaws.com/{$key}";
+            }
+        }
+    
+        $this->deleteDir($tempDir);
+    
+        return $indexUrl ? ['success' => true, 'index_url' => $indexUrl] : ['success' => false, 'message' => 'Failed to upload SCORM package'];
+    }
+    
+    private function parseManifest($manifestContent) {
+        try {
+            $xml = new SimpleXMLElement($manifestContent);
+    
+            $organizations = $xml->xpath('//organizations/organization');
+            if (!$organizations) {
+                return ['success' => false, 'message' => 'No organizations found in imsmanifest.xml'];
+            }
+    
+            $defaultOrg = $organizations[0];
+            $items = $defaultOrg->xpath('./item');
+            if (!$items) {
+                return ['success' => false, 'message' => 'No items found in imsmanifest.xml'];
+            }
+    
+            $launchFile = (string)$items[0]->resource['href'];
+            return [
+                'success' => true,
+                'launch_file' => $launchFile,
+                'course_title' => (string)$defaultOrg['title'],
+            ];
+        } catch (Exception $e) {
+            return ['success' => false, 'message' => 'Error parsing imsmanifest.xml: ' . $e->getMessage()];
+        }
+    }
+    
+    private function saveScormUnit($course_id, $unit_name, $scormIndexUrl) {
+        $conn = Database::getConnection();
+    
+        $stmt = $conn->prepare("SELECT * FROM courses WHERE id = ?");
+        $stmt->execute([$course_id]);
+        $course = $stmt->fetch(PDO::FETCH_ASSOC);
+    
+        if (!$course) {
+            echo json_encode(['message' => 'Course not found']);
+            exit;
+        }
+    
+        $course_book = json_decode($course['course_book'], true) ?? [];
+        $course_book[] = [
+            'unit_name' => $unit_name,
+            'scorm_url' => $scormIndexUrl,
+        ];
+        $course_book_json = json_encode($course_book);
+    
+        $stmt = $conn->prepare("UPDATE courses SET course_book = :course_book WHERE id = :id");
+        $stmt->execute([
+            'course_book' => $course_book_json,
+            'id' => $course_id,
+        ]);
+    
+        Notification::create($conn, $course_id, "New SCORM package uploaded");
     }
     
     private function getMimeType($filePath) {
@@ -1029,10 +1045,7 @@ class AdminController {
         $mimeType = finfo_file($finfo, $filePath);
         finfo_close($finfo);
     
-        // Normalize file extension
         $extension = strtolower(pathinfo($filePath, PATHINFO_EXTENSION));
-    
-        // Fallback MIME types
         $mimeTypes = [
             'js' => 'application/javascript',
             'css' => 'text/css',
@@ -1047,9 +1060,9 @@ class AdminController {
             'xml' => 'application/xml',
         ];
     
-        // Fallback if incorrect detection
         return $mimeTypes[$extension] ?? $mimeType;
-    }    
+    }
+    
     
 
     public function editStudent($student_id) {

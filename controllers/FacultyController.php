@@ -302,113 +302,113 @@ class FacultyController {
         //     require 'views/faculty/manage_assignments.php';
         // }
     
-        public function viewAssignment($assignmentId) {
-            $conn = Database::getConnection();
-            $assignment = Assignment::getById($conn, $assignmentId);
-            $submissions = Assignment::getSubmissions($conn, $assignmentId);
-            require 'views/faculty/view_assignment.php';
+    public function viewAssignment($assignmentId) {
+        $conn = Database::getConnection();
+        $assignment = Assignment::getById($conn, $assignmentId);
+        $submissions = Assignment::getSubmissions($conn, $assignmentId);
+        require 'views/faculty/view_assignment.php';
+    }
+
+    public function markAssignment() {
+        $conn = Database::getConnection();
+        $submissionId = $_POST['submission_id'];
+        $grade = $_POST['grade'];
+        $feedback = $_POST['feedback'];
+
+        $sql = "UPDATE submissions SET grade = :grade, feedback = :feedback WHERE id = :id";
+        $stmt = $conn->prepare($sql);
+        $stmt->bindParam(':grade', $grade);
+        $stmt->bindParam(':feedback', $feedback);
+        $stmt->bindParam(':id', $submissionId);
+        $stmt->execute();
+
+        header('Location: /faculty/manage_assignments');
+    }
+
+
+
+
+
+    public function createAssignment() {
+        $conn = Database::getConnection();
+        $messages = []; // Initialize the $messages variable
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $title = $_POST['assignment_title'];
+            $instructions = $_POST['assignment_instructions'];
+            $due_date = $_POST['due_date'];
+            $course_id = $_POST['course_id'];
+            $section_id = $_POST['section_id'];
+
+            // Check if email is set in the session
+            if (isset($_SESSION['email'])) {
+                $email = $_SESSION['email'];
+                $faculty = Faculty::getByEmail($conn, $email);
+                $university_id = $faculty['university_id'];
+            } else {
+                $messages[] = "Email is not set in the session.";
+                require 'views/faculty/assignment_create.php';
+                return;
+            }
+
+            $file_path = '';
+
+            if (isset($_FILES['assignment_file']) && $_FILES['assignment_file']['error'] == 0) {
+                $file_path = 'uploads/' . basename($_FILES['assignment_file']['name']);
+                move_uploaded_file($_FILES['assignment_file']['tmp_name'], $file_path);
+            }
+
+            try {
+                $sql = "INSERT INTO assignments (title, instructions, due_date, course_id, section_id, university_id, file_path) VALUES (:title, :instructions, :due_date, :course_id, :section_id, :university_id, :file_path)";
+                $stmt = $conn->prepare($sql);
+                $stmt->execute([
+                    ':title' => $title,
+                    ':instructions' => $instructions,
+                    ':due_date' => $due_date,
+                    ':course_id' => $course_id,
+                    ':section_id' => $section_id,
+                    ':university_id' => $university_id,
+                    ':file_path' => $file_path
+                ]);
+
+                // Send email notification to students
+                $students = Student::getAllByCourseAndSection($conn, $course_id, $section_id);
+                foreach ($students as $student) {
+                    mail($student['email'], "New Assignment Created", "A new assignment titled '$title' has been created. Please check the LMS for details.");
+                }
+
+                header('Location: /faculty/manage_assignments');
+                exit;
+            } catch (PDOException $e) {
+                $messages[] = "Error creating assignment: " . $e->getMessage();
+            }
         }
-    
-        public function markAssignment() {
-            $conn = Database::getConnection();
-            $submissionId = $_POST['submission_id'];
-            $grade = $_POST['grade'];
-            $feedback = $_POST['feedback'];
-    
-            $sql = "UPDATE submissions SET grade = :grade, feedback = :feedback WHERE id = :id";
-            $stmt = $conn->prepare($sql);
-            $stmt->bindParam(':grade', $grade);
-            $stmt->bindParam(':feedback', $feedback);
-            $stmt->bindParam(':id', $submissionId);
-            $stmt->execute();
-    
-            header('Location: /faculty/manage_assignments');
-        }
+        $courses = Course::getCoursesByFaculty($conn);
+        $sections = Faculty::getAll($conn); // Updated to fetch sections from the faculty table
+        require 'views/faculty/assignment_create.php';
+    }
 
 
-
-
-
-public function createAssignment() {
-    $conn = Database::getConnection();
-    $messages = []; // Initialize the $messages variable
-
-    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-        $title = $_POST['assignment_title'];
-        $instructions = $_POST['assignment_instructions'];
-        $due_date = $_POST['due_date'];
-        $course_id = $_POST['course_id'];
-        $section_id = $_POST['section_id'];
+    public function manageAssignments() {
+        $conn = Database::getConnection();
+        $messages = []; // Initialize the $messages variable
 
         // Check if email is set in the session
         if (isset($_SESSION['email'])) {
             $email = $_SESSION['email'];
             $faculty = Faculty::getByEmail($conn, $email);
-            $university_id = $faculty['university_id'];
+            $faculty_id = $faculty['id'];
         } else {
             $messages[] = "Email is not set in the session.";
-            require 'views/faculty/assignment_create.php';
+            require 'views/faculty/manage_assignments.php';
             return;
         }
 
-        $file_path = '';
+        // Fetch all assignments related to the faculty
+        $assignments = Assignment::getAllByFaculty($conn, $faculty_id);
 
-        if (isset($_FILES['assignment_file']) && $_FILES['assignment_file']['error'] == 0) {
-            $file_path = 'uploads/' . basename($_FILES['assignment_file']['name']);
-            move_uploaded_file($_FILES['assignment_file']['tmp_name'], $file_path);
-        }
-
-        try {
-            $sql = "INSERT INTO assignments (title, instructions, due_date, course_id, section_id, university_id, file_path) VALUES (:title, :instructions, :due_date, :course_id, :section_id, :university_id, :file_path)";
-            $stmt = $conn->prepare($sql);
-            $stmt->execute([
-                ':title' => $title,
-                ':instructions' => $instructions,
-                ':due_date' => $due_date,
-                ':course_id' => $course_id,
-                ':section_id' => $section_id,
-                ':university_id' => $university_id,
-                ':file_path' => $file_path
-            ]);
-
-            // Send email notification to students
-            $students = Student::getAllByCourseAndSection($conn, $course_id, $section_id);
-            foreach ($students as $student) {
-                mail($student['email'], "New Assignment Created", "A new assignment titled '$title' has been created. Please check the LMS for details.");
-            }
-
-            header('Location: /faculty/manage_assignments');
-            exit;
-        } catch (PDOException $e) {
-            $messages[] = "Error creating assignment: " . $e->getMessage();
-        }
-    }
-    $courses = Course::getCoursesByFaculty($conn);
-    $sections = Faculty::getAll($conn); // Updated to fetch sections from the faculty table
-    require 'views/faculty/assignment_create.php';
-}
-
-
-public function manageAssignments() {
-    $conn = Database::getConnection();
-    $messages = []; // Initialize the $messages variable
-
-    // Check if email is set in the session
-    if (isset($_SESSION['email'])) {
-        $email = $_SESSION['email'];
-        $faculty = Faculty::getByEmail($conn, $email);
-        $faculty_id = $faculty['id'];
-    } else {
-        $messages[] = "Email is not set in the session.";
         require 'views/faculty/manage_assignments.php';
-        return;
     }
-
-    // Fetch all assignments related to the faculty
-    $assignments = Assignment::getAllByFaculty($conn, $faculty_id);
-
-    require 'views/faculty/manage_assignments.php';
-}
 
 
 
