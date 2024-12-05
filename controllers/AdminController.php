@@ -17,6 +17,7 @@ use Models\Notification;
 use PDO;
 use ZipArchive;
 use Models\VirtualClassroom;
+use SimpleXMLElement;
 
 use Aws\S3\S3Client;
 use Aws\Exception\AwsException;
