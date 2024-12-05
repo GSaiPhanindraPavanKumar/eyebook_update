@@ -1078,6 +1078,24 @@ class AdminController {
         return $mimeTypes[$extension] ?? $mimeType;
     }
 
+    private function deleteDir($dirPath) {
+        if (!is_dir($dirPath)) {
+            throw new InvalidArgumentException("$dirPath must be a directory");
+        }
+        if (substr($dirPath, strlen($dirPath) - 1, 1) != DIRECTORY_SEPARATOR) {
+            $dirPath .= DIRECTORY_SEPARATOR;
+        }
+        $files = glob($dirPath . '*', GLOB_MARK);
+        foreach ($files as $file) {
+            if (is_dir($file)) {
+                $this->deleteDir($file);
+            } else {
+                unlink($file);
+            }
+        }
+        rmdir($dirPath);
+    }
+
     public function editStudent($student_id) {
         $conn = Database::getConnection();
         $message = '';
