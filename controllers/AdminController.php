@@ -887,23 +887,23 @@ class AdminController {
 
     public function addUnit() {
         set_time_limit(600); // Allow enough time for large uploads.
-    
-        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $course_id = $_POST['course_id'] ?? null;
             $unit_name = $_POST['unit_name'] ?? null;
             $scorm_file = $_FILES['scorm_file'] ?? null;
-    
+
             if (!$unit_name || !$scorm_file) {
                 echo json_encode(['message' => 'Unit name and SCORM package file are required']);
                 exit;
             }
-    
+
             // AWS S3 Configuration
             $bucketName = AWS_BUCKET_NAME;
             $region = AWS_REGION;
             $accessKey = AWS_ACCESS_KEY_ID;
             $secretKey = AWS_SECRET_ACCESS_KEY;
-    
+
             // Initialize AWS S3 Client
             $s3Client = new S3Client([
                 'region' => $region,
@@ -913,69 +913,60 @@ class AdminController {
                     'secret' => $secretKey,
                 ],
             ]);
-    
+
             $zipFilePath = $scorm_file['tmp_name'];
             $timestamp = time();
             $uploadPrefix = "scorm_courses/{$course_id}/{$timestamp}/";
-    
-            // Unzip the SCORM Package and Upload to AWS S3
+
+            // Process and Upload SCORM Package
             $uploadResult = $this->processScormPackage($s3Client, $bucketName, $zipFilePath, $uploadPrefix, $region);
-    
+
             if (!$uploadResult['success']) {
                 echo json_encode(['message' => $uploadResult['message']]);
                 exit;
             }
-    
-            $scormIndexUrl = $uploadResult['index_url'];
-    
-            // Save SCORM Data to Database
-            $this->saveScormUnit($course_id, $unit_name, $scormIndexUrl);
-    
-            echo json_encode(['message' => 'SCORM package uploaded successfully', 'scorm_url' => $scormIndexUrl]);
+
+            echo json_encode([
+                'message' => 'SCORM package uploaded successfully',
+                'scorm_url' => $uploadResult['index_url']
+            ]);
             exit;
         }
     }
-    
+
     private function processScormPackage($s3Client, $bucketName, $zipFilePath, $uploadPrefix, $region) {
         $tempDir = sys_get_temp_dir() . DIRECTORY_SEPARATOR . uniqid('scorm_');
         mkdir($tempDir);
-    
+
         $zip = new ZipArchive;
         if ($zip->open($zipFilePath) !== TRUE) {
-            error_log('Unable to open SCORM package');
             return ['success' => false, 'message' => 'Unable to open SCORM package'];
         }
-    
+
         $zip->extractTo($tempDir);
         $zip->close();
-    
-        // Log the contents of the temporary directory
-        $files = scandir($tempDir);
-        error_log('Extracted files: ' . print_r($files, true));
-    
+
         $manifestFile = $tempDir . DIRECTORY_SEPARATOR . 'imsmanifest.xml';
         if (!file_exists($manifestFile)) {
-            error_log('SCORM package missing imsmanifest.xml');
             return ['success' => false, 'message' => 'SCORM package missing imsmanifest.xml'];
         }
-    
+
         $manifestContent = file_get_contents($manifestFile);
         $parsedManifest = $this->parseManifest($manifestContent);
-    
+
         if (!$parsedManifest['success']) {
-            error_log('Error parsing imsmanifest.xml: ' . $parsedManifest['message']);
             return ['success' => false, 'message' => $parsedManifest['message']];
         }
-    
+
         // Upload the package to S3
         $indexUrl = null;
         $iterator = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($tempDir));
         foreach ($iterator as $file) {
             if ($file->isDir()) continue;
-    
+
             $filePath = $file->getPathname();
             $key = $uploadPrefix . str_replace($tempDir . DIRECTORY_SEPARATOR, '', $filePath);
-    
+
             $mimeType = $this->getMimeType($filePath);
             try {
                 $s3Client->putObject([
@@ -985,130 +976,53 @@ class AdminController {
                     'ContentType' => $mimeType,
                 ]);
             } catch (AwsException $e) {
-                error_log('Error uploading file to S3: ' . $e->getMessage());
                 return ['success' => false, 'message' => 'Error uploading file to S3: ' . $e->getMessage()];
             }
-    
+
             if (basename($filePath) === $parsedManifest['launch_file']) {
                 $indexUrl = "https://{$bucketName}.s3.{$region}.amazonaws.com/{$key}";
             }
         }
-    
+
         $this->deleteDir($tempDir);
-    
+
         if ($indexUrl) {
             return ['success' => true, 'index_url' => $indexUrl];
         } else {
-            error_log('Failed to find launch file in uploaded SCORM package');
             return ['success' => false, 'message' => 'Failed to upload SCORM package'];
         }
     }
-    
+
     private function parseManifest($manifestContent) {
         try {
             $xml = new SimpleXMLElement($manifestContent);
-    
-            // Register namespaces
-            $namespaces = $xml->getNamespaces(true);
-    
-            // Log the entire XML structure for debugging
-            error_log('imsmanifest.xml content: ' . $manifestContent);
-    
-            // Register the default namespace
-            $xml->registerXPathNamespace('default', $namespaces['']);
-    
-            // Use the registered namespace for XPath queries
-            $organizations = $xml->xpath('//default:organizations/default:organization');
-            if (!$organizations) {
-                error_log('No organizations found in imsmanifest.xml');
-                return ['success' => false, 'message' => 'No organizations found in imsmanifest.xml'];
+
+            $resources = $xml->xpath('//resources/resource');
+            foreach ($resources as $resource) {
+                $launchFile = (string)$resource['href'];
+                if ($launchFile) {
+                    return ['success' => true, 'launch_file' => $launchFile];
+                }
             }
-    
-            $defaultOrg = $organizations[0];
-            $defaultOrg->registerXPathNamespace('default', $namespaces['']);
-            $items = $defaultOrg->xpath('./default:item');
-            if (!$items) {
-                error_log('No items found in imsmanifest.xml');
-                return ['success' => false, 'message' => 'No items found in imsmanifest.xml'];
-            }
-    
-            $launchFile = (string)$items[0]->attributes()->identifierref;
-            return [
-                'success' => true,
-                'launch_file' => $launchFile,
-                'course_title' => (string)$defaultOrg->title,
-            ];
+
+            return ['success' => false, 'message' => 'Launch file not found in imsmanifest.xml'];
         } catch (Exception $e) {
-            error_log('Error parsing imsmanifest.xml: ' . $e->getMessage());
             return ['success' => false, 'message' => 'Error parsing imsmanifest.xml: ' . $e->getMessage()];
         }
     }
-    
-    private function saveScormUnit($course_id, $unit_name, $scormIndexUrl) {
-        $conn = Database::getConnection();
-    
-        $stmt = $conn->prepare("SELECT * FROM courses WHERE id = ?");
-        $stmt->execute([$course_id]);
-        $course = $stmt->fetch(PDO::FETCH_ASSOC);
-    
-        if (!$course) {
-            echo json_encode(['message' => 'Course not found']);
-            exit;
-        }
-    
-        $course_book = json_decode($course['course_book'], true) ?? [];
-        $course_book[] = [
-            'unit_name' => $unit_name,
-            'scorm_url' => $scormIndexUrl,
-        ];
-        $course_book_json = json_encode($course_book);
-    
-        $stmt = $conn->prepare("UPDATE courses SET course_book = :course_book WHERE id = :id");
-        $stmt->execute([
-            'course_book' => $course_book_json,
-            'id' => $course_id,
-        ]);
-    
-        Notification::create($conn, $course_id, "New SCORM package uploaded");
-    }
-    
+
     private function getMimeType($filePath) {
         $finfo = finfo_open(FILEINFO_MIME_TYPE);
         $mimeType = finfo_file($finfo, $filePath);
         finfo_close($finfo);
-    
-        $extension = strtolower(pathinfo($filePath, PATHINFO_EXTENSION));
-        $mimeTypes = [
-            'js' => 'application/javascript',
-            'css' => 'text/css',
-            'html' => 'text/html',
-            'json' => 'application/json',
-            'jpg' => 'image/jpeg',
-            'jpeg' => 'image/jpeg',
-            'png' => 'image/png',
-            'gif' => 'image/gif',
-            'svg' => 'image/svg+xml',
-            'zip' => 'application/zip',
-            'xml' => 'application/xml',
-        ];
-    
-        return $mimeTypes[$extension] ?? $mimeType;
+        return $mimeType;
     }
 
     private function deleteDir($dirPath) {
-        if (!is_dir($dirPath)) {
-            throw new InvalidArgumentException("$dirPath must be a directory");
-        }
-        if (substr($dirPath, strlen($dirPath) - 1, 1) != DIRECTORY_SEPARATOR) {
-            $dirPath .= DIRECTORY_SEPARATOR;
-        }
-        $files = glob($dirPath . '*', GLOB_MARK);
+        $files = array_diff(scandir($dirPath), ['.', '..']);
         foreach ($files as $file) {
-            if (is_dir($file)) {
-                $this->deleteDir($file);
-            } else {
-                unlink($file);
-            }
+            $filePath = $dirPath . DIRECTORY_SEPARATOR . $file;
+            is_dir($filePath) ? $this->deleteDir($filePath) : unlink($filePath);
         }
         rmdir($dirPath);
     }
