@@ -1063,8 +1063,6 @@ class AdminController {
     
         return $mimeTypes[$extension] ?? $mimeType;
     }
-    
-    
 
     public function editStudent($student_id) {
         $conn = Database::getConnection();
