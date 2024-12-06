@@ -1,4 +1,6 @@
-<?php include "sidebar.php"; ?>
+<?php include "sidebar.php";
+use Models\Course;
+?>
 
 <div class="main-panel">
     <div class="content-wrapper">
@@ -47,7 +49,7 @@
                                     <th scope="col">S. No.</th>
                                     <th scope="col">Unit Title</th>
                                     <th scope="col">Action</th>
-                                    <th scope="col">Completed</th>
+                                    <th scope="col">Status</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -61,12 +63,8 @@
                                         echo "<td>" . $serialNumber++ . "</td>"; // Increment the serial number
                                         echo "<td>" . htmlspecialchars($unit['unit_name']) . "</td>";
                                         $full_url = $unit['scorm_url'];
-                                        echo "<td><a href='/student/view_book/" . $hashedId . "?index_path=" . urlencode($full_url) . "' class='btn btn-primary'>View Course Book</a></td>";
-                                        if ($course['status'] !== 'archived') {
-                                            echo "<td><button class='btn btn-success' onclick='markAsCompleted(\"" . htmlspecialchars($full_url) . "\", " . ($isCompleted ? "true" : "false") . ", this)'>" . ($isCompleted ? "Completed" : "Mark as Completed") . "</button></td>";
-                                        } else {
-                                            echo "<td>" . ($isCompleted ? "Completed" : "") . "</td>";
-                                        }
+                                        echo "<td><a href='#' onclick='viewAndMarkAsCompleted(\"" . htmlspecialchars($full_url) . "\", this)' class='btn btn-primary'>View Course Book</a></td>";
+                                        echo "<td class='status-cell'>" . ($isCompleted ? "Completed" : "Not Completed") . "</td>";
                                         echo "</tr>";
                                     }
                                 } else {
@@ -110,6 +108,25 @@
                             </tbody>
                         </table>
 
+                        <!-- Feedback Section for Archived Courses -->
+                        <?php if ($course['status'] === 'archived'): ?>
+                            <div class="mt-4">
+                                <h5>Feedback</h5>
+                                <?php if (Course::hasFeedback($conn, $course['id'], $student['id'])): ?>
+                                    <p>Thank you for providing the feedback. Your Feedback is already recorded.</p>
+                                <?php else: ?>
+                                    <form method="post" action="/student/submit_feedback">
+                                        <input type="hidden" name="course_id" value="<?php echo htmlspecialchars($course['id']); ?>">
+                                        <div class="form-group">
+                                            <label for="feedback">Your Feedback</label>
+                                            <textarea class="form-control" id="feedback" name="feedback" rows="4" required></textarea>
+                                        </div>
+                                        <button type="submit" class="btn btn-primary mt-2">Submit Feedback</button>
+                                    </form>
+                                <?php endif; ?>
+                            </div>
+                        <?php endif; ?>
+
                     </div>
                 </div>
             </div>
@@ -119,54 +136,15 @@
 </div>
 
 <script>
-function redirectToCoursePlan() {
-    var coursePlan = <?php echo json_encode($course['course_plan'] ?? []); ?>;
-    var coursePlanUrl = "";
-    if (coursePlan && coursePlan.url) {
-        coursePlanUrl = coursePlan.url;
-    }
-
-    if (coursePlanUrl) {
-        window.open(coursePlanUrl, '_blank');
-    } else {
-        alert('Course Plan URL not available.');
-    }
-}
-
-function redirectToCourseBook(url) {
-    var courseBookUrl = url;
-
-    if (url) {
-        window.open(courseBookUrl, '_blank');
-    } else {
-        alert('Course Book URL not available.');
-    }
-}
-
-function redirectToCourseMaterial(url) {
-    var courseMaterialUrl = url;
-
-    if (url) {
-        window.open(courseMaterialUrl, '_blank');
-    } else {
-        alert('Course Material URL not available.');
-    }
-}
-
-function markAsCompleted(indexPath, isCompleted, button) {
-    if (isCompleted) {
-        alert('This course book is already marked as completed.');
-        return;
-    }
-
+function viewAndMarkAsCompleted(indexPath, button) {
     var xhr = new XMLHttpRequest();
     xhr.open("POST", "/student/mark_as_completed", true);
     xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
     xhr.onreadystatechange = function () {
         if (xhr.readyState === 4 && xhr.status === 200) {
-            alert('Course book marked as completed.');
-            button.innerHTML = 'Completed';
-            button.disabled = true;
+            window.open(indexPath, '_blank');
+            var statusCell = button.closest('tr').querySelector('.status-cell');
+            statusCell.innerHTML = 'Completed';
         }
     };
     xhr.send("indexPath=" + encodeURIComponent(indexPath) + "&course_id=<?php echo $course['id']; ?>");

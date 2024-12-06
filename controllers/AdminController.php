@@ -238,22 +238,22 @@ class AdminController {
     private function fetchUserData($conn, $userType, $timeRange) {
         switch ($userType) {
             case 'admins':
-                $sql = "SELECT name, username FROM admins WHERE DATE(last_login) = CURDATE()";
+                $sql = "SELECT name, username, last_login as Last_Usage FROM admins WHERE DATE(last_login) = CURDATE()";
                 break;
             case 'spocs':
-                $sql = "SELECT spocs.name, spocs.email, universities.long_name as university 
+                $sql = "SELECT spocs.name, spocs.email, universities.long_name as university, last_login as Last_Usage 
                         FROM spocs 
                         JOIN universities ON spocs.university_id = universities.id 
                         WHERE DATE(spocs.last_login) = CURDATE()";
                 break;
             case 'faculty':
-                $sql = "SELECT faculty.name, faculty.email, universities.long_name as university, faculty.section 
+                $sql = "SELECT faculty.name, faculty.email, universities.long_name as university, faculty.section, last_login as Last_Usage 
                         FROM faculty 
                         JOIN universities ON faculty.university_id = universities.id 
                         WHERE DATE(faculty.last_login) = CURDATE()";
                 break;
             case 'students':
-                $sql = "SELECT students.name, students.email, universities.long_name as university, students.section 
+                $sql = "SELECT students.name, students.email, universities.long_name as university, students.section, last_login as Last_Usage 
                         FROM students 
                         JOIN universities ON students.university_id = universities.id 
                         WHERE DATE(students.last_login) = CURDATE()";
@@ -506,25 +506,20 @@ class AdminController {
 
     public function resetStudentPasswords() {
         $conn = Database::getConnection();
-    
-        if (isset($_POST['bulk_reset_password'])) {
-            $selectedStudents = $_POST['selected'] ?? [];
-    
+        if (isset($_POST['selected'])) {
+            $selectedStudents = $_POST['selected'];
             foreach ($selectedStudents as $studentId) {
-                $student = Student::getById($conn, $studentId);
-                if ($student) {
-                    $newPassword = $student['email']; // Reset password to email
-                    $hashedPassword = password_hash($newPassword, PASSWORD_BCRYPT);
-    
-                    $sql = "UPDATE students SET password = ? WHERE id = ?";
-                    $stmt = $conn->prepare($sql);
-                    $stmt->execute([$hashedPassword, $studentId]);
-                }
+                $newPassword = 'newpassword123'; // Generate or set a new password
+                Student::updatePassword($conn, $studentId, password_hash($newPassword, PASSWORD_BCRYPT));
             }
-    
-            header('Location: /admin/manage_students');
-            exit();
+            $_SESSION['message'] = 'Passwords have been reset successfully.';
+            $_SESSION['message_type'] = 'success';
+        } else {
+            $_SESSION['message'] = 'No students selected for password reset.';
+            $_SESSION['message_type'] = 'warning';
         }
+        header('Location: /admin/manage_students');
+        exit();
     }
     
     public function addCourse() {
@@ -1064,17 +1059,15 @@ class AdminController {
     
     public function resetStudentPassword($student_id) {
         $conn = Database::getConnection();
-    
-        $student = Student::getById($conn, $student_id);
-        if ($student) {
-            $newPassword = $student['email']; // Reset password to email
-            $hashedPassword = password_hash($newPassword, PASSWORD_BCRYPT);
-    
-            $sql = "UPDATE students SET password = ? WHERE id = ?";
-            $stmt = $conn->prepare($sql);
-            $stmt->execute([$hashedPassword, $student_id]);
+        if ($student_id) {
+            $newPassword = 'newpassword123'; // Generate or set a new password
+            Student::updatePassword($conn, $student_id, password_hash($newPassword, PASSWORD_BCRYPT));
+            $_SESSION['message'] = 'Password has been reset successfully.';
+            $_SESSION['message_type'] = 'success';
+        } else {
+            $_SESSION['message'] = 'Failed to reset password.';
+            $_SESSION['message_type'] = 'danger';
         }
-    
         header('Location: /admin/viewStudentProfile/' . $student_id);
         exit();
     }

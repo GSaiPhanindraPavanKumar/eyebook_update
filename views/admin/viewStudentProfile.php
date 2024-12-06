@@ -15,6 +15,15 @@
                 <div class="card shadow">
                     <div class="card-body">
                         <p class="card-title mb-0" style="font-size:larger">Profile Details</p><br>
+
+                        <!-- Display session message -->
+                        <?php if (isset($_SESSION['message'])): ?>
+                            <div class="alert alert-<?= $_SESSION['message_type'] ?>">
+                                <?= $_SESSION['message'] ?>
+                                <?php unset($_SESSION['message']); unset($_SESSION['message_type']); ?>
+                            </div>
+                        <?php endif; ?>
+
                         <div class="table-responsive">
                             <table class="table table-borderless">
                                 <tr>

@@ -96,7 +96,7 @@ $archivedCourses = array_filter($courses, function($course) {
                                     ?>
                                     <a href="view_course/<?php echo $hashedId; ?>" class="card-link">View Course</a>
                                     <a href="/faculty/discussion_forum/<?php echo $course['id']; ?>" class="card-link">Chat Room</a>
-                                    <form method="POST" action="archive_course" style="display:inline;" onsubmit="return confirmArchive()">
+                                    <form method="POST" action="/faculty/archive_course" style="display:inline;" onsubmit="return confirmArchive()">
                                         <input type="hidden" name="archive_course_id" value="<?php echo $course['id']; ?>">
                                         <button type="submit" class="btn btn-warning btn-sm">Archive</button>
                                     </form>

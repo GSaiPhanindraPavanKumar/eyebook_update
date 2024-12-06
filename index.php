@@ -202,7 +202,7 @@ $router->get('/faculty/download_assessment_report/(\d+)', function($assessmentId
 });
 
 
-
+$router->post('/faculty/archive_course', 'FacultyController@archiveCourse');
 $router->get('/faculty/view_book/([a-zA-Z0-9]+)', 'FacultyController@viewBook');
 $router->get('/faculty/view_course_plan/(\w+)', 'FacultyController@viewCoursePlan');
 $router->get('/faculty/view_material/(\w+)', 'FacultyController@viewMaterial');
@@ -249,7 +249,7 @@ $router->post('/student/submit_assignment/(\d+)', 'StudentController@submitAssig
 $router->get('/student/view_course_plan/(\w+)', 'StudentController@viewCoursePlan');
 $router->get('/student/view_material/(\w+)', 'StudentController@viewMaterial');
 $router->get('/student/view_book/(\w+)', 'StudentController@viewBook');
-
+$router->post('/student/submit_feedback', 'StudentController@submitFeedback');
 $router->get('/student/submit_assignment/(\d+)', function($assignment_id){
     $_GET['assignment_id'] = $assignment_id;
     require 'views/student/assignment_submit.php';

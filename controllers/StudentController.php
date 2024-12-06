@@ -160,6 +160,23 @@ class StudentController {
         require 'views/student/profile.php';
     }
 
+    public function submitFeedback() {
+        $conn = Database::getConnection();
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            $course_id = $_POST['course_id'];
+            $student_id = $_SESSION['student_id'];
+            $feedback = $_POST['feedback'];
+    
+            Course::saveFeedback($conn, $course_id, $student_id, $feedback);
+    
+            $_SESSION['message'] = 'Feedback submitted successfully.';
+            $_SESSION['message_type'] = 'success';
+    
+            header('Location: /student/view_course/' . str_replace(['+', '/', '='], ['-', '_', ''], base64_encode($course_id)));
+            exit();
+        }
+    }
+
     function getCoursesWithProgress($studentId) {
         $conn = Database::getConnection();
         $stmt = $conn->prepare("SELECT * FROM courses WHERE status = 'ongoing'");

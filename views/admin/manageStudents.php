@@ -7,6 +7,16 @@ use Models\Student;
 $conn = Database::getConnection();
 $universities = University::getAll($conn);
 $students = Student::getAll($conn);
+
+function daysAgo($date) {
+    if ($date === null) {
+        return 'N/A';
+    }
+    $now = new DateTime();
+    $lastUsage = new DateTime($date);
+    $interval = $now->diff($lastUsage);
+    return $interval->days;
+}
 ?>
 
 <div class="main-panel">
@@ -31,6 +41,15 @@ $students = Student::getAll($conn);
                 <div class="card shadow">
                     <div class="card-body">
                         <p class="card-title mb-0" style="font-size:larger">Students</p><br>
+
+                        <!-- Display session message -->
+                        <?php if (isset($_SESSION['message'])): ?>
+                            <div class="alert alert-<?= $_SESSION['message_type'] ?>">
+                                <?= $_SESSION['message'] ?>
+                                <?php unset($_SESSION['message']); unset($_SESSION['message_type']); ?>
+                            </div>
+                        <?php endif; ?>
+
                         <div class="table-responsive">
                             <div class="input-group mb-3">
                                 <input class="form-control" id="searchInput" type="text" placeholder="🔍 Search Students...">
@@ -41,6 +60,7 @@ $students = Student::getAll($conn);
                                         <option value="name">Name</option>
                                         <option value="email">Email</option>
                                         <option value="university">University</option>
+                                        <option value="last_usage">Last Usage (Days Ago)</option>
                                     </select>
                                 </div>
                             </div>
@@ -54,6 +74,7 @@ $students = Student::getAll($conn);
                                             <th data-sort="name">Name <i class="fas fa-sort"></i></th>
                                             <th data-sort="email">Email <i class="fas fa-sort"></i></th>
                                             <th data-sort="university">University <i class="fas fa-sort"></i></th>
+                                            <th data-sort="last_usage">Last Usage (Days Ago) <i class="fas fa-sort"></i></th>
                                             <th>Actions</th>
                                         </tr>
                                     </thead>
@@ -75,6 +96,7 @@ $students = Student::getAll($conn);
                                                     break;
                                                 }
                                             }
+                                            $daysAgo = daysAgo($student['last_login']);
                                         ?>
                                             <tr>
                                                 <td><input type="checkbox" name="selected[]" value="<?= $student['id'] ?>"></td>
@@ -83,6 +105,7 @@ $students = Student::getAll($conn);
                                                 <td data-filter="name"><?= htmlspecialchars($student['name']) ?></td>
                                                 <td data-filter="email"><?= htmlspecialchars($student['email']) ?></td>
                                                 <td data-filter="university"><?= htmlspecialchars($university_short_name) ?></td>
+                                                <td data-filter="last_usage"><?= htmlspecialchars($daysAgo) ?></td>
                                                 <td>
                                                     <a href="viewStudentProfile/<?= $student['id'] ?>" class="btn btn-outline-primary btn-sm"><i class="fas fa-eye"></i> View</a>
                                                 </td>

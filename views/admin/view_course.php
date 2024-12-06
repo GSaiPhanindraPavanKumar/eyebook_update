@@ -18,6 +18,13 @@ $assignedUniversities = Course::getAssignedUniversities($conn, $course['id']);
         <div class="row">
             <div class="col-md-12 grid-margin">
                 <div class="d-flex justify-content-between align-items-center">
+                <style>
+                    /* Add this CSS rule to ensure text wraps in the feedback column */
+                    #feedbackTable td[data-filter="feedback"] {
+                        white-space: normal;
+                        word-wrap: break-word;
+                    }
+                </style>
                     <h2 class="font-weight-bold mb-4">Course Management: <?php echo htmlspecialchars($course['name'] ?? 'N/A'); ?></h2>
                     <span class="badge bg-primary text-white">Course ID: <?php echo htmlspecialchars($course['id'] ?? 'N/A'); ?></span>
                 </div>
@@ -193,6 +200,52 @@ $assignedUniversities = Course::getAssignedUniversities($conn, $course['id']);
                                             <?php endforeach; ?>
                                         </tbody>
                                     </table>
+
+                                    <h4 class="card-title mt-3">Feedback</h4>
+                                    <div class="table-responsive">
+                                        <div class="input-group mb-3">
+                                            <input class="form-control" id="searchInputFeedback" type="text" placeholder="🔍 Search Feedback...">
+                                            <div class="input-group-append">
+                                                <select class="form-control" id="filterSelectFeedback">
+                                                    <option value="">Filter by...</option>
+                                                    <option value="regd_no">Register Number</option>
+                                                    <option value="name">Name</option>
+                                                    <option value="email">Email</option>
+                                                    <option value="feedback">Feedback</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <table class="table table-hover table-borderless table-striped">
+                                            <thead class="thead-light">
+                                                <tr>
+                                                    <th>Register Number</th>
+                                                    <th style="width: 30%;">Name</th>
+                                                    <th>Email</th>
+                                                    <th>Feedback</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="feedbackTable">
+                                                <?php
+                                                $feedbacks = Course::getFeedback($conn, $course['id']);
+                                                if (empty($feedbacks)) {
+                                                    echo "<tr><td colspan='4'>No feedback available.</td></tr>";
+                                                } else {
+                                                    foreach ($feedbacks as $feedback):
+                                                        $student = Student::getById($conn, $feedback['student_id']);
+                                                ?>
+                                                    <tr>
+                                                        <td data-filter="regd_no"><?php echo htmlspecialchars($student['regd_no'] ?? 'N/A'); ?></td>
+                                                        <td data-filter="name" style="width: 30%;"><?php echo htmlspecialchars($student['name']); ?></td>
+                                                        <td data-filter="email"><?php echo htmlspecialchars($student['email']); ?></td>
+                                                        <td data-filter="feedback"><?php echo htmlspecialchars($feedback['feedback']); ?></td>
+                                                    </tr>
+                                                <?php
+                                                    endforeach;
+                                                }
+                                                ?>
+                                            </tbody>
+                                        </table>
+                                    </div>
                                 </div>
                                 </form>
                                     
@@ -481,4 +534,24 @@ document.getElementById('assignCourseForm').addEventListener('submit', function(
         }
     });
 });
+</script>
+<script>
+    $(document).ready(function() {
+        $('#searchInputFeedback, #filterSelectFeedback').on('input change', function() {
+            var searchValue = $('#searchInputFeedback').val().toLowerCase();
+            var filterValue = $('#filterSelectFeedback').val();
+            var visibleRows = 0;
+            $('#feedbackTable tr').filter(function() {
+                var text = $(this).text().toLowerCase();
+                var isVisible = text.indexOf(searchValue) > -1;
+                if (filterValue) {
+                    var cellValue = $(this).find('td[data-filter="' + filterValue + '"]').text().toLowerCase();
+                    isVisible = isVisible && cellValue.indexOf(searchValue) > -1;
+                }
+                $(this).toggle(isVisible);
+                if (isVisible) visibleRows++;
+            });
+            $('#noRecords').toggle(visibleRows === 0);
+        });
+    });
 </script>

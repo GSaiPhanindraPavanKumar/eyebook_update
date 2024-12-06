@@ -388,6 +388,20 @@ class FacultyController {
         require 'views/faculty/assignment_create.php';
     }
 
+    public function archiveCourse() {
+        $conn = Database::getConnection();
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            $course_id = $_POST['archive_course_id'];
+            Course::archiveCourse($conn, $course_id);
+    
+            $_SESSION['message'] = 'Course archived successfully.';
+            $_SESSION['message_type'] = 'success';
+    
+            header('Location: /faculty/my_courses');
+            exit();
+        }
+    }
+
 
     public function manageAssignments() {
         $conn = Database::getConnection();

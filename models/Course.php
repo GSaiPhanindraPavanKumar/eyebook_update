@@ -44,6 +44,48 @@ class Course {
         return $course;
     }
 
+    public static function saveFeedback($conn, $course_id, $student_id, $feedback) {
+        $query = 'SELECT feedback FROM courses WHERE id = :course_id';
+        $stmt = $conn->prepare($query);
+        $stmt->execute(['course_id' => $course_id]);
+        $course = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        $feedbacks = [];
+        if ($course && !empty($course['feedback'])) {
+            $feedbacks = json_decode($course['feedback'], true);
+            if (!is_array($feedbacks)) {
+                $feedbacks = [];
+            }
+        }
+
+        $feedbacks[] = ['student_id' => $student_id, 'feedback' => $feedback];
+        $feedbackJson = json_encode($feedbacks);
+
+        $query = 'UPDATE courses SET feedback = :feedback WHERE id = :course_id';
+        $stmt = $conn->prepare($query);
+        $stmt->execute([
+            ':feedback' => $feedbackJson,
+            ':course_id' => $course_id
+        ]);
+    }
+    
+    public static function getFeedback($conn, $course_id) {
+        $query = 'SELECT feedback FROM courses WHERE id = :course_id';
+        $stmt = $conn->prepare($query);
+        $stmt->execute(['course_id' => $course_id]);
+        $course = $stmt->fetch(PDO::FETCH_ASSOC);
+    
+        $feedbacks = [];
+        if ($course && !empty($course['feedback'])) {
+            $feedbacks = json_decode($course['feedback'], true);
+            if (!is_array($feedbacks)) {
+                $feedbacks = [];
+            }
+        }
+    
+        return $feedbacks;
+    }
+    
     public static function getCoursesByFaculty($conn) {
         $sql = "SELECT * FROM courses";
         $stmt = $conn->query($sql);
@@ -136,6 +178,34 @@ class Course {
         $stmt->execute(['course_book' => $content_json, 'id' => $course_id]);
     
         return ['message' => 'Unit added successfully with SCORM content', 'indexPath' => $index_path];
+    }
+
+    public static function archiveCourse($conn, $course_id) {
+        $query = 'UPDATE courses SET status = :status WHERE id = :course_id';
+        $stmt = $conn->prepare($query);
+        $stmt->execute([
+            ':status' => 'archived',
+            ':course_id' => $course_id
+        ]);
+    }
+
+    public static function hasFeedback($conn, $course_id, $student_id) {
+        $query = 'SELECT feedback FROM courses WHERE id = :course_id';
+        $stmt = $conn->prepare($query);
+        $stmt->execute(['course_id' => $course_id]);
+        $course = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if ($course && !empty($course['feedback'])) {
+            $feedbacks = json_decode($course['feedback'], true);
+            if (is_array($feedbacks)) {
+                foreach ($feedbacks as $feedback) {
+                    if (isset($feedback['student_id']) && $feedback['student_id'] == $student_id) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
     }
 
     public static function getAssignedFaculty($conn, $course_id) {
