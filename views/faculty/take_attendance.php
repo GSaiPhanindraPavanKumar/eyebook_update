@@ -21,15 +21,20 @@ if ($classroomId) {
         exit();
     }
 
-    // Fetch course_id from the classroom details
-    $courseId = $classroom['course_id'];
+    // Fetch course_id from the classroom details (assuming it's stored as JSON)
+    $courseIds = json_decode($classroom['course_id'], true);
+    if (json_last_error() !== JSON_ERROR_NONE || !is_array($courseIds)) {
+        echo "Error: Invalid course ID format.";
+        exit();
+    }
 
     // Fetch course details using the course_id
-    $stmt = $conn->prepare("SELECT assigned_faculty, assigned_students FROM courses WHERE id = ?");
-    $stmt->execute([$courseId]);
-    $course = $stmt->fetch(PDO::FETCH_ASSOC);
+    $placeholders = implode(',', array_fill(0, count($courseIds), '?'));
+    $stmt = $conn->prepare("SELECT assigned_faculty, assigned_students FROM courses WHERE id IN ($placeholders)");
+    $stmt->execute($courseIds);
+    $courses = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    if (!$course) {
+    if (empty($courses)) {
         echo "Error: Course not found.";
         exit();
     }
@@ -38,16 +43,27 @@ if ($classroomId) {
     $facultyId = $_SESSION['faculty_id'];
 
     // Check if the faculty ID is in the list of assigned faculty
-    $assignedFaculty = json_decode($course['assigned_faculty'], true);
+    $assignedFaculty = [];
+    $assignedStudentIds = [];
+    foreach ($courses as $course) {
+        $courseAssignedFaculty = json_decode($course['assigned_faculty'], true);
+        if (json_last_error() === JSON_ERROR_NONE && is_array($courseAssignedFaculty)) {
+            $assignedFaculty = array_merge($assignedFaculty, $courseAssignedFaculty);
+        }
+
+        $courseAssignedStudents = json_decode($course['assigned_students'], true);
+        if (json_last_error() === JSON_ERROR_NONE && is_array($courseAssignedStudents)) {
+            $assignedStudentIds = array_merge($assignedStudentIds, $courseAssignedStudents);
+        }
+    }
+
     if (!in_array($facultyId, $assignedFaculty)) {
         echo "Error: You are not assigned to this course.";
         exit();
     }
 
-    // Fetch assigned student IDs
-    $assignedStudentIds = json_decode($course['assigned_students'], true);
-
     // Fetch student details for the assigned student IDs
+    $assignedStudentIds = array_unique($assignedStudentIds);
     $students = Student::getByIds($conn, $assignedStudentIds);
 } else {
     echo "Error: Classroom ID not provided.";
