@@ -21,14 +21,31 @@ if ($classroomId) {
         exit();
     }
 
+    // Fetch course_id from the classroom details
+    $courseId = $classroom['course_id'];
+
+    // Fetch course details using the course_id
+    $stmt = $conn->prepare("SELECT assigned_faculty, assigned_students FROM courses WHERE id = ?");
+    $stmt->execute([$courseId]);
+    $course = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if (!$course) {
+        echo "Error: Course not found.";
+        exit();
+    }
+
     // Fetch faculty ID from session
     $facultyId = $_SESSION['faculty_id'];
 
-    // Fetch assigned courses for the faculty
-    $assignedCourses = Faculty::getAssignedCourses($conn, $facultyId);
+    // Check if the faculty ID is in the list of assigned faculty
+    $assignedFaculty = json_decode($course['assigned_faculty'], true);
+    if (!in_array($facultyId, $assignedFaculty)) {
+        echo "Error: You are not assigned to this course.";
+        exit();
+    }
 
-    // Fetch assigned student IDs for the assigned courses
-    $assignedStudentIds = Course::getAssignedStudentIds($conn, $assignedCourses);
+    // Fetch assigned student IDs
+    $assignedStudentIds = json_decode($course['assigned_students'], true);
 
     // Fetch student details for the assigned student IDs
     $students = Student::getByIds($conn, $assignedStudentIds);
