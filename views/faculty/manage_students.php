@@ -31,7 +31,10 @@ if (!empty($assignedCourses)) {
             if (json_last_error() === JSON_ERROR_NONE && is_array($studentIds)) {
                 foreach ($studentIds as $studentId) {
                     $assignedStudents[] = $studentId;
-                    $courseNames[$studentId] = $courseName;
+                    if (!isset($courseNames[$studentId])) {
+                        $courseNames[$studentId] = [];
+                    }
+                    $courseNames[$studentId][] = $courseName;
                 }
             }
         }
@@ -91,7 +94,7 @@ if (!empty($assignedCourses)) {
                                             <td><?= htmlspecialchars($student['section']) ?></td>
                                             <td><?= htmlspecialchars($student['stream']) ?></td>
                                             <td><?= htmlspecialchars($student['year']) ?></td>
-                                            <td><?= htmlspecialchars($courseNames[$student['id']] ?? 'N/A') ?></td>
+                                            <td><?= htmlspecialchars(implode(', ', $courseNames[$student['id']] ?? ['N/A'])) ?></td>
                                         </tr>
                                     <?php endforeach; ?>
                                 </tbody>
