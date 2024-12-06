@@ -19,19 +19,20 @@ $assignedCourses = Faculty::getAssignedCourses($conn, $facultyId);
 $students = [];
 $courseNames = [];
 if (!empty($assignedCourses)) {
-    $placeholders = implode(',', array_fill(0, count($assignedCourses), '?'));
-    $sql = "SELECT id, assigned_students, name as course_name FROM courses WHERE id IN ($placeholders)";
-    $stmt = $conn->prepare($sql);
-    $stmt->execute($assignedCourses);
     $assignedStudents = [];
-    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-        $courseId = $row['id'];
-        $courseName = $row['course_name'];
-        $studentIds = $row['assigned_students'] ? json_decode($row['assigned_students'], true) : [];
-        if (json_last_error() === JSON_ERROR_NONE && is_array($studentIds)) {
-            foreach ($studentIds as $studentId) {
-                $assignedStudents[] = $studentId;
-                $courseNames[$studentId] = $courseName;
+    foreach ($assignedCourses as $courseId) {
+        $sql = "SELECT id, assigned_students, name as course_name FROM courses WHERE id = ?";
+        $stmt = $conn->prepare($sql);
+        $stmt->execute([$courseId]);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        if ($row) {
+            $courseName = $row['course_name'];
+            $studentIds = $row['assigned_students'] ? json_decode($row['assigned_students'], true) : [];
+            if (json_last_error() === JSON_ERROR_NONE && is_array($studentIds)) {
+                foreach ($studentIds as $studentId) {
+                    $assignedStudents[] = $studentId;
+                    $courseNames[$studentId] = $courseName;
+                }
             }
         }
     }
