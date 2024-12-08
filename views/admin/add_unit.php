@@ -2,9 +2,38 @@
 require_once __DIR__ . '/../../models/Database.php';
 require_once __DIR__ . '/../../vendor/autoload.php';
 
+
+
 use Models\Database;
 use Aws\S3\S3Client;
 use Aws\Exception\AwsException;
+
+require_once __DIR__ . '/../../aws_config.php';
+
+$bucketName = AWS_BUCKET_NAME;
+$region = AWS_REGION;
+$accessKey = AWS_ACCESS_KEY_ID;
+$secretKey = AWS_SECRET_ACCESS_KEY;
+
+// Debugging: Log the values of the configuration variables
+error_log('AWS_BUCKET_NAME: ' . $bucketName);
+error_log('AWS_REGION: ' . $region);
+error_log('AWS_ACCESS_KEY_ID: ' . $accessKey);
+error_log('AWS_SECRET_ACCESS_KEY: ' . $secretKey);
+
+if (!$bucketName || !$region || !$accessKey || !$secretKey) {
+    throw new Exception('Missing AWS configuration in aws_config.php file');
+}
+
+$s3Client = new S3Client([
+    'region' => 'us-east-1',
+    'version' => 'latest',
+    'credentials' => [
+        'key' => $accessKey,
+        'secret' => $secretKey,
+    ],
+]);
+
 
 $conn = Database::getConnection();
 
@@ -55,10 +84,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
 
     // AWS S3 configuration
-    $bucketName = getenv('AWS_BUCKET_NAME');
-    $region = getenv('AWS_REGION');
-    $accessKey = getenv('AWS_ACCESS_KEY_ID');
-    $secretKey = getenv('AWS_SECRET_ACCESS_KEY');
+    $bucketName = AWS_BUCKET_NAME;
+    $region = AWS_REGION;
+    $accessKey = AWS_ACCESS_KEY_ID;
+    $secretKey = AWS_SECRET_ACCESS_KEY;
 
     // Initialize S3 client
     $s3Client = new S3Client([

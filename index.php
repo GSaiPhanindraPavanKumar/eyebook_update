@@ -59,7 +59,10 @@ $router->get('/admin/add_courses', 'AdminController@addCourse');
 $router->post('/admin/add_courses', 'AdminController@addCourse');
 $router->get('/admin/manage_courses', 'AdminController@manageCourse');
 $router->get('/admin/view_course/(\d+)', 'AdminController@courseView');
-$router->post('/admin/add_unit', 'AdminController@addUnit');
+//$router->post('/admin/add_unit', 'AdminController@addUnit');
+$router->post('/admin/add_unit', function(){
+    require 'views/admin/add_unit.php';
+});
 $router->post('/admin/assign_course', 'AdminController@assignCourse');
 $router->post('/admin/unassign_course', 'AdminController@unassignCourse');
 $router->get('/admin/manage_students', 'AdminController@manageStudents');
