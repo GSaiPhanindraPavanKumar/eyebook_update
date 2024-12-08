@@ -29,6 +29,31 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         exit;
     }
 
+    // Validate SCORM package
+    $zip = new ZipArchive();
+    if ($zip->open($scorm_file['tmp_name']) === TRUE) {
+        $scormVersion = null;
+        if ($zip->locateName('imsmanifest.xml') !== false) {
+            $manifest = $zip->getFromName('imsmanifest.xml');
+            if (strpos($manifest, 'ADL SCORM') !== false) {
+                if (strpos($manifest, '2004') !== false) {
+                    $scormVersion = 'SCORM 2004';
+                } elseif (strpos($manifest, '1.2') !== false) {
+                    $scormVersion = 'SCORM 1.2';
+                }
+            }
+        }
+        $zip->close();
+
+        if (!$scormVersion) {
+            echo json_encode(['message' => 'Invalid SCORM package']);
+            exit;
+        }
+    } else {
+        echo json_encode(['message' => 'Failed to open SCORM package']);
+        exit;
+    }
+
     // AWS S3 configuration
     $bucketName = getenv('AWS_BUCKET_NAME');
     $region = getenv('AWS_REGION');
@@ -62,15 +87,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $fileUrl = $result['ObjectURL'];
 
         // Save the unit details to the database
-        $sql = "INSERT INTO units (course_id, name, scorm_url) VALUES (:course_id, :name, :scorm_url)";
+        $sql = "INSERT INTO units (course_id, name, scorm_url, scorm_version) VALUES (:course_id, :name, :scorm_url, :scorm_version)";
         $stmt = $conn->prepare($sql);
         $stmt->execute([
             'course_id' => $course_id,
             'name' => $unit_name,
             'scorm_url' => $fileUrl,
+            'scorm_version' => $scormVersion,
         ]);
 
-        echo json_encode(['message' => 'Unit added successfully', 'scorm_url' => $fileUrl]);
+        echo json_encode(['message' => 'Unit added successfully', 'scorm_url' => $fileUrl, 'scorm_version' => $scormVersion]);
     } catch (AwsException $e) {
         echo json_encode(['message' => 'Error uploading file to S3: ' . $e->getMessage()]);
     }
