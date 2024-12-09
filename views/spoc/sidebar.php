@@ -120,7 +120,7 @@ if ($userData) {
         <nav class="sidebar sidebar-offcanvas" id="sidebar">
             <ul class="nav">
                 <li class="nav-item">
-                    <a class="nav-link" href="dashboard">
+                    <a class="nav-link" href="/spoc/dashboard">
                         <i class="icon-grid menu-icon"></i>
                         <span class="menu-title">Dashboard</span>
                     </a>
@@ -137,8 +137,8 @@ if ($userData) {
                     <div class="collapse" id="faculty">
                         <ul class="nav flex-column sub-menu">
                             <!-- <li class="nav-item"> <a class="nav-link" href="#">Upload Faculty</a></li> -->
-                            <li class="nav-item"> <a class="nav-link" href="addFaculty">Add Faculty</a></li>
-                           <li class="nav-item"> <a class="nav-link" href="manage_faculty">Manage Faculty</a></li>
+                            <li class="nav-item"> <a class="nav-link" href="/spoc/addFaculty">Add Faculty</a></li>
+                           <li class="nav-item"> <a class="nav-link" href="/spoc/manage_faculty">Manage Faculty</a></li>
                         </ul>
                     </div>
                 </li>
@@ -151,7 +151,7 @@ if ($userData) {
                     </a>
                     <div class="collapse" id="courses">
                         <ul class="nav flex-column sub-menu">
-                            <li class="nav-item"><a class="nav-link" href="manage_courses">Manage Courses</a></li>
+                            <li class="nav-item"><a class="nav-link" href="/spoc/manage_courses">Manage Courses</a></li>
                         </ul>
                     </div>
                 </li>
@@ -181,7 +181,7 @@ if ($userData) {
                     <div class="collapse" id="student">
                         <ul class="nav flex-column sub-menu">
                         <!-- <li class="nav-item"> <a class="nav-link" href="upload_students">Upload Students</a></li> -->
-                            <li class="nav-item"> <a class="nav-link" href="manage_students">Manage Student</a></li>
+                            <li class="nav-item"> <a class="nav-link" href="/spoc/manage_students">Manage Student</a></li>
                         </ul>
                     </div>
                 </li>
@@ -247,19 +247,19 @@ if ($userData) {
 
                 <li class="nav-item"><hr></li>
                 <li class="nav-item">
-                    <a class="nav-link" href="profile">
+                    <a class="nav-link" href="/spoc/profile">
                         <i class="ti-user menu-icon"></i>
                         <span class="menu-title">Profile</span>
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="updatePassword">
+                    <a class="nav-link" href="/spoc/updatePassword">
                         <i class="ti-settings menu-icon"></i>
                         <span class="menu-title">Change Password</span>
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="logout">
+                    <a class="nav-link" href="/spoc/logout">
                         <i class="ti-power-off menu-icon"></i>
                         <span class="menu-title">Logout</span>
                 </a>
