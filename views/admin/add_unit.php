@@ -82,34 +82,52 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         exit;
     }
 
-    // Upload SCORM file to S3
-    $filePath = $scorm_file['tmp_name'];
-    $fileName = basename($scorm_file['name']);
-    $key = "scorm_packages/{$course_id}/{$fileName}";
+    // Extract and upload SCORM package to S3
+    $extractPath = sys_get_temp_dir() . '/' . uniqid('scorm_', true);
+    mkdir($extractPath);
 
-    try {
-        $result = $s3Client->putObject([
-            'Bucket' => $bucketName,
-            'Key' => $key,
-            'SourceFile' => $filePath,
-            'ACL' => 'public-read', // Optional: Set the ACL to public-read if you want the file to be publicly accessible
-        ]);
-
-        // Get the URL of the uploaded file
-        $fileUrl = $result['ObjectURL'];
-
-        // Save the unit details to the database
-        $sql = "INSERT INTO units (course_id, name, scorm_url, scorm_version) VALUES (:course_id, :name, :scorm_url, :scorm_version)";
-        $stmt = $conn->prepare($sql);
-        $stmt->execute([
-            'course_id' => $course_id,
-            'name' => $unit_name,
-            'scorm_url' => $fileUrl,
-            'scorm_version' => $scormVersion,
-        ]);
-
-        echo json_encode(['message' => 'Unit added successfully', 'scorm_url' => $fileUrl, 'scorm_version' => $scormVersion]);
-    } catch (AwsException $e) {
-        echo json_encode(['message' => 'Error uploading file to S3: ' . $e->getMessage()]);
+    if ($zip->open($scorm_file['tmp_name']) === TRUE) {
+        $zip->extractTo($extractPath);
+        $zip->close();
+    } else {
+        echo json_encode(['message' => 'Failed to extract SCORM package']);
+        exit;
     }
+
+    $iterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($extractPath));
+    foreach ($iterator as $file) {
+        if ($file->isDir()) {
+            continue;
+        }
+
+        $filePath = $file->getPathname();
+        $key = "scorm_packages/{$course_id}/" . substr($filePath, strlen($extractPath) + 1);
+
+        try {
+            $s3Client->putObject([
+                'Bucket' => $bucketName,
+                'Key' => $key,
+                'SourceFile' => $filePath,
+                'ACL' => 'public-read', // Optional: Set the ACL to public-read if you want the file to be publicly accessible
+            ]);
+        } catch (AwsException $e) {
+            echo json_encode(['message' => 'Error uploading file to S3: ' . $e->getMessage()]);
+            exit;
+        }
+    }
+
+    // Get the base URL of the uploaded SCORM package
+    $baseUrl = $s3Client->getObjectUrl($bucketName, "scorm_packages/{$course_id}/");
+
+    // Save the unit details to the database
+    $sql = "INSERT INTO units (course_id, name, scorm_url, scorm_version) VALUES (:course_id, :name, :scorm_url, :scorm_version)";
+    $stmt = $conn->prepare($sql);
+    $stmt->execute([
+        'course_id' => $course_id,
+        'name' => $unit_name,
+        'scorm_url' => $baseUrl,
+        'scorm_version' => $scormVersion,
+    ]);
+
+    echo json_encode(['message' => 'Unit added successfully', 'scorm_url' => $baseUrl, 'scorm_version' => $scormVersion]);
 }
