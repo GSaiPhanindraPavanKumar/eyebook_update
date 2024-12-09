@@ -2,8 +2,6 @@
 require_once __DIR__ . '/../../models/Database.php';
 require_once __DIR__ . '/../../vendor/autoload.php';
 
-
-
 use Models\Database;
 use Aws\S3\S3Client;
 use Aws\Exception\AwsException;
@@ -26,14 +24,13 @@ if (!$bucketName || !$region || !$accessKey || !$secretKey) {
 }
 
 $s3Client = new S3Client([
-    'region' => 'us-east-1',
+    'region' => $region,
     'version' => 'latest',
     'credentials' => [
         'key' => $accessKey,
         'secret' => $secretKey,
     ],
 ]);
-
 
 $conn = Database::getConnection();
 
@@ -61,7 +58,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     // Validate SCORM package
     $zip = new ZipArchive();
     if ($zip->open($scorm_file['tmp_name']) === TRUE) {
-        $scormVersion = null;
+        $scormVersion = 'Unknown';
         if ($zip->locateName('imsmanifest.xml') !== false) {
             $manifest = $zip->getFromName('imsmanifest.xml');
             if (strpos($manifest, 'ADL SCORM') !== false) {
@@ -69,12 +66,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     $scormVersion = 'SCORM 2004';
                 } elseif (strpos($manifest, '1.2') !== false) {
                     $scormVersion = 'SCORM 1.2';
+                } else {
+                    $scormVersion = 'Other SCORM Version';
                 }
             }
         }
         $zip->close();
 
-        if (!$scormVersion) {
+        if ($scormVersion === 'Unknown') {
             echo json_encode(['message' => 'Invalid SCORM package']);
             exit;
         }
@@ -82,22 +81,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         echo json_encode(['message' => 'Failed to open SCORM package']);
         exit;
     }
-
-    // AWS S3 configuration
-    $bucketName = AWS_BUCKET_NAME;
-    $region = AWS_REGION;
-    $accessKey = AWS_ACCESS_KEY_ID;
-    $secretKey = AWS_SECRET_ACCESS_KEY;
-
-    // Initialize S3 client
-    $s3Client = new S3Client([
-        'region' => $region,
-        'version' => 'latest',
-        'credentials' => [
-            'key' => $accessKey,
-            'secret' => $secretKey,
-        ],
-    ]);
 
     // Upload SCORM file to S3
     $filePath = $scorm_file['tmp_name'];
