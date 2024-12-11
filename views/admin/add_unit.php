@@ -94,5 +94,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         'id' => $course_id,
     ]);
 
-    echo json_encode(['message' => 'Unit added successfully', 'scorm_url' => $baseUrl, 'scorm_version' => $scormVersion]);
+    echo '<script>
+            alert("Unit added successfully!");
+            window.location.href = "/admin/view_course";
+          </script>';
+    exit;
+    
 }
