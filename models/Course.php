@@ -180,6 +180,18 @@ class Course {
         return ['message' => 'Unit added successfully with SCORM content', 'indexPath' => $index_path];
     }
 
+    public static function getCoursesByIds($conn, $course_ids) {
+        if (empty($course_ids)) {
+            return [];
+        }
+    
+        $placeholders = implode(',', array_fill(0, count($course_ids), '?'));
+        $sql = "SELECT * FROM courses WHERE id IN ($placeholders)";
+        $stmt = $conn->prepare($sql);
+        $stmt->execute($course_ids);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
     public static function archiveCourse($conn, $course_id) {
         $query = 'UPDATE courses SET status = :status WHERE id = :course_id';
         $stmt = $conn->prepare($query);

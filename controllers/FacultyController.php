@@ -327,8 +327,6 @@ class FacultyController {
 
 
 
-
-
     public function createAssignment() {
         $conn = Database::getConnection();
         $messages = []; // Initialize the $messages variable
@@ -337,8 +335,7 @@ class FacultyController {
             $title = $_POST['assignment_title'];
             $instructions = $_POST['assignment_instructions'];
             $due_date = $_POST['due_date'];
-            $course_id = $_POST['course_id'];
-            $section_id = $_POST['section_id'];
+            $course_ids = $_POST['course_id']; // Array of course IDs
 
             // Check if email is set in the session
             if (isset($_SESSION['email'])) {
@@ -359,22 +356,23 @@ class FacultyController {
             }
 
             try {
-                $sql = "INSERT INTO assignments (title, instructions, due_date, course_id, section_id, university_id, file_path) VALUES (:title, :instructions, :due_date, :course_id, :section_id, :university_id, :file_path)";
-                $stmt = $conn->prepare($sql);
-                $stmt->execute([
-                    ':title' => $title,
-                    ':instructions' => $instructions,
-                    ':due_date' => $due_date,
-                    ':course_id' => $course_id,
-                    ':section_id' => $section_id,
-                    ':university_id' => $university_id,
-                    ':file_path' => $file_path
-                ]);
+                foreach ($course_ids as $course_id) {
+                    $sql = "INSERT INTO assignments (title, instructions, due_date, course_id, university_id, file_path) VALUES (:title, :instructions, :due_date, :course_id, :university_id, :file_path)";
+                    $stmt = $conn->prepare($sql);
+                    $stmt->execute([
+                        ':title' => $title,
+                        ':instructions' => $instructions,
+                        ':due_date' => $due_date,
+                        ':course_id' => $course_id,
+                        ':university_id' => $university_id,
+                        ':file_path' => $file_path
+                    ]);
 
-                // Send email notification to students
-                $students = Student::getAllByCourseAndSection($conn, $course_id, $section_id);
-                foreach ($students as $student) {
-                    mail($student['email'], "New Assignment Created", "A new assignment titled '$title' has been created. Please check the LMS for details.");
+                    // Send email notification to students
+                    $students = Student::getAllByCourse($conn, $course_id);
+                    foreach ($students as $student) {
+                        mail($student['email'], "New Assignment Created", "A new assignment titled '$title' has been created. Please check the LMS for details.");
+                    }
                 }
 
                 header('Location: /faculty/manage_assignments');
@@ -383,8 +381,17 @@ class FacultyController {
                 $messages[] = "Error creating assignment: " . $e->getMessage();
             }
         }
-        $courses = Course::getCoursesByFaculty($conn);
-        $sections = Faculty::getAll($conn); // Updated to fetch sections from the faculty table
+
+        // Fetch only the assigned courses for the faculty
+        if (isset($_SESSION['email'])) {
+            $email = $_SESSION['email'];
+            $faculty = Faculty::getByEmail($conn, $email);
+            $assigned_courses = json_decode($faculty['assigned_courses'], true);
+            $courses = Course::getCoursesByIds($conn, $assigned_courses);
+        } else {
+            $courses = [];
+        }
+
         require 'views/faculty/assignment_create.php';
     }
 
