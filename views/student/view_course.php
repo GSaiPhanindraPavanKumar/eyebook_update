@@ -63,7 +63,7 @@ use Models\Course;
                                         echo "<td>" . $serialNumber++ . "</td>"; // Increment the serial number
                                         echo "<td>" . htmlspecialchars($unit['unit_name']) . "</td>";
                                         $full_url = $unit['scorm_url'];
-                                        echo "<td><a href='#' onclick='viewAndMarkAsCompleted(\"" . htmlspecialchars($full_url) . "\", this)' class='btn btn-primary'>View Course Book</a></td>";
+                                        echo "<td><a href='/student/view_book/" . $hashedId . "?index_path=" . urlencode($full_url) . "' class='btn btn-primary'>View Course Book</a></td>";
                                         echo "<td class='status-cell'>" . ($isCompleted ? "Completed" : "Not Completed") . "</td>";
                                         echo "</tr>";
                                     }
