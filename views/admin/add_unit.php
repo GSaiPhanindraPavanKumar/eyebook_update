@@ -99,5 +99,5 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             window.location.href = "/admin/view_course";
           </script>';
     exit;
-    
 }
+?>
