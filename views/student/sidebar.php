@@ -106,7 +106,7 @@ if ($userData) {
                     </div>
                 </li>
                 <li class="nav-item nav-profile dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" data-toggle="dropdown" id="profileDropdown">
+                    <a class="nav-link dropdown-toggle" href="#" data-toggle="#" id="#">
                         <img src="../../views/public\images\user.jpg" alt="profile"/>
                     </a>
                     <div class="dropdown-menu dropdown-menu-right navbar-dropdown" aria-labelledby="profileDropdown">
@@ -275,6 +275,12 @@ if ($userData) {
 
 
                 <li class="nav-item"><hr></li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/student/profile">
+                        <i class="ti-user menu-icon"></i>
+                        <span class="menu-title">Profile</span>
+                    </a>
+                </li>
                 <li class="nav-item">
                     <a class="nav-link" href="/student/updatePassword">
                         <i class="ti-settings menu-icon"></i>
