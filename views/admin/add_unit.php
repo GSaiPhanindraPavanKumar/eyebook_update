@@ -3,34 +3,6 @@ require_once __DIR__ . '/../../models/Database.php';
 require_once __DIR__ . '/../../vendor/autoload.php';
 
 use Models\Database;
-use Aws\S3\S3Client;
-use Aws\Exception\AwsException;
-
-require_once __DIR__ . '/../../aws_config.php';
-
-$bucketName = AWS_BUCKET_NAME;
-$region = AWS_REGION;
-$accessKey = AWS_ACCESS_KEY_ID;
-$secretKey = AWS_SECRET_ACCESS_KEY;
-
-// Debugging: Log the values of the configuration variables
-error_log('AWS_BUCKET_NAME: ' . $bucketName);
-error_log('AWS_REGION: ' . $region);
-error_log('AWS_ACCESS_KEY_ID: ' . $accessKey);
-error_log('AWS_SECRET_ACCESS_KEY: ' . $secretKey);
-
-if (!$bucketName || !$region || !$accessKey || !$secretKey) {
-    throw new Exception('Missing AWS configuration in aws_config.php file');
-}
-
-$s3Client = new S3Client([
-    'region' => $region,
-    'version' => 'latest',
-    'credentials' => [
-        'key' => $accessKey,
-        'secret' => $secretKey,
-    ],
-]);
 
 $conn = Database::getConnection();
 
@@ -69,11 +41,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 } else {
                     $scormVersion = 'Other SCORM Version';
                 }
+            } else {
+                $scormVersion = 'Non-SCORM Package';
             }
         }
         $zip->close();
 
-        if ($scormVersion === 'Unknown') {
+        if ($scormVersion === 'Unknown' || $scormVersion === 'Non-SCORM Package') {
             echo json_encode(['message' => 'Invalid SCORM package']);
             exit;
         }
@@ -82,51 +56,42 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         exit;
     }
 
-    // Extract and upload SCORM package to S3
-    $extractPath = sys_get_temp_dir() . '/' . uniqid('scorm_', true);
-    mkdir($extractPath);
+    // Define the upload path
+    $uploadPath = __DIR__ . '/../../uploads/courses/' . $course_id . '/' . $unit_name;
+    if (!is_dir($uploadPath)) {
+        mkdir($uploadPath, 0777, true);
+    }
 
+    // Extract and save SCORM package locally
     if ($zip->open($scorm_file['tmp_name']) === TRUE) {
-        $zip->extractTo($extractPath);
+        $zip->extractTo($uploadPath);
         $zip->close();
     } else {
         echo json_encode(['message' => 'Failed to extract SCORM package']);
         exit;
     }
 
-    $iterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($extractPath));
-    foreach ($iterator as $file) {
-        if ($file->isDir()) {
-            continue;
-        }
-
-        $filePath = $file->getPathname();
-        $key = "scorm_packages/{$course_id}/" . substr($filePath, strlen($extractPath) + 1);
-
-        try {
-            $s3Client->putObject([
-                'Bucket' => $bucketName,
-                'Key' => $key,
-                'SourceFile' => $filePath,
-                'ACL' => 'public-read', // Optional: Set the ACL to public-read if you want the file to be publicly accessible
-            ]);
-        } catch (AwsException $e) {
-            echo json_encode(['message' => 'Error uploading file to S3: ' . $e->getMessage()]);
-            exit;
-        }
-    }
-
     // Get the base URL of the uploaded SCORM package
-    $baseUrl = $s3Client->getObjectUrl($bucketName, "scorm_packages/{$course_id}/");
+    $baseUrl = '/uploads/courses/' . $course_id . '/' . $unit_name . '/';
 
-    // Save the unit details to the database
-    $sql = "INSERT INTO units (course_id, name, scorm_url, scorm_version) VALUES (:course_id, :name, :scorm_url, :scorm_version)";
+    // Update the SCORM details in the courses table
+    $existingCourseBook = json_decode($course['course_book'], true);
+    if (!is_array($existingCourseBook)) {
+        $existingCourseBook = [];
+    }
+    $existingCourseBook[] = [
+        'unit_name' => $unit_name,
+        'scorm_url' => $baseUrl,
+        'scorm_version' => $scormVersion
+    ];
+    $updatedCourseBook = json_encode($existingCourseBook);
+
+    $sql = "UPDATE courses SET course_book = :course_book, scorm_version = :scorm_version WHERE id = :id";
     $stmt = $conn->prepare($sql);
     $stmt->execute([
-        'course_id' => $course_id,
-        'name' => $unit_name,
-        'scorm_url' => $baseUrl,
+        'course_book' => $updatedCourseBook,
         'scorm_version' => $scormVersion,
+        'id' => $course_id,
     ]);
 
     echo json_encode(['message' => 'Unit added successfully', 'scorm_url' => $baseUrl, 'scorm_version' => $scormVersion]);

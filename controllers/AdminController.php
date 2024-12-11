@@ -33,31 +33,31 @@ require_once __DIR__ . '/../models/Database.php';
 require_once __DIR__ . '/../models/zoom_integration.php';
 
 require_once 'vendor/autoload.php';
-require_once __DIR__ . '/../aws_config.php';
+// require_once __DIR__ . '/../aws_config.php';
 
-$bucketName = AWS_BUCKET_NAME;
-$region = AWS_REGION;
-$accessKey = AWS_ACCESS_KEY_ID;
-$secretKey = AWS_SECRET_ACCESS_KEY;
+// $bucketName = AWS_BUCKET_NAME;
+// $region = AWS_REGION;
+// $accessKey = AWS_ACCESS_KEY_ID;
+// $secretKey = AWS_SECRET_ACCESS_KEY;
 
-// Debugging: Log the values of the configuration variables
-error_log('AWS_BUCKET_NAME: ' . $bucketName);
-error_log('AWS_REGION: ' . $region);
-error_log('AWS_ACCESS_KEY_ID: ' . $accessKey);
-error_log('AWS_SECRET_ACCESS_KEY: ' . $secretKey);
+// // Debugging: Log the values of the configuration variables
+// error_log('AWS_BUCKET_NAME: ' . $bucketName);
+// error_log('AWS_REGION: ' . $region);
+// error_log('AWS_ACCESS_KEY_ID: ' . $accessKey);
+// error_log('AWS_SECRET_ACCESS_KEY: ' . $secretKey);
 
-if (!$bucketName || !$region || !$accessKey || !$secretKey) {
-    throw new Exception('Missing AWS configuration in aws_config.php file');
-}
+// if (!$bucketName || !$region || !$accessKey || !$secretKey) {
+//     throw new Exception('Missing AWS configuration in aws_config.php file');
+// }
 
-$s3Client = new S3Client([
-    'region' => 'us-east-1',
-    'version' => 'latest',
-    'credentials' => [
-        'key' => $accessKey,
-        'secret' => $secretKey,
-    ],
-]);
+// $s3Client = new S3Client([
+//     'region' => 'us-east-1',
+//     'version' => 'latest',
+//     'credentials' => [
+//         'key' => $accessKey,
+//         'secret' => $secretKey,
+//     ],
+// ]);
 
 class AdminController {
     public function index() {
