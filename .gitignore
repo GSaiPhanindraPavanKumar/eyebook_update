@@ -7,3 +7,4 @@ mailer.log
 uploads
 .env
 aws_config.php
+uploads
