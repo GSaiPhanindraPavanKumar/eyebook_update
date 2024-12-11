@@ -39,23 +39,20 @@ include('sidebar.php');
                                 <input type="datetime-local" class="form-control" id="due_date" name="due_date" required>
                             </div>
                             <div class="form-group">
-                                <label for="courses">Select Courses</label>
-                                <table class="table table-bordered">
-                                    <thead>
-                                        <tr>
-                                            <th>Select</th>
-                                            <th>Course Name</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <?php foreach ($courses as $course): ?>
-                                            <tr>
-                                                <td><input type="checkbox" name="course_id[]" value="<?php echo $course['id']; ?>"></td>
-                                                <td><?php echo htmlspecialchars($course['name'] ?? 'N/A'); ?></td>
-                                            </tr>
-                                        <?php endforeach; ?>
-                                    </tbody>
-                                </table>
+                                <label for="course_id">Course:</label>
+                                <select class="form-control" id="course_id" name="course_id" required>
+                                    <?php foreach ($courses as $course): ?>
+                                        <option value="<?php echo $course['id']; ?>"><?php echo htmlspecialchars($course['name']); ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="section_id">Section:</label>
+                                <select class="form-control" id="section_id" name="section_id" required>
+                                    <?php foreach ($sections as $section): ?>
+                                        <option value="<?php echo $section['id']; ?>"><?php echo htmlspecialchars($section['section']); ?></option>
+                                    <?php endforeach; ?>
+                                </select>
                             </div>
                             <div class="form-group">
                                 <label for="assignment_file">Upload Assignment File:</label>
