@@ -96,7 +96,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     echo '<script>
             alert("Unit added successfully!");
-            window.location.href = "/admin/view_course";
+            window.location.href = "/admin/manage_courses";
           </script>';
     exit;
 }
