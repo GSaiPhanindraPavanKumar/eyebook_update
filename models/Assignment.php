@@ -8,13 +8,11 @@ use Models\Database;
 
 
 class Assignment {
-    
-    
     public static function getAllByFaculty($conn, $faculty_id) {
         $sql = "SELECT a.*, c.name as course_name 
                 FROM assignments a
                 JOIN courses c ON a.course_id = c.id
-                WHERE c.faculty_id = :faculty_id";
+                WHERE c.id = :faculty_id";
         $stmt = $conn->prepare($sql);
         $stmt->execute([':faculty_id' => $faculty_id]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);

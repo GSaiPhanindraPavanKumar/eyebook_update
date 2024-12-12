@@ -378,33 +378,39 @@
         </div>
       </section>
 
-      <section class="py-5">
-            <div class="container">
-                <div class="row">
-                    <div class="col-12">
-                        <h2 class="fw-bold">Privacy and Policies</h2>
-                        <p>Your privacy is important to us. This privacy statement explains the personal data EyeBook processes, how EyeBook processes it, and for what purposes.</p>
-                        <h4>Information We Collect</h4>
-                        <p>We collect information to provide better services to all our users. We collect information in the following ways:</p>
-                        <ul>
-                            <li>Information you give us. For example, our service requires you to sign up for an EyeBook Account. When you do, we’ll ask for personal information, like your name, email address, telephone number, or credit card.</li>
-                            <li>Information we get from your use of our services. We collect information about the services that you use and how you use them, like when you visit a website that uses our advertising services or view and interact with our ads and content.</li>
-                        </ul>
-                        <h4>How We Use Information We Collect</h4>
-                        <p>We use the information we collect from all our services to provide, maintain, protect, and improve them, to develop new ones, and to protect EyeBook and our users.</p>
-                        <h4>Information We Share</h4>
-                        <p>We do not share personal information with companies, organizations, and individuals outside of EyeBook unless one of the following circumstances applies:</p>
-                        <ul>
-                            <li>With your consent</li>
-                            <li>For external processing</li>
-                            <li>For legal reasons</li>
-                        </ul>
-                        <h4>Changes</h4>
-                        <p>Our Privacy Policy may change from time to time. We will not reduce your rights under this Privacy Policy without your explicit consent. We will post any privacy policy changes on this page and, if the changes are significant, we will provide a more prominent notice (including, for certain services, email notification of privacy policy changes).</p>
-                    </div>
-                </div>
-            </div>
-        </section>
+      <section class="py-5 bg-light">
+          <div class="container">
+              <div class="row">
+                  <div class="col-12">
+                      <div class="card border-0 shadow">
+                          <div class="card-header  text-white text-center">
+                              <h2 class="fw-bold">Privacy and Policies</h2>
+                          </div>
+                          <div class="card-body p-4">
+                              <p class="lead">Your privacy is important to us. This privacy statement explains the personal data EyeBook processes, how EyeBook processes it, and for what purposes.</p>
+                              <h4 class="mt-4">Information We Collect</h4>
+                              <p>We collect information to provide better services to all our users. We collect information in the following ways:</p>
+                              <ul>
+                                  <li><strong>Information you give us:</strong> For example, our service requires you to sign up for an EyeBook Account. When you do, we’ll ask for personal information, like your name, email address, telephone number, or credit card.</li>
+                                  <li><strong>Information we get from your use of our services:</strong> We collect information about the services that you use and how you use them, like when you visit a website that uses our advertising services or view and interact with our ads and content.</li>
+                              </ul>
+                              <h4 class="mt-4">How We Use Information We Collect</h4>
+                              <p>We use the information we collect from all our services to provide, maintain, protect, and improve them, to develop new ones, and to protect EyeBook and our users.</p>
+                              <h4 class="mt-4">Information We Share</h4>
+                              <p>We do not share personal information with companies, organizations, and individuals outside of EyeBook unless one of the following circumstances applies:</p>
+                              <ul>
+                                  <li><strong>With your consent:</strong> We will share personal information with companies, organizations, or individuals outside of EyeBook when we have your consent to do so.</li>
+                                  <li><strong>For external processing:</strong> We provide personal information to our affiliates or other trusted businesses or persons to process it for us, based on our instructions and in compliance with our Privacy Policy and any other appropriate confidentiality and security measures.</li>
+                                  <li><strong>For legal reasons:</strong> We will share personal information with companies, organizations, or individuals outside of EyeBook if we have a good-faith belief that access, use, preservation, or disclosure of the information is reasonably necessary to meet any applicable law, regulation, legal process, or enforceable governmental request.</li>
+                              </ul>
+                              <h4 class="mt-4">Changes</h4>
+                              <p>Our Privacy Policy may change from time to time. We will not reduce your rights under this Privacy Policy without your explicit consent. We will post any privacy policy changes on this page and, if the changes are significant, we will provide a more prominent notice (including, for certain services, email notification of privacy policy changes).</p>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+          </div>
+      </section>
 
 
       <!-- ============================================-->

@@ -327,19 +327,17 @@ class FacultyController {
 
 
 
-
-
     public function createAssignment() {
         $conn = Database::getConnection();
         $messages = []; // Initialize the $messages variable
-
+    
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $title = $_POST['assignment_title'];
             $instructions = $_POST['assignment_instructions'];
             $due_date = $_POST['due_date'];
             $course_id = $_POST['course_id'];
             $section_id = $_POST['section_id'];
-
+    
             // Check if email is set in the session
             if (isset($_SESSION['email'])) {
                 $email = $_SESSION['email'];
@@ -350,37 +348,45 @@ class FacultyController {
                 require 'views/faculty/assignment_create.php';
                 return;
             }
-
-            $file_path = '';
-
+    
+            $file_content = null;
+    
             if (isset($_FILES['assignment_file']) && $_FILES['assignment_file']['error'] == 0) {
-                $file_path = 'uploads/' . basename($_FILES['assignment_file']['name']);
-                move_uploaded_file($_FILES['assignment_file']['tmp_name'], $file_path);
+                $file_content = file_get_contents($_FILES['assignment_file']['tmp_name']);
             }
-
+    
             try {
-                $sql = "INSERT INTO assignments (title, instructions, due_date, course_id, section_id, university_id, file_path) VALUES (:title, :instructions, :due_date, :course_id, :section_id, :university_id, :file_path)";
+                $sql = "INSERT INTO assignments (title, instructions, due_date, course_id, section_id, university_id, file_content) VALUES (:title, :instructions, :due_date, :course_id, :section_id, :university_id, :file_content)";
                 $stmt = $conn->prepare($sql);
-                $stmt->execute([
+                $params = [
                     ':title' => $title,
                     ':instructions' => $instructions,
                     ':due_date' => $due_date,
                     ':course_id' => $course_id,
                     ':section_id' => $section_id,
                     ':university_id' => $university_id,
-                    ':file_path' => $file_path
-                ]);
-
+                    ':file_content' => $file_content
+                ];
+                $stmt->execute($params);
+    
+                // Debugging output
+                error_log("SQL: $sql");
+                error_log("Params: " . print_r($params, true));
+    
                 // Send email notification to students
                 $students = Student::getAllByCourseAndSection($conn, $course_id, $section_id);
                 foreach ($students as $student) {
                     mail($student['email'], "New Assignment Created", "A new assignment titled '$title' has been created. Please check the LMS for details.");
                 }
-
-                header('Location: /faculty/manage_assignments');
+    
+                echo "<script>
+                    alert('Assignment created successfully!');
+                    window.location.href = '/faculty/manage_assignments';
+                </script>";
                 exit;
             } catch (PDOException $e) {
                 $messages[] = "Error creating assignment: " . $e->getMessage();
+                error_log("Error creating assignment: " . $e->getMessage());
             }
         }
         $courses = Course::getCoursesByFaculty($conn);
@@ -403,10 +409,11 @@ class FacultyController {
     }
 
 
+    
     public function manageAssignments() {
         $conn = Database::getConnection();
         $messages = []; // Initialize the $messages variable
-
+    
         // Check if email is set in the session
         if (isset($_SESSION['email'])) {
             $email = $_SESSION['email'];
@@ -417,13 +424,12 @@ class FacultyController {
             require 'views/faculty/manage_assignments.php';
             return;
         }
-
+    
         // Fetch all assignments related to the faculty
         $assignments = Assignment::getAllByFaculty($conn, $faculty_id);
-
+    
         require 'views/faculty/manage_assignments.php';
     }
-
 
 
 
