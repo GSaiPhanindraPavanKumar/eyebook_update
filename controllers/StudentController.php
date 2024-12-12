@@ -292,6 +292,11 @@ class StudentController {
         $student_id = $_SESSION['student_id']; // Assuming student_id is stored in session
         $assignments = Assignment::getAssignmentsByStudentId($conn, $student_email);
 
+        // Ensure $assignments is an array
+        if (!is_array($assignments)) {
+            $assignments = [];
+        }
+
         // Fetch submission status for each assignment
         foreach ($assignments as &$assignment) {
             $assignment['is_submitted'] = Assignment::isSubmitted($conn, $assignment['id'], $student_id);
@@ -303,22 +308,11 @@ class StudentController {
     public function viewAssignment($assignment_id) {
         $conn = Database::getConnection();
         $assignment = Assignment::getById($conn, $assignment_id);
-        $student_id = $_SESSION['student_id']; // Assuming student_id is stored in session
+        $submissions = Assignment::getSubmissions($conn, $assignment_id);
 
-        // Fetch existing submissions
-        $sql = "SELECT submissions FROM assignments WHERE id = :assignment_id";
-        $stmt = $conn->prepare($sql);
-        $stmt->execute([':assignment_id' => $assignment_id]);
-        $result = $stmt->fetch(PDO::FETCH_ASSOC);
-        $submissions = $result ? json_decode($result['submissions'], true) : [];
-
-        // Find the student's submission
-        $student_submission = null;
-        foreach ($submissions as $submission) {
-            if ($submission['student_id'] == $student_id) {
-                $student_submission = $submission;
-                break;
-            }
+        // Ensure $submissions is an array
+        if (!is_array($submissions)) {
+            $submissions = [];
         }
 
         require 'views/student/view_assignment.php';

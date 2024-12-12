@@ -106,7 +106,7 @@ class Assignment {
         $stmt = $conn->prepare($sql);
         $stmt->execute([':assignment_id' => $assignmentId]);
         $result = $stmt->fetch(PDO::FETCH_ASSOC);
-        $submissions = isset($result['submissions']) ? json_decode($result['submissions'], true) : [];
+        $submissions = isset($result['submissions']) ? json_decode($result['submissions'] ?? '[]', true) : [];
 
         // Fetch student details for each submission
         $submissionDetails = [];
@@ -159,7 +159,7 @@ class Assignment {
         $stmt = $conn->prepare($sql);
         $stmt->execute([':email' => $student_email]);
         $result = $stmt->fetch(PDO::FETCH_ASSOC);
-        $assigned_courses = $result ? json_decode($result['assigned_courses'], true) : [];
+        $assigned_courses = $result ? json_decode($result['assigned_courses'] ?? '[]', true) : [];
 
         if (empty($assigned_courses)) {
             return [];
@@ -175,7 +175,7 @@ class Assignment {
         $assignment_ids = [];
         $course_names = [];
         foreach ($courses as $course) {
-            $course_assignments = json_decode($course['assignments']  ?? '[]', true);
+            $course_assignments = json_decode($course['assignments'] ?? '[]', true);
             if (is_array($course_assignments)) {
                 $assignment_ids = array_merge($assignment_ids, $course_assignments);
                 foreach ($course_assignments as $assignment_id) {
@@ -200,12 +200,12 @@ class Assignment {
 
         // Step 4: Add course names and grade information to assignments
         foreach ($assignments as &$assignment) {
-            $assignment['course_name'] = $course_names[$assignment['id']];
+            $assignment['course_name'] = $course_names[$assignment['id']] ?? 'Unknown Course';
             $sql = "SELECT submissions FROM assignments WHERE id = :assignment_id";
             $stmt = $conn->prepare($sql);
             $stmt->execute([':assignment_id' => $assignment['id']]);
             $result = $stmt->fetch(PDO::FETCH_ASSOC);
-            $submissions = isset($result['submissions']) ? json_decode($result['submissions'], true) : [];
+            $submissions = isset($result['submissions']) ? json_decode($result['submissions'] ?? '[]', true) : [];
             foreach ($submissions as $submission) {
                 if ($submission['student_id'] == $_SESSION['student_id']) {
                     $assignment['grade'] = $submission['grade'] ?? 'Not Graded';
