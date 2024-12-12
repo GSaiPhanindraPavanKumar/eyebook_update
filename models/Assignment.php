@@ -11,7 +11,7 @@ class Assignment {
     public static function getAllByFaculty($conn, $faculty_id) {
         $sql = "SELECT a.*, c.name as course_name 
                 FROM assignments a
-                JOIN courses c ON a.course_id = c.id
+                JOIN courses c ON a.id = c.id
                 WHERE JSON_CONTAINS(c.assigned_faculty, :faculty_id, '$')";
         $stmt = $conn->prepare($sql);
         $stmt->execute([':faculty_id' => json_encode($faculty_id)]);
