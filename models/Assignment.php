@@ -19,7 +19,7 @@ class Assignment {
     }
 
         public static function getAll($conn) {
-            $sql = "SELECT a.*, c.name as course_name FROM assignments a JOIN courses c ON a.course_id = c.id";
+            $sql = "SELECT a.*, c.name as course_name FROM assignments a JOIN courses c ON a.id = c.id";
             $stmt = $conn->prepare($sql);
             $stmt->execute();
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -68,7 +68,7 @@ class Assignment {
             $sql = "SELECT a.*, s.file_content, s.grade 
                     FROM assignments a
                     LEFT JOIN assignment_submissions s ON a.id = s.assignment_id AND s.student_id = :student_id";
-                   // -- WHERE a.course_id IN (SELECT course_id FROM courses WHERE student_id = :student_id)";
+                   // -- WHERE a.id IN (SELECT id FROM courses WHERE student_id = :student_id)";
 
             $stmt = $conn->prepare($sql);
             $stmt->execute([':student_id' => $student_id]);
