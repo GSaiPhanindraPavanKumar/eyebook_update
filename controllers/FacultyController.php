@@ -327,6 +327,7 @@ class FacultyController {
 
 
 
+        
     public function createAssignment() {
         $conn = Database::getConnection();
         $messages = []; // Initialize the $messages variable
@@ -379,10 +380,7 @@ class FacultyController {
                     mail($student['email'], "New Assignment Created", "A new assignment titled '$title' has been created. Please check the LMS for details.");
                 }
     
-                echo "<script>
-                    alert('Assignment created successfully!');
-                    window.location.href = '/faculty/manage_assignments';
-                </script>";
+                header('Location: /faculty/manage_assignments');
                 exit;
             } catch (PDOException $e) {
                 $messages[] = "Error creating assignment: " . $e->getMessage();
