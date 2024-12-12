@@ -9,6 +9,7 @@ use Models\Database;
 
 class Assignment {
     
+    
     public static function getAllByFaculty($conn, $faculty_id) {
         $sql = "SELECT a.*, c.name as course_name 
                 FROM assignments a
