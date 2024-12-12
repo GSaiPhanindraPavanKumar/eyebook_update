@@ -175,7 +175,7 @@ class Assignment {
         $assignment_ids = [];
         $course_names = [];
         foreach ($courses as $course) {
-            $course_assignments = json_decode($course['assignments'], true);
+            $course_assignments = json_decode($course['assignments']  ?? '[]', true);
             if (is_array($course_assignments)) {
                 $assignment_ids = array_merge($assignment_ids, $course_assignments);
                 foreach ($course_assignments as $assignment_id) {
