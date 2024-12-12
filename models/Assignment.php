@@ -12,9 +12,9 @@ class Assignment {
         $sql = "SELECT a.*, c.name as course_name 
                 FROM assignments a
                 JOIN courses c ON a.course_id = c.id
-                WHERE c.faculty_id = :faculty_id";
+                WHERE JSON_CONTAINS(c.assigned_faculty, :faculty_id, '$')";
         $stmt = $conn->prepare($sql);
-        $stmt->execute([':faculty_id' => $faculty_id]);
+        $stmt->execute([':faculty_id' => json_encode($faculty_id)]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
