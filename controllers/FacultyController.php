@@ -337,7 +337,7 @@ class FacultyController {
             $title = $_POST['assignment_title'];
             $instructions = $_POST['assignment_instructions'];
             $due_date = $_POST['due_date'];
-            $course_id = $_POST['id'];
+            $course_id = $_POST['course_id'];
             $section_id = $_POST['section_id'];
 
             // Check if email is set in the session
