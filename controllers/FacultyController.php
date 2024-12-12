@@ -191,67 +191,67 @@ class FacultyController {
     }
 
 
-        // Other methods...
-    
-        public function downloadReport($assignmentId, $format) {
-            $conn = Database::getConnection();
-            $submissions = Assignment::getSubmissions($conn, $assignmentId);
-    
-            if ($format === 'pdf') {
-                $this->generatePDFReport($submissions);
-            } elseif ($format === 'excel') {
-                $this->generateExcelReport($submissions);
-            }
+    // Other methods...
+
+    public function downloadReport($assignmentId, $format) {
+        $conn = Database::getConnection();
+        $submissions = Assignment::getSubmissions($conn, $assignmentId);
+
+        if ($format === 'pdf') {
+            $this->generatePDFReport($submissions);
+        } elseif ($format === 'excel') {
+            $this->generateExcelReport($submissions);
         }
-    
-        private function generatePDFReport($submissions) {
-            $options = new Options();
-            $options->set('isHtml5ParserEnabled', true);
-            $options->set('isRemoteEnabled', true);
-    
-            $dompdf = new Dompdf($options);
-            $html = '<h1>Assignment Report</h1>';
-            $html .= '<table border="1" cellpadding="10" cellspacing="0">';
-            $html .= '<thead><tr><th>S.No</th><th>Student Name</th><th>Email</th><th>Grade</th></tr></thead>';
-            $html .= '<tbody>';
-            foreach ($submissions as $index => $submission) {
-                $html .= '<tr>';
-                $html .= '<td>' . ($index + 1) . '</td>';
-                $html .= '<td>' . htmlspecialchars($submission['student_name']) . '</td>';
-                $html .= '<td>' . htmlspecialchars($submission['email']) . '</td>';
-                $html .= '<td>' . htmlspecialchars($submission['grade']) . '</td>';
-                $html .= '</tr>';
-            }
-            $html .= '</tbody></table>';
-            $dompdf->loadHtml($html);
-            $dompdf->setPaper('A4', 'landscape');
-            $dompdf->render();
-            $dompdf->stream('assignment_report.pdf', ['Attachment' => false]);
+    }
+
+    private function generatePDFReport($submissions) {
+        $options = new Options();
+        $options->set('isHtml5ParserEnabled', true);
+        $options->set('isRemoteEnabled', true);
+
+        $dompdf = new Dompdf($options);
+        $html = '<h1>Assignment Report</h1>';
+        $html .= '<table border="1" cellpadding="10" cellspacing="0">';
+        $html .= '<thead><tr><th>S.No</th><th>Student Name</th><th>Email</th><th>Grade</th></tr></thead>';
+        $html .= '<tbody>';
+        foreach ($submissions as $index => $submission) {
+            $html .= '<tr>';
+            $html .= '<td>' . ($index + 1) . '</td>';
+            $html .= '<td>' . htmlspecialchars($submission['student_name']) . '</td>';
+            $html .= '<td>' . htmlspecialchars($submission['email']) . '</td>';
+            $html .= '<td>' . htmlspecialchars($submission['grade']) . '</td>';
+            $html .= '</tr>';
         }
-    
-        private function generateExcelReport($submissions) {
-            $spreadsheet = new Spreadsheet();
-            $sheet = $spreadsheet->getActiveSheet();
-            $sheet->setCellValue('A1', 'S.No');
-            $sheet->setCellValue('B1', 'Student Name');
-            $sheet->setCellValue('C1', 'Email');
-            $sheet->setCellValue('D1', 'Grade');
-    
-            foreach ($submissions as $index => $submission) {
-                $sheet->setCellValue('A' . ($index + 2), $index + 1);
-                $sheet->setCellValue('B' . ($index + 2), $submission['student_name']);
-                $sheet->setCellValue('C' . ($index + 2), $submission['email']);
-                $sheet->setCellValue('D' . ($index + 2), $submission['grade']);
-            }
-    
-            $writer = new Xlsx($spreadsheet);
-            $filename = 'assignment_report.xlsx';
-            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-            header('Content-Disposition: attachment; filename="' . $filename . '"');
-            header('Cache-Control: max-age=0');
-            $writer->save('php://output');
-            exit;
+        $html .= '</tbody></table>';
+        $dompdf->loadHtml($html);
+        $dompdf->setPaper('A4', 'landscape');
+        $dompdf->render();
+        $dompdf->stream('assignment_report.pdf', ['Attachment' => false]);
+    }
+
+    private function generateExcelReport($submissions) {
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setCellValue('A1', 'S.No');
+        $sheet->setCellValue('B1', 'Student Name');
+        $sheet->setCellValue('C1', 'Email');
+        $sheet->setCellValue('D1', 'Grade');
+
+        foreach ($submissions as $index => $submission) {
+            $sheet->setCellValue('A' . ($index + 2), $index + 1);
+            $sheet->setCellValue('B' . ($index + 2), $submission['student_name']);
+            $sheet->setCellValue('C' . ($index + 2), $submission['email']);
+            $sheet->setCellValue('D' . ($index + 2), $submission['grade']);
         }
+
+        $writer = new Xlsx($spreadsheet);
+        $filename = 'assignment_report.xlsx';
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment; filename="' . $filename . '"');
+        header('Cache-Control: max-age=0');
+        $writer->save('php://output');
+        exit;
+    }
             
 
 
@@ -302,11 +302,40 @@ class FacultyController {
         //     require 'views/faculty/manage_assignments.php';
         // }
     
-    public function viewAssignment($assignmentId) {
+    public function viewAssignment($assignment_id) {
         $conn = Database::getConnection();
-        $assignment = Assignment::getById($conn, $assignmentId);
-        $submissions = Assignment::getSubmissions($conn, $assignmentId);
+        $assignment = Assignment::getById($conn, $assignment_id);
+        $submissions = Assignment::getSubmissions($conn, $assignment_id);
+
         require 'views/faculty/view_assignment.php';
+    }
+
+    public function gradeSubmissionPage($assignment_id, $student_id) {
+        $conn = Database::getConnection();
+        $assignment = Assignment::getById($conn, $assignment_id);
+        $submissions = Assignment::getSubmissions($conn, $assignment_id);
+
+        // Find the specific student's submission
+        $student_submission = null;
+        foreach ($submissions as $submission) {
+            if ($submission['student_id'] == $student_id) {
+                $student_submission = $submission;
+                break;
+            }
+        }
+
+        require 'views/faculty/grade_submission.php';
+    }
+
+    public function gradeSubmission($assignment_id, $student_id) {
+        $conn = Database::getConnection();
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $grade = $_POST['grade'];
+            $feedback = $_POST['feedback'];
+            Assignment::grade($conn, $assignment_id, $student_id, $grade, $feedback);
+            header('Location: /faculty/view_assignment/' . $assignment_id);
+            exit;
+        }
     }
 
     public function markAssignment() {
@@ -327,68 +356,54 @@ class FacultyController {
 
 
 
-        
+    public function manageAssignments() {
+        $conn = Database::getConnection();
+        $faculty_id = $_SESSION['faculty_id'];
+        $assignments = Assignment::getAssignmentsByFaculty($conn, $faculty_id);
+
+        // Fetch submission count for each assignment
+        foreach ($assignments as &$assignment) {
+            $assignment['submission_count'] = Assignment::getSubmissionCount($conn, $assignment['id']);
+        }
+
+        require 'views/faculty/manage_assignments.php';
+    }
+
+    
+
     public function createAssignment() {
         $conn = Database::getConnection();
-        $messages = []; // Initialize the $messages variable
-    
+        $messages = [];
+
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $title = $_POST['assignment_title'];
-            $instructions = $_POST['assignment_instructions'];
+            $description = $_POST['assignment_description'];
             $due_date = $_POST['due_date'];
-            $course_id = $_POST['course_id'];
-            $section_id = $_POST['section_id'];
-    
-            // Check if email is set in the session
-            if (isset($_SESSION['email'])) {
-                $email = $_SESSION['email'];
-                $faculty = Faculty::getByEmail($conn, $email);
-                $university_id = $faculty['university_id'];
-            } else {
-                $messages[] = "Email is not set in the session.";
-                require 'views/faculty/assignment_create.php';
-                return;
-            }
-    
+            $course_ids = $_POST['course_id'];
             $file_content = null;
-    
+
             if (isset($_FILES['assignment_file']) && $_FILES['assignment_file']['error'] == 0) {
                 $file_content = file_get_contents($_FILES['assignment_file']['tmp_name']);
             }
-    
+
             try {
-                $sql = "INSERT INTO assignments (title, instructions, due_date, course_id, section_id, university_id, file_content) VALUES (:title, :instructions, :due_date, :course_id, :section_id, :university_id, :file_content)";
-                $stmt = $conn->prepare($sql);
-                $params = [
-                    ':title' => $title,
-                    ':instructions' => $instructions,
-                    ':due_date' => $due_date,
-                    ':course_id' => $course_id,
-                    ':section_id' => $section_id,
-                    ':university_id' => $university_id,
-                    ':file_content' => $file_content
-                ];
-                $stmt->execute($params);
-    
-                // Debugging output
-                error_log("SQL: $sql");
-                error_log("Params: " . print_r($params, true));
-    
-                // Send email notification to students
-                $students = Student::getAllByCourseAndSection($conn, $course_id, $section_id);
-                foreach ($students as $student) {
-                    mail($student['email'], "New Assignment Created", "A new assignment titled '$title' has been created. Please check the LMS for details.");
+                $assignment_id = Assignment::create($conn, $title, $description, $due_date, $course_ids, $file_content);
+
+                foreach ($course_ids as $course_id) {
+                    Course::addAssignmentToCourse($conn, $course_id, $assignment_id);
                 }
-    
+
                 header('Location: /faculty/manage_assignments');
                 exit;
             } catch (PDOException $e) {
                 $messages[] = "Error creating assignment: " . $e->getMessage();
-                error_log("Error creating assignment: " . $e->getMessage());
             }
         }
-        $courses = Course::getCoursesByFaculty($conn);
-        $sections = Faculty::getAll($conn); // Updated to fetch sections from the faculty table
+
+        $faculty_id = $_SESSION['faculty_id'];
+        $assigned_courses = Faculty::getAssignedCourses($conn, $faculty_id);
+        $courses = Course::getOngoingCoursesByIds($conn, $assigned_courses);
+
         require 'views/faculty/assignment_create.php';
     }
 
@@ -404,29 +419,6 @@ class FacultyController {
             header('Location: /faculty/my_courses');
             exit();
         }
-    }
-
-
-    
-    public function manageAssignments() {
-        $conn = Database::getConnection();
-        $messages = []; // Initialize the $messages variable
-    
-        // Check if email is set in the session
-        if (isset($_SESSION['email'])) {
-            $email = $_SESSION['email'];
-            $faculty = Faculty::getByEmail($conn, $email);
-            $faculty_id = $faculty['id'];
-        } else {
-            $messages[] = "Email is not set in the session.";
-            require 'views/faculty/manage_assignments.php';
-            return;
-        }
-    
-        // Fetch all assignments related to the faculty
-        $assignments = Assignment::getAllByFaculty($conn, $faculty_id);
-    
-        require 'views/faculty/manage_assignments.php';
     }
 
 

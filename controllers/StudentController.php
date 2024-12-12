@@ -286,44 +286,132 @@ class StudentController {
     }
 
     
-        public function manageAssignments() {
-            $conn = Database::getConnection();
-            $student_id = $_SESSION['email'];
-            $assignments = Assignment::getAssignmentsByStudentId($conn, $student_id);
-            require 'views/student/manage_assignments.php';
-        }
-    
-        public function submitAssignment($assignmentId) {
-            $conn = Database::getConnection();
-            $student_id = $_SESSION['student_id'];
-            $messages = [];
-        
-            if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-                $file_content = null;
-        
-                if (isset($_FILES['assignment_file']) && $_FILES['assignment_file']['error'] == 0) {
-                    $file_content = file_get_contents($_FILES['assignment_file']['tmp_name']);
-                }
-        
-                try {
-                    Student::submitAssignment($conn, $student_id, $assignmentId, $file_content);
-                    $messages[] = "Assignment submitted successfully.";
-                } catch (PDOException $e) {
-                    $messages[] = "Error submitting assignment: " . $e->getMessage();
-                }
-            }
-        
-            $assignment = Assignment::getById($conn, $assignmentId);
-            require 'views/student/assignment_submit.php';
-        }
-        
-        public function viewGrades() {
-            $conn = Database::getConnection();
-            $student_id = $_SESSION['student_id'];
-            $grades = Assignment::getGradesByStudentId($conn, $student_id);
-            require 'views/student/view_grades.php';
+    public function manageAssignments() {
+        $conn = Database::getConnection();
+        $student_email = $_SESSION['email'];
+        $student_id = $_SESSION['student_id']; // Assuming student_id is stored in session
+        $assignments = Assignment::getAssignmentsByStudentId($conn, $student_email);
+
+        // Fetch submission status for each assignment
+        foreach ($assignments as &$assignment) {
+            $assignment['is_submitted'] = Assignment::isSubmitted($conn, $assignment['id'], $student_id);
         }
 
-    
+        require 'views/student/manage_assignments.php';
     }
+
+    public function viewAssignment($assignment_id) {
+        $conn = Database::getConnection();
+        $assignment = Assignment::getById($conn, $assignment_id);
+        $student_id = $_SESSION['student_id']; // Assuming student_id is stored in session
+
+        // Fetch existing submissions
+        $sql = "SELECT submissions FROM assignments WHERE id = :assignment_id";
+        $stmt = $conn->prepare($sql);
+        $stmt->execute([':assignment_id' => $assignment_id]);
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        $submissions = $result ? json_decode($result['submissions'], true) : [];
+
+        // Find the student's submission
+        $student_submission = null;
+        foreach ($submissions as $submission) {
+            if ($submission['student_id'] == $student_id) {
+                $student_submission = $submission;
+                break;
+            }
+        }
+
+        require 'views/student/view_assignment.php';
+    }
+
+    public function submitAssignment($assignment_id) {
+        $conn = Database::getConnection();
+        $student_id = $_SESSION['student_id']; // Assuming student_id is stored in session
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            if (isset($_FILES['submission_file']) && $_FILES['submission_file']['error'] == 0) {
+                $file_content = file_get_contents($_FILES['submission_file']['tmp_name']);
+                $submission_date = date('Y-m-d H:i:s');
+
+                // Fetch existing submissions
+                $sql = "SELECT submissions FROM assignments WHERE id = :assignment_id";
+                $stmt = $conn->prepare($sql);
+                $stmt->execute([':assignment_id' => $assignment_id]);
+                $result = $stmt->fetch(PDO::FETCH_ASSOC);
+                $submissions = $result ? json_decode($result['submissions'], true) : [];
+
+                // Add or update the student's submission
+                $updated = false;
+                foreach ($submissions as &$submission) {
+                    if ($submission['student_id'] == $student_id) {
+                        $submission['file'] = base64_encode($file_content);
+                        $submission['date_of_submit'] = $submission_date;
+                        $updated = true;
+                        break;
+                    }
+                }
+                if (!$updated) {
+                    $submissions[] = [
+                        'student_id' => $student_id,
+                        'file' => base64_encode($file_content),
+                        'date_of_submit' => $submission_date
+                    ];
+                }
+
+                // Update submissions in the database
+                $sql = "UPDATE assignments SET submissions = :submissions WHERE id = :assignment_id";
+                $stmt = $conn->prepare($sql);
+                $stmt->execute([
+                    ':submissions' => json_encode($submissions),
+                    ':assignment_id' => $assignment_id
+                ]);
+
+                header('Location: /student/view_assignment/' . $assignment_id);
+                exit;
+            } else {
+                $error = "Failed to upload file.";
+            }
+        }
+
+        $assignment = Assignment::getById($conn, $assignment_id);
+        require 'views/student/view_assignment.php';
+    }
+
+    public function deleteSubmission($assignment_id) {
+        $conn = Database::getConnection();
+        $student_id = $_SESSION['student_id']; // Assuming student_id is stored in session
+
+        // Fetch existing submissions
+        $sql = "SELECT submissions FROM assignments WHERE id = :assignment_id";
+        $stmt = $conn->prepare($sql);
+        $stmt->execute([':assignment_id' => $assignment_id]);
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        $submissions = $result ? json_decode($result['submissions'], true) : [];
+
+        // Remove the student's submission
+        $submissions = array_filter($submissions, function($submission) use ($student_id) {
+            return $submission['student_id'] != $student_id;
+        });
+
+        // Update submissions in the database
+        $sql = "UPDATE assignments SET submissions = :submissions WHERE id = :assignment_id";
+        $stmt = $conn->prepare($sql);
+        $stmt->execute([
+            ':submissions' => json_encode(array_values($submissions)),
+            ':assignment_id' => $assignment_id
+        ]);
+
+        header('Location: /student/view_assignment/' . $assignment_id);
+        exit;
+    }
+    
+    public function viewGrades() {
+        $conn = Database::getConnection();
+        $student_id = $_SESSION['student_id'];
+        $grades = Assignment::getGradesByStudentId($conn, $student_id);
+        require 'views/student/view_grades.php';
+    }
+
+    
+}
 ?>

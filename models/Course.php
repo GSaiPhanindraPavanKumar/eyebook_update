@@ -201,6 +201,34 @@ class Course {
         ]);
     }
 
+    public static function getOngoingCoursesByIds($conn, $course_ids) {
+        if (empty($course_ids)) {
+            return [];
+        }
+
+        $placeholders = implode(',', array_fill(0, count($course_ids), '?'));
+        $sql = "SELECT * FROM courses WHERE id IN ($placeholders) AND status = 'ongoing'";
+        $stmt = $conn->prepare($sql);
+        $stmt->execute($course_ids);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public static function addAssignmentToCourse($conn, $course_id, $assignment_id) {
+        $sql = "SELECT assignments FROM courses WHERE id = :id";
+        $stmt = $conn->prepare($sql);
+        $stmt->execute([':id' => $course_id]);
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        $assignments = $result ? json_decode($result['assignments'], true) : [];
+        $assignments[] = $assignment_id;
+
+        $sql = "UPDATE courses SET assignments = :assignments WHERE id = :id";
+        $stmt = $conn->prepare($sql);
+        $stmt->execute([
+            ':assignments' => json_encode($assignments),
+            ':id' => $course_id
+        ]);
+    }
+
     public static function hasFeedback($conn, $course_id, $student_id) {
         $query = 'SELECT feedback FROM courses WHERE id = :course_id';
         $stmt = $conn->prepare($query);

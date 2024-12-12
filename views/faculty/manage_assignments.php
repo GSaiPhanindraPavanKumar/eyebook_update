@@ -3,24 +3,18 @@
 <div class="main-panel">
     <div class="content-wrapper">
         <div class="row">
-        <div class="row">
             <div class="col-md-12 grid-margin">
-                <div class="row">
-                    <div class="col-12">
-                        <h3 class="font-weight-bold">Manage Assignments</h3>
-                    </div>
-                    <!-- <div class="col-12 col-xl-6 text-right">
-                        <a href="/faculty/create_assignment" class="btn btn-primary">
-                            <i class="fas fa-plus-circle"></i> Create Assignment
-                        </a>
-                    </div> -->
+                <div class="d-flex justify-content-between align-items-center">
+                    <h3 class="font-weight-bold">Manage Assignments</h3>
+                    <a href="/faculty/create_assignment" class="btn btn-primary">
+                        <i class="fas fa-plus-circle"></i> Create Assignment
+                    </a>
                 </div>
             </div>
         </div>
+        <div class="row">
             <div class="col-md-12 grid-margin stretch-card"><br>
                 <div class="card">
-
-                    <!-- <a href="/faculty/create_assignment" class="btn btn-primary">Create Assignment</a> -->
                     <div class="card-body" style="text-align: center;">
                         <table class="table">
                             <thead>
@@ -28,22 +22,28 @@
                                     <th>Title</th>
                                     <th>Course</th>
                                     <th>Due Date</th>
+                                    <th>Submissions</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <?php foreach ($assignments as $assignment): ?>
+                                <?php if (!empty($assignments)): ?>
+                                    <?php foreach ($assignments as $assignment): ?>
+                                        <tr>
+                                            <td><?php echo htmlspecialchars($assignment['title']); ?></td>
+                                            <td><?php echo htmlspecialchars($assignment['course_name'] ?? ''); ?></td>
+                                            <td><?php echo htmlspecialchars($assignment['due_date']); ?></td>
+                                            <td><?php echo htmlspecialchars($assignment['submission_count']); ?></td>
+                                            <td>
+                                                <a href="/faculty/view_assignment/<?php echo $assignment['id']; ?>" class="btn btn-info">View</a>
+                                            </td>
+                                        </tr>
+                                    <?php endforeach; ?>
+                                <?php else: ?>
                                     <tr>
-                                        <td><?php echo htmlspecialchars($assignment['title']); ?></td>
-                                        <td><?php echo htmlspecialchars($assignment['course_name']); ?></td>
-                                        <td><?php echo htmlspecialchars($assignment['due_date']); ?></td>
-                                        <td>
-                                            <a href="/faculty/view_assignment/<?php echo $assignment['id']; ?>" class="btn btn-info">View</a>
-                                            <!-- <a href="/faculty/download_report/<?php echo $assignment['id']; ?>/pdf" class="btn btn-secondary">Preview PDF</a> -->
-                                            <a href="/faculty/download_report/<?php echo $assignment['id']; ?>/excel" class="btn btn-secondary">Download Excel</a>
-                                        </td>
+                                        <td colspan="5">No assignments found.</td>
                                     </tr>
-                                <?php endforeach; ?>
+                                <?php endif; ?>
                             </tbody>
                         </table>
                     </div>

@@ -1,6 +1,5 @@
-<?php
-include('sidebar.php');
-?>
+// assignment_create.php (View)
+<?php include('sidebar.php'); ?>
 
 <div class="main-panel">
     <div class="content-wrapper">
@@ -8,7 +7,7 @@ include('sidebar.php');
             <div class="col-md-12 grid-margin">
                 <div class="row">
                     <div class="col-12 col-xl-8 mb-4 mb-xl-0">
-                        <!-- <h3 class="font-weight-bold">Hello, <em><?php echo htmlspecialchars($userData['name']); ?></em></h3> -->
+                        <h3 class="font-weight-bold">Create Assignment</h3>
                     </div>
                 </div>
             </div>
@@ -31,28 +30,31 @@ include('sidebar.php');
                                 <input type="text" class="form-control" id="assignment_title" name="assignment_title" required>
                             </div>
                             <div class="form-group">
-                                <label for="assignment_instructions">Assignment Instructions:</label>
-                                <textarea class="form-control" id="assignment_instructions" name="assignment_instructions" required></textarea>
+                                <label for="assignment_description">Assignment Description:</label>
+                                <textarea class="form-control" id="assignment_description" name="assignment_description" required></textarea>
                             </div>
                             <div class="form-group">
                                 <label for="due_date">Due Date:</label>
                                 <input type="datetime-local" class="form-control" id="due_date" name="due_date" required>
                             </div>
                             <div class="form-group">
-                                <label for="course_id">Course:</label>
-                                <select class="form-control" id="course_id" name="course_id" required>
-                                    <?php foreach ($courses as $course): ?>
-                                        <option value="<?php echo $course['id']; ?>"><?php echo htmlspecialchars($course['name']); ?></option>
-                                    <?php endforeach; ?>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label for="section_id">Section:</label>
-                                <select class="form-control" id="section_id" name="section_id" required>
-                                    <?php foreach ($sections as $section): ?>
-                                        <option value="<?php echo $section['id']; ?>"><?php echo htmlspecialchars($section['section']); ?></option>
-                                    <?php endforeach; ?>
-                                </select>
+                                <label for="courses">Select Courses</label>
+                                <table class="table table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th>Select</th>
+                                            <th>Course Name</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <?php foreach ($courses as $course): ?>
+                                            <tr>
+                                                <td><input type="checkbox" name="course_id[]" value="<?php echo $course['id']; ?>"></td>
+                                                <td><?php echo htmlspecialchars($course['name']); ?></td>
+                                            </tr>
+                                        <?php endforeach; ?>
+                                    </tbody>
+                                </table>
                             </div>
                             <div class="form-group">
                                 <label for="assignment_file">Upload Assignment File:</label>
@@ -65,9 +67,7 @@ include('sidebar.php');
             </div>
         </div>
     </div>
-    <!-- content-wrapper ends -->
     <?php include 'footer.html'; ?>
 </div>
 
-<!-- Include Bootstrap CSS -->
 <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">

@@ -3,57 +3,54 @@
 <div class="main-panel">
     <div class="content-wrapper">
         <div class="row">
-        <div class="row">
             <div class="col-md-12 grid-margin">
                 <div class="row">
                     <div class="col-12">
                         <h3 class="font-weight-bold">Manage Assignments</h3>
                     </div>
-                    <!-- <div class="col-12 col-xl-6 text-right">
-                        <a href="/faculty/create_assignment" class="btn btn-primary">
-                            <i class="fas fa-plus-circle"></i> Create Assignment
-                        </a>
-                    </div> -->
                 </div>
             </div>
         </div>
+        <div class="row">
             <div class="col-md-12 grid-margin stretch-card"><br>
                 <div class="card">
-
-                    <!-- <a href="/faculty/create_assignment" class="btn btn-primary">Create Assignment</a> -->
                     <div class="card-body" style="text-align: center;">
-                    <table class="table">
-                    <table class="table">
-        <thead>
-            <tr>
-                <th>Title</th>
-                <th>Due Date</th>
-                <!-- <th>File</th>
-                <th>Grade</th> -->
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            <?php foreach ($assignments as $assignment): ?>
-                <tr>
-                    <td><?php echo htmlspecialchars($assignment['title'] ?? ''); ?></td>
-                    <td><?php echo htmlspecialchars($assignment['due_date'] ?? ''); ?></td>
-                    <!-- <td>
-                        <?php if (!empty($assignment['file_content'])): ?>
-                            <a href="data:application/octet-stream;base64,<?php echo base64_encode($assignment['file_content']); ?>" download="assignment_<?php echo $assignment['id']; ?>">Download File</a>
-                        <?php else: ?>
-                            Not Submitted
-                        <?php endif; ?>
-                    </td> -->
-                    <!-- <td><?php echo htmlspecialchars($assignment['grade'] ?? ''); ?></td> -->
-                    <td>
-                        <a href="/student/submit_assignment/<?php echo $assignment['id']; ?>" class="btn btn-primary">Submit</a>
-                    </td>
-                </tr>
-            <?php endforeach; ?>
-        </tbody>
-    </table>
-
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Title</th>
+                                    <th>Course</th>
+                                    <th>Due Date</th>
+                                    <th>Submitted</th>
+                                    <th>Grade</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php if (!empty($assignments)): ?>
+                                    <?php foreach ($assignments as $assignment): ?>
+                                        <?php
+                                            $is_overdue = !$assignment['is_submitted'] && (new DateTime($assignment['due_date']) < new DateTime());
+                                            $row_class = $is_overdue ? 'table-danger' : '';
+                                        ?>
+                                        <tr class="<?php echo $row_class; ?>">
+                                            <td><?php echo htmlspecialchars($assignment['title'] ?? ''); ?></td>
+                                            <td><?php echo htmlspecialchars($assignment['course_name'] ?? ''); ?></td>
+                                            <td><?php echo htmlspecialchars($assignment['due_date'] ?? ''); ?></td>
+                                            <td><?php echo $assignment['is_submitted'] ? 'Submitted' : 'Not Submitted'; ?></td>
+                                            <td><?php echo htmlspecialchars($assignment['grade'] ?? 'Not Graded'); ?></td>
+                                            <td>
+                                                <a href="/student/view_assignment/<?php echo $assignment['id']; ?>" class="btn btn-info">View</a>
+                                            </td>
+                                        </tr>
+                                    <?php endforeach; ?>
+                                <?php else: ?>
+                                    <tr>
+                                        <td colspan="6">No assignments found.</td>
+                                    </tr>
+                                <?php endif; ?>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>

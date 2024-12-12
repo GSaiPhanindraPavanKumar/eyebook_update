@@ -197,6 +197,11 @@ $router->post('/faculty/view_course/upload_course_plan', function(){
     require 'views/faculty/upload_course_plan.php';
 });
 
+$router->get('/faculty/view_assignment/(\d+)', 'FacultyController@viewAssignment');
+$router->get('/faculty/grade_submission/(\d+)/(\d+)', 'FacultyController@gradeSubmissionPage');
+$router->post('/faculty/grade_submission/(\d+)/(\d+)', 'FacultyController@gradeSubmission');
+
+
 $router->get('/faculty/view_assessment_report/(\d+)', function($assessmentId) {
     require 'views/faculty/view_assessment_report.php';
 });
@@ -215,8 +220,9 @@ $router->get('/faculty/download_report/(\d+)', 'FacultyController@downloadReport
 
 
 $router->get('/student/manage_assignments', 'StudentController@manageAssignments');
-$router->get('/student/submit_assignment/(\d+)', 'StudentController@submitAssignment');
+$router->get('/student/view_assignment/(\d+)', 'StudentController@viewAssignment');
 $router->post('/student/submit_assignment/(\d+)', 'StudentController@submitAssignment');
+$router->post('/student/delete_submission/(\d+)', 'StudentController@deleteSubmission');
 $router->get('/student/view_grades', 'StudentController@viewGrades');
 
 $router->get('/student/dashboard', function(){

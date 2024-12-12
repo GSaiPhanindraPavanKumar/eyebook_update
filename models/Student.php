@@ -245,6 +245,13 @@ class Student {
         $stmt->execute([':course_id' => $course_id, ':section_id' => $section_id]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+
+    public static function getAllByCourse($conn, $course_id) {
+        $sql = "SELECT * FROM students WHERE course_id = :course_id";
+        $stmt = $conn->prepare($sql);
+        $stmt->execute([':course_id' => $course_id]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
     
     // In Course.php
     public static function getCoursesByFaculty($conn) {
