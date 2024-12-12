@@ -308,15 +308,35 @@ class StudentController {
     public function viewAssignment($assignment_id) {
         $conn = Database::getConnection();
         $assignment = Assignment::getById($conn, $assignment_id);
-        $submissions = Assignment::getSubmissions($conn, $assignment_id);
-
-        // Ensure $submissions is an array
-        if (!is_array($submissions)) {
-            $submissions = [];
+        $student_id = $_SESSION['student_id']; // Assuming student_id is stored in session
+    
+        // Fetch existing submissions
+        $sql = "SELECT submissions FROM assignments WHERE id = :assignment_id";
+        $stmt = $conn->prepare($sql);
+        $stmt->execute([':assignment_id' => $assignment_id]);
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+    
+        // Handle the case where 'submissions' might be null or invalid
+        $submissions = [];
+        if (!empty($result['submissions'])) {
+            $decoded = json_decode($result['submissions'], true);
+            if (json_last_error() === JSON_ERROR_NONE) {
+                $submissions = $decoded;
+            }
         }
-
+    
+        // Find the student's submission
+        $student_submission = null;
+        foreach ($submissions as $submission) {
+            if (isset($submission['student_id']) && $submission['student_id'] == $student_id) {
+                $student_submission = $submission;
+                break;
+            }
+        }
+    
         require 'views/student/view_assignment.php';
     }
+    
 
     public function submitAssignment($assignment_id) {
         $conn = Database::getConnection();
