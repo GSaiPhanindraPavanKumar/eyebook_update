@@ -167,8 +167,8 @@ if ($userData) {
                     </a>
                     <div class="collapse" id="assessments">
                         <ul class="nav flex-column sub-menu">
-                            <li class="nav-item"> <a class="nav-link" href="/faculty/create_assignment">Create Assessment</a></li>
-                            <li class="nav-item"> <a class="nav-link" href="/faculty/manage_assignments">Manage Assessments</a></li>
+                            <li class="nav-item"> <a class="nav-link" href="/faculty/create_assignment">Create Assignments</a></li>
+                            <li class="nav-item"> <a class="nav-link" href="/faculty/manage_assignments">Manage Assignments</a></li>
                         </ul>
                     </div>
                 </li>
