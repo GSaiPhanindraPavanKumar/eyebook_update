@@ -481,10 +481,10 @@ class AdminController {
                     $duplicateRecords[] = $result['data'];
                 } else {
                     // Send account creation email
-                    // $mailer = new Mailer();
-                    // $subject = 'Welcome to EyeBook!';
-                    // $body = "Dear {$data['name']},<br><br>Your account has been created successfully.<br><br>Username: {$data['email']}<br>Password: {$data['password']}<br><br>Best Regards,<br>EyeBook Team";
-                    // $mailer->sendMail($data['email'], $subject, $body);
+                    $mailer = new Mailer();
+                    $subject = 'Welcome to EyeBook!';
+                    $body = "Dear {$data['name']},<br><br>Your account has been created successfully.<br><br>Username: {$data['email']}<br>Password: {$data['password']}<br><br>Best Regards,<br>EyeBook Team";
+                    $mailer->sendMail($data['email'], $subject, $body);
                 }
             }
     
