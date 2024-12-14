@@ -16,6 +16,18 @@ class Assignment {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    public static function getByIds($conn, $assignmentIds) {
+        if (empty($assignmentIds)) {
+            return [];
+        }
+
+        $placeholders = implode(',', array_fill(0, count($assignmentIds), '?'));
+        $sql = "SELECT * FROM assignments WHERE id IN ($placeholders)";
+        $stmt = $conn->prepare($sql);
+        $stmt->execute($assignmentIds);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+    
     public static function getAssignmentsByFaculty($conn, $faculty_id) {
         // Step 1: Fetch assigned courses for the faculty
         $sql = "SELECT assigned_courses FROM faculty WHERE id = :faculty_id";
@@ -99,6 +111,12 @@ class Assignment {
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
+    public static function getByCourseId($conn, $course_id) {
+        $sql = "SELECT * FROM assignments WHERE JSON_CONTAINS(course_id, :course_id, '$')";
+        $stmt = $conn->prepare($sql);
+        $stmt->execute([':course_id' => json_encode($course_id)]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
     
 
     public static function getSubmissions($conn, $assignmentId) {

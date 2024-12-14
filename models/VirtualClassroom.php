@@ -44,6 +44,18 @@ class VirtualClassroom {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    public function getById($virtualClassIds) {
+        if (empty($virtualClassIds)) {
+            return [];
+        }
+
+        $placeholders = implode(',', array_fill(0, count($virtualClassIds), '?'));
+        $sql = "SELECT * FROM virtual_classrooms WHERE id IN ($placeholders) ORDER BY start_time DESC";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->execute($virtualClassIds);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
     public function getAttendance($classroomId) {
         $stmt = $this->conn->prepare("SELECT attendance FROM virtual_classrooms WHERE classroom_id = ?");
         $stmt->execute([$classroomId]);

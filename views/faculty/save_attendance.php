@@ -13,7 +13,9 @@ if ($classroomId && !empty($attendance)) {
     $stmt->execute([json_encode($attendance), $classroomId]);
 
     // Redirect back to the dashboard
-    header('Location: /faculty/virtual_classroom');
+    $hashedCourseId = base64_encode($courseId);
+    $hashedCourseId = str_replace(['+', '/', '='], ['-', '_', ''], $hashedCourseId);
+    header('Location: /faculty/view_course/' . $hashedCourseId);
     exit();
 } else {
     echo "Error: Classroom ID or attendance data not provided.";

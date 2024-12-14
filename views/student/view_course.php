@@ -108,6 +108,130 @@ use Models\Course;
                             </tbody>
                         </table>
 
+                        <!-- Virtual Classroom Section -->
+                        <div class="d-flex justify-content-between align-items-center mt-4">
+                            <h5 class="d-flex justify-content-between align-items-center">
+                                Virtual Classrooms
+                            </h5>
+                        </div>
+                        <h6 class="d-flex justify-content-between align-items-center">Today's and Upcoming Classes</h6>
+                        <?php if (!empty($virtualClassrooms)): ?>
+                        <table class="table table-hover mt-2">
+                            <thead class="thead-dark">
+                                <tr>
+                                    <th scope="col">Topic</th>
+                                    <th scope="col">Start Date</th>
+                                    <th scope="col">Start Time</th>
+                                    <th scope="col">End Time</th>
+                                    <th scope="col">Join URL</th>
+                                    <th scope="col">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php
+                                $current_time = new DateTime('now', new DateTimeZone('UTC'));
+                                foreach ($virtualClassrooms as $classroom):
+                                    $start_time = new DateTime($classroom['start_time'], new DateTimeZone('UTC'));
+                                    $end_time = clone $start_time;
+                                    $end_time->modify('+' . $classroom['duration'] . ' minutes');
+                                    if ($current_time <= $end_time):
+                                ?>
+                                    <tr>
+                                        <td><?php echo htmlspecialchars($classroom['topic']); ?></td>
+                                        <td><?php echo htmlspecialchars($start_time->format('Y-m-d')); ?></td>
+                                        <td><?php echo htmlspecialchars($start_time->format('H:i:s')); ?></td>
+                                        <td><?php echo htmlspecialchars($end_time->format('H:i:s')); ?></td>
+                                        <td><a href="<?php echo htmlspecialchars($classroom['join_url']); ?>" target="_blank" class="btn btn-primary">Join</a></td>
+                                        <td>
+                                            <?php if (isset($classroom['attendance_taken']) && $classroom['attendance_taken']): ?>
+                                                <a href="/faculty/download_attendance?classroom_id=<?php echo htmlspecialchars($classroom['id']); ?>" class="btn btn-primary">Download</a>
+                                            <?php else: ?>
+                                                <a href="/faculty/take_attendance?classroom_id=<?php echo htmlspecialchars($classroom['id']); ?>" class="btn btn-warning">Take Attendance</a>
+                                            <?php endif; ?>
+                                        </td>
+                                    </tr>
+                                <?php endif; endforeach; ?>
+                            </tbody>
+                        </table>
+                        <?php else: ?>
+                            <p>No available classes.</p>
+                        <?php endif; ?>
+
+                        <h6 class="d-flex justify-content-between align-items-center mt-4">Past Classes</h6>
+                        <?php if (!empty($virtualClassrooms)): ?>
+                        <table class="table table-hover mt-2">
+                            <thead class="thead-dark">
+                                <tr>
+                                    <th scope="col">Topic</th>
+                                    <th scope="col">Start Date</th>
+                                    <th scope="col">Start Time</th>
+                                    <th scope="col">End Time</th>
+                                    <th scope="col">Attendance</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php
+                                foreach ($virtualClassrooms as $classroom):
+                                    $start_time = new DateTime($classroom['start_time'], new DateTimeZone('UTC'));
+                                    $end_time = clone $start_time;
+                                    $end_time->modify('+' . $classroom['duration'] . ' minutes');
+                                    if ($current_time > $end_time):
+                                ?>
+                                    <tr>
+                                        <td><?php echo htmlspecialchars($classroom['topic']); ?></td>
+                                        <td><?php echo htmlspecialchars($start_time->format('Y-m-d')); ?></td>
+                                        <td><?php echo htmlspecialchars($start_time->format('H:i:s')); ?></td>
+                                        <td><?php echo htmlspecialchars($end_time->format('H:i:s')); ?></td>
+                                        <td>
+                                            <?php if (isset($classroom['attendance_taken']) && $classroom['attendance_taken']): ?>
+                                                <a href="/faculty/download_attendance?classroom_id=<?php echo htmlspecialchars($classroom['id']); ?>" class="btn btn-primary">Download</a>
+                                            <?php else: ?>
+                                                <a href="/faculty/take_attendance?classroom_id=<?php echo htmlspecialchars($classroom['id']); ?>" class="btn btn-warning">Take Attendance</a>
+                                            <?php endif; ?>
+                                        </td>
+                                    </tr>
+                                <?php endif; endforeach; ?>
+                            </tbody>
+                        </table>
+                        <?php else: ?>
+                            <p>No available classes.</p>
+                        <?php endif; ?>
+
+                        <!-- Assignments Section -->
+                        <div class="d-flex justify-content-between align-items-center mt-4">
+                            <h5 class="d-flex justify-content-between align-items-center">
+                                Assignments
+                            </h5>
+                        </div>
+                        <table class="table table-hover mt-2">
+                            <thead class="thead-dark">
+                                <tr>
+                                    <th scope="col">Title</th>
+                                    <th scope="col">Description</th>
+                                    <th scope="col">Due Date</th>
+                                    <th>Submissions</th>
+                                    <th scope="col">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php
+                                if (!empty($assignments)) {
+                                    foreach ($assignments as $assignment) {
+                                        echo "<tr>";
+                                        echo "<td>" . htmlspecialchars($assignment['title']) . "</td>";
+                                        echo "<td>" . htmlspecialchars($assignment['description']) . "</td>";
+                                        echo "<td>" . htmlspecialchars($assignment['due_date']) . "</td>";
+                                        echo "<td>" . htmlspecialchars($assignment['submission_count']). "</td>";
+                                        echo "<td><a href='/student/view_assignment/" . $assignment['id'] . "' class='btn btn-primary'>View</a></td>";
+                                        echo "</tr>";
+                                    }
+                                } else {
+                                    echo "<tr><td colspan='5'>No assignments available.</td></tr>";
+                                }
+                                ?>
+                            </tbody>
+                        </table>
+
                         <!-- Feedback Section for Archived Courses -->
                         <?php if ($course['status'] === 'archived'): ?>
                             <div class="mt-4">

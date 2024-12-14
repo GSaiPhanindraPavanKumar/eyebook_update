@@ -5,6 +5,7 @@ use Models\Course;
 use Models\Database;
 use Models\Student;
 use Models\Assignment;
+use Models\VirtualClassroom;
 use PDO;
 use PDOException;
 
@@ -55,6 +56,26 @@ class StudentController {
         // Ensure course_book is an array
         if (!is_array($course['course_book'])) {
             $course['course_book'] = json_decode($course['course_book'], true) ?? [];
+        }
+
+        // Fetch virtual classrooms for the course
+        $virtualClassIds = !empty($course['virtual_class_id']) ? json_decode($course['virtual_class_id'], true) : [];
+        $virtualClassrooms = [];
+        if (!empty($virtualClassIds)) {
+            $virtualClassroomModel = new VirtualClassroom($conn);
+            $virtualClassrooms = $virtualClassroomModel->getById($virtualClassIds);
+
+            // Add attendance_taken key to each virtual classroom
+            foreach ($virtualClassrooms as &$classroom) {
+                $classroom['attendance_taken'] = $virtualClassroomModel->getAttendance($classroom['classroom_id']) ? true : false;
+            }
+        }
+
+        // Fetch assignments for the course
+        $assignments = Assignment::getByCourseId($conn, $course_id);
+
+        foreach ($assignments as &$assignment) {
+            $assignment['submission_count'] = Assignment::getSubmissionCount($conn, $assignment['id']);
         }
     
         require 'views/student/view_course.php';

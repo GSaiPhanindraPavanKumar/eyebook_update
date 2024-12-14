@@ -20,7 +20,9 @@
                         
                         <!-- Course Plan Section -->
                         <div class="d-flex justify-content-between align-items-center">
-                            <h5>Course Plan</h5>
+                            <h5 class="d-flex justify-content-between align-items-center">
+                                Course Plan
+                            </h5>
                             <div>
                                 <?php if ($course['status'] !== 'archived') : ?>
                                     <button type="button" class="btn btn-primary" onclick="toggleCoursePlanForm()">Upload</button>
@@ -45,15 +47,10 @@
 
                         <!-- Course Book Section -->
                         <div class="d-flex justify-content-between align-items-center mt-4">
-                            <h5>Course Book</h5>
-                            <?php if (!empty($course['course_book'])) : ?>
-                                <?php
-                                $hashedId = base64_encode($course['id']);
-                                $hashedId = str_replace(['+', '/', '='], ['-', '_', ''], $hashedId);
-                                ?>
-                            <?php endif; ?>
+                            <h5 class="d-flex justify-content-between align-items-center">
+                                Course Book
+                            </h5>
                         </div>
-
                         <table class="table table-hover mt-2">
                             <thead class="thead-dark">
                                 <tr>
@@ -83,7 +80,9 @@
                         
                         <!-- Course Materials Section -->
                         <div class="d-flex justify-content-between align-items-center mt-4">
-                            <h5>Course Materials</h5>
+                            <h5 class="d-flex justify-content-between align-items-center">
+                                Course Materials
+                            </h5>
                             <?php if ($course['status'] !== 'archived') : ?>
                                 <button type="button" class="btn btn-primary" onclick="toggleUploadOptions()">Upload</button>
                             <?php endif; ?>
@@ -158,12 +157,155 @@
                             </tbody>
                         </table>
 
-                        <!-- Discussion Forum Section -->
+                        <!-- Virtual Classroom Section -->
                         <div class="d-flex justify-content-between align-items-center mt-4">
-                            <h5>Discussion Forum</h5>
-                            <a href="/faculty/discussion_forum/<?php echo $course['id']; ?>" class="btn btn-primary">Go to Discussion Forum</a>
+                            <h5 class="d-flex justify-content-between align-items-center">
+                                Virtual Classrooms
+                            </h5>
                         </div>
+                        <h6 class="d-flex justify-content-between align-items-center">Today's and Upcoming Classes</h6>
+                        <?php if (!empty($virtualClassrooms)): ?>
+                        <table class="table table-hover mt-2">
+                            <thead class="thead-dark">
+                                <tr>
+                                    <th scope="col">Topic</th>
+                                    <th scope="col">Start Date</th>
+                                    <th scope="col">Start Time</th>
+                                    <th scope="col">End Time</th>
+                                    <th scope="col">Join URL</th>
+                                    <th scope="col">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php
+                                $current_time = new DateTime('now', new DateTimeZone('UTC'));
+                                foreach ($virtualClassrooms as $classroom):
+                                    $start_time = new DateTime($classroom['start_time'], new DateTimeZone('UTC'));
+                                    $end_time = clone $start_time;
+                                    $end_time->modify('+' . $classroom['duration'] . ' minutes');
+                                    if ($current_time <= $end_time):
+                                ?>
+                                    <tr>
+                                        <td><?php echo htmlspecialchars($classroom['topic']); ?></td>
+                                        <td><?php echo htmlspecialchars($start_time->format('Y-m-d')); ?></td>
+                                        <td><?php echo htmlspecialchars($start_time->format('H:i:s')); ?></td>
+                                        <td><?php echo htmlspecialchars($end_time->format('H:i:s')); ?></td>
+                                        <td><a href="<?php echo htmlspecialchars($classroom['join_url']); ?>" target="_blank" class="btn btn-primary">Join</a></td>
+                                        <td>
+                                            <?php if (isset($classroom['attendance_taken']) && $classroom['attendance_taken']): ?>
+                                                <a href="/faculty/download_attendance?classroom_id=<?php echo htmlspecialchars($classroom['id']); ?>" class="btn btn-primary">Download</a>
+                                            <?php else: ?>
+                                                <a href="/faculty/take_attendance?classroom_id=<?php echo htmlspecialchars($classroom['id']); ?>" class="btn btn-warning">Take Attendance</a>
+                                            <?php endif; ?>
+                                        </td>
+                                    </tr>
+                                <?php endif; endforeach; ?>
+                            </tbody>
+                        </table>
+                        <?php else: ?>
+                            <p>No available classes.</p>
+                        <?php endif; ?>
 
+                        <h6 class="d-flex justify-content-between align-items-center mt-4">Past Classes</h6>
+                        <?php if (!empty($virtualClassrooms)): ?>
+                        <table class="table table-hover mt-2">
+                            <thead class="thead-dark">
+                                <tr>
+                                    <th scope="col">Topic</th>
+                                    <th scope="col">Start Date</th>
+                                    <th scope="col">Start Time</th>
+                                    <th scope="col">End Time</th>
+                                    <th scope="col">Attendance</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php
+                                foreach ($virtualClassrooms as $classroom):
+                                    $start_time = new DateTime($classroom['start_time'], new DateTimeZone('UTC'));
+                                    $end_time = clone $start_time;
+                                    $end_time->modify('+' . $classroom['duration'] . ' minutes');
+                                    if ($current_time > $end_time):
+                                ?>
+                                    <tr>
+                                        <td><?php echo htmlspecialchars($classroom['topic']); ?></td>
+                                        <td><?php echo htmlspecialchars($start_time->format('Y-m-d')); ?></td>
+                                        <td><?php echo htmlspecialchars($start_time->format('H:i:s')); ?></td>
+                                        <td><?php echo htmlspecialchars($end_time->format('H:i:s')); ?></td>
+                                        <td>
+                                            <?php if (isset($classroom['attendance_taken']) && $classroom['attendance_taken']): ?>
+                                                <a href="/faculty/download_attendance?classroom_id=<?php echo htmlspecialchars($classroom['id']); ?>" class="btn btn-primary">Download</a>
+                                            <?php else: ?>
+                                                <a href="/faculty/take_attendance?classroom_id=<?php echo htmlspecialchars($classroom['id']); ?>" class="btn btn-warning">Take Attendance</a>
+                                            <?php endif; ?>
+                                        </td>
+                                    </tr>
+                                <?php endif; endforeach; ?>
+                            </tbody>
+                        </table>
+                        <?php else: ?>
+                            <p>No available classes.</p>
+                        <?php endif; ?>
+
+                        <!-- Assignments Section -->
+                        <div class="d-flex justify-content-between align-items-center mt-4">
+                            <h5 class="d-flex justify-content-between align-items-center">
+                                Assignments
+                            </h5>
+                            <button type="button" class="btn btn-primary" onclick="toggleAssignmentForm()">Create Assignment</button>
+
+                        </div>
+                        <!-- Assignment Creation Form -->
+                        <div id="assignmentForm" style="display: none; margin-top: 20px;">
+                            <h5 class="card-title">Create Assignment</h5>
+                            <form action="/faculty/create_assignment" method="post" enctype="multipart/form-data">
+                                <div class="form-group">
+                                    <label for="assignment_title">Assignment Title:</label>
+                                    <input type="text" class="form-control" id="assignment_title" name="assignment_title" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="assignment_description">Assignment Description:</label>
+                                    <textarea class="form-control" id="assignment_description" name="assignment_description" required></textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label for="due_date">Due Date:</label>
+                                    <input type="datetime-local" class="form-control" id="due_date" name="due_date" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="assignment_file">Upload Assignment File:</label>
+                                    <input type="file" class="form-control" id="assignment_file" name="assignment_file">
+                                </div>
+                                <input type="hidden" name="course_id[]" value="<?php echo $course['id']; ?>">
+                                <button type="submit" class="btn btn-primary">Create Assignment</button>
+                            </form>
+                        </div>
+                        <table class="table table-hover mt-2">
+                            <thead class="thead-dark">
+                                <tr>
+                                    <th scope="col">Title</th>
+                                    <th scope="col">Description</th>
+                                    <th scope="col">Due Date</th>
+                                    <th>Submissions</th>
+                                    <th scope="col">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php
+                                if (!empty($assignments)) {
+                                    foreach ($assignments as $assignment) {
+                                        echo "<tr>";
+                                        echo "<td>" . htmlspecialchars($assignment['title']) . "</td>";
+                                        echo "<td>" . htmlspecialchars($assignment['description']) . "</td>";
+                                        echo "<td>" . htmlspecialchars($assignment['due_date']) . "</td>";
+                                        echo "<td>" . htmlspecialchars($assignment['submission_count']). "</td>";
+                                        echo "<td><a href='/faculty/view_assignment/" . $assignment['id'] . "' class='btn btn-primary'>View</a></td>";
+                                        echo "</tr>";
+                                    }
+                                } else {
+                                    echo "<tr><td colspan='5'>No assignments available.</td></tr>";
+                                }
+                                ?>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
@@ -272,5 +414,10 @@ function redirectToCourseMaterial(url) {
     } else {
         alert('Course Material URL not available.');
     }
+}
+
+function toggleAssignmentForm() {
+    var form = document.getElementById('assignmentForm');
+    form.style.display = form.style.display === 'none' ? 'block' : 'none';
 }
 </script>

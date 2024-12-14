@@ -63,7 +63,7 @@ class FacultyController {
             die('Invalid course ID');
         }
         $course = Course::getById($conn, $course_id);
-
+    
         if (!isset($_SESSION['email'])) {
             die('Email not set in session.');
         }
@@ -73,7 +73,31 @@ class FacultyController {
         if (!is_array($course['course_book'])) {
             $course['course_book'] = json_decode($course['course_book'], true) ?? [];
         }
-        
+    
+        // Fetch virtual classrooms for the course
+        $virtualClassIds = !empty($course['virtual_class_id']) ? json_decode($course['virtual_class_id'], true) : [];
+        $virtualClassrooms = [];
+        if (!empty($virtualClassIds)) {
+            $virtualClassroomModel = new VirtualClassroom($conn);
+            $virtualClassrooms = $virtualClassroomModel->getById($virtualClassIds);
+
+            // Add attendance_taken key to each virtual classroom
+            foreach ($virtualClassrooms as &$classroom) {
+                $classroom['attendance_taken'] = $virtualClassroomModel->getAttendance($classroom['classroom_id']) ? true : false;
+            }
+        }
+
+        // Fetch assignments for the course
+        $assignmentIds = !empty($course['assignments']) ? json_decode($course['assignments'], true) : [];
+        $assignments = [];
+        if (!empty($assignmentIds)) {
+            $assignments = Assignment::getByIds($conn, $assignmentIds);
+        }
+
+        foreach ($assignments as &$assignment) {
+            $assignment['submission_count'] = Assignment::getSubmissionCount($conn, $assignment['id']);
+        }
+    
         require 'views/faculty/view_course.php';
     }
 
@@ -368,7 +392,6 @@ class FacultyController {
 
         require 'views/faculty/manage_assignments.php';
     }
-
     
 
     public function createAssignment() {
@@ -388,12 +411,15 @@ class FacultyController {
 
             try {
                 $assignment_id = Assignment::create($conn, $title, $description, $due_date, $course_ids, $file_content);
-
+            
                 foreach ($course_ids as $course_id) {
                     Course::addAssignmentToCourse($conn, $course_id, $assignment_id);
                 }
-
-                header('Location: /faculty/manage_assignments');
+            
+                // Redirect to the view course page
+                $hashedId = base64_encode($course_ids[0]);
+                $hashedId = str_replace(['+', '/', '='], ['-', '_', ''], $hashedId);
+                header('Location: /faculty/view_course/' . $hashedId);
                 exit;
             } catch (PDOException $e) {
                 $messages[] = "Error creating assignment: " . $e->getMessage();
