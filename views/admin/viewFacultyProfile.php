@@ -47,9 +47,7 @@
                         <div class="actions mt-4">
                             <a href="/admin/edit_faculty/<?= $faculty['id'] ?>" class="btn btn-warning">Edit Faculty</a>
                             <a href="/admin/delete_faculty/<?= $faculty['id'] ?>" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this faculty?');">Delete Faculty</a>
-                            <form method="post" action="/admin/reset_faculty_password/<?= $faculty['id'] ?>" style="display:inline;">
-                                <button type="submit" class="btn btn-secondary">Reset Password</button>
-                            </form>
+                            <button class="btn btn-secondary" onclick="resetPassword(<?= $faculty['id'] ?>)">Reset Password</button>
                         </div>
                     </div>
                 </div>
@@ -58,3 +56,36 @@
     </div>
     <?php include 'footer.html'; ?>
 </div>
+
+<!-- Scripts -->
+<script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/js/all.min.js"></script>
+<script>
+    function resetPassword(facultyId) {
+        var newPassword = prompt("Enter new password:");
+        if (newPassword) {
+            var confirmPassword = prompt("Confirm new password:");
+            if (newPassword === confirmPassword) {
+                $.ajax({
+                    type: 'POST',
+                    url: '/admin/reset_faculty_password/' + facultyId,
+                    data: JSON.stringify({ new_password: newPassword, confirm_password: confirmPassword }),
+                    contentType: 'application/json',
+                    success: function(response) {
+                        console.log(response);
+                        alert('Password reset successfully.');
+                        location.reload();
+                    },
+                    error: function(response) {
+                        console.log(response);
+                        alert('An error occurred while resetting the password.');
+                    }
+                });
+            } else {
+                alert("Passwords do not match.");
+            }
+        }
+    }
+</script>

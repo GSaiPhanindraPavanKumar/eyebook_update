@@ -95,7 +95,7 @@ function daysAgo($date) {
                                 </table>
                                 <div id="noRecords" style="display: none;" class="text-center">No records found</div>
                                 <div class="text-right">
-                                    <button type="submit" name="bulk_reset_password" class="btn btn-warning">Selected Reset Password</button>
+                                    <button type="button" onclick="bulkResetPassword()" class="btn btn-warning">Selected Reset Password</button>
                                     <button type="submit" name="bulk_delete" class="btn btn-danger">Delete Selected</button>
                                 </div>
                             </form>
@@ -169,4 +169,40 @@ function daysAgo($date) {
             $('input[name="selected[]"]').prop('checked', this.checked);
         });
     });
+
+    function bulkResetPassword() {
+        var selected = [];
+        $('input[name="selected[]"]:checked').each(function() {
+            selected.push($(this).val());
+        });
+
+        if (selected.length === 0) {
+            alert('Please select at least one faculty member.');
+            return;
+        }
+
+        var newPassword = prompt("Enter new password for selected faculty members:");
+        if (newPassword) {
+            var confirmPassword = prompt("Confirm new password:");
+            if (newPassword === confirmPassword) {
+                $.ajax({
+                    type: 'POST',
+                    url: '/admin/bulk_reset_faculty_password',
+                    data: JSON.stringify({ selected: selected, new_password: newPassword, confirm_password: confirmPassword }),
+                    contentType: 'application/json',
+                    success: function(response) {
+                        console.log(response);
+                        alert('Passwords reset successfully.');
+                        location.reload();
+                    },
+                    error: function(response) {
+                        console.log(response);
+                        alert('An error occurred while resetting the passwords.');
+                    }
+                });
+            } else {
+                alert("Passwords do not match.");
+            }
+        }
+    }
 </script>

@@ -16,6 +16,18 @@ class Faculty {
         $stmt = $conn->query($sql);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+
+    public static function getByIds($conn, $facultyIds) {
+        if (empty($facultyIds)) {
+            return [];
+        }
+    
+        $placeholders = implode(',', array_fill(0, count($facultyIds), '?'));
+        $sql = "SELECT * FROM faculty WHERE id IN ($placeholders)";
+        $stmt = $conn->prepare($sql);
+        $stmt->execute($facultyIds);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
     public static function search($conn, $searchQuery, $sortColumn = 'name', $sortOrder = 'asc') {
         $validColumns = ['name', 'email', 'university_short_name'];
         if (!in_array($sortColumn, $validColumns)) {

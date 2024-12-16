@@ -867,28 +867,35 @@ class AdminController {
         exit();
     }
 
-    public function resetFacultyPassword($faculty_id) {
+    public function resetFacultyPassword($facultyId) {
         $conn = Database::getConnection();
-
-        $faculty = Faculty::getById($conn, $faculty_id);
-        if ($faculty) {
-            $newPassword = $faculty['email']; // Reset password to email
-            $hashedPassword = password_hash($newPassword, PASSWORD_BCRYPT);
-
-            $sql = "UPDATE faculty SET password = ? WHERE id = ?";
-            $stmt = $conn->prepare($sql);
-            $stmt->execute([$hashedPassword, $faculty_id]);
-
-            $message = "Password reset successfully!";
-            $message_type = "success";
-        } else {
-            $message = "Faculty not found.";
-            $message_type = "danger";
+        $faculty = Faculty::getById($conn, $facultyId);
+    
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            $data = json_decode(file_get_contents('php://input'), true);
+            $newPassword = $data['new_password'];
+            $confirmPassword = $data['confirm_password'];
+    
+            if ($newPassword === $confirmPassword) {
+                $hashedPassword = password_hash($newPassword, PASSWORD_BCRYPT);
+                Faculty::updatePassword($conn, $facultyId, $hashedPassword);
+    
+                // Send email notification
+                $mailer = new Mailer();
+                $subject = 'Password Reset Successful';
+                $body = "Dear {$faculty['name']},<br><br>Your password has been successfully changed.<br><br>Your new password is: <strong>{$newPassword}</strong><br><br>Best Regards,<br>EyeBook Team";
+                $mailer->sendMail($faculty['email'], $subject, $body);
+    
+                $_SESSION['message'] = 'Password reset successfully.';
+                $_SESSION['message_type'] = 'success';
+            } else {
+                $_SESSION['message'] = 'Passwords do not match.';
+                $_SESSION['message_type'] = 'error';
+            }
+    
+            echo json_encode(['status' => 'success']);
+            exit();
         }
-
-        // Redirect back to the faculty profile page with a message
-        header("Location: /admin/viewFacultyProfile/$faculty_id?message=$message&message_type=$message_type");
-        exit();
     }
 
     public function addUnit() {
@@ -1054,6 +1061,41 @@ class AdminController {
                     $subject = 'Password Reset Successful';
                     $body = "Dear {$student['name']},<br><br>Your password has been successfully changed.<br><br>Your new password is: <strong>{$newPassword}</strong><br><br>Best Regards,<br>EyeBook Team";
                     $mailer->sendMail($student['email'], $subject, $body);
+                }
+    
+                $_SESSION['message'] = 'Passwords reset successfully.';
+                $_SESSION['message_type'] = 'success';
+            } else {
+                $_SESSION['message'] = 'Passwords do not match.';
+                $_SESSION['message_type'] = 'error';
+            }
+    
+            echo json_encode(['status' => 'success']);
+            exit();
+        }
+    }
+
+    public function bulkResetFacultyPassword() {
+        $conn = Database::getConnection();
+    
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            $data = json_decode(file_get_contents('php://input'), true);
+            $selected = $data['selected'] ?? [];
+            $newPassword = $data['new_password'];
+            $confirmPassword = $data['confirm_password'];
+    
+            if ($newPassword === $confirmPassword) {
+                $hashedPassword = password_hash($newPassword, PASSWORD_BCRYPT);
+                $facultyMembers = Faculty::getByIds($conn, $selected);
+    
+                foreach ($facultyMembers as $member) {
+                    Faculty::updatePassword($conn, $member['id'], $hashedPassword);
+    
+                    // Send email notification
+                    $mailer = new Mailer();
+                    $subject = 'Password Reset Successful';
+                    $body = "Dear {$member['name']},<br><br>Your password has been successfully changed.<br><br>Your new password is: <strong>{$newPassword}</strong><br><br>Best Regards,<br>EyeBook Team";
+                    $mailer->sendMail($member['email'], $subject, $body);
                 }
     
                 $_SESSION['message'] = 'Passwords reset successfully.';
