@@ -13,8 +13,12 @@ class Student {
         return $result['student_count'] ?? 0;
     }
     
-    public static function search($conn, $searchQuery) {
-        $sql = "SELECT * FROM students WHERE regd_no LIKE :search OR name LIKE :search OR email LIKE :search";
+    public static function search($conn, $searchQuery, $sortColumn = 'name', $sortOrder = 'asc') {
+        $validColumns = ['regd_no', 'name', 'email', 'university', 'last_usage'];
+        if (!in_array($sortColumn, $validColumns)) {
+            $sortColumn = 'name';
+        }
+        $sql = "SELECT * FROM students WHERE regd_no LIKE :search OR name LIKE :search OR email LIKE :search ORDER BY $sortColumn $sortOrder";
         $stmt = $conn->prepare($sql);
         $stmt->execute(['search' => '%' . $searchQuery . '%']);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);

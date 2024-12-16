@@ -7,9 +7,11 @@ use Models\Student;
 $conn = Database::getConnection();
 $universities = University::getAll($conn);
 
-// Handle search query
+// Handle search query and sorting
 $searchQuery = $_GET['search'] ?? '';
-$students = Student::search($conn, $searchQuery);
+$sortColumn = $_GET['sort'] ?? 'name';
+$sortOrder = $_GET['order'] ?? 'asc';
+$students = Student::search($conn, $searchQuery, $sortColumn, $sortOrder);
 
 function daysAgo($date) {
     if ($date === null) {
@@ -68,17 +70,17 @@ function daysAgo($date) {
                                         <tr>
                                             <th><input type="checkbox" id="selectAll"></th>
                                             <th data-sort="serialNumber">S.No<i class="fas fa-sort"></i></th>
-                                            <th data-sort="regd_no">Registration Number <i class="fas fa-sort"></i></th>
-                                            <th data-sort="name">Name <i class="fas fa-sort"></i></th>
-                                            <th data-sort="email">Email <i class="fas fa-sort"></i></th>
-                                            <th data-sort="university">University <i class="fas fa-sort"></i></th>
-                                            <th data-sort="last_usage">Last Usage (Days Ago) <i class="fas fa-sort"></i></th>
+                                            <th data-sort="regd_no"><a href="?search=<?= htmlspecialchars($searchQuery) ?>&sort=regd_no&order=<?= $sortOrder === 'asc' ? 'desc' : 'asc' ?>">Registration Number <i class="fas fa-sort"></i></a></th>
+                                            <th data-sort="name"><a href="?search=<?= htmlspecialchars($searchQuery) ?>&sort=name&order=<?= $sortOrder === 'asc' ? 'desc' : 'asc' ?>">Name <i class="fas fa-sort"></i></a></th>
+                                            <th data-sort="email"><a href="?search=<?= htmlspecialchars($searchQuery) ?>&sort=email&order=<?= $sortOrder === 'asc' ? 'desc' : 'asc' ?>">Email <i class="fas fa-sort"></i></a></th>
+                                            <th data-sort="university"><a href="?search=<?= htmlspecialchars($searchQuery) ?>&sort=university&order=<?= $sortOrder === 'asc' ? 'desc' : 'asc' ?>">University <i class="fas fa-sort"></i></a></th>
+                                            <th data-sort="last_usage"><a href="?search=<?= htmlspecialchars($searchQuery) ?>&sort=last_usage&order=<?= $sortOrder === 'asc' ? 'desc' : 'asc' ?>">Last Usage (Days Ago) <i class="fas fa-sort"></i></a></th>
                                             <th>Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody id="studentTable">
                                         <?php
-                                        $limit = 50;
+                                        $limit = 25;
                                         $page = isset($_GET['page']) ? $_GET['page'] : 1;
                                         $offset = ($page - 1) * $limit;
                                         $total_students = count($students);
@@ -122,7 +124,7 @@ function daysAgo($date) {
                             <ul class="pagination justify-content-center">
                                 <?php for ($i = 1; $i <= $total_pages; $i++): ?>
                                     <li class="page-item <?= ($i == $page) ? 'active' : '' ?>">
-                                        <a class="page-link" href="?page=<?= $i ?>&search=<?= htmlspecialchars($searchQuery) ?>"><?= $i ?></a>
+                                        <a class="page-link" href="?page=<?= $i ?>&search=<?= htmlspecialchars($searchQuery) ?>&sort=<?= htmlspecialchars($sortColumn) ?>&order=<?= htmlspecialchars($sortOrder) ?>"><?= $i ?></a>
                                     </li>
                                 <?php endfor; ?>
                             </ul>
