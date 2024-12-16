@@ -43,7 +43,7 @@ $assignedUniversities = Course::getAssignedUniversities($conn, $course['id']);
                                 <a class="nav-link active" id="details-tab" data-toggle="tab" href="#details" role="tab" aria-controls="details" aria-selected="true">Details</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" id="add-unit-tab" data-toggle="tab" href="#add-unit" role="tab" aria-controls="add-unit" aria-selected="false">Add Course Book</a>
+                                <a class="nav-link" id="add-unit-tab" data-toggle="tab" href="#add-unit" role="tab" aria-controls="add-unit" aria-selected="false">Uploads</a>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link" id="assign-universities-tab" data-toggle="tab" href="#assign-universities" role="tab" aria-controls="assign-universities" aria-selected="false">Assign to Universities</a>
@@ -110,6 +110,33 @@ $assignedUniversities = Course::getAssignedUniversities($conn, $course['id']);
                                             }
                                         } else {
                                             echo "<tr><td colspan='4'>No course books available.</td></tr>";
+                                        }
+                                        ?>
+                                    </tbody>
+                                </table>
+                                <h5 class="mt-5">Additional Content</h5>
+                                <table class="table table-hover mt-2">
+                                    <thead class="thead-dark">
+                                        <tr>
+                                            <th scope="col">S. No.</th>
+                                            <th scope="col">Title</th>
+                                            <th scope="col">Link</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <?php
+                                        $additionalContent = !empty($course['additional_content']) ? json_decode($course['additional_content'], true) : [];
+                                        if (!empty($additionalContent)) {
+                                            $serialNumber = 1;
+                                            foreach ($additionalContent as $content) {
+                                                echo "<tr>";
+                                                echo "<td>" . $serialNumber++ . "</td>";
+                                                echo "<td>" . htmlspecialchars($content['title'] ?? 'N/A') . "</td>";
+                                                echo "<td><a href='" . htmlspecialchars($content['link'] ?? '#') . "' target='_blank'>" . htmlspecialchars($content['link'] ?? 'N/A') . "</a></td>";
+                                                echo "</tr>";
+                                            }
+                                        } else {
+                                            echo "<tr><td colspan='3'>No additional content available.</td></tr>";
                                         }
                                         ?>
                                     </tbody>
@@ -228,6 +255,19 @@ $assignedUniversities = Course::getAssignedUniversities($conn, $course['id']);
                                     </div>
                                     <input type="hidden" name="course_id" value="<?php echo htmlspecialchars($course['id']); ?>">
                                     <button type="submit" class="btn btn-primary">Add Course Book</button>
+                                </form>
+                                <h5 class="mt-5">Additional Content</h5>
+                                <form method="POST" action="/admin/add_additional_content">
+                                    <div class="form-group">
+                                        <label for="contentTitle">Title</label>
+                                        <input type="text" class="form-control" id="contentTitle" name="content_title" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="contentLink">Link</label>
+                                        <input type="url" class="form-control" id="contentLink" name="content_link" required>
+                                    </div>
+                                    <input type="hidden" name="course_id" value="<?php echo htmlspecialchars($course['id']); ?>">
+                                    <button type="submit" class="btn btn-primary">Add Additional Content</button>
                                 </form>
                             </div>
 

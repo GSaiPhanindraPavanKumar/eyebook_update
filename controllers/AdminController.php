@@ -1110,6 +1110,34 @@ class AdminController {
         }
     }
 
+    public function addAdditionalContent() {
+        $conn = Database::getConnection();
+    
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            $course_id = $_POST['course_id'];
+            $title = $_POST['content_title'];
+            $link = $_POST['content_link'];
+    
+            $course = Course::getById($conn, $course_id);
+            $additional_content = !empty($course['additional_content']) ? json_decode($course['additional_content'], true) : [];
+    
+            $new_content = [
+                'title' => $title,
+                'link' => $link
+            ];
+    
+            $additional_content[] = $new_content;
+    
+            Course::updateAdditionalContent($conn, $course_id, $additional_content);
+    
+            $_SESSION['message'] = 'Additional content added successfully.';
+            $_SESSION['message_type'] = 'success';
+    
+            header('Location: /admin/view_course/' . $course_id);
+            exit();
+        }
+    }
+
     public function editStudent($student_id) {
         $conn = Database::getConnection();
         $message = '';

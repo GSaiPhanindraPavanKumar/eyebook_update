@@ -29,6 +29,15 @@ class Course {
         ]);
     }
 
+    public static function updateAdditionalContent($conn, $course_id, $additional_content) {
+        $sql = "UPDATE courses SET additional_content = :additional_content WHERE id = :course_id";
+        $stmt = $conn->prepare($sql);
+        $stmt->execute([
+            ':additional_content' => json_encode($additional_content),
+            ':course_id' => $course_id
+        ]);
+    }
+
     public static function getCourseById($conn, $course_id) {
         $sql = "SELECT * FROM courses WHERE id = :course_id";
         $stmt = $conn->prepare($sql);

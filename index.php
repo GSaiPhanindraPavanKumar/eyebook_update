@@ -120,6 +120,7 @@ $router->post('/admin/toggle_feedback', 'AdminController@toggleFeedback');
 $router->post('/admin/reset_student_password/(\d+)', 'AdminController@resetStudentPassword');
 $router->post('/admin/bulk_reset_student_password', 'AdminController@bulkResetStudentPassword');
 $router->post('/admin/bulk_reset_faculty_password', 'AdminController@bulkResetFacultyPassword');
+$router->post('/admin/add_additional_content', 'AdminController@addAdditionalContent');
 
 $router->get('/spoc', 'SpocController@dashboard');
 $router->get('/spoc/dashboard', 'SpocController@dashboard');

@@ -75,6 +75,33 @@ use Models\feedback;
                                 ?>
                             </tbody>
                         </table>
+                        <h5 class="mt-5">Additional Content</h5>
+                        <table class="table table-hover mt-2">
+                            <thead class="thead-dark">
+                                <tr>
+                                    <th scope="col">S. No.</th>
+                                    <th scope="col">Title</th>
+                                    <th scope="col">Link</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php
+                                $additionalContent = !empty($course['additional_content']) ? json_decode($course['additional_content'], true) : [];
+                                if (!empty($additionalContent)) {
+                                    $serialNumber = 1;
+                                    foreach ($additionalContent as $content) {
+                                        echo "<tr>";
+                                        echo "<td>" . $serialNumber++ . "</td>";
+                                        echo "<td>" . htmlspecialchars($content['title'] ?? 'N/A') . "</td>";
+                                        echo "<td><a href='" . htmlspecialchars($content['link'] ?? '#') . "' target='_blank' class='btn btn-primary'>View Content</a></td>";
+                                        echo "</tr>";
+                                    }
+                                } else {
+                                    echo "<tr><td colspan='3'>No additional content available.</td></tr>";
+                                }
+                                ?>
+                            </tbody>
+                        </table>
                         
                         <!-- Course Materials Section -->
                         <div class="d-flex justify-content-between align-items-center mt-4">
