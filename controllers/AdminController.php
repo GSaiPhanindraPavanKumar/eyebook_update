@@ -1033,6 +1033,40 @@ class AdminController {
         rmdir($dirPath);
     }
 
+    public function bulkResetStudentPassword() {
+        $conn = Database::getConnection();
+    
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            $selected = $_POST['selected'] ?? [];
+            $newPassword = $_POST['new_password'];
+            $confirmPassword = $_POST['confirm_password'];
+    
+            if ($newPassword === $confirmPassword) {
+                $hashedPassword = password_hash($newPassword, PASSWORD_BCRYPT);
+                $students = Student::getByIds($conn, $selected);
+    
+                foreach ($students as $student) {
+                    Student::updatePassword($conn, $student['id'], $hashedPassword);
+    
+                    // Send email notification
+                    $mailer = new Mailer();
+                    $subject = 'Password Reset Successful';
+                    $body = "Dear {$student['name']},<br><br>Your password has been successfully changed.<br><br>Your new password is: <strong>{$newPassword}</strong><br><br>Best Regards,<br>EyeBook Team";
+                    $mailer->sendMail($student['email'], $subject, $body);
+                }
+    
+                $_SESSION['message'] = 'Passwords reset successfully.';
+                $_SESSION['message_type'] = 'success';
+            } else {
+                $_SESSION['message'] = 'Passwords do not match.';
+                $_SESSION['message_type'] = 'error';
+            }
+    
+            header('Location: /admin/manageStudents');
+            exit();
+        }
+    }
+
     public function editStudent($student_id) {
         $conn = Database::getConnection();
         $message = '';

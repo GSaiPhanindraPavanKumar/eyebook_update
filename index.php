@@ -118,6 +118,7 @@ $router->post('/admin/archive_course', 'adminController@archiveCourse');
 $router->post('/admin/unarchive_course', 'adminController@unarchiveCourse');
 $router->post('/admin/toggle_feedback', 'AdminController@toggleFeedback');
 $router->post('/admin/reset_student_password/(\d+)', 'AdminController@resetStudentPassword');
+$router->post('/admin/bulk_reset_student_password', 'AdminController@bulkResetStudentPassword');
 
 $router->get('/spoc', 'SpocController@dashboard');
 $router->get('/spoc/dashboard', 'SpocController@dashboard');

@@ -64,7 +64,7 @@ function daysAgo($date) {
                                     </div>
                                 </div>
                             </form>
-                            <form id="studentForm" method="post" action="/admin/resetStudentPasswords">
+                            <form id="studentForm" method="post" action="/admin/bulk_reset_student_password">
                                 <table class="table table-hover table-borderless table-striped">
                                     <thead class="thead-light">
                                         <tr>
@@ -108,7 +108,7 @@ function daysAgo($date) {
                                 </table>
                                 <div id="noRecords" style="display: none;" class="text-center">No records found</div>
                                 <div class="text-right">
-                                    <button type="submit" name="bulk_reset_password" class="btn btn-warning">Selected Reset Password</button>
+                                    <button type="button" onclick="bulkResetPassword()" class="btn btn-warning">Selected Reset Password</button>
                                     <button type="submit" name="bulk_delete" class="btn btn-danger">Delete Selected</button>
                                 </div>
                             </form>
@@ -188,4 +188,37 @@ function daysAgo($date) {
             $('input[name="selected[]"]').prop('checked', this.checked);
         });
     });
+
+    function bulkResetPassword() {
+        var selected = [];
+        $('input[name="selected[]"]:checked').each(function() {
+            selected.push($(this).val());
+        });
+
+        if (selected.length === 0) {
+            alert('Please select at least one student.');
+            return;
+        }
+
+        var newPassword = prompt("Enter new password for selected students:");
+        if (newPassword) {
+            var confirmPassword = prompt("Confirm new password:");
+            if (newPassword === confirmPassword) {
+                $.ajax({
+                    type: 'POST',
+                    url: '/admin/bulk_reset_student_password',
+                    data: { selected: selected, new_password: newPassword, confirm_password: confirmPassword },
+                    success: function(response) {
+                        alert('Passwords reset successfully.');
+                        location.reload();
+                    },
+                    error: function(response) {
+                        alert('An error occurred while resetting the passwords.');
+                    }
+                });
+            } else {
+                alert("Passwords do not match.");
+            }
+        }
+    }
 </script>
