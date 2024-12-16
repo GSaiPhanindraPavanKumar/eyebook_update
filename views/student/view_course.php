@@ -1,5 +1,6 @@
 <?php include "sidebar.php";
 use Models\Course;
+use models\Assignment;
 ?>
 
 <div class="main-panel">
@@ -198,6 +199,7 @@ use Models\Course;
                         <?php endif; ?>
 
                         <!-- Assignments Section -->
+                        <!-- Assignments Section -->
                         <div class="d-flex justify-content-between align-items-center mt-4">
                             <h5 class="d-flex justify-content-between align-items-center">
                                 Assignments
@@ -209,7 +211,8 @@ use Models\Course;
                                     <th scope="col">Title</th>
                                     <th scope="col">Description</th>
                                     <th scope="col">Due Date</th>
-                                    <th>Submissions</th>
+                                    <th>Submitted</th>
+                                    <th>Grade</th>
                                     <th scope="col">Actions</th>
                                 </tr>
                             </thead>
@@ -217,16 +220,26 @@ use Models\Course;
                                 <?php
                                 if (!empty($assignments)) {
                                     foreach ($assignments as $assignment) {
+                                        $isSubmitted = Assignment::isSubmitted($conn, $assignment['id'], $student['id']);
+                                        $grade = 'Not Graded';
+                                        $submissions = Assignment::getSubmissions($conn, $assignment['id']);
+                                        foreach ($submissions as $submission) {
+                                            if ($submission['student_id'] == $student['id']) {
+                                                $grade = $submission['grade'] ?? 'Not Graded';
+                                                break;
+                                            }
+                                        }
                                         echo "<tr>";
                                         echo "<td>" . htmlspecialchars($assignment['title']) . "</td>";
                                         echo "<td>" . htmlspecialchars($assignment['description']) . "</td>";
                                         echo "<td>" . htmlspecialchars($assignment['due_date']) . "</td>";
-                                        echo "<td>" . htmlspecialchars($assignment['submission_count']). "</td>";
+                                        echo "<td>" . ($isSubmitted ? 'Submitted' : 'Not Submitted') . "</td>";
+                                        echo "<td>" . htmlspecialchars($grade) . "</td>";
                                         echo "<td><a href='/student/view_assignment/" . $assignment['id'] . "' class='btn btn-primary'>View</a></td>";
                                         echo "</tr>";
                                     }
                                 } else {
-                                    echo "<tr><td colspan='5'>No assignments available.</td></tr>";
+                                    echo "<tr><td colspan='6'>No assignments available.</td></tr>";
                                 }
                                 ?>
                             </tbody>

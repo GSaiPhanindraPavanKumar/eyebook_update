@@ -89,7 +89,7 @@ class Assignment {
     public static function getAll($conn) {
         $sql = "SELECT a.*, c.name as course_name 
                 FROM assignments a 
-                JOIN courses c ON FIND_IN_SET(c.id, a.course_id)";
+                JOIN courses c ON JSON_CONTAINS(a.course_id, JSON_QUOTE(CAST(c.id AS CHAR)), '$')";
         $stmt = $conn->prepare($sql);
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);

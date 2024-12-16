@@ -9,12 +9,42 @@ use Models\University;
 use Models\Database;
 use Models\Assignment;
 use Models\VirtualClassroom;
+use Models\Discussion;
 use PDO;
 use \PDOException;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use Dompdf\Dompdf;
 use Dompdf\Options;
+
+use Aws\S3\S3Client;
+use Aws\Exception\AwsException;
+require 'vendor/autoload.php';
+require_once __DIR__ . '/../aws_config.php';
+
+$bucketName = AWS_BUCKET_NAME;
+$region = AWS_REGION;
+$accessKey = AWS_ACCESS_KEY_ID;
+$secretKey = AWS_SECRET_ACCESS_KEY;
+
+// Debugging: Log the values of the configuration variables
+error_log('AWS_BUCKET_NAME: ' . $bucketName);
+error_log('AWS_REGION: ' . $region);
+error_log('AWS_ACCESS_KEY_ID: ' . $accessKey);
+error_log('AWS_SECRET_ACCESS_KEY: ' . $secretKey);
+
+if (!$bucketName || !$region || !$accessKey || !$secretKey) {
+    throw new Exception('Missing AWS configuration in aws_config.php file');
+}
+
+$s3Client = new S3Client([
+    'region' => 'us-east-1',
+    'version' => 'latest',
+    'credentials' => [
+        'key' => $accessKey,
+        'secret' => $secretKey,
+    ],
+]);
 class FacultyController {
     public function index() {
         $faculty = new Faculty();
@@ -39,6 +69,44 @@ class FacultyController {
             $email = htmlspecialchars($_POST['email']);
             $phone = htmlspecialchars($_POST['phone']);
             $department = htmlspecialchars($_POST['department']);
+
+            if (isset($_FILES['profile_image']) && $_FILES['profile_image']['error'] == UPLOAD_ERR_OK) {
+                $bucketName = AWS_BUCKET_NAME;
+                $keyName = 'profile/faculty/' . $userId . '/' . basename($_FILES['profile_image']['name']);
+                $filePath = $_FILES['profile_image']['tmp_name'];
+    
+                // Initialize S3 client
+                $s3 = new S3Client([
+                    'version' => 'latest',
+                    'region'  => AWS_REGION,
+                    'credentials' => [
+                        'key'    => AWS_ACCESS_KEY_ID,
+                        'secret' => AWS_SECRET_ACCESS_KEY,
+                    ],
+                ]);
+    
+                try {
+                    // Upload the image to S3
+                    $result = $s3->putObject([
+                        'Bucket' => $bucketName,
+                        'Key'    => $keyName,
+                        'SourceFile' => $filePath,
+                        'ACL'    => 'public-read',
+                    ]);
+    
+                    // Get the URL of the uploaded image
+                    $profileImageUrl = $result['ObjectURL'];
+    
+                    // Save the URL to the database
+                    $stmt = $conn->prepare("UPDATE faculty SET profile_image_url = ? WHERE email = ?");
+                    $stmt->execute([$profileImageUrl, $userId]);
+    
+                    // Update the userData array for display
+                    $userData['profile_image_url'] = $profileImageUrl;
+                } catch (AwsException $e) {
+                    echo "Error uploading image: " . $e->getMessage();
+                }
+            }
 
             Faculty::update($conn, $userId, $name, $email, $phone, $department);
 
@@ -85,6 +153,10 @@ class FacultyController {
             foreach ($virtualClassrooms as &$classroom) {
                 $classroom['attendance_taken'] = $virtualClassroomModel->getAttendance($classroom['classroom_id']) ? true : false;
             }
+            // Sort virtual classrooms by start date in descending order
+            usort($virtualClassrooms, function($a, $b) {
+                return strtotime($b['start_time']) - strtotime($a['start_time']);
+            });
         }
 
         // Fetch assignments for the course
@@ -97,6 +169,10 @@ class FacultyController {
         foreach ($assignments as &$assignment) {
             $assignment['submission_count'] = Assignment::getSubmissionCount($conn, $assignment['id']);
         }
+
+        usort($assignments, function($a, $b) {
+            return strtotime($b['due_date']) - strtotime($a['due_date']);
+        });
     
         require 'views/faculty/view_course.php';
     }
@@ -217,15 +293,41 @@ class FacultyController {
 
     // Other methods...
 
-    public function downloadReport($assignmentId, $format) {
+    public function downloadReport($assignmentId) {
         $conn = Database::getConnection();
         $submissions = Assignment::getSubmissions($conn, $assignmentId);
+        $this->generateExcelReport($submissions);
+    }
 
-        if ($format === 'pdf') {
-            $this->generatePDFReport($submissions);
-        } elseif ($format === 'excel') {
-            $this->generateExcelReport($submissions);
+    private function generateExcelReport($submissions) {
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setCellValue('A1', 'S.No');
+        $sheet->setCellValue('B1', 'Student Name');
+        $sheet->setCellValue('C1', 'Email');
+        $sheet->setCellValue('D1', 'Grade');
+    
+        foreach ($submissions as $index => $submission) {
+            $sheet->setCellValue('A' . ($index + 2), $index + 1);
+            $sheet->setCellValue('B' . ($index + 2), $submission['name']);
+            $sheet->setCellValue('C' . ($index + 2), $submission['email']);
+            $sheet->setCellValue('D' . ($index + 2), $submission['grade'] ?? 'Not Graded');
         }
+    
+        $writer = new Xlsx($spreadsheet);
+        $filename = 'assignment_report.xlsx';
+    
+        // Clear the output buffer
+        if (ob_get_contents()) ob_end_clean();
+    
+        // Set headers to force download
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment; filename="' . $filename . '"');
+        header('Cache-Control: max-age=0');
+    
+        // Save the file to the output
+        $writer->save('php://output');
+        exit;
     }
 
     private function generatePDFReport($submissions) {
@@ -252,31 +354,6 @@ class FacultyController {
         $dompdf->render();
         $dompdf->stream('assignment_report.pdf', ['Attachment' => false]);
     }
-
-    private function generateExcelReport($submissions) {
-        $spreadsheet = new Spreadsheet();
-        $sheet = $spreadsheet->getActiveSheet();
-        $sheet->setCellValue('A1', 'S.No');
-        $sheet->setCellValue('B1', 'Student Name');
-        $sheet->setCellValue('C1', 'Email');
-        $sheet->setCellValue('D1', 'Grade');
-
-        foreach ($submissions as $index => $submission) {
-            $sheet->setCellValue('A' . ($index + 2), $index + 1);
-            $sheet->setCellValue('B' . ($index + 2), $submission['student_name']);
-            $sheet->setCellValue('C' . ($index + 2), $submission['email']);
-            $sheet->setCellValue('D' . ($index + 2), $submission['grade']);
-        }
-
-        $writer = new Xlsx($spreadsheet);
-        $filename = 'assignment_report.xlsx';
-        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-        header('Content-Disposition: attachment; filename="' . $filename . '"');
-        header('Cache-Control: max-age=0');
-        $writer->save('php://output');
-        exit;
-    }
-            
 
 
     public function updatePassword() {
@@ -331,8 +408,12 @@ class FacultyController {
         $assignment = Assignment::getById($conn, $assignment_id);
         $submissions = Assignment::getSubmissions($conn, $assignment_id);
 
+        $course_id = json_decode($assignment['course_id'], true)[0];
+
         require 'views/faculty/view_assignment.php';
     }
+
+    
 
     public function gradeSubmissionPage($assignment_id, $student_id) {
         $conn = Database::getConnection();
@@ -447,7 +528,70 @@ class FacultyController {
         }
     }
 
+    private function ensureUniversityIdInSession() {
+        if (!isset($_SESSION['university_id'])) {
+            $conn = Database::getConnection();
+            $faculty_id = $_SESSION['faculty_id']; // Assuming faculty_id is stored in session
 
+            // Fetch the university_id from the faculty table
+            $sql = "SELECT university_id FROM faculty WHERE id = :faculty_id";
+            $stmt = $conn->prepare($sql);
+            $stmt->execute([':faculty_id' => $faculty_id]);
+            $faculty = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$faculty) {
+                die("Faculty not found.");
+            }
+
+            $_SESSION['university_id'] = $faculty['university_id'];
+        }
+    }
+
+    public function viewDiscussions() {
+        $this->ensureUniversityIdInSession();
+        $conn = Database::getConnection();
+        $university_id = $_SESSION['university_id']; // Assuming university_id is stored in session
+        $discussions = Discussion::getDiscussionsByUniversity($conn, $university_id);
+        require 'views/faculty/discussion_forum.php';
+    }
+
+    public function createDiscussion() {
+        $this->ensureUniversityIdInSession();
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $conn = Database::getConnection();
+            $name = $_SESSION['name']; // Assuming email is stored in session
+            $post = filter_input(INPUT_POST, 'msg', FILTER_SANITIZE_FULL_SPECIAL_CHARS); // Ensure 'msg' is retrieved correctly
+            $university_id = $_SESSION['university_id']; // Assuming university_id is stored in session
+            $parent_post_id = filter_input(INPUT_POST, 'parent_post_id', FILTER_VALIDATE_INT);
+
+            if (empty($post)) {
+                die("Post content cannot be empty.");
+            }
+
+            Discussion::addDiscussion($conn, $name, $post, $university_id, $parent_post_id);
+            header('Location: /faculty/discussion_forum');
+            exit();
+        }
+    }
+
+    public function replyDiscussion() {
+        $this->ensureUniversityIdInSession();
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $conn = Database::getConnection();
+            $parent_post_id = filter_input(INPUT_POST, 'parent_post_id', FILTER_VALIDATE_INT);
+            $name = $_SESSION['email']; // Assuming email is stored in session
+            $post = filter_input(INPUT_POST, 'msg', FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+            $university_id = $_SESSION['university_id']; // Assuming university_id is stored in session
+
+            if (empty($post)) {
+                die("Reply content cannot be empty.");
+            }
+
+            Discussion::addDiscussion($conn, $name, $post, $university_id, $parent_post_id);
+            header('Location: /faculty/discussion_forum');
+            exit();
+        }
+    }
 
 
     // public function viewAssignment($assignmentId) {

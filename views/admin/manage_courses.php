@@ -3,7 +3,7 @@ include("sidebar.php");
 use Models\Database;
 $conn = Database::getConnection();
 
-$sql = "SELECT c.id, c.name, c.university_id 
+$sql = "SELECT c.id, c.name, c.university_id, c.status 
         FROM courses c";
 $result = $conn->query($sql);
 $courses = [];
@@ -69,8 +69,19 @@ if ($result->rowCount() > 0) {
                                                 <td><?= htmlspecialchars($course['name']) ?></td>
                                                 <td><?= htmlspecialchars($course['university']) ?></td>
                                                 <td>
-                                                <a href="/admin/view_course/<?= $course['id'] ?>" class="btn btn-outline-info btn-sm"><i class="fas fa-eye"></i> View</a>
+                                                    <a href="/admin/view_course/<?= $course['id'] ?>" class="btn btn-outline-info btn-sm"><i class="fas fa-eye"></i> View</a>
                                                     <a href="/admin/edit_course/<?= $course['id'] ?>" class="btn btn-outline-warning btn-sm"><i class="fas fa-edit"></i> Edit</a>
+                                                    <?php if ($course['status'] === 'archived'): ?>
+                                                        <form method="POST" action="/admin/unarchive_course" style="display:inline;" onsubmit="return confirmUnarchive()">
+                                                            <input type="hidden" name="archive_course_id" value="<?= $course['id'] ?>">
+                                                            <button type="submit" class="btn btn-outline-secondary btn-sm"><i class="fas fa-archive"></i> Unarchive</button>
+                                                        </form>
+                                                    <?php else: ?>
+                                                        <form method="POST" action="/admin/archive_course" style="display:inline;" onsubmit="return confirmArchive()">
+                                                            <input type="hidden" name="archive_course_id" value="<?= $course['id'] ?>">
+                                                            <button type="submit" class="btn btn-outline-secondary btn-sm"><i class="fas fa-archive"></i> Archive</button>
+                                                        </form>
+                                                    <?php endif; ?>
                                                     <a href="/admin/delete_course/<?= $course['id'] ?>" class="btn btn-outline-danger btn-sm" onclick="return confirm('Are you sure you want to delete this course?');"><i class="fas fa-trash"></i> Delete</a>
                                                 </td>
                                             </tr>
@@ -129,4 +140,12 @@ if ($result->rowCount() > 0) {
             return $(row).children('td').eq(index).text();
         }
     });
+
+    function confirmArchive() {
+        return confirm("Are you sure you want to archive this course?");
+    }
+
+    function confirmUnarchive() {
+        return confirm("Are you sure you want to unarchive this course?");
+    }
 </script>

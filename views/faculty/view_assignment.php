@@ -6,7 +6,7 @@
             <div class="col-md-12 grid-margin">
                 <div class="d-flex justify-content-between align-items-center">
                     <h3 class="font-weight-bold">View Assignment</h3>
-                    <a href="/faculty/manage_assignments" class="btn btn-secondary">Back to Assignments</a>
+                    <a href="/faculty/view_course/<?php echo str_replace(['+', '/', '='], ['-', '_', ''], base64_encode($course_id)); ?>" class="btn btn-secondary">Back to Course</a>
                 </div>
             </div>
         </div>
@@ -27,7 +27,10 @@
                             <p>No file attached.</p>
                         <?php endif; ?>
 
-                        <h5 class="mt-4">Submissions</h5>
+                        <div class="d-flex justify-content-between align-items-center mt-4">
+                            <h5>Submissions</h5>
+                            <a href="/faculty/download_report/<?php echo $assignment['id']; ?>" class="btn btn-primary">Download Grades</a>
+                        </div>
                         <table class="table">
                             <thead>
                                 <tr>

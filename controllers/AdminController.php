@@ -14,10 +14,13 @@ use PhpOffice\PhpSpreadsheet\IOFactory;
 use Models\Discussion;
 use Models\Meetings;
 use Models\Notification;
+use Models\Assignment;
 use PDO;
 use ZipArchive;
 use Models\VirtualClassroom;
 use SimpleXMLElement;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 use Aws\S3\S3Client;
 use Aws\Exception\AwsException;
@@ -1393,5 +1396,165 @@ class AdminController {
         exit();
     }
 
+    public function manageAssignments() {
+        $conn = Database::getConnection();
+        $assignments = Assignment::getAll($conn);
+        foreach ($assignments as &$assignment) {
+            $assignment['submission_count'] = Assignment::getSubmissionCount($conn, $assignment['id']);
+        }
+        usort($assignments, function($a, $b) {
+            return strtotime($b['due_date']) - strtotime($a['due_date']);
+        });
+        require 'views/admin/manage_assignments.php';
+    }
+
+    public function createAssignment() {
+        $conn = Database::getConnection();
+        $messages = [];
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $title = $_POST['assignment_title'];
+            $description = $_POST['assignment_description'];
+            $due_date = $_POST['due_date'];
+            $course_ids = $_POST['course_id'];
+            $file_content = null;
+
+            if (isset($_FILES['assignment_file']) && $_FILES['assignment_file']['error'] == 0) {
+                $file_content = file_get_contents($_FILES['assignment_file']['tmp_name']);
+            }
+
+            try {
+                $assignment_id = Assignment::create($conn, $title, $description, $due_date, $course_ids, $file_content);
+            
+                foreach ($course_ids as $course_id) {
+                    Course::addAssignmentToCourse($conn, $course_id, $assignment_id);
+                }
+            
+                header('Location: /admin/manage_assignments');
+                exit;
+            } catch (PDOException $e) {
+                $messages[] = "Error creating assignment: " . $e->getMessage();
+            }
+        }
+
+        $courses = Course::getAll($conn);
+        require 'views/admin/assignment_create.php';
+    }
+    public function archiveCourse() {
+        $conn = Database::getConnection();
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            $course_id = $_POST['archive_course_id'];
+            Course::archiveCourse($conn, $course_id);
+    
+            $_SESSION['message'] = 'Course archived successfully.';
+            $_SESSION['message_type'] = 'success';
+    
+            header('Location: /admin/manage_courses');
+            exit();
+        }
+    }
+    public function unarchiveCourse() {
+        $conn = Database::getConnection();
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            $course_id = $_POST['archive_course_id'];
+            Course::unarchiveCourse($conn, $course_id);
+    
+            $_SESSION['message'] = 'Course unarchived successfully.';
+            $_SESSION['message_type'] = 'success';
+    
+            header('Location: /admin/manage_courses');
+            exit();
+        }
+    }
+    public function viewAssignment($assignment_id) {
+        $conn = Database::getConnection();
+        $assignment = Assignment::getById($conn, $assignment_id);
+        $submissions = Assignment::getSubmissions($conn, $assignment_id);
+
+        $course_id = json_decode($assignment['course_id'], true)[0];
+
+        require 'views/admin/view_assignment.php';
+    }
+
+    public function gradeSubmissionPage($assignment_id, $student_id) {
+        $conn = Database::getConnection();
+        $assignment = Assignment::getById($conn, $assignment_id);
+        $submissions = Assignment::getSubmissions($conn, $assignment_id);
+
+        // Find the specific student's submission
+        $student_submission = null;
+        foreach ($submissions as $submission) {
+            if ($submission['student_id'] == $student_id) {
+                $student_submission = $submission;
+                break;
+            }
+        }
+
+        require 'views/admin/grade_submission.php';
+    }
+
+    public function downloadReport($assignmentId) {
+        $conn = Database::getConnection();
+        $submissions = Assignment::getSubmissions($conn, $assignmentId);
+        $this->generateExcelReport($submissions);
+    }
+
+    private function generateExcelReport($submissions) {
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setCellValue('A1', 'S.No');
+        $sheet->setCellValue('B1', 'Student Name');
+        $sheet->setCellValue('C1', 'Email');
+        $sheet->setCellValue('D1', 'Grade');
+    
+        foreach ($submissions as $index => $submission) {
+            $sheet->setCellValue('A' . ($index + 2), $index + 1);
+            $sheet->setCellValue('B' . ($index + 2), $submission['name']);
+            $sheet->setCellValue('C' . ($index + 2), $submission['email']);
+            $sheet->setCellValue('D' . ($index + 2), $submission['grade'] ?? 'Not Graded');
+        }
+    
+        $writer = new Xlsx($spreadsheet);
+        $filename = 'assignment_report.xlsx';
+    
+        // Clear the output buffer
+        if (ob_get_contents()) ob_end_clean();
+    
+        // Set headers to force download
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment; filename="' . $filename . '"');
+        header('Cache-Control: max-age=0');
+    
+        // Save the file to the output
+        $writer->save('php://output');
+        exit;
+    }
+    public function gradeAssignment($assignmentId, $studentId) {
+        $conn = Database::getConnection();
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $marks = $_POST['marks'];
+            $feedback = $_POST['feedback'];
+            $grade = $this->calculateGrade($marks);
+
+            Assignment::grade($conn, $assignmentId, $studentId, $grade, $feedback);
+            header('Location: /admin/manage_assignments');
+            exit;
+        }
+        $submission = Assignment::getSubmission($conn, $assignmentId, $studentId);
+        require 'views/admin/grade_assignment.php';
+    }
+    private function calculateGrade($marks) {
+        if ($marks >= 90) {
+            return 'A';
+        } elseif ($marks >= 80) {
+            return 'B';
+        } elseif ($marks >= 70) {
+            return 'C';
+        } elseif ($marks >= 60) {
+            return 'D';
+        } else {
+            return 'F';
+        }
+    }
 }
 ?>

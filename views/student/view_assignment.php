@@ -6,7 +6,7 @@
             <div class="col-md-12 grid-margin">
                 <div class="d-flex justify-content-between align-items-center">
                     <h3 class="font-weight-bold">View Assignment</h3>
-                    <a href="/student/manage_assignments" class="btn btn-secondary">Back to Assignments</a>
+                    <a href="/student/view_course/<?php echo str_replace(['+', '/', '='], ['-', '_', ''], base64_encode($course_id)); ?>" class="btn btn-secondary">Back to Course</a>
                 </div>
             </div>
         </div>

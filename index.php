@@ -105,6 +105,18 @@ $router->post('/admin/assign_students', 'AdminController@assignStudents');
 $router->post('/admin/unassign_faculty', 'AdminController@unassignFaculty');
 $router->post('/admin/unassign_students', 'AdminController@unassignStudents');
 $router->get('/admin/view_book/([a-zA-Z0-9]+)', 'AdminController@viewBook');
+$router->get('/admin/manage_assignments', 'AdminController@manageAssignments');
+$router->get('/admin/create_assignment', 'AdminController@createAssignment');
+$router->post('/admin/create_assignment', 'AdminController@createAssignment');
+$router->get('/admin/view_assignment/(\d+)', 'AdminController@viewAssignment');
+$router->get('/admin/grade_assignment/(\d+)/(\d+)', 'AdminController@gradeAssignment');
+$router->post('/admin/grade_assignment/(\d+)/(\d+)', 'AdminController@gradeAssignment');
+$router->get('/admin/view_assignment/(\d+)', 'AdminController@viewAssignment');
+$router->get('/admin/grade_submission/(\d+)/(\d+)', 'AdminController@gradeSubmissionPage');
+$router->post('/admin/grade_submission/(\d+)/(\d+)', 'AdminController@gradeSubmission');
+$router->post('/admin/archive_course', 'adminController@archiveCourse');
+$router->post('/admin/unarchive_course', 'adminController@unarchiveCourse');
+
 
 
 $router->get('/spoc', 'SpocController@dashboard');
@@ -154,6 +166,9 @@ $router->get('/faculty/discussion_forum/(\d+)', function(){
 $router->post('/faculty/discussion_forum/(\d+)', function(){
     require 'views/faculty/discussion_forum.php';
 });
+$router->get('/faculty/discussion_forum', 'FacultyController@viewDiscussions');
+$router->post('/faculty/discussion_forum', 'FacultyController@createDiscussion');
+$router->post('/faculty/reply_discussion', 'FacultyController@replyDiscussion');
 $router->get('/faculty/create_assessment', function() {
     require 'views/faculty/faculty.php';
 });
@@ -263,6 +278,10 @@ $router->get('/student/submit_assignment/(\d+)', function($assignment_id){
     $_GET['assignment_id'] = $assignment_id;
     require 'views/student/assignment_submit.php';
 });
+
+$router->get('/student/discussion_forum', 'StudentController@viewDiscussions');
+$router->post('/student/discussion_forum', 'StudentController@createDiscussion');
+$router->post('/student/reply_discussion', 'StudentController@replyDiscussion');
 
 $router->post('/student/submit_assignment/(\d+)', function($assignment_id){
     $_GET['assignment_id'] = $assignment_id;

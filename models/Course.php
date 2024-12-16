@@ -200,6 +200,14 @@ class Course {
             ':course_id' => $course_id
         ]);
     }
+    public static function unarchiveCourse($conn, $course_id) {
+        $query = 'UPDATE courses SET status = :status WHERE id = :course_id';
+        $stmt = $conn->prepare($query);
+        $stmt->execute([
+            ':status' => 'ongoing',
+            ':course_id' => $course_id
+        ]);
+    }
 
     public static function getOngoingCoursesByIds($conn, $course_ids) {
         if (empty($course_ids)) {

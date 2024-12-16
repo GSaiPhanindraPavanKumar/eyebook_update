@@ -6,6 +6,7 @@ use Models\Database;
 use Models\Student;
 use Models\Assignment;
 use Models\VirtualClassroom;
+use Models\Discussion;
 use PDO;
 use PDOException;
 
@@ -69,6 +70,13 @@ class StudentController {
             foreach ($virtualClassrooms as &$classroom) {
                 $classroom['attendance_taken'] = $virtualClassroomModel->getAttendance($classroom['classroom_id']) ? true : false;
             }
+
+            // Sort virtual classrooms by start date in descending order
+            usort($virtualClassrooms, function($a, $b) {
+                return strtotime($b['start_time']) - strtotime($a['start_time']);
+            });
+
+            
         }
 
         // Fetch assignments for the course
@@ -77,6 +85,10 @@ class StudentController {
         foreach ($assignments as &$assignment) {
             $assignment['submission_count'] = Assignment::getSubmissionCount($conn, $assignment['id']);
         }
+
+        usort($assignments, function($a, $b) {
+            return strtotime($b['due_date']) - strtotime($a['due_date']);
+        });
     
         require 'views/student/view_course.php';
     }
@@ -354,6 +366,10 @@ class StudentController {
                 break;
             }
         }
+
+        // Fetch the course_id from the assignment
+        $course_id = json_decode($assignment['course_id'], true)[0];
+
     
         require 'views/student/view_assignment.php';
     }
@@ -445,6 +461,70 @@ class StudentController {
         $student_id = $_SESSION['student_id'];
         $grades = Assignment::getGradesByStudentId($conn, $student_id);
         require 'views/student/view_grades.php';
+    }
+
+    private function ensureUniversityIdInSession() {
+        if (!isset($_SESSION['university_id'])) {
+            $conn = Database::getConnection();
+            $student_id = $_SESSION['student_id']; // Assuming faculty_id is stored in session
+
+            // Fetch the university_id from the faculty table
+            $sql = "SELECT university_id FROM students WHERE id = :student_id";
+            $stmt = $conn->prepare($sql);
+            $stmt->execute([':student_id' => $student_id]);
+            $student = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$student) {
+                die("student not found.");
+            }
+
+            $_SESSION['university_id'] = $student['university_id'];
+        }
+    }
+    
+    public function viewDiscussions() {
+        $this->ensureUniversityIdInSession();
+        $conn = Database::getConnection();
+        $university_id = $_SESSION['university_id']; // Assuming university_id is stored in session
+        $discussions = Discussion::getDiscussionsByUniversity($conn, $university_id);
+        require 'views/student/discussion_forum.php';
+    }
+
+    public function createDiscussion() {
+        $this->ensureUniversityIdInSession();
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $conn = Database::getConnection();
+            $name = $_SESSION['name']; // Assuming email is stored in session
+            $post = filter_input(INPUT_POST, 'msg', FILTER_SANITIZE_FULL_SPECIAL_CHARS); // Ensure 'msg' is retrieved correctly
+            $university_id = $_SESSION['university_id']; // Assuming university_id is stored in session
+
+            if (empty($post)) {
+                die("Post content cannot be empty.");
+            }
+
+            Discussion::addDiscussion($conn, $name, $post, $university_id);
+            header('Location: /student/discussion_forum');
+            exit();
+        }
+    }
+
+    public function replyDiscussion() {
+        $this->ensureUniversityIdInSession();
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $conn = Database::getConnection();
+            $parent_post_id = filter_input(INPUT_POST, 'parent_post_id', FILTER_VALIDATE_INT);
+            $name = $_SESSION['name']; // Assuming email is stored in session
+            $post = filter_input(INPUT_POST, 'msg', FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+            $university_id = $_SESSION['university_id']; // Assuming university_id is stored in session
+
+            if (empty($post)) {
+                die("Reply content cannot be empty.");
+            }
+
+            Discussion::addDiscussion($conn, $name, $post, $university_id, $parent_post_id);
+            header('Location: /student/discussion_forum');
+            exit();
+        }
     }
 
     
