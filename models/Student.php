@@ -211,11 +211,12 @@ class Student {
     //     ]);
     // }
 
-    public static function updatePassword($conn, $student_id, $new_password) {
-        $stmt = $conn->prepare("UPDATE students SET password = :new_password WHERE id = :admin_id");
+    public static function updatePassword($conn, $studentId, $newPassword) {
+        $sql = "UPDATE students SET password = :new_password WHERE id = :id";
+        $stmt = $conn->prepare($sql);
         $stmt->execute([
-            ':new_password' => $new_password,
-            ':admin_id' => $student_id
+            ':new_password' => $newPassword,
+            ':id' => $studentId
         ]);
     }
 

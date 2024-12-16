@@ -1068,19 +1068,34 @@ class AdminController {
         exit();
     }
     
-    public function resetStudentPassword($student_id) {
+    public function resetStudentPassword($studentId) {
         $conn = Database::getConnection();
-        if ($student_id) {
-            $newPassword = 'newpassword123'; // Generate or set a new password
-            Student::updatePassword($conn, $student_id, password_hash($newPassword, PASSWORD_BCRYPT));
-            $_SESSION['message'] = 'Password has been reset successfully.';
-            $_SESSION['message_type'] = 'success';
-        } else {
-            $_SESSION['message'] = 'Failed to reset password.';
-            $_SESSION['message_type'] = 'danger';
+        $student = Student::getById($conn, $studentId);
+    
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            $newPassword = $_POST['new_password'];
+            $confirmPassword = $_POST['confirm_password'];
+    
+            if ($newPassword === $confirmPassword) {
+                $hashedPassword = password_hash($newPassword, PASSWORD_BCRYPT);
+                Student::updatePassword($conn, $studentId, $hashedPassword);
+    
+                // Send email notification
+                $mailer = new Mailer();
+                $subject = 'Password Reset Successful';
+                $body = "Dear {$student['name']},<br><br>Your password has been successfully changed.<br><br>Your new password is: <strong>{$newPassword}</strong><br><br>Best Regards,<br>EyeBook Team";
+                $mailer->sendMail($student['email'], $subject, $body);
+    
+                $_SESSION['message'] = 'Password reset successfully.';
+                $_SESSION['message_type'] = 'success';
+            } else {
+                $_SESSION['message'] = 'Passwords do not match.';
+                $_SESSION['message_type'] = 'error';
+            }
+    
+            header('Location: /admin/viewStudentProfile/' . $studentId);
+            exit();
         }
-        header('Location: /admin/viewStudentProfile/' . $student_id);
-        exit();
     }
     
 

@@ -63,7 +63,7 @@
                         <div class="actions mt-4">
                             <a href="/admin/edit_student/<?= $student['id'] ?>" class="btn btn-warning">Edit Student</a>
                             <a href="/admin/delete_student/<?= $student['id'] ?>" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this student?');">Delete Student</a>
-                            <a href="/admin/reset_student_password/<?= $student['id'] ?>" class="btn btn-secondary">Reset Password</a>
+                            <button class="btn btn-secondary" data-toggle="modal" data-target="#resetPasswordModal">Reset Password</button>
                         </div>
                     </div>
                 </div>
@@ -72,3 +72,58 @@
     </div>
     <?php include 'footer.html'; ?>
 </div>
+
+<!-- Reset Password Modal -->
+<div class="modal fade" id="resetPasswordModal" tabindex="-1" role="dialog" aria-labelledby="resetPasswordModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <form id="resetPasswordForm" method="post" action="/admin/reset_student_password/<?= $student['id'] ?>">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="resetPasswordModalLabel">Reset Password</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="newPassword">New Password</label>
+                        <input type="password" class="form-control" id="newPassword" name="new_password" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="confirmPassword">Confirm Password</label>
+                        <input type="password" class="form-control" id="confirmPassword" name="confirm_password" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Save changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Scripts -->
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/js/all.min.js"></script>
+<script>
+    $(document).ready(function() {
+        $('.edit-btn').on('click', function() {
+            var id = $(this).data('id');
+            var regd_no = $(this).data('regd_no');
+            var name = $(this).data('name');
+            var email = $(this).data('email');
+            $('#edit-id').val(id);
+            $('#edit-regd_no').val(regd_no);
+            $('#edit-name').val(name);
+            $('#edit-email').val(email);
+            $('#editModal').modal('show');
+        });
+
+        $('#selectAll').on('click', function() {
+            $('input[name="selected[]"]').prop('checked', this.checked);
+        });
+    });
+</script>

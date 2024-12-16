@@ -117,7 +117,7 @@ $router->post('/admin/grade_submission/(\d+)/(\d+)', 'AdminController@gradeSubmi
 $router->post('/admin/archive_course', 'adminController@archiveCourse');
 $router->post('/admin/unarchive_course', 'adminController@unarchiveCourse');
 $router->post('/admin/toggle_feedback', 'AdminController@toggleFeedback');
-
+$router->post('/admin/reset_student_password/(\d+)', 'AdminController@resetStudentPassword');
 
 $router->get('/spoc', 'SpocController@dashboard');
 $router->get('/spoc/dashboard', 'SpocController@dashboard');
