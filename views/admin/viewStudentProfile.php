@@ -77,7 +77,7 @@
 <div class="modal fade" id="resetPasswordModal" tabindex="-1" role="dialog" aria-labelledby="resetPasswordModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
-            <form id="resetPasswordForm" method="post" action="/admin/reset_student_password/<?= $student['id'] ?>">
+            <form id="resetPasswordForm" method="post">
                 <div class="modal-header">
                     <h5 class="modal-title" id="resetPasswordModalLabel">Reset Password</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
@@ -124,6 +124,26 @@
 
         $('#selectAll').on('click', function() {
             $('input[name="selected[]"]').prop('checked', this.checked);
+        });
+
+        $('#resetPasswordForm').on('submit', function(e) {
+            e.preventDefault();
+            var form = $(this);
+            var url = '/admin/reset_student_password/<?= $student['id'] ?>';
+
+            $.ajax({
+                type: 'POST',
+                url: url,
+                data: form.serialize(),
+                success: function(response) {
+                    $('#resetPasswordModal').modal('hide');
+                    alert('Password reset successfully.');
+                    location.reload();
+                },
+                error: function(response) {
+                    alert('An error occurred while resetting the password.');
+                }
+            });
         });
     });
 </script>
