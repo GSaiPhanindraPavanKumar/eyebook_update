@@ -15,6 +15,7 @@ use Models\Discussion;
 use Models\Meetings;
 use Models\Notification;
 use Models\Assignment;
+use Models\feedback;
 use PDO;
 use ZipArchive;
 use Models\VirtualClassroom;
@@ -1466,6 +1467,18 @@ class AdminController {
             exit();
         }
     }
+
+    public function toggleFeedback() {
+        $conn = Database::getConnection();
+        $course_id = $_POST['course_id'];
+        $feedback_enabled = $_POST['enabled'] === 'true' ? 1 : 0;
+
+        Course::updateFeedbackStatus($conn, $course_id, $feedback_enabled);
+
+        header('Location: /admin/view_course/' . $course_id);
+        exit();
+    }
+
     public function viewAssignment($assignment_id) {
         $conn = Database::getConnection();
         $assignment = Assignment::getById($conn, $assignment_id);

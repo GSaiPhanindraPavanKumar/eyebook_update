@@ -116,7 +116,7 @@ $router->get('/admin/grade_submission/(\d+)/(\d+)', 'AdminController@gradeSubmis
 $router->post('/admin/grade_submission/(\d+)/(\d+)', 'AdminController@gradeSubmission');
 $router->post('/admin/archive_course', 'adminController@archiveCourse');
 $router->post('/admin/unarchive_course', 'adminController@unarchiveCourse');
-
+$router->post('/admin/toggle_feedback', 'AdminController@toggleFeedback');
 
 
 $router->get('/spoc', 'SpocController@dashboard');
@@ -266,7 +266,7 @@ $router->post('/student/discussion_forum/(\d+)', function(){
 $router->get('/student/my_courses', function(){
     require 'views/student/my_courses.php';
 });
-
+$router->post('/student/submit_feedback', 'StudentController@submitFeedback');
 $router->get('/student/manage_assignments', 'StudentController@manageAssignments');
 $router->get('/student/submit_assignment/(\d+)', 'StudentController@submitAssignment');
 $router->post('/student/submit_assignment/(\d+)', 'StudentController@submitAssignment');

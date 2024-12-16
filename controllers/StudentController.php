@@ -7,6 +7,7 @@ use Models\Student;
 use Models\Assignment;
 use Models\VirtualClassroom;
 use Models\Discussion;
+use Models\feedback;
 use PDO;
 use PDOException;
 
@@ -260,22 +261,22 @@ class StudentController {
         require 'views/student/profile.php';
     }
 
-    public function submitFeedback() {
-        $conn = Database::getConnection();
-        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-            $course_id = $_POST['course_id'];
-            $student_id = $_SESSION['student_id'];
-            $feedback = $_POST['feedback'];
+    // public function submitFeedback() {
+    //     $conn = Database::getConnection();
+    //     if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    //         $course_id = $_POST['course_id'];
+    //         $student_id = $_SESSION['student_id'];
+    //         $feedback = $_POST['feedback'];
     
-            Course::saveFeedback($conn, $course_id, $student_id, $feedback);
+    //         Course::saveFeedback($conn, $course_id, $student_id, $feedback);
     
-            $_SESSION['message'] = 'Feedback submitted successfully.';
-            $_SESSION['message_type'] = 'success';
+    //         $_SESSION['message'] = 'Feedback submitted successfully.';
+    //         $_SESSION['message_type'] = 'success';
     
-            header('Location: /student/view_course/' . str_replace(['+', '/', '='], ['-', '_', ''], base64_encode($course_id)));
-            exit();
-        }
-    }
+    //         header('Location: /student/view_course/' . str_replace(['+', '/', '='], ['-', '_', ''], base64_encode($course_id)));
+    //         exit();
+    //     }
+    // }
 
     function getCoursesWithProgress($studentId) {
         $conn = Database::getConnection();
@@ -372,6 +373,33 @@ class StudentController {
 
     
         require 'views/student/view_assignment.php';
+    }
+
+    public function submitFeedback() {
+        $conn = Database::getConnection();
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            $course_id = $_POST['course_id'];
+            $student_id = $_SESSION['student_id'];
+            $feedback = [
+                'depth_of_coverage' => $_POST['depth_of_coverage'],
+                'emphasis_on_fundamentals' => $_POST['emphasis_on_fundamentals'],
+                'coverage_of_modern_topics' => $_POST['coverage_of_modern_topics'],
+                'overall_rating' => $_POST['overall_rating'],
+                'benefits' => $_POST['benefits'],
+                'instructor_assistance' => $_POST['instructor_assistance'],
+                'instructor_feedback' => $_POST['instructor_feedback'],
+                'motivation' => $_POST['motivation'],
+                'sme_help' => $_POST['sme_help'],
+                'overall_very_good' => $_POST['overall_very_good']
+            ];
+
+            Feedback::saveFeedback($conn, $course_id, $student_id, $feedback);
+
+            $_SESSION['feedback_submitted'] = true;
+
+            header('Location: /student/view_course/' . str_replace(['+', '/', '='], ['-', '_', ''], base64_encode($course_id)));
+            exit();
+        }
     }
     
 

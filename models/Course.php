@@ -20,6 +20,22 @@ class Course {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    public static function updateFeedbackStatus($conn, $course_id, $feedback_enabled) {
+        $sql = "UPDATE courses SET feedback_enabled = :feedback_enabled WHERE id = :course_id";
+        $stmt = $conn->prepare($sql);
+        $stmt->execute([
+            ':feedback_enabled' => $feedback_enabled,
+            ':course_id' => $course_id
+        ]);
+    }
+
+    public static function getCourseById($conn, $course_id) {
+        $sql = "SELECT * FROM courses WHERE id = :course_id";
+        $stmt = $conn->prepare($sql);
+        $stmt->execute([':course_id' => $course_id]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
     public static function getById($conn, $id) {
         $query = 'SELECT * FROM courses WHERE id = :id';
         $stmt = $conn->prepare($query);
@@ -44,47 +60,47 @@ class Course {
         return $course;
     }
 
-    public static function saveFeedback($conn, $course_id, $student_id, $feedback) {
-        $query = 'SELECT feedback FROM courses WHERE id = :course_id';
-        $stmt = $conn->prepare($query);
-        $stmt->execute(['course_id' => $course_id]);
-        $course = $stmt->fetch(PDO::FETCH_ASSOC);
+    // public static function saveFeedback($conn, $course_id, $student_id, $feedback) {
+    //     $query = 'SELECT feedback FROM courses WHERE id = :course_id';
+    //     $stmt = $conn->prepare($query);
+    //     $stmt->execute(['course_id' => $course_id]);
+    //     $course = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        $feedbacks = [];
-        if ($course && !empty($course['feedback'])) {
-            $feedbacks = json_decode($course['feedback'], true);
-            if (!is_array($feedbacks)) {
-                $feedbacks = [];
-            }
-        }
+    //     $feedbacks = [];
+    //     if ($course && !empty($course['feedback'])) {
+    //         $feedbacks = json_decode($course['feedback'], true);
+    //         if (!is_array($feedbacks)) {
+    //             $feedbacks = [];
+    //         }
+    //     }
 
-        $feedbacks[] = ['student_id' => $student_id, 'feedback' => $feedback];
-        $feedbackJson = json_encode($feedbacks);
+    //     $feedbacks[] = ['student_id' => $student_id, 'feedback' => $feedback];
+    //     $feedbackJson = json_encode($feedbacks);
 
-        $query = 'UPDATE courses SET feedback = :feedback WHERE id = :course_id';
-        $stmt = $conn->prepare($query);
-        $stmt->execute([
-            ':feedback' => $feedbackJson,
-            ':course_id' => $course_id
-        ]);
-    }
+    //     $query = 'UPDATE courses SET feedback = :feedback WHERE id = :course_id';
+    //     $stmt = $conn->prepare($query);
+    //     $stmt->execute([
+    //         ':feedback' => $feedbackJson,
+    //         ':course_id' => $course_id
+    //     ]);
+    // }
     
-    public static function getFeedback($conn, $course_id) {
-        $query = 'SELECT feedback FROM courses WHERE id = :course_id';
-        $stmt = $conn->prepare($query);
-        $stmt->execute(['course_id' => $course_id]);
-        $course = $stmt->fetch(PDO::FETCH_ASSOC);
+    // public static function getFeedback($conn, $course_id) {
+    //     $query = 'SELECT feedback FROM courses WHERE id = :course_id';
+    //     $stmt = $conn->prepare($query);
+    //     $stmt->execute(['course_id' => $course_id]);
+    //     $course = $stmt->fetch(PDO::FETCH_ASSOC);
     
-        $feedbacks = [];
-        if ($course && !empty($course['feedback'])) {
-            $feedbacks = json_decode($course['feedback'], true);
-            if (!is_array($feedbacks)) {
-                $feedbacks = [];
-            }
-        }
+    //     $feedbacks = [];
+    //     if ($course && !empty($course['feedback'])) {
+    //         $feedbacks = json_decode($course['feedback'], true);
+    //         if (!is_array($feedbacks)) {
+    //             $feedbacks = [];
+    //         }
+    //     }
     
-        return $feedbacks;
-    }
+    //     return $feedbacks;
+    // }
     
     public static function getCoursesByFaculty($conn) {
         $sql = "SELECT * FROM courses";
@@ -207,6 +223,26 @@ class Course {
             ':status' => 'ongoing',
             ':course_id' => $course_id
         ]);
+    }
+
+    public static function enableFeedback($conn, $course_id, $enabled) {
+        $sql = "UPDATE courses SET feedback_enabled = :enabled WHERE id = :course_id";
+        $stmt = $conn->prepare($sql);
+        $stmt->execute([':enabled' => $enabled, ':course_id' => $course_id]);
+    }
+
+    public static function isFeedbackEnabled($conn, $course_id) {
+        $sql = "SELECT feedback_enabled FROM courses WHERE id = :course_id";
+        $stmt = $conn->prepare($sql);
+        $stmt->execute([':course_id' => $course_id]);
+        return $stmt->fetchColumn();
+    }
+
+    public static function getFeedback($conn, $course_id) {
+        $sql = "SELECT * FROM feedback WHERE course_id = :course_id";
+        $stmt = $conn->prepare($sql);
+        $stmt->execute([':course_id' => $course_id]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     public static function getOngoingCoursesByIds($conn, $course_ids) {

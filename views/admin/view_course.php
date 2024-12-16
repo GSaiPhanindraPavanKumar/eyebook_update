@@ -3,10 +3,12 @@ include "sidebar.php";
 use Models\Faculty;
 use Models\Student;
 use Models\Course;
+use Models\feedback;
 ?>
 
 <?php
 // Fetch all faculties and students for the assigned university
+$feedbackEnabled = $course['feedback_enabled'];
 
 
 // Fetch assigned universities
@@ -51,6 +53,9 @@ $assignedUniversities = Course::getAssignedUniversities($conn, $course['id']);
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link" id="assign-students-tab" data-toggle="tab" href="#assign-students" role="tab" aria-controls="assign-students" aria-selected="false">Assign Students</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id="feedback-tab" data-toggle="tab" href="#feedback" role="tab" aria-controls="feedback" aria-selected="false">Feedback</a>
                             </li>
                         </ul>
                         <div class="tab-content" id="myTabContent">
@@ -201,52 +206,6 @@ $assignedUniversities = Course::getAssignedUniversities($conn, $course['id']);
                                             <?php endforeach; ?>
                                         </tbody>
                                     </table>
-
-                                    <h4 class="card-title mt-3">Feedback</h4>
-                                    <div class="table-responsive">
-                                        <div class="input-group mb-3">
-                                            <input class="form-control" id="searchInputFeedback" type="text" placeholder="🔍 Search Feedback...">
-                                            <div class="input-group-append">
-                                                <select class="form-control" id="filterSelectFeedback">
-                                                    <option value="">Filter by...</option>
-                                                    <option value="regd_no">Register Number</option>
-                                                    <option value="name">Name</option>
-                                                    <option value="email">Email</option>
-                                                    <option value="feedback">Feedback</option>
-                                                </select>
-                                            </div>
-                                        </div>
-                                        <table class="table table-hover table-borderless table-striped">
-                                            <thead class="thead-light">
-                                                <tr>
-                                                    <th>Register Number</th>
-                                                    <th style="width: 30%;">Name</th>
-                                                    <th>Email</th>
-                                                    <th>Feedback</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody id="feedbackTable">
-                                                <?php
-                                                $feedbacks = Course::getFeedback($conn, $course['id']);
-                                                if (empty($feedbacks)) {
-                                                    echo "<tr><td colspan='4'>No feedback available.</td></tr>";
-                                                } else {
-                                                    foreach ($feedbacks as $feedback):
-                                                        $student = Student::getById($conn, $feedback['student_id']);
-                                                ?>
-                                                    <tr>
-                                                        <td data-filter="regd_no"><?php echo htmlspecialchars($student['regd_no'] ?? 'N/A'); ?></td>
-                                                        <td data-filter="name" style="width: 30%;"><?php echo htmlspecialchars($student['name']); ?></td>
-                                                        <td data-filter="email"><?php echo htmlspecialchars($student['email']); ?></td>
-                                                        <td data-filter="feedback"><?php echo htmlspecialchars($feedback['feedback']); ?></td>
-                                                    </tr>
-                                                <?php
-                                                    endforeach;
-                                                }
-                                                ?>
-                                            </tbody>
-                                        </table>
-                                    </div>
                                 </div>
                                 </form>
                                     
@@ -388,6 +347,72 @@ $assignedUniversities = Course::getAssignedUniversities($conn, $course['id']);
                                     <button type="submit" class="btn btn-primary">Assign Students</button>
                                 </form>
                             </div>
+
+                            <!-- Feedback Tab -->
+                            <div class="tab-pane fade" id="feedback" role="tabpanel" aria-labelledby="feedback-tab">
+                            <h4 class="card-title mt-3">Feedback</h4>
+                            <form method="post" action="/admin/toggle_feedback">
+                                <input type="hidden" name="course_id" value="<?php echo htmlspecialchars($course['id']); ?>">
+                                <div class="form-group">
+                                    <label for="feedback_enabled">Enable Feedback</label>
+                                    <select class="form-control" id="feedback_enabled" name="enabled">
+                                        <option value="true" <?php echo $feedbackEnabled ? 'selected' : ''; ?>>Yes</option>
+                                        <option value="false" <?php echo !$feedbackEnabled ? 'selected' : ''; ?>>No</option>
+                                    </select>
+                                </div>
+                                <button type="submit" class="btn btn-primary">Save</button>
+                            </form>
+
+                            <div class="mt-4">
+                                <h5>View Feedback</h5>
+                                <div class="table-responsive mt-4">
+                                    <table class="table table-hover table-borderless table-striped">
+                                        <thead class="thead-light">
+                                            <tr>
+                                                <th>Name</th>
+                                                <th>Depth of Coverage</th>
+                                                <th>Emphasis on Fundamentals</th>
+                                                <th>Coverage of Modern Topics</th>
+                                                <th>Overall Rating</th>
+                                                <th>Benefits</th>
+                                                <th>Instructor Assistance</th>
+                                                <th>Instructor Feedback</th>
+                                                <th>Motivation</th>
+                                                <th>SME Help</th>
+                                                <th>Overall Very Good</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="feedbackTable">
+                                            <?php
+                                            $feedbacks = Course::getFeedback($conn, $course['id']);
+                                            if (empty($feedbacks)) {
+                                                echo "<tr><td colspan='11'>No feedback available.</td></tr>";
+                                            } else {
+                                                foreach ($feedbacks as $feedback):
+                                                    $student = Student::getById($conn, $feedback['student_id']);
+                                            ?>
+                                                <tr>
+                                                    <td><?php echo htmlspecialchars($student['name']); ?></td>
+                                                    <td><?php echo htmlspecialchars($feedback['depth_of_coverage']); ?></td>
+                                                    <td><?php echo htmlspecialchars($feedback['emphasis_on_fundamentals']); ?></td>
+                                                    <td><?php echo htmlspecialchars($feedback['coverage_of_modern_topics']); ?></td>
+                                                    <td><?php echo htmlspecialchars($feedback['overall_rating']); ?></td>
+                                                    <td><?php echo htmlspecialchars($feedback['benefits']); ?></td>
+                                                    <td><?php echo htmlspecialchars($feedback['instructor_assistance']); ?></td>
+                                                    <td><?php echo htmlspecialchars($feedback['instructor_feedback']); ?></td>
+                                                    <td><?php echo htmlspecialchars($feedback['motivation']); ?></td>
+                                                    <td><?php echo htmlspecialchars($feedback['sme_help']); ?></td>
+                                                    <td><?php echo htmlspecialchars($feedback['overall_very_good']); ?></td>
+                                                </tr>
+                                            <?php
+                                                endforeach;
+                                            }
+                                            ?>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
                         </div>
                         <?php if (isset($message)): ?>
                             <div class="alert alert-info"><?php echo $message; ?></div>
@@ -412,6 +437,7 @@ $assignedUniversities = Course::getAssignedUniversities($conn, $course['id']);
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 
 <script>
@@ -535,24 +561,83 @@ document.getElementById('assignCourseForm').addEventListener('submit', function(
         }
     });
 });
+function showGraphicalFeedback() {
+    document.getElementById('graphicalFeedback').style.display = 'block';
+    document.getElementById('individualFeedback').style.display = 'none';
+    renderGraphicalFeedback();
+}
+
+function showIndividualFeedback() {
+    document.getElementById('graphicalFeedback').style.display = 'none';
+    document.getElementById('individualFeedback').style.display = 'block';
+}
+function renderGraphicalFeedback() {
+    var ctx = document.getElementById('feedbackChart').getContext('2d');
+    var feedbackData = <?php echo json_encode($feedbacks); ?>;
+
+    var labels = ['Depth of Coverage', 'Emphasis on Fundamentals', 'Coverage of Modern Topics', 'Overall Rating', 'Instructor Assistance', 'Instructor Feedback', 'Motivation', 'SME Help', 'Overall Very Good'];
+    var data = {
+        labels: labels,
+        datasets: []
+    };
+
+    var questions = ['depth_of_coverage', 'emphasis_on_fundamentals', 'coverage_of_modern_topics', 'overall_rating', 'instructor_assistance', 'instructor_feedback', 'motivation', 'sme_help', 'overall_very_good'];
+    var options = ['Basic Level', 'Intermediate Level', 'Advance Level', 'Poor', 'Satisfactory', 'Good', 'Very Good', 'Excellent', 'Strongly Agree', 'Agree', 'Neutral', 'Disagree', 'Strongly disagree'];
+
+    questions.forEach(function(question, index) {
+        var counts = {};
+        options.forEach(function(option) {
+            counts[option] = 0;
+        });
+
+        feedbackData.forEach(function(feedback) {
+            var answer = feedback[question];
+            if (counts[answer] !== undefined) {
+                counts[answer]++;
+            }
+        });
+
+        var dataset = {
+            label: labels[index],
+            data: options.map(function(option) { return counts[option]; }),
+            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+            borderColor: 'rgba(75, 192, 192, 1)',
+            borderWidth: 1
+        };
+
+        data.datasets.push(dataset);
+    });
+
+    new Chart(ctx, {
+        type: 'bar',
+        data: data,
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+}
 </script>
 <script>
-    $(document).ready(function() {
-        $('#searchInputFeedback, #filterSelectFeedback').on('input change', function() {
-            var searchValue = $('#searchInputFeedback').val().toLowerCase();
-            var filterValue = $('#filterSelectFeedback').val();
-            var visibleRows = 0;
-            $('#feedbackTable tr').filter(function() {
-                var text = $(this).text().toLowerCase();
-                var isVisible = text.indexOf(searchValue) > -1;
-                if (filterValue) {
-                    var cellValue = $(this).find('td[data-filter="' + filterValue + '"]').text().toLowerCase();
-                    isVisible = isVisible && cellValue.indexOf(searchValue) > -1;
-                }
-                $(this).toggle(isVisible);
-                if (isVisible) visibleRows++;
-            });
-            $('#noRecords').toggle(visibleRows === 0);
+$(document).ready(function() {
+    $('#searchInputFeedback, #filterSelectFeedback').on('input change', function() {
+        var searchValue = $('#searchInputFeedback').val().toLowerCase();
+        var filterValue = $('#filterSelectFeedback').val();
+        var visibleRows = 0;
+        $('#feedbackTable tr').filter(function() {
+            var text = $(this).text().toLowerCase();
+            var isVisible = text.indexOf(searchValue) > -1;
+            if (filterValue) {
+                var cellValue = $(this).find('td[data-filter="' + filterValue + '"]').text().toLowerCase();
+                isVisible = isVisible && cellValue.indexOf(searchValue) > -1;
+            }
+            $(this).toggle(isVisible);
+            if (isVisible) visibleRows++;
         });
+        $('#noRecords').toggle(visibleRows === 0);
     });
+});
 </script>
