@@ -12,11 +12,22 @@ if ($classroomId && !empty($attendance)) {
     $stmt = $conn->prepare("UPDATE virtual_classrooms SET attendance = ? WHERE id = ?");
     $stmt->execute([json_encode($attendance), $classroomId]);
 
-    // Redirect back to the dashboard
-    $hashedCourseId = base64_encode($courseId);
-    $hashedCourseId = str_replace(['+', '/', '='], ['-', '_', ''], $hashedCourseId);
-    header("Location: /faculty/view_course/$hashedCourseId");
-    exit();
+    // Fetch the course ID associated with the virtual classroom
+    $stmt = $conn->prepare("SELECT course_id FROM virtual_classrooms WHERE id = ?");
+    $stmt->execute([$classroomId]);
+    $courseIdJson = $stmt->fetchColumn();
+    $courseIds = json_decode($courseIdJson, true);
+
+    if (!empty($courseIds)) {
+        // Use the first course ID for redirection
+        $courseId = $courseIds[0];
+        $hashedCourseId = base64_encode($courseId);
+        $hashedCourseId = str_replace(['+', '/', '='], ['-', '_', ''], $hashedCourseId);
+        header("Location: /faculty/view_course/$hashedCourseId");
+        exit();
+    } else {
+        echo "Error: No course ID found.";
+    }
 } else {
     echo "Error: Classroom ID or attendance data not provided.";
 }
