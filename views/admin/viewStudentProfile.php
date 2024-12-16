@@ -84,7 +84,7 @@
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
-                <div class="modal-body">
+                <div class="modal-body non-clickable">
                     <div class="form-group">
                         <label for="newPassword">New Password</label>
                         <input type="password" class="form-control" id="newPassword" name="new_password" required>
@@ -147,3 +147,12 @@
         });
     });
 </script>
+
+<style>
+    .non-clickable {
+        pointer-events: none;
+    }
+    .modal-footer .btn, .modal-header .close {
+        pointer-events: auto;
+    }
+</style>
