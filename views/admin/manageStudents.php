@@ -69,7 +69,7 @@ function daysAgo($date) {
                                     <thead class="thead-light">
                                         <tr>
                                             <th><input type="checkbox" id="selectAll"></th>
-                                            <th data-sort="serialNumber">S.No<i class="fas fa-sort"></i></th>
+                                            <th data-sort="serialNumber">S.No</th>
                                             <th data-sort="regd_no"><a href="?search=<?= htmlspecialchars($searchQuery) ?>&sort=regd_no&order=<?= $sortOrder === 'asc' ? 'desc' : 'asc' ?>">Registration Number <i class="fas fa-sort"></i></a></th>
                                             <th data-sort="name"><a href="?search=<?= htmlspecialchars($searchQuery) ?>&sort=name&order=<?= $sortOrder === 'asc' ? 'desc' : 'asc' ?>">Name <i class="fas fa-sort"></i></a></th>
                                             <th data-sort="email"><a href="?search=<?= htmlspecialchars($searchQuery) ?>&sort=email&order=<?= $sortOrder === 'asc' ? 'desc' : 'asc' ?>">Email <i class="fas fa-sort"></i></a></th>
