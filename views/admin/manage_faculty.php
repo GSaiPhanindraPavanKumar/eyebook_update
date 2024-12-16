@@ -6,7 +6,20 @@ use Models\Faculty;
 
 $conn = Database::getConnection();
 $universities = University::getAll($conn);
-$faculty = Faculty::getAll($conn);
+
+// Handle search query
+$searchQuery = $_GET['search'] ?? '';
+$faculty = Faculty::search($conn, $searchQuery);
+
+function daysAgo($date) {
+    if ($date === null) {
+        return 'N/A';
+    }
+    $now = new DateTime();
+    $lastUsage = new DateTime($date);
+    $interval = $now->diff($lastUsage);
+    return $interval->days;
+}
 ?>
 
 <div class="main-panel">
@@ -32,17 +45,14 @@ $faculty = Faculty::getAll($conn);
                     <div class="card-body">
                         <p class="card-title mb-0" style="font-size:larger">Faculty</p><br>
                         <div class="table-responsive">
-                            <div class="input-group mb-3">
-                                <input class="form-control" id="searchInput" type="text" placeholder="🔍 Search Faculty...">
-                                <div class="input-group-append">
-                                    <select class="form-control" id="filterSelect">
-                                        <option value="">Filter by...</option>
-                                        <option value="name">Name</option>
-                                        <option value="email">Email</option>
-                                        <option value="university">University</option>
-                                    </select>
+                            <form method="get" action="">
+                                <div class="input-group mb-3">
+                                    <input class="form-control" id="searchInput" name="search" type="text" placeholder="🔍 Search Faculty..." value="<?= htmlspecialchars($searchQuery) ?>">
+                                    <div class="input-group-append">
+                                        <button class="btn btn-primary" type="submit">Search</button>
+                                    </div>
                                 </div>
-                            </div>
+                            </form>
                             <form id="facultyForm" method="post" action="/admin/resetFacultyPasswords">
                                 <table class="table table-hover table-borderless table-striped">
                                     <thead class="thead-light">
@@ -58,7 +68,7 @@ $faculty = Faculty::getAll($conn);
                                     <tbody id="facultyTable">
                                         <?php
                                         $serialNumber = 1;
-                                        $limit = 10;
+                                        $limit = 50;
                                         $page = isset($_GET['page']) ? $_GET['page'] : 1;
                                         $offset = ($page - 1) * $limit;
                                         $total_faculty = count($faculty);
@@ -98,7 +108,7 @@ $faculty = Faculty::getAll($conn);
                             <ul class="pagination justify-content-center">
                                 <?php for ($i = 1; $i <= $total_pages; $i++): ?>
                                     <li class="page-item <?= ($i == $page) ? 'active' : '' ?>">
-                                        <a class="page-link" href="?page=<?= $i ?>"><?= $i ?></a>
+                                        <a class="page-link" href="?page=<?= $i ?>&search=<?= htmlspecialchars($searchQuery) ?>"><?= $i ?></a>
                                     </li>
                                 <?php endfor; ?>
                             </ul>
@@ -158,42 +168,6 @@ $faculty = Faculty::getAll($conn);
             $('#edit-email').val(email);
             $('#editModal').modal('show');
         });
-
-        $('#searchInput, #filterSelect').on('input change', function() {
-            var searchValue = $('#searchInput').val().toLowerCase();
-            var filterValue = $('#filterSelect').val();
-            var visibleRows = 0;
-            $('#facultyTable tr').filter(function() {
-                var text = $(this).text().toLowerCase();
-                var isVisible = text.indexOf(searchValue) > -1;
-                if (filterValue) {
-                    var cellValue = $(this).find('td[data-filter="' + filterValue + '"]').text().toLowerCase();
-                    isVisible = isVisible && cellValue.indexOf(searchValue) > -1;
-                }
-                $(this).toggle(isVisible);
-                if (isVisible) visibleRows++;
-            });
-            $('#noRecords').toggle(visibleRows === 0);
-        });
-
-        $('th[data-sort]').on('click', function() {
-            var table = $(this).parents('table').eq(0);
-            var rows = table.find('tbody tr').toArray().sort(comparer($(this).index()));
-            this.asc = !this.asc;
-            if (!this.asc) { rows = rows.reverse(); }
-            for (var i = 0; i < rows.length; i++) { table.append(rows[i]); }
-        });
-
-        function comparer(index) {
-            return function(a, b) {
-                var valA = getCellValue(a, index), valB = getCellValue(b, index);
-                return $.isNumeric(valA) && $.isNumeric(valB) ? valA - valB : valA.localeCompare(valB);
-            };
-        }
-
-        function getCellValue(row, index) {
-            return $(row).children('td').eq(index).text();
-        }
 
         $('#selectAll').on('click', function() {
             $('input[name="selected[]"]').prop('checked', this.checked);

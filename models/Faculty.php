@@ -16,6 +16,12 @@ class Faculty {
         $stmt = $conn->query($sql);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+    public static function search($conn, $searchQuery) {
+        $sql = "SELECT * FROM faculty WHERE name LIKE :search OR email LIKE :search";
+        $stmt = $conn->prepare($sql);
+        $stmt->execute(['search' => '%' . $searchQuery . '%']);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
 
     public function updateLoginDetails($faculty_id) {
         $conn = Database::getConnection();
