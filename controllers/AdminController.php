@@ -178,65 +178,72 @@ class AdminController {
     public function downloadUsageReport() {
         $conn = Database::getConnection();
     
-        // Fetch data for each user type
-        $admins = $this->fetchUserData($conn, 'admins', 'today');
-        $spocs = $this->fetchUserData($conn, 'spocs', 'today');
-        $faculty = $this->fetchUserData($conn, 'faculty', 'today');
-        $students = $this->fetchUserData($conn, 'students', 'today');
+        // Fetch data for students
+        $stmt = $conn->query("SELECT id, name, email, created_at, last_login, first_login, login_count FROM students");
+        $students = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
-        // Fetch usage summary data
-        $usageData = $this->fetchUsageData($conn, 'today');
-        $usageSummary = [];
-        foreach ($usageData as $userType => $count) {
-            $usageSummary[] = [$userType, $count];
+        // Fetch data for faculty
+        $stmt = $conn->query("SELECT id, name, email, created_at, last_login, first_login, login_count FROM faculty");
+        $faculty = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    
+        // Fetch data for spocs
+        $stmt = $conn->query("SELECT id, name, email, last_login, first_login, login_count FROM spocs");
+        $spocs = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    
+        // Create a new spreadsheet
+        $spreadsheet = new Spreadsheet();
+    
+        // Populate data for students
+        $studentSheet = $spreadsheet->getActiveSheet();
+        $studentSheet->setTitle('Students');
+        $headers = ['ID', 'Name', 'Email', 'Created At', 'Last Login', 'First Login', 'Login Count'];
+        $studentSheet->fromArray($headers, NULL, 'A1');
+        $row = 2;
+        foreach ($students as $student) {
+            $studentSheet->fromArray(array_values($student), NULL, 'A' . $row);
+            $row++;
         }
     
-        // Create a new Spreadsheet object
-        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
-    
-        // Add summary data to the first sheet
-        $summarySheet = $spreadsheet->getActiveSheet();
-        $summarySheet->setTitle('Summary');
-        $summarySheet->fromArray(['User Type', 'Count'], NULL, 'A1');
-        $summarySheet->fromArray($usageSummary, NULL, 'A2');
-    
-        // Add data to the Admin sheet
-        $adminSheet = $spreadsheet->createSheet();
-        $adminSheet->setTitle('Admins');
-        $adminSheet->fromArray(['Name', 'Username'], NULL, 'A1'); // Updated header
-        $adminSheet->fromArray($admins, NULL, 'A2');
-    
-        // Add data to the SPOC sheet
-        $spocSheet = $spreadsheet->createSheet();
-        $spocSheet->setTitle('SPOCs');
-        $spocSheet->fromArray(['Name', 'Email', 'University'], NULL, 'A1');
-        $spocSheet->fromArray($spocs, NULL, 'A2');
-    
-        // Add data to the Faculty sheet
+        // Create and populate data for faculty
         $facultySheet = $spreadsheet->createSheet();
         $facultySheet->setTitle('Faculty');
-        $facultySheet->fromArray(['Name', 'Email', 'University', 'Section'], NULL, 'A1');
-        $facultySheet->fromArray($faculty, NULL, 'A2');
+        $facultySheet->fromArray($headers, NULL, 'A1');
+        $row = 2;
+        foreach ($faculty as $member) {
+            $facultySheet->fromArray(array_values($member), NULL, 'A' . $row);
+            $row++;
+        }
     
-        // Add data to the Student sheet
-        $studentSheet = $spreadsheet->createSheet();
-        $studentSheet->setTitle('Students');
-        $studentSheet->fromArray(['Name', 'Email', 'University', 'Section'], NULL, 'A1');
-        $studentSheet->fromArray($students, NULL, 'A2');
+        // Create and populate data for spocs
+        $spocSheet = $spreadsheet->createSheet();
+        $spocSheet->setTitle('SPOCs');
+        $spocSheet->fromArray($headers, NULL, 'A1');
+        $row = 2;
+        foreach ($spocs as $spoc) {
+            $spocSheet->fromArray(array_values($spoc), NULL, 'A' . $row);
+            $row++;
+        }
     
-        // Set the first sheet as the active sheet
-        $spreadsheet->setActiveSheetIndex(0);
+        // Ensure the reports directory exists
+        $reportsDir = __DIR__ . '/../../reports';
+        if (!is_dir($reportsDir)) {
+            mkdir($reportsDir, 0777, true);
+        }
     
-        // Generate the Excel file
-        $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
-        $filename = 'user_usage_report_' . date('Ymd') . '.xlsx';
+        // Write the spreadsheet to a file
+        $fileName = 'usage_report_' . date('Y-m-d_H-i-s') . '.xlsx';
+        $filePath = $reportsDir . '/' . $fileName;
+        $writer = new Xlsx($spreadsheet);
+        $writer->save($filePath);
     
-        // Send the file to the browser for download
+        // Output the file for download
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-        header('Content-Disposition: attachment;filename="' . $filename . '"');
-        header('Cache-Control: max-age=0');
-        $writer->save('php://output');
-        exit();
+        header('Content-Disposition: attachment; filename="' . basename($filePath) . '"');
+        header('Content-Length: ' . filesize($filePath));
+        readfile($filePath);
+    
+        // Delete the file after download
+        unlink($filePath);
     }
     
     private function fetchUserData($conn, $userType, $timeRange) {

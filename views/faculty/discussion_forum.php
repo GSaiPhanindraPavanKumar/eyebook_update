@@ -130,14 +130,14 @@ $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
                                     </tr>
                                     <tr id="reply-form-<?php echo $discussion['id']; ?>" style="display: none;">
                                         <td colspan="4">
-                                            <form method="post">
+                                            <form method="post" action="/faculty/reply_discussion">
                                                 <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
                                                 <input type="hidden" name="parent_post_id" value="<?php echo $discussion['id']; ?>">
                                                 <div class="form-group">
                                                     <label for="reply">Your Reply:</label>
                                                     <textarea class="form-control" rows="3" name="msg" required></textarea>
                                                 </div>
-                                                <input type="submit" name="save" class="btn btn-primary" value="Reply">
+                                                <input type="submit" name="save_reply" class="btn btn-primary" value="Reply">
                                             </form>
                                         </td>
                                     </tr>

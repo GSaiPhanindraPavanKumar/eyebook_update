@@ -562,13 +562,12 @@ class FacultyController {
             $name = $_SESSION['name']; // Assuming email is stored in session
             $post = filter_input(INPUT_POST, 'msg', FILTER_SANITIZE_FULL_SPECIAL_CHARS); // Ensure 'msg' is retrieved correctly
             $university_id = $_SESSION['university_id']; // Assuming university_id is stored in session
-            $parent_post_id = filter_input(INPUT_POST, 'parent_post_id', FILTER_VALIDATE_INT);
 
             if (empty($post)) {
                 die("Post content cannot be empty.");
             }
 
-            Discussion::addDiscussion($conn, $name, $post, $university_id, $parent_post_id);
+            Discussion::addDiscussion($conn, $name, $post, $university_id);
             header('Location: /faculty/discussion_forum');
             exit();
         }
@@ -579,7 +578,7 @@ class FacultyController {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $conn = Database::getConnection();
             $parent_post_id = filter_input(INPUT_POST, 'parent_post_id', FILTER_VALIDATE_INT);
-            $name = $_SESSION['email']; // Assuming email is stored in session
+            $name = $_SESSION['name']; // Assuming email is stored in session
             $post = filter_input(INPUT_POST, 'msg', FILTER_SANITIZE_FULL_SPECIAL_CHARS);
             $university_id = $_SESSION['university_id']; // Assuming university_id is stored in session
 
