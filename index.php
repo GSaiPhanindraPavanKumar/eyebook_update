@@ -105,6 +105,7 @@ $router->post('/admin/assign_students', 'AdminController@assignStudents');
 $router->post('/admin/unassign_faculty', 'AdminController@unassignFaculty');
 $router->post('/admin/unassign_students', 'AdminController@unassignStudents');
 $router->get('/admin/view_book/([a-zA-Z0-9]+)', 'AdminController@viewBook');
+$router->get('/admin/viewECbook/([a-zA-Z0-9]+)', 'AdminController@viewECBook');
 $router->get('/admin/manage_assignments', 'AdminController@manageAssignments');
 $router->get('/admin/create_assignment', 'AdminController@createAssignment');
 $router->post('/admin/create_assignment', 'AdminController@createAssignment');
@@ -121,6 +122,7 @@ $router->post('/admin/reset_student_password/(\d+)', 'AdminController@resetStude
 $router->post('/admin/bulk_reset_student_password', 'AdminController@bulkResetStudentPassword');
 $router->post('/admin/bulk_reset_faculty_password', 'AdminController@bulkResetFacultyPassword');
 $router->post('/admin/add_additional_content', 'AdminController@addAdditionalContent');
+$router->post('/admin/upload_ec_content', 'AdminController@uploadEcContent');
 
 $router->get('/spoc', 'SpocController@dashboard');
 $router->get('/spoc/dashboard', 'SpocController@dashboard');

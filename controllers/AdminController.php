@@ -37,31 +37,31 @@ require_once __DIR__ . '/../models/Database.php';
 require_once __DIR__ . '/../models/zoom_integration.php';
 
 require_once 'vendor/autoload.php';
-// require_once __DIR__ . '/../aws_config.php';
+require_once __DIR__ . '/../aws_config.php';
 
-// $bucketName = AWS_BUCKET_NAME;
-// $region = AWS_REGION;
-// $accessKey = AWS_ACCESS_KEY_ID;
-// $secretKey = AWS_SECRET_ACCESS_KEY;
+$bucketName = AWS_BUCKET_NAME;
+$region = AWS_REGION;
+$accessKey = AWS_ACCESS_KEY_ID;
+$secretKey = AWS_SECRET_ACCESS_KEY;
 
-// // Debugging: Log the values of the configuration variables
-// error_log('AWS_BUCKET_NAME: ' . $bucketName);
-// error_log('AWS_REGION: ' . $region);
-// error_log('AWS_ACCESS_KEY_ID: ' . $accessKey);
-// error_log('AWS_SECRET_ACCESS_KEY: ' . $secretKey);
+// Debugging: Log the values of the configuration variables
+error_log('AWS_BUCKET_NAME: ' . $bucketName);
+error_log('AWS_REGION: ' . $region);
+error_log('AWS_ACCESS_KEY_ID: ' . $accessKey);
+error_log('AWS_SECRET_ACCESS_KEY: ' . $secretKey);
 
-// if (!$bucketName || !$region || !$accessKey || !$secretKey) {
-//     throw new Exception('Missing AWS configuration in aws_config.php file');
-// }
+if (!$bucketName || !$region || !$accessKey || !$secretKey) {
+    throw new Exception('Missing AWS configuration in aws_config.php file');
+}
 
-// $s3Client = new S3Client([
-//     'region' => 'us-east-1',
-//     'version' => 'latest',
-//     'credentials' => [
-//         'key' => $accessKey,
-//         'secret' => $secretKey,
-//     ],
-// ]);
+$s3Client = new S3Client([
+    'region' => 'us-east-1',
+    'version' => 'latest',
+    'credentials' => [
+        'key' => $accessKey,
+        'secret' => $secretKey,
+    ],
+]);
 
 class AdminController {
     public function index() {
@@ -620,6 +620,32 @@ class AdminController {
         require 'views/admin/book_view.php';
     }
 
+    public function viewECBook($hashedId) {
+        $conn = Database::getConnection();
+        $course_id = base64_decode($hashedId);
+        if (!is_numeric($course_id)) {
+            die('Invalid course ID');
+        }
+        $course = Course::getById($conn, $course_id);
+    
+        if (!$course || empty($course['EC_content'])) {
+            echo 'EC content not found.';
+            exit;
+        }
+    
+        // Ensure EC_content is an array
+        $ec_content = json_decode($course['EC_content'], true);
+        if (!is_array($ec_content)) {
+            echo 'Invalid EC content format.';
+            exit;
+        }
+    
+        // Get the index_path from the query parameter
+        $index_path = $_GET['index_path'] ?? $ec_content[0]['indexPath'];
+    
+        require 'views/admin/book_view.php';
+    }
+
     public function uploadSingleFaculty() {
         $conn = Database::getConnection();
         $universities = University::getAll($conn);
@@ -1110,13 +1136,44 @@ class AdminController {
         }
     }
 
+    public function uploadEcContent() {
+        $conn = Database::getConnection();
+    
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            $course_id = $_POST['course_id'];
+            $title = $_POST['ec_content_title'];
+            $file = $_FILES['ec_content_file'];
+            if (!$title || !$file) {
+                echo json_encode(['message' => 'Unit name and EC Content file are required']);
+                exit;
+            }
+            $result = Course::addEcContent($conn, $course_id, $title, $file);
+            if (isset($result['indexPath'])) {
+                header("Location: /admin/view_course/$course_id");
+                exit;
+            } else {
+                echo json_encode(['message' => $result['message']]);
+                exit;
+            }
+        }
+    }
+
     public function addAdditionalContent() {
         $conn = Database::getConnection();
     
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $course_id = $_POST['course_id'];
             $title = $_POST['content_title'];
-            $link = $_POST['content_link'];
+            $content_type = $_POST['content_type'];
+    
+            if ($content_type == 'link') {
+                $link = $_POST['content_link'];
+            } else {
+                $file = $_FILES['content_file'];
+                $upload_dir = 'uploads/additional_content/';
+                $file_path = $upload_dir . basename($file['name']);
+                $link = $this->uploadFileToS3($file);
+            }
     
             $course = Course::getById($conn, $course_id);
             $additional_content = !empty($course['additional_content']) ? json_decode($course['additional_content'], true) : [];
@@ -1135,6 +1192,41 @@ class AdminController {
     
             header('Location: /admin/view_course/' . $course_id);
             exit();
+        }
+    }
+    
+    private function uploadFileToS3($file) {
+        $bucketName = AWS_BUCKET_NAME;
+        $region = AWS_REGION;
+        $accessKey = AWS_ACCESS_KEY_ID;
+        $secretKey = AWS_SECRET_ACCESS_KEY;
+    
+        $s3Client = new S3Client([
+            'region' => $region,
+            'version' => 'latest',
+            'credentials' => [
+                'key' => $accessKey,
+                'secret' => $secretKey,
+            ],
+        ]);
+    
+        $filePath = $file['tmp_name'];
+        $fileName = basename($file['name']);
+        $key = "additional_content/{$fileName}";
+    
+        try {
+            $result = $s3Client->putObject([
+                'Bucket' => $bucketName,
+                'Key' => $key,
+                'SourceFile' => $filePath,
+                'ContentType' => $file['type'],
+                'ACL' => 'public-read',
+            ]);
+    
+            return $result['ObjectURL'];
+        } catch (AwsException $e) {
+            error_log('AWS S3 Upload Error: ' . $e->getMessage());
+            return null;
         }
     }
 

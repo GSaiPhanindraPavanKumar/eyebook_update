@@ -28,6 +28,17 @@ class Course {
             ':course_id' => $course_id
         ]);
     }
+    public static function updateEcContent($conn, $course_id, $ec_contents) {
+        $sql = "UPDATE courses SET EC_content = :ec_content WHERE id = :course_id";
+        $stmt = $conn->prepare($sql);
+        $stmt->execute([
+            ':ec_content' => json_encode($ec_contents),
+            ':course_id' => $course_id
+        ]);
+    
+        // Debugging: Log the result of the database update
+        error_log('Updated EC Content for Course ID: ' . $course_id);
+    }
 
     public static function updateAdditionalContent($conn, $course_id, $additional_content) {
         $sql = "UPDATE courses SET additional_content = :additional_content WHERE id = :course_id";
@@ -153,10 +164,10 @@ class Course {
             return ['message' => 'Unit name is required'];
         }
         if (empty($scorm_file)) {
-            return ['message' => 'SCORM package file is required'];
+            return ['message' => 'EC Content file is required'];
         }
         if ($scorm_file['error'] != 0) {
-            return ['message' => 'Error uploading SCORM package file: ' . $scorm_file['error']];
+            return ['message' => 'Error uploading EC Content file: ' . $scorm_file['error']];
         }
     
         $sql = "SELECT * FROM courses WHERE id = :id";
@@ -173,7 +184,7 @@ class Course {
             $course_content = [];
         }
     
-        $scorm_dir = "uploads/course-$course_id/course_book" . time() . '-' . basename($scorm_file['name'], '.zip');
+        $scorm_dir = "uploads/course-$course_id/EC" . time() . '-' . basename($scorm_file['name'], '.zip');
         if (!mkdir($scorm_dir, 0777, true)) {
             return ['message' => 'Failed to create directory for SCORM package'];
         }
@@ -202,7 +213,64 @@ class Course {
         $content_json = json_encode($course_content);
         $stmt->execute(['course_book' => $content_json, 'id' => $course_id]);
     
-        return ['message' => 'Unit added successfully with SCORM content', 'indexPath' => $index_path];
+        return ['message' => 'Unit added successfully with EC content', 'indexPath' => $index_path];
+    }
+
+    public static function addEcContent($conn, $course_id, $unit_name, $scorm_file) {
+        if (empty($unit_name)) {
+            return ['message' => 'Unit name is required'];
+        }
+        if (empty($scorm_file)) {
+            return ['message' => 'EC Content file is required'];
+        }
+        if ($scorm_file['error'] != 0) {
+            return ['message' => 'Error uploading EC Content file: ' . $scorm_file['error']];
+        }
+    
+        $sql = "SELECT * FROM courses WHERE id = :id";
+        $stmt = $conn->prepare($sql);
+        $stmt->execute(['id' => $course_id]);
+        $course = $stmt->fetch(PDO::FETCH_ASSOC);
+    
+        if (!$course) {
+            return ['message' => 'Course not found'];
+        }
+    
+        $course_content = json_decode($course['EC_content'], true);
+        if (!is_array($course_content)) {
+            $course_content = [];
+        }
+    
+        $scorm_dir = "uploads/course-$course_id/EC" . time() . '-' . basename($scorm_file['name'], '.zip');
+        if (!mkdir($scorm_dir, 0777, true)) {
+            return ['message' => 'Failed to create directory for SCORM package'];
+        }
+    
+        $zip = new ZipArchive;
+        if ($zip->open($scorm_file['tmp_name']) === TRUE) {
+            $zip->extractTo($scorm_dir);
+            $zip->close();
+        } else {
+            return ['message' => 'Failed to unzip SCORM package'];
+        }
+    
+        $index_path = $scorm_dir . '/index.html';
+        if (!file_exists($index_path)) {
+            return ['message' => 'index.html file not found'];
+        }
+    
+        $new_unit = [
+            'unitTitle' => $unit_name,
+            'indexPath' => $index_path
+        ];
+        $course_content[] = $new_unit;
+    
+        $sql = "UPDATE courses SET EC_content = :ec_content WHERE id = :id";
+        $stmt = $conn->prepare($sql);
+        $content_json = json_encode($course_content);
+        $stmt->execute(['ec_content' => $content_json, 'id' => $course_id]);
+    
+        return ['message' => 'Unit added successfully with EC content', 'indexPath' => $index_path];
     }
 
     public static function getCoursesByIds($conn, $course_ids) {

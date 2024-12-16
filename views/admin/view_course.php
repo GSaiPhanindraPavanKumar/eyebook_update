@@ -84,6 +84,34 @@ $assignedUniversities = Course::getAssignedUniversities($conn, $course['id']);
                                         <a href="/admin/edit_course/<?php echo $course['id']; ?>" class="btn btn-warning">Edit Course</a>
                                         <a href="/admin/delete_course/<?php echo $course['id']; ?>" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this course?');">Delete Course</a>
                                     </div>
+                                    <h5 class="mt-5">EC Content</h5>
+                                <table class="table table-hover mt-2">
+                                    <thead class="thead-dark">
+                                        <tr>
+                                            <th scope="col">S. No.</th>
+                                            <th scope="col">Title</th>
+                                            <th scope="col">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <?php
+                                        $ECContent = !empty($course['EC_content']) ? json_decode($course['EC_content'], true) : [];
+                                        if (!empty($ECContent)) {
+                                            $serialNumber = 1;
+                                            foreach ($ECContent as $content) {
+                                                echo "<tr>";
+                                                echo "<td>" . $serialNumber++ . "</td>";
+                                                echo "<td>" . htmlspecialchars($content['unitTitle'] ?? 'N/A') . "</td>";
+                                                $full_url = $content['indexPath'] ?? '#';
+                                                echo "<td><a href='/" . htmlspecialchars($full_url) . "' target='_blank' class='btn btn-primary'>View EC</a></td>";
+                                                echo "</tr>";
+                                            }
+                                        } else {
+                                            echo "<tr><td colspan='3'>No EC content available.</td></tr>";
+                                        }
+                                        ?>
+                                    </tbody>
+                                </table>
                                     <h4 class="card-title mt-3">Course Book</h4>
                                 <table class="table table-hover mt-2">
                                     <thead class="thead-dark">
@@ -132,7 +160,8 @@ $assignedUniversities = Course::getAssignedUniversities($conn, $course['id']);
                                                 echo "<tr>";
                                                 echo "<td>" . $serialNumber++ . "</td>";
                                                 echo "<td>" . htmlspecialchars($content['title'] ?? 'N/A') . "</td>";
-                                                echo "<td><a href='" . htmlspecialchars($content['link'] ?? '#') . "' target='_blank'>" . htmlspecialchars($content['link'] ?? 'N/A') . "</a></td>";
+                                                $full_url = $content['link'] ?? '#';
+                                                echo "<td><a href='" . htmlspecialchars($full_url) . "' target='_blank' class='btn btn-primary'>View Content</a></td>";
                                                 echo "</tr>";
                                             }
                                         } else {
@@ -256,15 +285,39 @@ $assignedUniversities = Course::getAssignedUniversities($conn, $course['id']);
                                     <input type="hidden" name="course_id" value="<?php echo htmlspecialchars($course['id']); ?>">
                                     <button type="submit" class="btn btn-primary">Add Course Book</button>
                                 </form>
+                                <h5 class="mt-5">EC Content Upload</h5>
+                                <form method="POST" action="/admin/upload_ec_content" enctype="multipart/form-data">
+                                    <div class="form-group">
+                                        <label for="ecContentTitle">Title</label>
+                                        <input type="text" class="form-control" id="ecContentTitle" name="ec_content_title" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="ecContentFile">Upload ZIP File</label>
+                                        <input type="file" class="form-control" id="ecContentFile" name="ec_content_file" accept=".zip" required>
+                                    </div>
+                                    <input type="hidden" name="course_id" value="<?php echo htmlspecialchars($course['id']); ?>">
+                                    <button type="submit" class="btn btn-primary">Upload EC Content</button>
+                                </form>
                                 <h5 class="mt-5">Additional Content</h5>
-                                <form method="POST" action="/admin/add_additional_content">
+                                <form method="POST" action="/admin/add_additional_content" enctype="multipart/form-data">
                                     <div class="form-group">
                                         <label for="contentTitle">Title</label>
                                         <input type="text" class="form-control" id="contentTitle" name="content_title" required>
                                     </div>
                                     <div class="form-group">
+                                        <label>Content Type</label><br>
+                                        <input type="radio" id="linkOption" name="content_type" value="link" checked>
+                                        <label for="linkOption">Link</label>
+                                        <input type="radio" id="fileOption" name="content_type" value="file">
+                                        <label for="fileOption">File</label>
+                                    </div>
+                                    <div class="form-group" id="linkInput">
                                         <label for="contentLink">Link</label>
-                                        <input type="url" class="form-control" id="contentLink" name="content_link" required>
+                                        <input type="url" class="form-control" id="contentLink" name="content_link">
+                                    </div>
+                                    <div class="form-group" id="fileInput" style="display: none;">
+                                        <label for="contentFile">File</label>
+                                        <input type="file" class="form-control" id="contentFile" name="content_file" accept=".pdf,video/*,image/*">
                                     </div>
                                     <input type="hidden" name="course_id" value="<?php echo htmlspecialchars($course['id']); ?>">
                                     <button type="submit" class="btn btn-primary">Add Additional Content</button>
@@ -679,5 +732,21 @@ $(document).ready(function() {
         });
         $('#noRecords').toggle(visibleRows === 0);
     });
+});
+</script>
+
+<script>
+document.getElementById('linkOption').addEventListener('change', function() {
+    document.getElementById('linkInput').style.display = 'block';
+    document.getElementById('fileInput').style.display = 'none';
+    document.getElementById('contentLink').required = true;
+    document.getElementById('contentFile').required = false;
+});
+
+document.getElementById('fileOption').addEventListener('change', function() {
+    document.getElementById('linkInput').style.display = 'none';
+    document.getElementById('fileInput').style.display = 'block';
+    document.getElementById('contentLink').required = false;
+    document.getElementById('contentFile').required = true;
 });
 </script>

@@ -75,6 +75,34 @@ use Models\feedback;
                                 ?>
                             </tbody>
                         </table>
+                        <h5 class="mt-5">EC Content</h5>
+                        <table class="table table-hover mt-2">
+                            <thead class="thead-dark">
+                                <tr>
+                                    <th scope="col">S. No.</th>
+                                    <th scope="col">Title</th>
+                                    <th scope="col">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php
+                                $ECContent = !empty($course['EC_content']) ? json_decode($course['EC_content'], true) : [];
+                                if (!empty($ECContent)) {
+                                    $serialNumber = 1;
+                                    foreach ($ECContent as $content) {
+                                        echo "<tr>";
+                                        echo "<td>" . $serialNumber++ . "</td>";
+                                        echo "<td>" . htmlspecialchars($content['unitTitle'] ?? 'N/A') . "</td>";
+                                        $full_url = $content['indexPath'] ?? '#';
+                                        echo "<td><a href='/" . htmlspecialchars($full_url) . "' target='_blank' class='btn btn-primary'>View EC</a></td>";
+                                        echo "</tr>";
+                                    }
+                                } else {
+                                    echo "<tr><td colspan='3'>No EC content available.</td></tr>";
+                                }
+                                ?>
+                            </tbody>
+                        </table>
                         <h5 class="mt-5">Additional Content</h5>
                         <table class="table table-hover mt-2">
                             <thead class="thead-dark">
