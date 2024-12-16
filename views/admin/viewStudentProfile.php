@@ -63,7 +63,7 @@
                         <div class="actions mt-4">
                             <a href="/admin/edit_student/<?= $student['id'] ?>" class="btn btn-warning">Edit Student</a>
                             <a href="/admin/delete_student/<?= $student['id'] ?>" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this student?');">Delete Student</a>
-                            <button class="btn btn-secondary" data-toggle="modal" data-target="#resetPasswordModal">Reset Password</button>
+                            <button class="btn btn-secondary" onclick="resetPassword(<?= $student['id'] ?>)">Reset Password</button>
                         </div>
                     </div>
                 </div>
@@ -72,38 +72,6 @@
     </div>
     <?php include 'footer.html'; ?>
 </div>
-<!-- Reset Password Modal -->
-<div class="modal fade" id="resetPasswordModal" tabindex="-1" role="dialog" aria-labelledby="resetPasswordModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <form id="resetPasswordForm" method="post">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="resetPasswordModalLabel">Reset Password</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body non-clickable">
-                    <!-- Non-clickable fields -->
-                    <div class="form-group">
-                        <label for="newPassword">New Password</label>
-                        <input type="password" class="form-control non-clickable-field" id="newPassword" name="new_password" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="confirmPassword">Confirm Password</label>
-                        <input type="password" class="form-control non-clickable-field" id="confirmPassword" name="confirm_password" required>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <!-- Keep these clickable -->
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Submit</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
 
 <!-- Scripts -->
 <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
@@ -127,40 +95,28 @@
         $('#selectAll').on('click', function() {
             $('input[name="selected[]"]').prop('checked', this.checked);
         });
-
-        $('#resetPasswordForm').on('submit', function(e) {
-            e.preventDefault();
-            var form = $(this);
-            var url = '/admin/reset_student_password/<?= $student['id'] ?>';
-
-            $.ajax({
-                type: 'POST',
-                url: url,
-                data: form.serialize(),
-                success: function(response) {
-                    $('#resetPasswordModal').modal('hide');
-                    alert('Password reset successfully.');
-                    location.reload();
-                },
-                error: function(response) {
-                    alert('An error occurred while resetting the password.');
-                }
-            });
-        });
     });
+
+    function resetPassword(studentId) {
+        var newPassword = prompt("Enter new password:");
+        if (newPassword) {
+            var confirmPassword = prompt("Confirm new password:");
+            if (newPassword === confirmPassword) {
+                $.ajax({
+                    type: 'POST',
+                    url: '/admin/reset_student_password/' + studentId,
+                    data: { new_password: newPassword, confirm_password: confirmPassword },
+                    success: function(response) {
+                        alert('Password reset successfully.');
+                        location.reload();
+                    },
+                    error: function(response) {
+                        alert('An error occurred while resetting the password.');
+                    }
+                });
+            } else {
+                alert("Passwords do not match.");
+            }
+        }
+    }
 </script>
-
-<style>
-    /* Make elements non-clickable */
-    .non-clickable-field {
-        pointer-events: none; /* Disable clicking */
-        background-color: #e9ecef; /* Optional: Gray background to indicate non-clickable fields */
-        opacity: 0.7; /* Optional: Reduced opacity */
-    }
-
-    /* Ensure buttons are still clickable */
-    .modal-footer .btn {
-        pointer-events: auto; /* Enable pointer events for buttons */
-    }
-
-</style>
