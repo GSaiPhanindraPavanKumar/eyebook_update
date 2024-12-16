@@ -12,6 +12,13 @@ class Student {
         $result = $stmt->fetch(PDO::FETCH_ASSOC);
         return $result['student_count'] ?? 0;
     }
+    
+    public static function search($conn, $searchQuery) {
+        $sql = "SELECT * FROM students WHERE regd_no LIKE :search OR name LIKE :search OR email LIKE :search";
+        $stmt = $conn->prepare($sql);
+        $stmt->execute(['search' => '%' . $searchQuery . '%']);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
 
     public function updateLoginDetails($student_id) {
         $conn = Database::getConnection();

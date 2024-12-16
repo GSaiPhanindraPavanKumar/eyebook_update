@@ -6,7 +6,10 @@ use Models\Student;
 
 $conn = Database::getConnection();
 $universities = University::getAll($conn);
-$students = Student::getAll($conn);
+
+// Handle search query
+$searchQuery = $_GET['search'] ?? '';
+$students = Student::search($conn, $searchQuery);
 
 function daysAgo($date) {
     if ($date === null) {
@@ -51,19 +54,14 @@ function daysAgo($date) {
                         <?php endif; ?>
 
                         <div class="table-responsive">
-                            <div class="input-group mb-3">
-                                <input class="form-control" id="searchInput" type="text" placeholder="🔍 Search Students...">
-                                <div class="input-group-append">
-                                    <select class="form-control" id="filterSelect">
-                                        <option value="">Filter by...</option>
-                                        <option value="regd_no">Registration Number</option>
-                                        <option value="name">Name</option>
-                                        <option value="email">Email</option>
-                                        <option value="university">University</option>
-                                        <option value="last_usage">Last Usage (Days Ago)</option>
-                                    </select>
+                            <form method="get" action="">
+                                <div class="input-group mb-3">
+                                    <input class="form-control" id="searchInput" name="search" type="text" placeholder="🔍 Search Students..." value="<?= htmlspecialchars($searchQuery) ?>">
+                                    <div class="input-group-append">
+                                        <button class="btn btn-primary" type="submit">Search</button>
+                                    </div>
                                 </div>
-                            </div>
+                            </form>
                             <form id="studentForm" method="post" action="/admin/resetStudentPasswords">
                                 <table class="table table-hover table-borderless table-striped">
                                     <thead class="thead-light">
@@ -81,7 +79,7 @@ function daysAgo($date) {
                                     <tbody id="studentTable">
                                         <?php
                                         $serialNumber = 1;
-                                        $limit = 10;
+                                        $limit = 50;
                                         $page = isset($_GET['page']) ? $_GET['page'] : 1;
                                         $offset = ($page - 1) * $limit;
                                         $total_students = count($students);
@@ -124,7 +122,7 @@ function daysAgo($date) {
                             <ul class="pagination justify-content-center">
                                 <?php for ($i = 1; $i <= $total_pages; $i++): ?>
                                     <li class="page-item <?= ($i == $page) ? 'active' : '' ?>">
-                                        <a class="page-link" href="?page=<?= $i ?>"><?= $i ?></a>
+                                        <a class="page-link" href="?page=<?= $i ?>&search=<?= htmlspecialchars($searchQuery) ?>"><?= $i ?></a>
                                     </li>
                                 <?php endfor; ?>
                             </ul>
@@ -190,42 +188,6 @@ function daysAgo($date) {
             $('#edit-email').val(email);
             $('#editModal').modal('show');
         });
-
-        $('#searchInput, #filterSelect').on('input change', function() {
-            var searchValue = $('#searchInput').val().toLowerCase();
-            var filterValue = $('#filterSelect').val();
-            var visibleRows = 0;
-            $('#studentTable tr').filter(function() {
-                var text = $(this).text().toLowerCase();
-                var isVisible = text.indexOf(searchValue) > -1;
-                if (filterValue) {
-                    var cellValue = $(this).find('td[data-filter="' + filterValue + '"]').text().toLowerCase();
-                    isVisible = isVisible && cellValue.indexOf(searchValue) > -1;
-                }
-                $(this).toggle(isVisible);
-                if (isVisible) visibleRows++;
-            });
-            $('#noRecords').toggle(visibleRows === 0);
-        });
-
-        $('th[data-sort]').on('click', function() {
-            var table = $(this).parents('table').eq(0);
-            var rows = table.find('tbody tr').toArray().sort(comparer($(this).index()));
-            this.asc = !this.asc;
-            if (!this.asc) { rows = rows.reverse(); }
-            for (var i = 0; i < rows.length; i++) { table.append(rows[i]); }
-        });
-
-        function comparer(index) {
-            return function(a, b) {
-                var valA = getCellValue(a, index), valB = getCellValue(b, index);
-                return $.isNumeric(valA) && $.isNumeric(valB) ? valA - valB : valA.localeCompare(valB);
-            };
-        }
-
-        function getCellValue(row, index) {
-            return $(row).children('td').eq(index).text();
-        }
 
         $('#selectAll').on('click', function() {
             $('input[name="selected[]"]').prop('checked', this.checked);
