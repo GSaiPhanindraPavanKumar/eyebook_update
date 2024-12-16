@@ -7,9 +7,11 @@ use Models\Faculty;
 $conn = Database::getConnection();
 $universities = University::getAll($conn);
 
-// Handle search query
+// Handle search query and sorting
 $searchQuery = $_GET['search'] ?? '';
-$faculty = Faculty::search($conn, $searchQuery);
+$sortColumn = $_GET['sort'] ?? 'name';
+$sortOrder = $_GET['order'] ?? 'asc';
+$faculty = Faculty::search($conn, $searchQuery, $sortColumn, $sortOrder);
 
 function daysAgo($date) {
     if ($date === null) {
@@ -58,38 +60,32 @@ function daysAgo($date) {
                                     <thead class="thead-light">
                                         <tr>
                                             <th><input type="checkbox" id="selectAll"></th>
-                                            <th data-sort="serialNumber">S.No<i class="fas fa-sort"></i></th>
-                                            <th data-sort="name">Name <i class="fas fa-sort"></i></th>
-                                            <th data-sort="email">Email <i class="fas fa-sort"></i></th>
-                                            <th data-sort="university">University <i class="fas fa-sort"></i></th>
+                                            <th>S.No</th>
+                                            <th data-sort="name"><a href="?search=<?= htmlspecialchars($searchQuery) ?>&sort=name&order=<?= $sortOrder === 'asc' ? 'desc' : 'asc' ?>">Name <i class="fas fa-sort"></i></a></th>
+                                            <th data-sort="email"><a href="?search=<?= htmlspecialchars($searchQuery) ?>&sort=email&order=<?= $sortOrder === 'asc' ? 'desc' : 'asc' ?>">Email <i class="fas fa-sort"></i></a></th>
+                                            <th data-sort="university_short_name"><a href="?search=<?= htmlspecialchars($searchQuery) ?>&sort=university_short_name&order=<?= $sortOrder === 'asc' ? 'desc' : 'asc' ?>">University <i class="fas fa-sort"></i></a></th>
                                             <th>Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody id="facultyTable">
                                         <?php
-                                        $serialNumber = 1;
                                         $limit = 50;
                                         $page = isset($_GET['page']) ? $_GET['page'] : 1;
                                         $offset = ($page - 1) * $limit;
                                         $total_faculty = count($faculty);
                                         $total_pages = ceil($total_faculty / $limit);
                                         $faculty_paginated = array_slice($faculty, $offset, $limit);
+                                        $serialNumber = $offset + 1;
 
                                         foreach ($faculty_paginated as $member):
-                                            $university_short_name = '';
-                                            foreach ($universities as $university) {
-                                                if ($university['id'] == $member['university_id']) {
-                                                    $university_short_name = $university['short_name'];
-                                                    break;
-                                                }
-                                            }
+                                            $daysAgo = daysAgo($member['last_login']);
                                         ?>
                                             <tr>
                                                 <td><input type="checkbox" name="selected[]" value="<?= $member['id'] ?>"></td>
                                                 <td><?= $serialNumber++ ?></td>
                                                 <td data-filter="name"><?= htmlspecialchars($member['name']) ?></td>
                                                 <td data-filter="email"><?= htmlspecialchars($member['email']) ?></td>
-                                                <td data-filter="university"><?= htmlspecialchars($university_short_name) ?></td>
+                                                <td data-filter="university"><?= htmlspecialchars($member['university_short_name']) ?></td>
                                                 <td>
                                                     <a href="viewFacultyProfile/<?= $member['id'] ?>" class="btn btn-outline-primary btn-sm"><i class="fas fa-eye"></i> View</a>
                                                 </td>
@@ -108,7 +104,7 @@ function daysAgo($date) {
                             <ul class="pagination justify-content-center">
                                 <?php for ($i = 1; $i <= $total_pages; $i++): ?>
                                     <li class="page-item <?= ($i == $page) ? 'active' : '' ?>">
-                                        <a class="page-link" href="?page=<?= $i ?>&search=<?= htmlspecialchars($searchQuery) ?>"><?= $i ?></a>
+                                        <a class="page-link" href="?page=<?= $i ?>&search=<?= htmlspecialchars($searchQuery) ?>&sort=<?= htmlspecialchars($sortColumn) ?>&order=<?= htmlspecialchars($sortOrder) ?>"><?= $i ?></a>
                                     </li>
                                 <?php endfor; ?>
                             </ul>

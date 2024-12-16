@@ -16,8 +16,16 @@ class Faculty {
         $stmt = $conn->query($sql);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
-    public static function search($conn, $searchQuery) {
-        $sql = "SELECT * FROM faculty WHERE name LIKE :search OR email LIKE :search";
+    public static function search($conn, $searchQuery, $sortColumn = 'name', $sortOrder = 'asc') {
+        $validColumns = ['name', 'email', 'university_short_name'];
+        if (!in_array($sortColumn, $validColumns)) {
+            $sortColumn = 'name';
+        }
+        $sql = "SELECT faculty.*, universities.short_name as university_short_name 
+                FROM faculty 
+                JOIN universities ON faculty.university_id = universities.id 
+                WHERE faculty.name LIKE :search OR faculty.email LIKE :search 
+                ORDER BY $sortColumn $sortOrder";
         $stmt = $conn->prepare($sql);
         $stmt->execute(['search' => '%' . $searchQuery . '%']);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
