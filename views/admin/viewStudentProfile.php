@@ -72,7 +72,6 @@
     </div>
     <?php include 'footer.html'; ?>
 </div>
-
 <!-- Reset Password Modal -->
 <div class="modal fade" id="resetPasswordModal" tabindex="-1" role="dialog" aria-labelledby="resetPasswordModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
@@ -85,23 +84,26 @@
                     </button>
                 </div>
                 <div class="modal-body non-clickable">
+                    <!-- Non-clickable fields -->
                     <div class="form-group">
                         <label for="newPassword">New Password</label>
-                        <input type="password" class="form-control" id="newPassword" name="new_password" required>
+                        <input type="password" class="form-control non-clickable-field" id="newPassword" name="new_password" required>
                     </div>
                     <div class="form-group">
                         <label for="confirmPassword">Confirm Password</label>
-                        <input type="password" class="form-control" id="confirmPassword" name="confirm_password" required>
+                        <input type="password" class="form-control non-clickable-field" id="confirmPassword" name="confirm_password" required>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                    <button type="submit" class="btn btn-primary">Save changes</button>
+                    <!-- Keep these clickable -->
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Submit</button>
                 </div>
             </form>
         </div>
     </div>
 </div>
+
 
 <!-- Scripts -->
 <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
@@ -149,10 +151,16 @@
 </script>
 
 <style>
-    .non-clickable {
-        pointer-events: none;
+    /* Make elements non-clickable */
+    .non-clickable-field {
+        pointer-events: none; /* Disable clicking */
+        background-color: #e9ecef; /* Optional: Gray background to indicate non-clickable fields */
+        opacity: 0.7; /* Optional: Reduced opacity */
     }
-    .modal-footer .btn, .modal-header .close {
-        pointer-events: auto;
+
+    /* Ensure buttons are still clickable */
+    .modal-footer .btn {
+        pointer-events: auto; /* Enable pointer events for buttons */
     }
+
 </style>
