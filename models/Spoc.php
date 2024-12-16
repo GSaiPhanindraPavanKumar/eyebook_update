@@ -17,6 +17,17 @@ class Spoc {
         return $result['spoc_count'] ?? 0;
     }
 
+    public function updateLoginDetails($spoc_id) {
+        $conn = Database::getConnection();
+        $sql = "UPDATE spocs SET 
+                    last_login = NOW(), 
+                    login_count = login_count + 1, 
+                    first_login = IF(first_login IS NULL, NOW(), first_login) 
+                WHERE id = ?";
+        $stmt = $conn->prepare($sql);
+        $stmt->execute([$spoc_id]);
+    }
+
     public static function getAll($conn) {
         $sql = "SELECT * FROM spocs";
         $stmt = $conn->query($sql);

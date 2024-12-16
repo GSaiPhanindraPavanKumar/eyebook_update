@@ -43,28 +43,27 @@ class AuthController {
                 $spoc = $this->spocModel->login($username, $password);
                 if ($spoc) {
                     $_SESSION['email'] = $username;
-                    $this->spocModel->updateLastLogin($spoc['id']);
-                    $this->spocModel->updateLastLogin($spoc['id']);
+                    $this->spocModel->updateLoginDetails($spoc['id']);
                     header('Location: /spoc/dashboard');
                     exit();
                 }
-    
+
                 // Check faculty credentials
                 $faculty = $this->facultyModel->login($username, $password);
                 if ($faculty) {
                     $_SESSION['faculty_id'] = $faculty['id'];
                     $_SESSION['email'] = $username;
-                    $this->facultyModel->updateLastLogin($faculty['id']);
+                    $this->facultyModel->updateLoginDetails($faculty['id']);
                     header('Location: /faculty/dashboard');
                     exit();
                 }
-    
+
                 // Check student credentials
                 $student = $this->studentModel->login($username, $password);
                 if ($student) {
                     $_SESSION['student_id'] = $student['id'];
                     $_SESSION['email'] = $username;
-                    $this->studentModel->updateLastLogin($student['id']);
+                    $this->studentModel->updateLoginDetails($student['id']);
                     header('Location: /student/dashboard');
                     exit();
                 }

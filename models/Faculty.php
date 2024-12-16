@@ -17,6 +17,17 @@ class Faculty {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    public function updateLoginDetails($faculty_id) {
+        $conn = Database::getConnection();
+        $sql = "UPDATE faculty SET 
+                    last_login = NOW(), 
+                    login_count = login_count + 1, 
+                    first_login = IF(first_login IS NULL, NOW(), first_login) 
+                WHERE id = ?";
+        $stmt = $conn->prepare($sql);
+        $stmt->execute([$faculty_id]);
+    }
+
     public static function getAssignedCourses($conn, $faculty_id) {
         $sql = "SELECT assigned_courses FROM faculty WHERE id = :id";
         $stmt = $conn->prepare($sql);

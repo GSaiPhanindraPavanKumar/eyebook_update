@@ -13,6 +13,17 @@ class Student {
         return $result['student_count'] ?? 0;
     }
 
+    public function updateLoginDetails($student_id) {
+        $conn = Database::getConnection();
+        $sql = "UPDATE students SET 
+                    last_login = NOW(), 
+                    login_count = login_count + 1, 
+                    first_login = IF(first_login IS NULL, NOW(), first_login) 
+                WHERE id = ?";
+        $stmt = $conn->prepare($sql);
+        $stmt->execute([$student_id]);
+    }
+
     public static function getAll($conn) {
         $sql = "SELECT * FROM students";
         $stmt = $conn->query($sql);
