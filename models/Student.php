@@ -14,11 +14,15 @@ class Student {
     }
     
     public static function search($conn, $searchQuery, $sortColumn = 'name', $sortOrder = 'asc') {
-        $validColumns = ['regd_no', 'name', 'email', 'university', 'last_usage'];
+        $validColumns = ['regd_no', 'name', 'email', 'last_login'];
         if (!in_array($sortColumn, $validColumns)) {
             $sortColumn = 'name';
         }
-        $sql = "SELECT * FROM students WHERE regd_no LIKE :search OR name LIKE :search OR email LIKE :search ORDER BY $sortColumn $sortOrder";
+        $sql = "SELECT students.*, universities.short_name as university_short_name 
+                FROM students 
+                JOIN universities ON students.university_id = universities.id 
+                WHERE students.regd_no LIKE :search OR students.name LIKE :search OR students.email LIKE :search 
+                ORDER BY $sortColumn $sortOrder";
         $stmt = $conn->prepare($sql);
         $stmt->execute(['search' => '%' . $searchQuery . '%']);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);

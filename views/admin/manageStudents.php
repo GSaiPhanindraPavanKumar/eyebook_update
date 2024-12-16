@@ -73,14 +73,14 @@ function daysAgo($date) {
                                             <th data-sort="regd_no"><a href="?search=<?= htmlspecialchars($searchQuery) ?>&sort=regd_no&order=<?= $sortOrder === 'asc' ? 'desc' : 'asc' ?>">Registration Number <i class="fas fa-sort"></i></a></th>
                                             <th data-sort="name"><a href="?search=<?= htmlspecialchars($searchQuery) ?>&sort=name&order=<?= $sortOrder === 'asc' ? 'desc' : 'asc' ?>">Name <i class="fas fa-sort"></i></a></th>
                                             <th data-sort="email"><a href="?search=<?= htmlspecialchars($searchQuery) ?>&sort=email&order=<?= $sortOrder === 'asc' ? 'desc' : 'asc' ?>">Email <i class="fas fa-sort"></i></a></th>
-                                            <th data-sort="university"><a href="?search=<?= htmlspecialchars($searchQuery) ?>&sort=university&order=<?= $sortOrder === 'asc' ? 'desc' : 'asc' ?>">University <i class="fas fa-sort"></i></a></th>
-                                            <th data-sort="last_usage"><a href="?search=<?= htmlspecialchars($searchQuery) ?>&sort=last_usage&order=<?= $sortOrder === 'asc' ? 'desc' : 'asc' ?>">Last Usage (Days Ago) <i class="fas fa-sort"></i></a></th>
+                                            <th data-sort="university"><a href="?search=<?= htmlspecialchars($searchQuery) ?>&sort=university_short_name&order=<?= $sortOrder === 'asc' ? 'desc' : 'asc' ?>">University <i class="fas fa-sort"></i></a></th>
+                                            <th data-sort="last_usage"><a href="?search=<?= htmlspecialchars($searchQuery) ?>&sort=last_login&order=<?= $sortOrder === 'asc' ? 'desc' : 'asc' ?>">Last Usage (Days Ago) <i class="fas fa-sort"></i></a></th>
                                             <th>Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody id="studentTable">
                                         <?php
-                                        $limit = 25;
+                                        $limit = 50;
                                         $page = isset($_GET['page']) ? $_GET['page'] : 1;
                                         $offset = ($page - 1) * $limit;
                                         $total_students = count($students);
@@ -89,13 +89,6 @@ function daysAgo($date) {
                                         $serialNumber = $offset + 1;
 
                                         foreach ($students_paginated as $student):
-                                            $university_short_name = '';
-                                            foreach ($universities as $university) {
-                                                if ($university['id'] == $student['university_id']) {
-                                                    $university_short_name = $university['short_name'];
-                                                    break;
-                                                }
-                                            }
                                             $daysAgo = daysAgo($student['last_login']);
                                         ?>
                                             <tr>
@@ -104,7 +97,7 @@ function daysAgo($date) {
                                                 <td data-filter="regd_no"><?= htmlspecialchars($student['regd_no']) ?></td>
                                                 <td data-filter="name"><?= htmlspecialchars($student['name']) ?></td>
                                                 <td data-filter="email"><?= htmlspecialchars($student['email']) ?></td>
-                                                <td data-filter="university"><?= htmlspecialchars($university_short_name) ?></td>
+                                                <td data-filter="university"><?= htmlspecialchars($student['university_short_name']) ?></td>
                                                 <td data-filter="last_usage"><?= htmlspecialchars($daysAgo) ?></td>
                                                 <td>
                                                     <a href="viewStudentProfile/<?= $student['id'] ?>" class="btn btn-outline-primary btn-sm"><i class="fas fa-eye"></i> View</a>
