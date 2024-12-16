@@ -15,7 +15,7 @@ if ($classroomId && !empty($attendance)) {
     // Redirect back to the dashboard
     $hashedCourseId = base64_encode($courseId);
     $hashedCourseId = str_replace(['+', '/', '='], ['-', '_', ''], $hashedCourseId);
-    header('Location: /faculty/view_course/' . $hashedCourseId);
+    header("Location: /faculty/view_course/$hashedCourseId");
     exit();
 } else {
     echo "Error: Classroom ID or attendance data not provided.";
