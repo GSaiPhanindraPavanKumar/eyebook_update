@@ -78,13 +78,13 @@ function daysAgo($date) {
                                     </thead>
                                     <tbody id="studentTable">
                                         <?php
-                                        $serialNumber = 1;
-                                        $limit = 25;
+                                        $limit = 50;
                                         $page = isset($_GET['page']) ? $_GET['page'] : 1;
                                         $offset = ($page - 1) * $limit;
                                         $total_students = count($students);
                                         $total_pages = ceil($total_students / $limit);
                                         $students_paginated = array_slice($students, $offset, $limit);
+                                        $serialNumber = $offset + 1;
 
                                         foreach ($students_paginated as $student):
                                             $university_short_name = '';
