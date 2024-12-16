@@ -1037,9 +1037,10 @@ class AdminController {
         $conn = Database::getConnection();
     
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-            $selected = $_POST['selected'] ?? [];
-            $newPassword = $_POST['new_password'];
-            $confirmPassword = $_POST['confirm_password'];
+            $data = json_decode(file_get_contents('php://input'), true);
+            $selected = $data['selected'] ?? [];
+            $newPassword = $data['new_password'];
+            $confirmPassword = $data['confirm_password'];
     
             if ($newPassword === $confirmPassword) {
                 $hashedPassword = password_hash($newPassword, PASSWORD_BCRYPT);
@@ -1062,7 +1063,7 @@ class AdminController {
                 $_SESSION['message_type'] = 'error';
             }
     
-            header('Location: /admin/manageStudents');
+            echo json_encode(['status' => 'success']);
             exit();
         }
     }
