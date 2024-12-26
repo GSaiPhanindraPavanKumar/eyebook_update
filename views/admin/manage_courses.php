@@ -3,24 +3,23 @@ include("sidebar.php");
 use Models\Database;
 $conn = Database::getConnection();
 
-$sql = "SELECT c.id, c.name, c.university_id, c.status 
-        FROM courses c";
-$result = $conn->query($sql);
-$courses = [];
+$sql = "SELECT courses.*, courses.university_id AS university_ids
+        FROM courses";
+$stmt = $conn->prepare($sql);
+$stmt->execute();
+$courses = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-if ($result->rowCount() > 0) {
-    while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
-        // Fetch the university names
-        if (!is_null($row['university_id'])) {
-            $sql = "SELECT long_name FROM universities WHERE id = ?";
-            $stmt = $conn->prepare($sql);
-            $stmt->execute([$row['university_id']]);
-            $university = $stmt->fetch(PDO::FETCH_ASSOC);
-            $row['university'] = $university['long_name'] ?? '';
-        } else {
-            $row['university'] = '';
-        }
-        $courses[] = $row;
+foreach ($courses as &$course) {
+    $university_ids = !empty($course['university_ids']) ? json_decode($course['university_ids'], true) : [];
+    if (is_array($university_ids) && !empty($university_ids)) {
+        $placeholders = implode(',', array_fill(0, count($university_ids), '?'));
+        $sql = "SELECT short_name FROM universities WHERE id IN ($placeholders)";
+        $stmt = $conn->prepare($sql);
+        $stmt->execute($university_ids);
+        $universities = $stmt->fetchAll(PDO::FETCH_COLUMN);
+        $course['university'] = implode(', ', $universities);
+    } else {
+        $course['university'] = 'N/A';
     }
 }
 ?>
@@ -54,10 +53,10 @@ if ($result->rowCount() > 0) {
                                 <table class="table table-hover table-borderless table-striped">
                                     <thead class="thead-light">
                                         <tr>
-                                            <th data-sort="serialNumber">S.no <i class="fas fa-sort"></i></th>
-                                            <th data-sort="courseName">Course Name <i class="fas fa-sort"></i></th>
-                                            <th data-sort="university">University <i class="fas fa-sort"></i></th>
-                                            <th>Actions</th>
+                                            <th data-sort="serialNumber" style="max-width: 50px;">S.no <i class="fas fa-sort"></i></th>
+                                            <th data-sort="courseName" style="max-width: 200px;">Course Name <i class="fas fa-sort"></i></th>
+                                            <th data-sort="university" style="max-width: 200px;">University <i class="fas fa-sort"></i></th>
+                                            <th style="max-width: 150px;">Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody id="courseTable">
@@ -65,10 +64,10 @@ if ($result->rowCount() > 0) {
                                         $serialNumber = 1;
                                         foreach ($courses as $course): ?>
                                             <tr>
-                                                <td><?= $serialNumber++ ?></td>
-                                                <td><?= htmlspecialchars($course['name']) ?></td>
-                                                <td><?= htmlspecialchars($course['university']) ?></td>
-                                                <td>
+                                                <td style="max-width: 50px; word-wrap: break-word;"><?= $serialNumber++ ?></td>
+                                                <td style="max-width: 150px; word-wrap: break-word;"><?= htmlspecialchars($course['name']) ?></td>
+                                                <td style="max-width: 250px; word-wrap: break-word;"><?= htmlspecialchars($course['university'] ?? 'N/A') ?></td>
+                                                <td style="max-width: 150px; word-wrap: break-word;">
                                                     <a href="/admin/view_course/<?= $course['id'] ?>" class="btn btn-outline-info btn-sm"><i class="fas fa-eye"></i> View</a>
                                                     <a href="/admin/edit_course/<?= $course['id'] ?>" class="btn btn-outline-warning btn-sm"><i class="fas fa-edit"></i> Edit</a>
                                                     <?php if ($course['status'] === 'archived'): ?>

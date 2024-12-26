@@ -89,7 +89,7 @@ $router->get('/admin/edit_student/(\d+)', 'AdminController@editStudent');
 $router->post('/admin/edit_student/(\d+)', 'AdminController@editStudent');
 $router->get('/admin/delete_student/(\d+)', 'AdminController@deleteStudent');
 $router->get('/admin/reset_student_password/(\d+)', 'AdminController@resetStudentPassword');
-$router->get('/admin/upload_faculty', 'AdminController@uploadFaculty');
+$router->get('/admin/uploadFaculty', 'AdminController@uploadFaculty');
 $router->post('/admin/uploadSingleFaculty', 'AdminController@uploadSingleFaculty');
 $router->post('/admin/uploadFaculty', 'AdminController@uploadFaculty');
 $router->get('/admin/manage_faculty', 'AdminController@manageFaculty');

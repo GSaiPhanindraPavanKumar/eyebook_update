@@ -158,7 +158,7 @@ $adminModel = new \Models\Admin();
                     </a>
                     <div class="collapse" id="faculty">
                         <ul class="nav flex-column sub-menu">
-                            <li class="nav-item"> <a class="nav-link" href="/admin/upload_faculty">Upload Faculty</a></li>
+                            <li class="nav-item"> <a class="nav-link" href="/admin/uploadFaculty">Upload Faculty</a></li>
                             <li class="nav-item"> <a class="nav-link" href="/admin/manage_faculty">Manage Faculty</a></li>
                         </ul>
                     </div>

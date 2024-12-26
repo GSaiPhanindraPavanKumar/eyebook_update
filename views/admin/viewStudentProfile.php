@@ -119,4 +119,17 @@
             }
         }
     }
+
+    // Eye shutter functionality
+    function togglePasswordVisibility(inputId, toggleButtonId) {
+        var passwordField = document.getElementById(inputId);
+        var toggleButton = document.getElementById(toggleButtonId);
+        if (passwordField.type === "password") {
+            passwordField.type = "text";
+            toggleButton.innerHTML = '<i class="fas fa-eye-slash"></i>';
+        } else {
+            passwordField.type = "password";
+            toggleButton.innerHTML = '<i class="fas fa-eye"></i>';
+        }
+    }
 </script>

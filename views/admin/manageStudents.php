@@ -58,8 +58,9 @@ function daysAgo($date) {
                         <div class="table-responsive">
                             <form method="get" action="">
                                 <div class="input-group mb-3">
-                                    <input class="form-control" id="searchInput" name="search" type="text" placeholder="🔍 Search Students..." value="<?= htmlspecialchars($searchQuery) ?>">
+                                    <input class="form-control" id="searchInput" name="search" type="text" placeholder="🔍 Search Faculty..." value="<?= htmlspecialchars($searchQuery) ?>">
                                     <div class="input-group-append">
+                                        <button class="btn btn-secondary" type="button" id="clearSearch">X</button>
                                         <button class="btn btn-primary" type="submit">Search</button>
                                     </div>
                                 </div>
@@ -224,4 +225,12 @@ function daysAgo($date) {
             }
         }
     }
+</script>
+<script>
+    $(document).ready(function() {
+        $('#clearSearch').on('click', function() {
+            $('#searchInput').val('');
+            window.location.href = window.location.pathname;
+        });
+    });
 </script>

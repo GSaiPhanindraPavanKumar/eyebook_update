@@ -575,13 +575,20 @@ class AdminController {
         if (!is_array($course['course_materials'])) {
             $course['course_materials'] = [];
         }
-    
+        $assignedUniversities = is_array($course['university_id']) ? $course['university_id'] : json_decode($course['university_id'], true);
+
         // Fetch universities details
         $universities = University::getAll($conn);
         $university_id = $course['university_id'];
-        $allFaculty = Faculty::getAllByUniversity($conn, $university_id); // Fetch all faculty of the university
-        $allStudents = Student::getAllByUniversity($conn, $university_id); // Fetch all students of the university
-    
+        $allFaculty = [];
+        $allStudents = [];
+        foreach ($assignedUniversities as $university_id) {
+            $faculty = Faculty::getAllByUniversity($conn, $university_id);
+            $students = Student::getAllByUniversity($conn, $university_id);
+            $allFaculty = array_merge($allFaculty, $faculty);
+            $allStudents = array_merge($allStudents, $students);
+        }
+
         $assignedFaculty = array_filter($allFaculty, function($faculty) use ($course_id) {
             $assigned_courses = $faculty['assigned_courses'] ? json_decode($faculty['assigned_courses'], true) : [];
             return in_array($course_id, $assigned_courses);
@@ -766,7 +773,7 @@ class AdminController {
             }
         }
     
-        require 'views/admin/upload_faculty.php';
+        require 'views/admin/uploadFaculty.php';
     }
     
     public function manageFaculty() {
@@ -1300,32 +1307,59 @@ class AdminController {
         $conn = Database::getConnection();
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $course_id = $_POST['course_id'];
-            $university_id = $_POST['university_id'];
-            $confirm = isset($_POST['confirm']) ? $_POST['confirm'] === 'true' : false;
+            $university_ids = $_POST['university_ids']; // Expecting an array of university IDs
     
-            $result = Course::assignCourseToUniversity($conn, $course_id, $university_id, $confirm);
+            $course = Course::getById($conn, $course_id);
+            $assigned_universities = is_string($course['university_id']) ? json_decode($course['university_id'], true) : $course['university_id'];
+            $assigned_universities = is_array($assigned_universities) ? $assigned_universities : [];
     
-            if ($result['message'] === 'Course assigned to university successfully') {
-                echo json_encode(['message' => $result['message']]);
-                exit();
-            } elseif (isset($result['confirm']) && $result['confirm']) {
-                // Show confirmation message
-                echo json_encode(['message' => $result['message'], 'confirm' => true]);
-                exit();
-            } else {
-                echo json_encode(['message' => $result['message']]);
-                exit();
+            foreach ($university_ids as $university_id) {
+                if (!in_array($university_id, $assigned_universities)) {
+                    $assigned_universities[] = $university_id;
+                }
             }
+    
+            $sql = "UPDATE courses SET university_id = :university_id WHERE id = :id";
+            $stmt = $conn->prepare($sql);
+            $stmt->execute([
+                ':university_id' => json_encode($assigned_universities),
+                ':id' => $course_id
+            ]);
+    
+            echo json_encode(['message' => 'Course assigned to universities successfully', 'success' => true]);
+            exit();
         }
     }
     
     public function unassignCourse() {
         $conn = Database::getConnection();
-        $course_id = $_POST['course_id'];
-        $university_id = $_POST['university_id'];
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            $course_id = $_POST['course_id'];
+            $university_ids = $_POST['university_ids']; // Expecting an array of university IDs
     
-        $result = Course::unassignCourseFromUniversity($conn, $course_id, $university_id);
-        echo json_encode($result);
+            foreach ($university_ids as $university_id) {
+                // Unassign the university from the course
+                Course::unassignCourseFromUniversity($conn, $course_id, $university_id);
+    
+                // Fetch all faculty and students associated with the university
+                $faculty = Faculty::getAllByUniversity($conn, $university_id);
+                $students = Student::getAllByUniversity($conn, $university_id);
+    
+                // Unassign each faculty from the course
+                foreach ($faculty as $faculty_member) {
+                    Faculty::unassignCourse($conn, $faculty_member['id'], $course_id);
+                }
+    
+                // Unassign each student from the course
+                foreach ($students as $student) {
+                    Student::unassignCourse($conn, $student['id'], $course_id);
+                }
+                
+            }
+    
+            echo json_encode(['message' => 'Course unassigned from universities, faculty, and students successfully', 'success' => true]);
+            exit();
+        }
     }
 
     public function uploadSingleStudent() {

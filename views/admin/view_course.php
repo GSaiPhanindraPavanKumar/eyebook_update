@@ -66,16 +66,25 @@ $assignedUniversities = Course::getAssignedUniversities($conn, $course['id']);
                                     <p><strong>Course Name:</strong> <?php echo htmlspecialchars($course['name'] ?? 'N/A'); ?></p>
                                     <p><strong>Description:</strong> <?php echo htmlspecialchars($course['description'] ?? 'N/A'); ?></p>
                                     <p><strong>Status:</strong> <?php echo htmlspecialchars($course['status'] ?? 'N/A'); ?></p>
-                                    <h5 class="mt-3">Assigned University</h5>
+                                    <h5 class="mt-3">Assigned Universities</h5>
                                     <ul>
                                         <?php if (!empty($course['university_id'])): ?>
                                             <?php
-                                            $university = array_filter($universities, function($u) use ($course) {
-                                                return $u['id'] == $course['university_id'];
-                                            });
-                                            $university = array_shift($university);
+                                            $university_ids = is_array($course['university_id']) ? $course['university_id'] : json_decode($course['university_id'], true);
+                                            if (is_array($university_ids)) {
+                                                foreach ($university_ids as $university_id) {
+                                                    $university = array_filter($universities, function($u) use ($university_id) {
+                                                        return $u['id'] == $university_id;
+                                                    });
+                                                    $university = array_shift($university);
+                                                    if ($university) {
+                                                        echo '<li>' . htmlspecialchars($university['long_name']) . '</li>';
+                                                    }
+                                                }
+                                            } else {
+                                                echo '<li>No university assigned.</li>';
+                                            }
                                             ?>
-                                            <li><?php echo htmlspecialchars($university['long_name']); ?></li>
                                         <?php else: ?>
                                             <li>No university assigned.</li>
                                         <?php endif; ?>
@@ -328,21 +337,65 @@ $assignedUniversities = Course::getAssignedUniversities($conn, $course['id']);
                             <div class="tab-pane fade" id="assign-universities" role="tabpanel" aria-labelledby="assign-universities-tab">
                                 <h5 class="mt-3">Assign Course to University</h5>
                                 <form id="assignCourseForm" method="POST" action="/admin/assign_course">
-                                    <div class="form-group">
-                                        <label for="university">Select University</label>
-                                        <select class="form-control" id="university" name="university_id" required>
-                                            <option value="">Select a university</option>
-                                            <?php foreach ($universities as $university): ?>
-                                                <option value="<?php echo $university['id']; ?>"><?php echo htmlspecialchars($university['long_name']); ?></option>
-                                            <?php endforeach; ?>
-                                        </select>
-                                    </div>
                                     <input type="hidden" name="course_id" value="<?php echo $course['id']; ?>">
-                                    <input type="hidden" name="confirm" id="confirm" value="false">
+                                    <div class="table-responsive">
+                                        <table class="table table-hover table-borderless table-striped">
+                                            <thead class="thead-light">
+                                                <tr>
+                                                    <th>Select</th>
+                                                    <th>Short Name</th>
+                                                    <th>Full Name</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <?php
+                                                $assignedUniversities = is_array($course['university_id']) ? $course['university_id'] : json_decode($course['university_id'], true);
+                                                foreach ($universities as $university): ?>
+                                                    <tr>
+                                                        <td>
+                                                            <input type="checkbox" name="university_ids[]" value="<?php echo $university['id']; ?>" <?php echo in_array($university['id'], $assignedUniversities) ? 'disabled' : ''; ?>>
+                                                        </td>
+                                                        <td><?php echo htmlspecialchars($university['short_name']); ?></td>
+                                                        <td><?php echo htmlspecialchars($university['long_name']); ?></td>
+                                                    </tr>
+                                                <?php endforeach; ?>
+                                            </tbody>
+                                        </table>
+                                    </div>
                                     <button type="submit" class="btn btn-primary">Assign Course</button>
                                 </form>
-                            </div>
 
+                                <h5 class="mt-5">Unassigned Universities</h5>
+                                <form id="unassignCourseForm" method="POST" action="/admin/unassign_course">
+                                    <input type="hidden" name="course_id" value="<?php echo $course['id']; ?>">
+                                    <div class="table-responsive">
+                                        <table class="table table-hover table-borderless table-striped">
+                                            <thead class="thead-light">
+                                                <tr>
+                                                    <th>Select</th>
+                                                    <th>Short Name</th>
+                                                    <th>Full Name</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <?php
+                                                foreach ($universities as $university):
+                                                    if (in_array($university['id'], $assignedUniversities)): ?>
+                                                        <tr>
+                                                            <td>
+                                                                <input type="checkbox" name="university_ids[]" value="<?php echo $university['id']; ?>">
+                                                            </td>
+                                                            <td><?php echo htmlspecialchars($university['short_name']); ?></td>
+                                                            <td><?php echo htmlspecialchars($university['long_name']); ?></td>
+                                                        </tr>
+                                                    <?php endif;
+                                                endforeach; ?>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <button type="submit" class="btn btn-danger">Unassign Course</button>
+                                </form>
+                            </div>
 
                             <!-- Assign Faculty Tab -->
                             <div class="tab-pane fade" id="assign-faculty" role="tabpanel" aria-labelledby="assign-faculty-tab">
@@ -531,7 +584,55 @@ $assignedUniversities = Course::getAssignedUniversities($conn, $course['id']);
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<!-- Include jQuery -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+$(document).ready(function() {
+    $('#assignCourseForm').on('submit', function(event) {
+        event.preventDefault(); // Prevent the default form submission
 
+        $.ajax({
+            url: '/admin/assign_course', // Adjust the URL as needed
+            type: 'POST',
+            data: $(this).serialize(),
+            success: function(response) {
+                var result = JSON.parse(response);
+                if (result.success) {
+                    alert(result.message);
+                    location.reload(); // Refresh the page upon success
+                } else {
+                    alert(result.message);
+                }
+            },
+            error: function(xhr, status, error) {
+                alert('An error occurred: ' + error);
+            }
+        });
+    });
+
+    $('#unassignCourseForm').on('submit', function(event) {
+        event.preventDefault(); // Prevent the default form submission
+
+        $.ajax({
+            url: '/admin/unassign_course', // Adjust the URL as needed
+            type: 'POST',
+            data: $(this).serialize(),
+            success: function(response) {
+                var result = JSON.parse(response);
+                if (result.success) {
+                    alert(result.message);
+                    location.reload(); // Refresh the page upon success
+                } else {
+                    alert(result.message);
+                }
+            },
+            error: function(xhr, status, error) {
+                alert('An error occurred: ' + error);
+            }
+        });
+    });
+});
+</script>
 
 <script>
     $(document).ready(function() {
@@ -621,39 +722,6 @@ $assignedUniversities = Course::getAssignedUniversities($conn, $course['id']);
     });
 </script>
 <script>
-document.getElementById('assignCourseForm').addEventListener('submit', function(event) {
-    event.preventDefault();
-    var form = this;
-    var formData = new FormData(form);
-    fetch(form.action, {
-        method: form.method,
-        body: formData
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.confirm) {
-            if (confirm(data.message)) {
-                document.getElementById('confirm').value = 'true';
-                fetch(form.action, {
-                    method: form.method,
-                    body: new FormData(form)
-                })
-                .then(response => response.json())
-                .then(data => {
-                    alert(data.message);
-                    if (data.message === 'Course reassigned to university successfully' || data.message === 'Course assigned to university successfully') {
-                        location.reload(); // Refresh the page
-                    }
-                });
-            }
-        } else {
-            alert(data.message);
-            if (data.message === 'Course assigned to university successfully') {
-                location.reload(); // Refresh the page
-            }
-        }
-    });
-});
 function showGraphicalFeedback() {
     document.getElementById('graphicalFeedback').style.display = 'block';
     document.getElementById('individualFeedback').style.display = 'none';

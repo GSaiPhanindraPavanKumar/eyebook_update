@@ -28,6 +28,28 @@ class Course {
             ':course_id' => $course_id
         ]);
     }
+
+    public static function assignCourseToUniversities($conn, $course_id, $university_ids) {
+        $course = self::getById($conn, $course_id);
+        $assigned_universities = is_string($course['university_id']) ? json_decode($course['university_id'], true) : $course['university_id'];
+        $assigned_universities = is_array($assigned_universities) ? $assigned_universities : [];
+    
+        foreach ($university_ids as $university_id) {
+            if (!in_array($university_id, $assigned_universities)) {
+                $assigned_universities[] = $university_id;
+            }
+        }
+    
+        $sql = "UPDATE courses SET university_id = :university_id WHERE id = :id";
+        $stmt = $conn->prepare($sql);
+        $stmt->execute([
+            ':university_id' => json_encode($assigned_universities),
+            ':id' => $course_id
+        ]);
+    
+        return ['message' => 'Course assigned to universities successfully'];
+    }
+    
     public static function updateEcContent($conn, $course_id, $ec_contents) {
         $sql = "UPDATE courses SET EC_content = :ec_content WHERE id = :course_id";
         $stmt = $conn->prepare($sql);
@@ -67,6 +89,7 @@ class Course {
             $course['course_plan'] = isset($course['course_plan']) ? json_decode($course['course_plan'], true) : [];
             $course['course_book'] = isset($course['course_book']) ? json_decode($course['course_book'], true) : [];
             $course['course_materials'] = isset($course['course_materials']) ? json_decode($course['course_materials'], true) : [];
+            $course['university_id'] = isset($course['university_id']) ? json_decode($course['university_id'], true) : [];
             if (!is_array($course['course_materials'])) {
                 $course['course_materials'] = [];
             }

@@ -12,6 +12,17 @@
                                 <?php echo htmlspecialchars($message); ?>
                             </div>
                         <?php endif; ?>
+                        <div class="form-group">
+                            <label for="uploadType">Select Upload Type</label><br>
+                            <div class="btn-group btn-group-toggle" data-toggle="buttons">
+                                <label class="btn btn-outline-primary active">
+                                    <input type="radio" id="single" name="uploadType" value="single" checked> Single Faculty
+                                </label>
+                                <label class="btn btn-outline-primary">
+                                    <input type="radio" id="bulk" name="uploadType" value="bulk"> Bulk Upload
+                                </label>
+                            </div>
+                        </div>
                         <div id="singleUploadForm">
                             <form method="POST" action="/admin/uploadSingleFaculty">
                                 <div class="form-group">
