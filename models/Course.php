@@ -49,6 +49,40 @@ class Course {
     
         return ['message' => 'Course assigned to universities successfully'];
     }
+    public static function assignStudentsToCourse($conn, $course_id, $student_ids) {
+        $course = self::getById($conn, $course_id);
+        $assigned_students = json_decode($course['assigned_students'], true) ?? [];
+    
+        foreach ($student_ids as $student_id) {
+            if (!in_array($student_id, $assigned_students)) {
+                $assigned_students[] = $student_id;
+            }
+        }
+    
+        $sql = "UPDATE courses SET assigned_students = :assigned_students WHERE id = :id";
+        $stmt = $conn->prepare($sql);
+        $stmt->execute([
+            ':assigned_students' => json_encode($assigned_students),
+            ':id' => $course_id
+        ]);
+    }
+    public static function unassignStudentsFromCourse($conn, $course_id, $student_ids) {
+        $course = self::getById($conn, $course_id);
+        $assigned_students = json_decode($course['assigned_students'], true) ?? [];
+    
+        foreach ($student_ids as $student_id) {
+            if (in_array($student_id, $assigned_students)) {
+                $assigned_students = array_diff($assigned_students, [$student_id]);
+            }
+        }
+    
+        $sql = "UPDATE courses SET assigned_students = :assigned_students WHERE id = :id";
+        $stmt = $conn->prepare($sql);
+        $stmt->execute([
+            ':assigned_students' => json_encode($assigned_students),
+            ':id' => $course_id
+        ]);
+    }
     
     public static function updateEcContent($conn, $course_id, $ec_contents) {
         $sql = "UPDATE courses SET EC_content = :ec_content WHERE id = :course_id";
@@ -520,6 +554,42 @@ class Course {
                 $assigned_students[] = $student_id;
             }
         }
+        $sql = "UPDATE courses SET assigned_students = :assigned_students WHERE id = :id";
+        $stmt = $conn->prepare($sql);
+        $stmt->execute([
+            ':assigned_students' => json_encode($assigned_students),
+            ':id' => $course_id
+        ]);
+    }
+
+    public static function unassigncohortStudentsFromCourse($conn, $course_id, $student_ids) {
+        $course = self::getById($conn, $course_id);
+        $assigned_students = json_decode($course['assigned_students'], true) ?? [];
+    
+        foreach ($student_ids as $student_id) {
+            if (in_array($student_id, $assigned_students)) {
+                $assigned_students = array_values(array_diff($assigned_students, [$student_id]));
+            }
+        }
+    
+        $sql = "UPDATE courses SET assigned_students = :assigned_students WHERE id = :id";
+        $stmt = $conn->prepare($sql);
+        $stmt->execute([
+            ':assigned_students' => json_encode(array_values($assigned_students)), // Reindex the array
+            ':id' => $course_id
+        ]);
+    }
+
+    public static function assigncohortstudents($conn, $course_id, $student_ids) {
+        $course = self::getById($conn, $course_id);
+        $assigned_students = json_decode($course['assigned_students'], true) ?? [];
+    
+        foreach ($student_ids as $student_id) {
+            if (!in_array($student_id, $assigned_students)) {
+                $assigned_students[] = $student_id;
+            }
+        }
+    
         $sql = "UPDATE courses SET assigned_students = :assigned_students WHERE id = :id";
         $stmt = $conn->prepare($sql);
         $stmt->execute([

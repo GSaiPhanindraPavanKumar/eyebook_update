@@ -123,6 +123,18 @@ $router->post('/admin/bulk_reset_student_password', 'AdminController@bulkResetSt
 $router->post('/admin/bulk_reset_faculty_password', 'AdminController@bulkResetFacultyPassword');
 $router->post('/admin/add_additional_content', 'AdminController@addAdditionalContent');
 $router->post('/admin/upload_ec_content', 'AdminController@uploadEcContent');
+$router->get('/admin/create_cohort', 'AdminController@createCohort');
+$router->post('/admin/create_cohort', 'AdminController@createCohort');
+$router->get('/admin/manage_cohort', 'AdminController@manageCohort');
+$router->get('/admin/edit_cohort/(\d+)', 'AdminController@editCohort');
+$router->post('/admin/edit_cohort/(\d+)', 'AdminController@editCohort');
+$router->get('/admin/delete_cohort/(\d+)', 'AdminController@deleteCohort');
+$router->get('/admin/view_cohort/(\d+)', 'AdminController@viewCohort');
+$router->post('/admin/assign_courses_to_cohort', 'AdminController@assignCoursesToCohort');
+$router->post('/admin/unassign_students_from_cohort', 'AdminController@unassignStudentsFromCohort');
+$router->get('/admin/unassign_course_from_cohort/(\d+)/(\d+)', 'AdminController@unassignCourseFromCohort');
+$router->get('/admin/add_students_to_cohort/(\d+)', 'AdminController@addStudentsToCohort');
+$router->post('/admin/add_students_to_cohort/(\d+)', 'AdminController@addStudentsToCohort');
 
 $router->get('/spoc', 'SpocController@dashboard');
 $router->get('/spoc/dashboard', 'SpocController@dashboard');

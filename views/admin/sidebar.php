@@ -189,6 +189,19 @@ $adminModel = new \Models\Admin();
                         </ul>
                     </div>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-toggle="collapse" href="#cohort" aria-expanded="false" aria-controls="cohort">
+                        <i class="icon-layout menu-icon"></i>
+                        <span class="menu-title">Cohort</span>
+                        <i class="menu-arrow"></i>
+                    </a>
+                    <div class="collapse" id="cohort">
+                        <ul class="nav flex-column sub-menu">
+                            <li class="nav-item"> <a class="nav-link" href="/admin/create_cohort">Create Cohort</a></li>
+                            <li class="nav-item"> <a class="nav-link" href="/admin/manage_cohort">Manage Cohort</a></li>
+                        </ul>
+                    </div>
+                </li>
                 <!-- <li class="nav-item">
                     <a class="nav-link" data-toggle="collapse" href="#streams" aria-expanded="false" aria-controls="streams">
                         <i class="icon-grid-2 menu-icon"></i>

@@ -16,6 +16,7 @@ use Models\Meetings;
 use Models\Notification;
 use Models\Assignment;
 use Models\feedback;
+use Models\Cohort;
 use PDO;
 use ZipArchive;
 use Models\VirtualClassroom;
@@ -1822,5 +1823,191 @@ class AdminController {
             return 'F';
         }
     }
+
+    public function createCohort() {
+        $conn = Database::getConnection();
+        $students = Student::getAllWithUniversity($conn); // Fetch all students with university
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            $name = $_POST['name'];
+            $student_ids = isset($_POST['student_ids']) ? $_POST['student_ids'] : [];
+            Cohort::create($conn, $name, $student_ids);
+            $message = "Cohort created successfully.";
+        }
+        require 'views/admin/create_cohort.php';
+    }
+
+    public function manageCohort() {
+        $conn = Database::getConnection();
+        $cohorts = Cohort::getAll($conn);
+        foreach ($cohorts as &$cohort) {
+            $cohort['student_count'] = Cohort::getStudentCount($conn, $cohort['id']);
+        }
+        require 'views/admin/manage_cohort.php';
+    }
+
+    public function editCohort($cohort_id) {
+        $conn = Database::getConnection();
+        $message = '';
+        $message_type = '';
+    
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            $name = $_POST['name'];
+    
+            // Update the cohort with only the name
+            Cohort::update($conn, $cohort_id, $name);
+    
+            $message = "Cohort updated successfully!";
+            $message_type = "success";
+    
+            // Redirect to view cohort page after successful update
+            header("Location: /admin/view_cohort/$cohort_id");
+            exit();
+        }
+    
+        $cohort = Cohort::getById($conn, $cohort_id);
+        require 'views/admin/edit_cohort.php';
+    }
+
+    public function deleteCohort($id) {
+        $conn = Database::getConnection();
+        Cohort::delete($conn, $id);
+        header("Location: /admin/manage_cohort");
+        exit();
+    }
+
+    public function viewCohort($id) {
+        $conn = Database::getConnection();
+        $cohort = Cohort::getById($conn, $id);
+        $student_ids = json_decode($cohort['student_ids'], true) ?? [];
+        $students = Student::getByIds($conn, $student_ids);
+        $courses = Course::getAll($conn);
+        $allCourses = Course::getAll($conn);
+        $allStudents = Student::getAll($conn);
+        $universities = University::getAll($conn); // Fetch all universities
+        $existing_student_ids = $student_ids; // Initialize existing student IDs
+    
+        require 'views/admin/view_cohort.php';
+    }
+
+    public function addStudentsToCohort($cohort_id) {
+        $conn = Database::getConnection();
+    
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            $new_student_ids = $_POST['student_ids'] ?? [];
+    
+            // Get the current cohort data
+            $cohort = Cohort::getById($conn, $cohort_id);
+            $existing_student_ids = json_decode($cohort['student_ids'], true) ?? [];
+            $course_ids = json_decode($cohort['course_ids'], true) ?? [];
+    
+            // Merge new student IDs with existing ones
+            $updated_student_ids = array_unique(array_merge($existing_student_ids, $new_student_ids));
+    
+            // Update the cohort with the new student IDs
+            Cohort::updateStudentIds($conn, $cohort_id, $updated_student_ids);
+    
+            // Assign courses to new students
+            Student::assignCoursesToStudents($conn, $new_student_ids, $course_ids);
+
+            // Update courses with new student IDs
+            foreach ($course_ids as $course_id) {
+                Course::assigncohortstudents($conn, $course_id, $new_student_ids);
+            }
+
+            // Redirect to view cohort page after successful update
+            header("Location: /admin/view_cohort/$cohort_id");
+            exit();
+        }
+    
+        $cohort = Cohort::getById($conn, $cohort_id);
+        $allStudents = Student::getAll($conn);
+        $universities = University::getAll($conn); // Fetch all universities
+        $existing_student_ids = json_decode($cohort['student_ids'], true) ?? []; // Initialize existing student IDs
+    
+        require 'views/admin/add_students_to_cohort.php';
+    }
+
+    public function assignCoursesToCohort() {
+        $conn = Database::getConnection();
+    
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            $cohort_id = $_POST['cohort_id'];
+            $course_ids = $_POST['course_ids'] ?? [];
+    
+            foreach ($course_ids as $course_id) {
+                // Add course to cohort
+                Cohort::addCourse($conn, $cohort_id, $course_id);
+    
+                // Get student IDs from cohort
+                $cohort = Cohort::getById($conn, $cohort_id);
+                $student_ids = json_decode($cohort['student_ids'], true) ?? [];
+    
+                // Assign course to students
+                Student::assignCourseToStudents($conn, $student_ids, $course_id);
+    
+                // Assign students to course
+                Course::assignStudentsToCourse($conn, $course_id, $student_ids);
+            }
+    
+            $message = "Courses assigned to cohort successfully!";
+            $message_type = "success";
+    
+            // Redirect to view cohort page after successful assignment
+            header("Location: /admin/view_cohort/$cohort_id");
+            exit();
+        }
+    }
+
+    public function unassignCourseFromCohort($cohort_id, $course_id) {
+        $conn = Database::getConnection();
+    
+        // Unassign course from cohort
+        Cohort::unassignCourse($conn, $cohort_id, $course_id);
+    
+        // Get student IDs from cohort
+        $cohort = Cohort::getById($conn, $cohort_id);
+        $student_ids = json_decode($cohort['student_ids'], true) ?? [];
+    
+        // Unassign course from students
+        Student::unassignCourseFromStudents($conn, $student_ids, $course_id);
+    
+        // Unassign students from course
+        Course::unassignStudentsFromCourse($conn, $course_id, $student_ids);
+    
+        // Redirect to view cohort page after successful unassignment
+        header("Location: /admin/view_cohort/$cohort_id");
+        exit();
+    }
+
+    public function unassignStudentsFromCohort() {
+        $conn = Database::getConnection();
+    
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            $cohort_id = $_POST['cohort_id'];
+            $student_ids = $_POST['student_ids'] ?? [];
+    
+            // Get the current cohort data
+            $cohort = Cohort::getById($conn, $cohort_id);
+            $existing_student_ids = json_decode($cohort['student_ids'], true) ?? [];
+            $course_ids = json_decode($cohort['course_ids'], true) ?? [];
+    
+            // Remove the student IDs from the courses.assigned_students column
+            foreach ($course_ids as $course_id) {
+                Course::unassigncohortStudentsFromCourse($conn, $course_id, $student_ids);
+            }
+    
+            // Remove the cohorts.course_ids from the selected students.assigned_courses column
+            Student::unassignCoursesFromStudents($conn, $student_ids, $course_ids);
+    
+            // Remove the selected students from the cohorts.student_ids column
+            $updated_student_ids = array_values(array_diff($existing_student_ids, $student_ids)); // Reindex the array
+            Cohort::updateStudentIds($conn, $cohort_id, $updated_student_ids);
+    
+            // Redirect to view cohort page after successful update
+            header("Location: /admin/view_cohort/$cohort_id");
+            exit();
+        }
+    }
+
 }
 ?>

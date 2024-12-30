@@ -181,6 +181,96 @@ class Student {
         $stmt->execute([':email' => $email]);
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
+    public static function getAllWithUniversity($conn) {
+        $sql = "SELECT students.id, students.name, universities.long_name as university 
+                FROM students 
+                LEFT JOIN universities ON students.university_id = universities.id";
+        $stmt = $conn->query($sql);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public static function getByIdsWithUniversity($conn, $ids) {
+        if (empty($ids) || !is_array($ids)) {
+            return [];
+        }
+        $placeholders = implode(',', array_fill(0, count($ids), '?'));
+        $sql = "SELECT students.id, students.name, universities.long_name as university 
+                FROM students 
+                LEFT JOIN universities ON students.university_id = universities.id
+                WHERE students.id IN ($placeholders)";
+        $stmt = $conn->prepare($sql);
+        $stmt->execute($ids);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+    public static function assignCourseToStudents($conn, $student_ids, $course_id) {
+        foreach ($student_ids as $student_id) {
+            $student = self::getById($conn, $student_id);
+            $assigned_courses = json_decode($student['assigned_courses'], true) ?? [];
+    
+            if (!in_array($course_id, $assigned_courses)) {
+                $assigned_courses[] = $course_id;
+                $sql = "UPDATE students SET assigned_courses = :assigned_courses WHERE id = :id";
+                $stmt = $conn->prepare($sql);
+                $stmt->execute([
+                    ':assigned_courses' => json_encode($assigned_courses),
+                    ':id' => $student_id
+                ]);
+            }
+        }
+    }
+    public static function unassignCourseFromStudents($conn, $student_ids, $course_id) {
+        foreach ($student_ids as $student_id) {
+            $student = self::getById($conn, $student_id);
+            $assigned_courses = json_decode($student['assigned_courses'], true) ?? [];
+    
+            if (in_array($course_id, $assigned_courses)) {
+                $assigned_courses = array_diff($assigned_courses, [$course_id]);
+                $sql = "UPDATE students SET assigned_courses = :assigned_courses WHERE id = :id";
+                $stmt = $conn->prepare($sql);
+                $stmt->execute([
+                    ':assigned_courses' => json_encode($assigned_courses),
+                    ':id' => $student_id
+                ]);
+            }
+        }
+    }
+
+    public static function assignCoursesToStudents($conn, $student_ids, $course_ids) {
+        foreach ($student_ids as $student_id) {
+            $student = self::getById($conn, $student_id);
+            $assigned_courses = json_decode($student['assigned_courses'], true) ?? [];
+    
+            // Merge new course IDs with existing ones
+            $updated_courses = array_unique(array_merge($assigned_courses, $course_ids));
+    
+            $sql = "UPDATE students SET assigned_courses = :assigned_courses WHERE id = :id";
+            $stmt = $conn->prepare($sql);
+            $stmt->execute([
+                ':assigned_courses' => json_encode($updated_courses),
+                ':id' => $student_id
+            ]);
+        }
+    }
+
+    public static function unassignCoursesFromStudents($conn, $student_ids, $course_ids) {
+        foreach ($student_ids as $student_id) {
+            $student = self::getById($conn, $student_id);
+            $assigned_courses = json_decode($student['assigned_courses'], true) ?? [];
+    
+            foreach ($course_ids as $course_id) {
+                if (in_array($course_id, $assigned_courses)) {
+                    $assigned_courses = array_values(array_diff($assigned_courses, [$course_id]));
+                }
+            }
+    
+            $sql = "UPDATE students SET assigned_courses = :assigned_courses WHERE id = :id";
+            $stmt = $conn->prepare($sql);
+            $stmt->execute([
+                ':assigned_courses' => json_encode(array_values($assigned_courses)), // Reindex the array
+                ':id' => $student_id
+            ]);
+        }
+    }
 
     public static function getAllByUniversity($conn, $university_id) {
         $sql = "SELECT * FROM students WHERE university_id = :university_id";
