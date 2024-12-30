@@ -2009,5 +2009,51 @@ class AdminController {
         }
     }
 
+    public function removeContent() {
+        $conn = Database::getConnection();
+        $type = $_POST['type'];
+        $index = $_POST['index'];
+        $course_id = $_POST['course_id'];
+
+        // Fetch the course data
+        $sql = "SELECT * FROM courses WHERE id = :course_id";
+        $stmt = $conn->prepare($sql);
+        $stmt->bindValue(':course_id', $course_id, PDO::PARAM_INT);
+        $stmt->execute();
+        $course = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$course) {
+            echo json_encode(['success' => false, 'message' => 'Course not found']);
+            return;
+        }
+
+        // Decode the JSON column
+        $content = json_decode($course[$type], true);
+
+        // Remove the specific content based on the index
+        if (isset($content[$index])) {
+            unset($content[$index]);
+        } else {
+            echo json_encode(['success' => false, 'message' => 'Content not found']);
+            return;
+        }
+
+        // Re-index the array and encode it back to JSON
+        $content = array_values($content);
+        $jsonContent = json_encode($content);
+
+        // Update the course data
+        $sql = "UPDATE courses SET $type = :content WHERE id = :course_id";
+        $stmt = $conn->prepare($sql);
+        $stmt->bindValue(':content', $jsonContent, PDO::PARAM_STR);
+        $stmt->bindValue(':course_id', $course_id, PDO::PARAM_INT);
+
+        if ($stmt->execute()) {
+            echo json_encode(['success' => true, 'message' => 'Content removed successfully']);
+        } else {
+            echo json_encode(['success' => false, 'message' => 'Failed to remove content']);
+        }
+    }
+
 }
 ?>

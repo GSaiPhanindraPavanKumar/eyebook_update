@@ -36,7 +36,35 @@
                                 <p><strong>Status:</strong> <?php echo htmlspecialchars($course['status'] ?? 'N/A'); ?></p>
 
                                 <!-- Course Book Section -->
-                                <h4 class="card-title mt-3">Course Book</h4>
+                                <h5 class="mt-5">EC Content</h5>
+                                <table class="table table-hover mt-2">
+                                    <thead class="thead-dark">
+                                        <tr>
+                                            <th scope="col">S. No.</th>
+                                            <th scope="col">Title</th>
+                                            <th scope="col">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <?php
+                                        $ECContent = !empty($course['EC_content']) ? json_decode($course['EC_content'], true) : [];
+                                        if (!empty($ECContent)) {
+                                            $serialNumber = 1;
+                                            foreach ($ECContent as $content) {
+                                                echo "<tr>";
+                                                echo "<td>" . $serialNumber++ . "</td>";
+                                                echo "<td>" . htmlspecialchars($content['unitTitle'] ?? 'N/A') . "</td>";
+                                                $full_url = $content['indexPath'] ?? '#';
+                                                echo "<td><a href='/" . htmlspecialchars($full_url) . "' target='_blank' class='btn btn-primary'>View EC</a></td>";
+                                                echo "</tr>";
+                                            }
+                                        } else {
+                                            echo "<tr><td colspan='3'>No EC content available.</td></tr>";
+                                        }
+                                        ?>
+                                    </tbody>
+                                </table>
+                                    <h4 class="card-title mt-3">Course Book</h4>
                                 <table class="table table-hover mt-2">
                                     <thead class="thead-dark">
                                         <tr>
@@ -52,15 +80,44 @@
                                             $hashedId = base64_encode($course['id']);
                                             $hashedId = str_replace(['+', '/', '='], ['-', '_', ''], $hashedId);
                                             foreach ($course['course_book'] as $unit) {
+                                            
                                                 echo "<tr>";
                                                 echo "<td>" . $serialNumber++ . "</td>"; // Increment the serial number
-                                                echo "<td>" . htmlspecialchars($unit['unit_name']) . "</td>";
-                                                $full_url = $unit['scorm_url'];
-                                                echo "<td><a href='/spoc/view_book/" . $hashedId . "?index_path=" . urlencode($full_url) . "' class='btn btn-primary'>View Course Book</a></td>";
+                                                echo "<td>" . htmlspecialchars($unit['unit_name'] ?? 'N/A') . "</td>";
+                                                $full_url = $unit['scorm_url'] ?? '';
+                                                echo "<td><a href='/admin/view_book/" . urlencode($hashedId) . "?index_path=" . urlencode($full_url) . "' class='btn btn-primary'>View Course Book</a></td>";
                                                 echo "</tr>";
                                             }
                                         } else {
                                             echo "<tr><td colspan='4'>No course books available.</td></tr>";
+                                        }
+                                        ?>
+                                    </tbody>
+                                </table>
+                                <h5 class="mt-5">Additional Content</h5>
+                                <table class="table table-hover mt-2">
+                                    <thead class="thead-dark">
+                                        <tr>
+                                            <th scope="col">S. No.</th>
+                                            <th scope="col">Title</th>
+                                            <th scope="col">Link</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <?php
+                                        $additionalContent = !empty($course['additional_content']) ? json_decode($course['additional_content'], true) : [];
+                                        if (!empty($additionalContent)) {
+                                            $serialNumber = 1;
+                                            foreach ($additionalContent as $content) {
+                                                echo "<tr>";
+                                                echo "<td>" . $serialNumber++ . "</td>";
+                                                echo "<td>" . htmlspecialchars($content['title'] ?? 'N/A') . "</td>";
+                                                $full_url = $content['link'] ?? '#';
+                                                echo "<td><a href='" . htmlspecialchars($full_url) . "' target='_blank' class='btn btn-primary'>View Content</a></td>";
+                                                echo "</tr>";
+                                            }
+                                        } else {
+                                            echo "<tr><td colspan='3'>No additional content available.</td></tr>";
                                         }
                                         ?>
                                     </tbody>

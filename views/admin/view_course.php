@@ -93,92 +93,106 @@ $assignedUniversities = Course::getAssignedUniversities($conn, $course['id']);
                                         <a href="/admin/edit_course/<?php echo $course['id']; ?>" class="btn btn-warning">Edit Course</a>
                                         <a href="/admin/delete_course/<?php echo $course['id']; ?>" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this course?');">Delete Course</a>
                                     </div>
+                                    <!-- EC Content Table -->
                                     <h5 class="mt-5">EC Content</h5>
-                                <table class="table table-hover mt-2">
-                                    <thead class="thead-dark">
-                                        <tr>
-                                            <th scope="col">S. No.</th>
-                                            <th scope="col">Title</th>
-                                            <th scope="col">Action</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <?php
-                                        $ECContent = !empty($course['EC_content']) ? json_decode($course['EC_content'], true) : [];
-                                        if (!empty($ECContent)) {
-                                            $serialNumber = 1;
-                                            foreach ($ECContent as $content) {
-                                                echo "<tr>";
-                                                echo "<td>" . $serialNumber++ . "</td>";
-                                                echo "<td>" . htmlspecialchars($content['unitTitle'] ?? 'N/A') . "</td>";
-                                                $full_url = $content['indexPath'] ?? '#';
-                                                echo "<td><a href='/" . htmlspecialchars($full_url) . "' target='_blank' class='btn btn-primary'>View EC</a></td>";
-                                                echo "</tr>";
+                                    <table class="table table-hover mt-2">
+                                        <thead class="thead-dark">
+                                            <tr>
+                                                <th scope="col">S. No.</th>
+                                                <th scope="col">Title</th>
+                                                <th scope="col">Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <?php
+                                            $ECContent = !empty($course['EC_content']) ? json_decode($course['EC_content'], true) : [];
+                                            if (!empty($ECContent)) {
+                                                $serialNumber = 1;
+                                                foreach ($ECContent as $content) {
+                                                    echo "<tr>";
+                                                    echo "<td>" . $serialNumber++ . "</td>";
+                                                    echo "<td>" . htmlspecialchars($content['unitTitle'] ?? 'N/A') . "</td>";
+                                                    $full_url = $content['indexPath'] ?? '#';
+                                                    echo "<td>
+                                                            <a href='/" . htmlspecialchars($full_url) . "' target='_blank' class='btn btn-primary'>View EC</a>
+                                                            <button class='btn btn-danger' onclick='removeContent(\"EC_content\", " . ($serialNumber - 1) . ")'>Remove</button>
+                                                        </td>";
+                                                    echo "</tr>";
+                                                }
+                                            } else {
+                                                echo "<tr><td colspan='3'>No EC content available.</td></tr>";
                                             }
-                                        } else {
-                                            echo "<tr><td colspan='3'>No EC content available.</td></tr>";
-                                        }
-                                        ?>
-                                    </tbody>
-                                </table>
+                                            ?>
+                                        </tbody>
+                                    </table>
+
+                                    <!-- Course Book Table -->
                                     <h4 class="card-title mt-3">Course Book</h4>
-                                <table class="table table-hover mt-2">
-                                    <thead class="thead-dark">
-                                        <tr>
-                                            <th scope="col">S. No.</th>
-                                            <th scope="col">Unit Title</th>
-                                            <th scope="col">Action</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <?php
-                                        if (!empty($course['course_book'])) {
-                                            $serialNumber = 1; 
-                                            $hashedId = base64_encode($course['id']);
-                                            $hashedId = str_replace(['+', '/', '='], ['-', '_', ''], $hashedId);
-                                            foreach ($course['course_book'] as $unit) {
-                                            
-                                                echo "<tr>";
-                                                echo "<td>" . $serialNumber++ . "</td>"; // Increment the serial number
-                                                echo "<td>" . htmlspecialchars($unit['unit_name'] ?? 'N/A') . "</td>";
-                                                $full_url = $unit['scorm_url'] ?? '';
-                                                echo "<td><a href='/admin/view_book/" . urlencode($hashedId) . "?index_path=" . urlencode($full_url) . "' class='btn btn-primary'>View Course Book</a></td>";
-                                                echo "</tr>";
+                                    <table class="table table-hover mt-2">
+                                        <thead class="thead-dark">
+                                            <tr>
+                                                <th scope="col">S. No.</th>
+                                                <th scope="col">Unit Title</th>
+                                                <th scope="col">Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <?php
+                                            if (!empty($course['course_book'])) {
+                                                $serialNumber = 1; 
+                                                $hashedId = base64_encode($course['id']);
+                                                $hashedId = str_replace(['+', '/', '='], ['-', '_', ''], $hashedId);
+                                                foreach ($course['course_book'] as $unit) {
+                                                    echo "<tr>";
+                                                    echo "<td>" . $serialNumber++ . "</td>";
+                                                    echo "<td>" . htmlspecialchars($unit['unit_name'] ?? 'N/A') . "</td>";
+                                                    $full_url = $unit['scorm_url'] ?? '';
+                                                    echo "<td>
+                                                            <a href='/admin/view_book/" . urlencode($hashedId) . "?index_path=" . urlencode($full_url) . "' class='btn btn-primary'>View Course Book</a>
+                                                            <button class='btn btn-danger' onclick='removeContent(\"course_book\", " . ($serialNumber - 1) . ")'>Remove</button>
+                                                        </td>";
+                                                    echo "</tr>";
+                                                }
+                                            } else {
+                                                echo "<tr><td colspan='4'>No course books available.</td></tr>";
                                             }
-                                        } else {
-                                            echo "<tr><td colspan='4'>No course books available.</td></tr>";
-                                        }
-                                        ?>
-                                    </tbody>
-                                </table>
-                                <h5 class="mt-5">Additional Content</h5>
-                                <table class="table table-hover mt-2">
-                                    <thead class="thead-dark">
-                                        <tr>
-                                            <th scope="col">S. No.</th>
-                                            <th scope="col">Title</th>
-                                            <th scope="col">Link</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <?php
-                                        $additionalContent = !empty($course['additional_content']) ? json_decode($course['additional_content'], true) : [];
-                                        if (!empty($additionalContent)) {
-                                            $serialNumber = 1;
-                                            foreach ($additionalContent as $content) {
-                                                echo "<tr>";
-                                                echo "<td>" . $serialNumber++ . "</td>";
-                                                echo "<td>" . htmlspecialchars($content['title'] ?? 'N/A') . "</td>";
-                                                $full_url = $content['link'] ?? '#';
-                                                echo "<td><a href='" . htmlspecialchars($full_url) . "' target='_blank' class='btn btn-primary'>View Content</a></td>";
-                                                echo "</tr>";
+                                            ?>
+                                        </tbody>
+                                    </table>
+
+                                    <!-- Additional Content Table -->
+                                    <h5 class="mt-5">Additional Content</h5>
+                                    <table class="table table-hover mt-2">
+                                        <thead class="thead-dark">
+                                            <tr>
+                                                <th scope="col">S. No.</th>
+                                                <th scope="col">Title</th>
+                                                <th scope="col">Link</th>
+                                                <th scope="col">Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <?php
+                                            $additionalContent = !empty($course['additional_content']) ? json_decode($course['additional_content'], true) : [];
+                                            if (!empty($additionalContent)) {
+                                                $serialNumber = 1;
+                                                foreach ($additionalContent as $content) {
+                                                    echo "<tr>";
+                                                    echo "<td>" . $serialNumber++ . "</td>";
+                                                    echo "<td>" . htmlspecialchars($content['title'] ?? 'N/A') . "</td>";
+                                                    $full_url = $content['link'] ?? '#';
+                                                    echo "<td>
+                                                            <a href='" . htmlspecialchars(string: $full_url) . "' target='_blank' class='btn btn-primary'>View Content</a>
+                                                            <button class='btn btn-danger' onclick='removeContent(\"additional_content\", " . ($serialNumber - 1) . ")'>Remove</button>
+                                                        </td>";
+                                                    echo "</tr>";
+                                                }
+                                            } else {
+                                                echo "<tr><td colspan='4'>No additional content available.</td></tr>";
                                             }
-                                        } else {
-                                            echo "<tr><td colspan='3'>No additional content available.</td></tr>";
-                                        }
-                                        ?>
-                                    </tbody>
-                                </table>
+                                            ?>
+                                        </tbody>
+                                    </table>
                                 <h4 class="card-title mt-3 d-flex justify-content-between align-items-center">
                                     Assigned Faculty
                                     <form method="POST" action="/admin/unassign_faculty">
@@ -817,4 +831,31 @@ document.getElementById('fileOption').addEventListener('change', function() {
     document.getElementById('contentLink').required = false;
     document.getElementById('contentFile').required = true;
 });
+</script>
+<script>
+function removeContent(type, index) {
+    if (confirm('Are you sure you want to remove this content?')) {
+        $.ajax({
+            url: '/admin/remove_content',
+            type: 'POST',
+            data: {
+                type: type,
+                index: index,
+                course_id: <?php echo json_encode($course['id']); ?>
+            },
+            success: function(response) {
+                var result = JSON.parse(response);
+                if (result.success) {
+                    alert(result.message);
+                    location.reload(); // Refresh the page upon success
+                } else {
+                    alert(result.message);
+                }
+            },
+            error: function(xhr, status, error) {
+                alert('An error occurred: ' + error);
+            }
+        });
+    }
+}
 </script>

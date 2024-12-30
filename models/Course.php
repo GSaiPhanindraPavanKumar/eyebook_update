@@ -725,5 +725,29 @@ class Course {
         $result = $stmt->fetch(PDO::FETCH_ASSOC);
         return $result['course_count'] ?? 0;
     }
+    public static function getVirtualClassIdsByCourseIds($conn, $course_ids) {
+        if (empty($course_ids)) {
+            return [];
+        }
+
+        $placeholders = implode(',', array_fill(0, count($course_ids), '?'));
+        $sql = "SELECT virtual_class_id FROM courses WHERE id IN ($placeholders)";
+        $stmt = $conn->prepare($sql);
+        $stmt->execute($course_ids);
+        return $stmt->fetchAll(PDO::FETCH_COLUMN);
+    }
+
+    public static function getAssignmentIdsByCourseIds($conn, $course_ids) {
+        if (empty($course_ids)) {
+            return [];
+        }
+
+        $placeholders = implode(',', array_fill(0, count($course_ids), '?'));
+        $sql = "SELECT assignments FROM courses WHERE id IN ($placeholders)";
+        $stmt = $conn->prepare($sql);
+        $stmt->execute($course_ids);
+        return $stmt->fetchAll(PDO::FETCH_COLUMN);
+    }
+
 }
 ?>

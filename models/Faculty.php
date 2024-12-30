@@ -146,12 +146,12 @@ class Faculty {
         return $user;
     }
 
-    public static function updatePassword($conn, $facultyId, $newPassword) {
-        $sql = "UPDATE faculty SET password = :new_password WHERE id = :id";
+    public static function updatePassword($conn, $email, $newPassword) {
+        $sql = "UPDATE faculty SET password = :new_password WHERE email = :email";
         $stmt = $conn->prepare($sql);
         $stmt->execute([
             ':new_password' => $newPassword,
-            ':id' => $facultyId
+            ':email' => $email
         ]);
     }
 

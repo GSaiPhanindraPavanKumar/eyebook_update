@@ -128,7 +128,7 @@ if ($userData) {
 
                 <li class="nav-item"><hr></li>
 
-                <li class="nav-item">
+                <!-- <li class="nav-item">
                     <a class="nav-link" data-toggle="collapse" href="#faculty" aria-expanded="false" aria-controls="faculty">
                         <i class="icon-layout menu-icon"></i>
                         <span class="menu-title">Faculty</span>
@@ -136,12 +136,12 @@ if ($userData) {
                     </a>
                     <div class="collapse" id="faculty">
                         <ul class="nav flex-column sub-menu">
-                            <!-- <li class="nav-item"> <a class="nav-link" href="#">Upload Faculty</a></li> -->
-                            <li class="nav-item"> <a class="nav-link" href="/spoc/addFaculty">Add Faculty</a></li>
+                            <li class="nav-item"> <a class="nav-link" href="#">Upload Faculty</a></li> -->
+                            <!-- <li class="nav-item"> <a class="nav-link" href="/spoc/addFaculty">Add Faculty</a></li>
                            <li class="nav-item"> <a class="nav-link" href="/spoc/manage_faculty">Manage Faculty</a></li>
                         </ul>
                     </div>
-                </li>
+                </li> -->
 
                 <li class="nav-item">
                     <a class="nav-link" data-toggle="collapse" href="#courses" aria-expanded="false" aria-controls="courses">
@@ -172,7 +172,7 @@ if ($userData) {
                         </ul>
                     </div>
                 </li> -->
-                <li class="nav-item">
+                <!-- <li class="nav-item">
                     <a class="nav-link" data-toggle="collapse" href="#student" aria-expanded="false" aria-controls="student">
                         <i class="icon-bar-graph menu-icon"></i>
                         <span class="menu-title" >Student</span>
@@ -180,11 +180,11 @@ if ($userData) {
                     </a>
                     <div class="collapse" id="student">
                         <ul class="nav flex-column sub-menu">
-                        <!-- <li class="nav-item"> <a class="nav-link" href="upload_students">Upload Students</a></li> -->
-                            <li class="nav-item"> <a class="nav-link" href="/spoc/manage_students">Manage Student</a></li>
+                         <li class="nav-item"> <a class="nav-link" href="upload_students">Upload Students</a></li> -->
+                            <!-- <li class="nav-item"> <a class="nav-link" href="/spoc/manage_students">Manage Student</a></li>
                         </ul>
                     </div>
-                </li>
+                </li>  -->
                 <!-- <li class="nav-item">
                     <a class="nav-link" data-toggle="collapse" href="#streams" aria-expanded="false" aria-controls="streams">
                         <i class="icon-grid-2 menu-icon"></i>

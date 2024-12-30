@@ -13,6 +13,34 @@ use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 use PDO;
 
+use Aws\S3\S3Client;
+use Aws\Exception\AwsException;
+require 'vendor/autoload.php';
+require_once __DIR__ . '/../aws_config.php';
+
+$bucketName = AWS_BUCKET_NAME;
+$region = AWS_REGION;
+$accessKey = AWS_ACCESS_KEY_ID;
+$secretKey = AWS_SECRET_ACCESS_KEY;
+
+// Debugging: Log the values of the configuration variables
+error_log('AWS_BUCKET_NAME: ' . $bucketName);
+error_log('AWS_REGION: ' . $region);
+error_log('AWS_ACCESS_KEY_ID: ' . $accessKey);
+error_log('AWS_SECRET_ACCESS_KEY: ' . $secretKey);
+
+if (!$bucketName || !$region || !$accessKey || !$secretKey) {
+    throw new Exception('Missing AWS configuration in aws_config.php file');
+}
+
+$s3Client = new S3Client([
+    'region' => 'us-east-1',
+    'version' => 'latest',
+    'credentials' => [
+        'key' => $accessKey,
+        'secret' => $secretKey,
+    ],
+]);
 class SpocController {
     public function dashboard() {
         $conn = Database::getConnection();
@@ -27,14 +55,17 @@ class SpocController {
         $course_count = Course::getCountspocByUniversityId($conn, $university_id); // Fetch course count for the university
         $faculties = Faculty::getAllByUniversity($conn, $university_id); // Fetch all faculties for the university
         $courses = Course::getAllspocByUniversity($conn, $university_id); // Fetch all courses for the university
-    
+
+        // Fetch virtual class IDs and assignment IDs for the courses
+        $virtualClassIds = Course::getVirtualClassIdsByCourseIds($conn, array_column($courses, 'id'));
+        $assignmentIds = Course::getAssignmentIdsByCourseIds($conn, array_column($courses, 'id'));
+        
         // Fetch virtual classes and assignments for the courses
         $virtualClassroomModel = new VirtualClassroom($conn);
         $assignmentModel = new Assignment();
     
-        $course_ids = array_column($courses, 'id');
-        $virtualClasses = $virtualClassroomModel->getVirtualClassroomsByCourseIds($course_ids);
-        $assignments = $assignmentModel->getAssignmentsByCourseIds($conn, $course_ids);
+        $virtualClasses = $virtualClassroomModel->getVirtualClassroomsByIdsspoc($virtualClassIds);
+        $assignments = $assignmentModel->getAssignmentsByIds($conn, $assignmentIds);
     
         require 'views/spoc/dashboard.php';
     }
@@ -60,7 +91,7 @@ class SpocController {
         $userData = $spocModel->getUserData($username);
         $university_id = $userData['university_id'];
     
-        $courses = Course::getAllByUniversity($conn, $university_id); // Fetch all courses for the university
+        $courses = Course::getAllspocByUniversity($conn, $university_id); // Fetch all courses for the university
     
         require 'views/spoc/manage_courses.php';
     }
@@ -233,6 +264,84 @@ class SpocController {
         $conn = Database::getConnection();
         $spocModel = new Spoc($conn);
         $spoc = $spocModel->getUserProfile($conn);
+        require 'views/spoc/profile.php';
+    }
+
+    public function profile() {
+        $conn = Database::getConnection();
+        $spocModel = new Spoc($conn);
+
+        // Check if the user is not logged in
+        if (!isset($_SESSION['email'])) {
+            header("Location: login");
+            exit;
+        }
+
+        // Get the email from the session
+        $email = $_SESSION['email'];
+        $userId = $_SESSION['email'];
+
+        // Fetch user data
+        $userData = $spocModel->getUserData($email);
+
+        // Check if the form is submitted
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $name = $_POST['name'];
+            $newEmail = $_POST['email'];
+            $phone = $_POST['phone'];
+            $profileImage = null;
+
+            // Handle profile image upload
+            if (isset($_FILES['profile_image']) && $_FILES['profile_image']['error'] == UPLOAD_ERR_OK) {
+                $bucketName = AWS_BUCKET_NAME;
+                $keyName = 'profile/spoc/' . $userId . '/' . basename($_FILES['profile_image']['name']);
+                $filePath = $_FILES['profile_image']['tmp_name'];
+    
+                // Initialize S3 client
+                $s3 = new S3Client([
+                    'version' => 'latest',
+                    'region'  => AWS_REGION,
+                    'credentials' => [
+                        'key'    => AWS_ACCESS_KEY_ID,
+                        'secret' => AWS_SECRET_ACCESS_KEY,
+                    ],
+                ]);
+    
+                try {
+                    // Upload the image to S3
+                    $result = $s3->putObject([
+                        'Bucket' => $bucketName,
+                        'Key'    => $keyName,
+                        'SourceFile' => $filePath,
+                        'ACL'    => 'public-read',
+                    ]);
+    
+                    // Get the URL of the uploaded image
+                    $profileImageUrl = $result['ObjectURL'];
+    
+                    // Save the URL to the database
+                    $stmt = $conn->prepare("UPDATE spocs SET profile_image_url = ? WHERE email = ?");
+                    $stmt->execute([$profileImageUrl, $userId]);
+    
+                    // Update the userData array for display
+                    $userData['profile_image_url'] = $profileImageUrl;
+                } catch (AwsException $e) {
+                    echo "Error uploading image: " . $e->getMessage();
+                }
+            }
+
+            // Update user data
+            $spocModel->updateUserData($email, $name, $newEmail, $phone);
+
+            // Update session email if changed
+            if ($email !== $newEmail) {
+                $_SESSION['email'] = $newEmail;
+            }
+
+            header("Location: profile");
+            exit;
+        }
+
         require 'views/spoc/profile.php';
     }
 

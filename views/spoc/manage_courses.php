@@ -14,7 +14,7 @@ $spoc = Spoc::getByEmail($conn, $email);
 $universityId = $spoc['university_id'];
 
 // Fetch courses from the database
-$courses = Course::getAllByUniversity($conn, $universityId);
+$courses = Course::getAllspocByUniversity($conn, $universityId);
 
 // Fetch all students
 $sql = "SELECT id, completed_books FROM students WHERE university_id = :university_id";

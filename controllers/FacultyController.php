@@ -360,15 +360,66 @@ class FacultyController {
         $conn = Database::getConnection();
     
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-            $faculty_id = $_SESSION['faculty_id'];
-            $new_password = password_hash($_POST['newPassword'], PASSWORD_BCRYPT);
-    
-            Faculty::updatePassword($conn, $faculty_id, $new_password);
-    
-            $message = "Password updated successfully.";
-            $message_type = "success";
+            $email = $_SESSION['email'];
+            $currentPassword = $_POST['currentPassword'];
+            $newPassword = $_POST['newPassword'];
+            $confirmPassword = $_POST['confirmPassword'];
+
+            // Check if the new password and confirm password match
+            if ($newPassword !== $confirmPassword) {
+                echo "<script>
+                        alert('New password and confirm password do not match.');
+                        window.location.href = 'updatePassword';
+                    </script>";
+                exit();
+            }
+
+            // Validate the new password using a regular expression
+            $passwordRegex = '/^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[\W_])[A-Za-z\d\W_]{8,}$/';
+            if (!preg_match($passwordRegex, $newPassword)) {
+                echo "<script>
+                        alert('Password must be at least 8 characters long and include at least 1 uppercase letter, 1 lowercase letter, 1 numeric digit, and 1 special character.');
+                        window.location.href = 'updatePassword';
+                    </script>";
+                exit();
+            }
+
+            // Verify the current password before updating
+            $sqlVerify = "SELECT password FROM faculty WHERE email = ?";
+            $stmtVerify = $conn->prepare($sqlVerify);
+            $stmtVerify->execute([$email]);
+            $storedPassword = $stmtVerify->fetchColumn();
+
+            if ($storedPassword && password_verify($currentPassword, $storedPassword)) {
+                // Hash the new password
+                $hashedNewPassword = password_hash($newPassword, PASSWORD_DEFAULT);
+
+                // Prepare and execute the SQL query to update the password
+                $sqlUpdate = "UPDATE faculty SET password = ? WHERE email = ?";
+                $stmtUpdate = $conn->prepare($sqlUpdate);
+                $stmtUpdate->execute([$hashedNewPassword, $email]);
+
+                if ($stmtUpdate->rowCount() > 0) {
+                    // Password updated successfully
+                    echo "<script>
+                            alert('Password updated successfully.');
+                            window.location.href = 'updatePassword'; // Redirect to another page after success
+                        </script>";
+                    exit();
+                } else {
+                    // Display an error message using a popup
+                    echo "<script>
+                            alert('Error: Unable to update password. Please try again later.');
+                        </script>";
+                }
+            } else {
+                // Current password is incorrect
+                echo "<script>
+                        alert('Incorrect current password. Please try again.');
+                    </script>";
+            }
         }
-    
+
         require 'views/faculty/updatePassword.php';
     }
 

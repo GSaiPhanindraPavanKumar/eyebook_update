@@ -135,12 +135,14 @@ $router->post('/admin/unassign_students_from_cohort', 'AdminController@unassignS
 $router->get('/admin/unassign_course_from_cohort/(\d+)/(\d+)', 'AdminController@unassignCourseFromCohort');
 $router->get('/admin/add_students_to_cohort/(\d+)', 'AdminController@addStudentsToCohort');
 $router->post('/admin/add_students_to_cohort/(\d+)', 'AdminController@addStudentsToCohort');
+$router->post('/admin/remove_content', 'AdminController@removeContent');
 
 $router->get('/spoc', 'SpocController@dashboard');
 $router->get('/spoc/dashboard', 'SpocController@dashboard');
 $router->get('/spoc/updatePassword', 'SpocController@updatePassword');
 $router->post('/spoc/updatePassword', 'SpocController@updatePassword');
-$router->get('/spoc/profile', 'SpocController@userProfile');
+$router->get('/spoc/profile', 'SpocController@profile');
+$router->post('/spoc/profile', 'SpocController@profile');
 $router->get('/spoc/addFaculty', 'SpocController@addFaculty');
 $router->post('/spoc/addFaculty', 'SpocController@addFaculty');
 $router->get('/spoc/manage_faculty', 'SpocController@manageFaculties');

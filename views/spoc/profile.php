@@ -11,27 +11,23 @@ if (!isset($_SESSION['email'])) {
 // Get the email from the session
 $email = $_SESSION['email'];
 
-// Get the database connection
-$conn = Database::getConnection();
-
 // Use prepared statements to prevent SQL injection
-$stmt = $conn->prepare("SELECT * FROM spocs WHERE email = :email");
-if (!$stmt) {
-    die('Error in preparing statement.');
-}
-
-$stmt->execute(['email' => $email]);
-
-// Fetch user data
+$conn = Database::getConnection();
+$query = "SELECT spocs.*, universities.long_name AS university_name 
+          FROM spocs 
+          JOIN universities ON spocs.university_id = universities.id 
+          WHERE spocs.email = :email";
+$stmt = $conn->prepare($query);
+$stmt->bindValue(':email', $email);
+$stmt->execute();
 $userData = $stmt->fetch(PDO::FETCH_ASSOC);
-
-if (!$userData) {
-    die('Invalid Credentials');
-}
 
 // Check if user data is available; if not, set default placeholder values
 $name = isset($userData['name']) ? htmlspecialchars($userData['name']) : "John Doe";
-$profileImage = isset($userData['profileImage']) ? $userData['profileImage'] : null;
+$email = isset($userData['email']) ? htmlspecialchars($userData['email']) : "john@example.com";
+$phone = isset($userData['phone']) ? htmlspecialchars($userData['phone']) : "123-456-7890";
+$university = isset($userData['university_name']) ? htmlspecialchars($userData['university_name']) : "Unknown University";
+$profileImage = isset($userData['profile_image_url']) ? $userData['profile_image_url'] : null;
 ?>
 
 <!-- HTML Content -->
@@ -44,7 +40,7 @@ $profileImage = isset($userData['profileImage']) ? $userData['profileImage'] : n
                         <!-- Profile Image -->
                         <div style="display: flex; justify-content: center; margin-bottom: 20px;">
                             <?php if ($profileImage): ?>
-                                <img src="data:image/jpeg;base64,<?php echo base64_encode($profileImage); ?>" alt="Profile Image" style="border-radius: 50%; width: 100px; height: 100px;">
+                                <img src="<?php echo htmlspecialchars($profileImage); ?>" alt="Profile Image" style="border-radius: 50%; width: 100px; height: 100px;">
                             <?php else: ?>
                                 <i class="fas fa-user-circle" style="font-size: 100px; color: gray;"></i>
                             <?php endif; ?>
@@ -52,6 +48,14 @@ $profileImage = isset($userData['profileImage']) ? $userData['profileImage'] : n
 
                         <!-- User Info -->
                         <h2 style="margin: 0;"><?php echo $name; ?></h2>
+                        <p style="color: gray;">SPOC</p>
+
+                        <!-- Additional User Details -->
+                        <div style="margin-top: 20px;">
+                            <p><strong>Email:</strong> <?php echo $email; ?></p>
+                            <p><strong>Phone:</strong> <?php echo $phone; ?></p>
+                            <p><strong>University:</strong> <?php echo $university; ?></p>
+                        </div>
 
                         <!-- Edit Profile and Update Password Buttons -->
                         <div style="margin-top: 20px;">
@@ -61,17 +65,25 @@ $profileImage = isset($userData['profileImage']) ? $userData['profileImage'] : n
 
                         <!-- Edit Profile Form -->
                         <div id="editProfileForm" style="display: none; margin-top: 20px;">
-                            <form method="POST" enctype="multipart/form-data">
+                            <form action="/spoc/profile" method="post" enctype="multipart/form-data">
                                 <div class="form-group">
-                                    <label for="name">Name</label>
-                                    <input type="text" class="form-control" id="name" name="name" value="<?php echo $name; ?>" required>
+                                    <label for="name">Name:</label>
+                                    <input type="text" class="form-control" id="name" name="name" value="<?php echo htmlspecialchars($userData['name']); ?>" required>
                                 </div>
                                 <div class="form-group">
-                                    <label for="profileImage">Profile Image</label>
-                                    <input type="file" class="form-control" id="profileImage" name="profileImage">
+                                    <label for="email">Email:</label>
+                                    <input type="email" class="form-control" id="email" name="email" value="<?php echo htmlspecialchars($userData['email']); ?>" required>
                                 </div>
-                                <button type="submit" class="btn btn-success">Save Changes</button>
-                                <button type="button" class="btn btn-danger" onclick="document.getElementById('editProfileForm').style.display='none'">Cancel</button>
+                                <div class="form-group">
+                                    <label for="phone">Phone:</label>
+                                    <input type="text" class="form-control" id="phone" name="phone" value="<?php echo htmlspecialchars($userData['phone']); ?>" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="profile_image">Profile Image:</label>
+                                    <input type="file" class="form-control" id="profile_image" name="profile_image" accept="image/*">
+                                </div>
+                                <button type="submit" class="btn btn-primary">Save Changes</button>
+                                <button type="button" class="btn btn-secondary" onclick="document.getElementById('editProfileForm').style.display='none'">Cancel</button>
                             </form>
                         </div>
                     </div>
@@ -79,4 +91,9 @@ $profileImage = isset($userData['profileImage']) ? $userData['profileImage'] : n
             </div>
         </div>
     </div>
+    <!-- content-wrapper ends -->
+    <?php include 'footer.html'; ?>
 </div>
+
+<!-- Include Font Awesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">

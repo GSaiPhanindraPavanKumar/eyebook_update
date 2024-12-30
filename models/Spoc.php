@@ -86,6 +86,28 @@ class Spoc {
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
+    public function getUserDataspoc($email) {
+        $sql = "SELECT spocs.*, universities.long_name AS university_name 
+                FROM spocs 
+                JOIN universities ON spocs.university_id = universities.id 
+                WHERE spocs.email = :email";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindValue(':email', $email);
+        $stmt->execute();
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+    public function updateUserData($email, $name, $newEmail, $phone) {
+        $sql = "UPDATE spocs SET name = :name, email = :newEmail, phone = :phone";
+        $sql .= " WHERE email = :email";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindValue(':name', $name);
+        $stmt->bindValue(':newEmail', $newEmail);
+        $stmt->bindValue(':phone', $phone);
+        $stmt->bindValue(':email', $email);
+        $stmt->execute();
+    }
+
     public function getFacultyCount($university_id) {
         $sql = "SELECT COUNT(*) as faculty_count FROM faculty WHERE university_id = :university_id";
         $stmt = $this->conn->prepare($sql);
