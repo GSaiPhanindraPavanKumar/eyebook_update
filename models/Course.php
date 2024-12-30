@@ -711,5 +711,19 @@ class Course {
         $stmt->execute([':university_id' => $university_id]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+
+    public static function getAllspocByUniversity($conn, $university_id) {
+        $sql = "SELECT * FROM courses WHERE JSON_CONTAINS(university_id, JSON_QUOTE(CAST(:university_id AS CHAR)), '$')";
+        $stmt = $conn->prepare($sql);
+        $stmt->execute([':university_id' => $university_id]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+    public static function getCountspocByUniversityId($conn, $university_id) {
+        $sql = "SELECT COUNT(*) as course_count FROM courses WHERE JSON_CONTAINS(university_id, JSON_QUOTE(CAST(:university_id AS CHAR)), '$')";
+        $stmt = $conn->prepare($sql);
+        $stmt->execute([':university_id' => $university_id]);
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $result['course_count'] ?? 0;
+    }
 }
 ?>

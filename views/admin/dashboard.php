@@ -2,12 +2,20 @@
 include("sidebar.php");
 use Models\Database;
 use Models\VirtualClassroom;
+use Models\Assignment;
 
 // Fetch all virtual classes
 $virtualClassroomModel = new VirtualClassroom(Database::getConnection());
 $virtualClasses = $virtualClassroomModel->getAll();
 $upcomingClasses = array_filter($virtualClasses, function($class) {
     return strtotime($class['start_time']) > time();
+});
+
+// Fetch all assignments
+$assignmentModel = new Assignment();
+$assignments = $assignmentModel->getAll(Database::getConnection());
+$upcomingAssignments = array_filter($assignments, function($assignment) {
+    return strtotime($assignment['due_date']) > time();
 });
 ?>
 
@@ -37,7 +45,7 @@ $upcomingClasses = array_filter($virtualClasses, function($class) {
                             <div class="col-md-6">
                                 <h4 class="card-title">Weekly Agenda</h4>
                                 <ul class="list-group">
-                                    <?php if (!empty($upcomingClasses)): ?>
+                                    <?php if (!empty($upcomingClasses) || !empty($upcomingAssignments)): ?>
                                         <?php foreach ($upcomingClasses as $class): ?>
                                             <?php
                                             $endTime = date('Y-m-d H:i:s', strtotime($class['start_time'] . ' + ' . $class['duration'] . ' minutes'));
@@ -46,6 +54,12 @@ $upcomingClasses = array_filter($virtualClasses, function($class) {
                                                 <strong><?php echo htmlspecialchars($class['topic']); ?></strong><br>
                                                 <?php echo htmlspecialchars($class['start_time']); ?> - <?php echo htmlspecialchars($endTime); ?><br>
                                                 <a href="<?php echo htmlspecialchars($class['join_url']); ?>" target="_blank">Join</a>
+                                            </li>
+                                        <?php endforeach; ?>
+                                        <?php foreach ($upcomingAssignments as $assignment): ?>
+                                            <li class="list-group-item">
+                                                <strong><?php echo htmlspecialchars($assignment['title']); ?></strong><br>
+                                                Due: <?php echo htmlspecialchars($assignment['due_date']); ?><br>
                                             </li>
                                         <?php endforeach; ?>
                                     <?php else: ?>
@@ -298,14 +312,24 @@ document.addEventListener('DOMContentLoaded', function() {
     var calendarEl = document.getElementById('calendar');
     var calendar = new FullCalendar.Calendar(calendarEl, {
         initialView: 'dayGridMonth',
-        events: <?php echo json_encode(array_map(function($class) {
-            return [
-                'title' => $class['topic'],
-                'start' => $class['start_time'],
-                'end' => date('Y-m-d\TH:i:s', strtotime($class['start_time'] . ' + ' . $class['duration'] . ' minutes')),
-                'url' => $class['join_url']
-            ];
-        }, $virtualClasses)); ?>,
+        events: <?php echo json_encode(array_merge(
+            array_map(function($class) {
+                return [
+                    'title' => $class['topic'],
+                    'start' => $class['start_time'],
+                    'end' => date('Y-m-d\TH:i:s', strtotime($class['start_time'] . ' + ' . $class['duration'] . ' minutes')),
+                    'url' => $class['join_url']
+                ];
+            }, $virtualClasses),
+            array_map(function($assignment) {
+                return [
+                    'title' => $assignment['title'] . ' (Due)',
+                    'start' => $assignment['due_date'],
+                    'color' => 'red',
+                    'url' => '/admin/view_assignment/' . $assignment['id'] // URL to view the assignment
+                ];
+            }, $assignments)
+        )); ?>,
         eventDisplay: 'block' // Ensure event titles are always visible
     });
     calendar.render();

@@ -78,13 +78,14 @@
                             <h5 class="mt-3">Assigned Students</h5>
                             <button id="unassignStudentButton" class="btn btn-danger">Unassign Students</button>
                         </div>
+                        <input type="text" id="assignedStudentsSearch" class="form-control mb-3" placeholder="Search Assigned Students">
                         <form id="unassignStudentForm" method="POST" action="/admin/unassign_students_from_cohort">
                             <input type="hidden" name="cohort_id" value="<?php echo htmlspecialchars($cohort['id']); ?>">
                             <div class="table-responsive">
-                                <table class="table table-hover table-borderless table-striped">
+                                <table class="table table-hover table-borderless table-striped" id="assignedStudentsTable">
                                     <thead class="thead-light">
                                         <tr>
-                                            <th>Select</th>
+                                            <th><input type="checkbox" id="selectAllAssigned"></th>
                                             <th>Student Name</th>
                                             <th>University</th>
                                         </tr>
@@ -114,14 +115,15 @@
                         
                         <!-- Add Students Section -->
                         <h5 class="mt-3">Add Students</h5>
+                        <input type="text" id="addStudentsSearch" class="form-control mb-3" placeholder="Search Students to Add">
                         <form method="POST" action="/admin/add_students_to_cohort/<?php echo $cohort['id']; ?>">
                             <div class="form-group">
                                 <label for="student_ids">Select Students to Add</label>
                                 <div class="table-responsive">
-                                    <table class="table table-hover table-borderless table-striped">
+                                    <table class="table table-hover table-borderless table-striped" id="addStudentsTable">
                                         <thead class="thead-light">
                                             <tr>
-                                                <th>Select</th>
+                                                <th><input type="checkbox" id="selectAllAdd"></th>
                                                 <th>Student Name</th>
                                                 <th>University</th>
                                             </tr>
@@ -175,6 +177,34 @@
 
         $('#unassignStudentButton').on('click', function () {
             $('#unassignStudentForm').submit();
+        });
+
+        // Search functionality for Assigned Students
+        $('#assignedStudentsSearch').on('keyup', function () {
+            var value = $(this).val().toLowerCase();
+            $('#assignedStudentsTable tbody tr').filter(function () {
+                $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1);
+            });
+        });
+
+        // Search functionality for Add Students
+        $('#addStudentsSearch').on('keyup', function () {
+            var value = $(this).val().toLowerCase();
+            $('#addStudentsTable tbody tr').filter(function () {
+                $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1);
+            });
+        });
+
+        // Select All functionality for Assigned Students
+        $('#selectAllAssigned').on('click', function () {
+            var isChecked = $(this).prop('checked');
+            $('#assignedStudentsTable tbody input[type="checkbox"]').prop('checked', isChecked);
+        });
+
+        // Select All functionality for Add Students
+        $('#selectAllAdd').on('click', function () {
+            var isChecked = $(this).prop('checked');
+            $('#addStudentsTable tbody input[type="checkbox"]').prop('checked', isChecked);
         });
     });
 </script>

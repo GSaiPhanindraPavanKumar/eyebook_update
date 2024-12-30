@@ -43,6 +43,17 @@ class VirtualClassroom {
         $stmt->execute($virtualClassIds);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+    public function getVirtualClassroomsByCourseIds($course_ids) {
+        if (empty($course_ids)) {
+            return [];
+        }
+    
+        $placeholders = implode(',', array_fill(0, count($course_ids), '?'));
+        $sql = "SELECT * FROM virtual_classrooms WHERE JSON_CONTAINS(course_id, JSON_QUOTE(CAST(id AS CHAR)), '$') AND course_id IN ($placeholders) ORDER BY start_time DESC";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->execute($course_ids);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
 
     public function getById($virtualClassIds) {
         if (empty($virtualClassIds)) {

@@ -7,6 +7,8 @@ use Models\Database;
 use Models\Faculty;
 use Models\Student;
 use Models\Course;
+use Models\Assignment;
+use Models\VirtualClassroom;
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 use PDO;
@@ -22,9 +24,17 @@ class SpocController {
     
         $faculty_count = $spocModel->getFacultyCount($university_id);
         $student_count = $spocModel->getStudentCount($university_id);
-        $course_count = Course::getCountByUniversityId($conn, $university_id); // Fetch course count for the university
+        $course_count = Course::getCountspocByUniversityId($conn, $university_id); // Fetch course count for the university
         $faculties = Faculty::getAllByUniversity($conn, $university_id); // Fetch all faculties for the university
-        $courses = Course::getAllByUniversity($conn, $university_id); // Fetch all courses for the university
+        $courses = Course::getAllspocByUniversity($conn, $university_id); // Fetch all courses for the university
+    
+        // Fetch virtual classes and assignments for the courses
+        $virtualClassroomModel = new VirtualClassroom($conn);
+        $assignmentModel = new Assignment();
+    
+        $course_ids = array_column($courses, 'id');
+        $virtualClasses = $virtualClassroomModel->getVirtualClassroomsByCourseIds($course_ids);
+        $assignments = $assignmentModel->getAssignmentsByCourseIds($conn, $course_ids);
     
         require 'views/spoc/dashboard.php';
     }
