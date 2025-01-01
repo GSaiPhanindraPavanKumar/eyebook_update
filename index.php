@@ -136,6 +136,15 @@ $router->get('/admin/unassign_course_from_cohort/(\d+)/(\d+)', 'AdminController@
 $router->get('/admin/add_students_to_cohort/(\d+)', 'AdminController@addStudentsToCohort');
 $router->post('/admin/add_students_to_cohort/(\d+)', 'AdminController@addStudentsToCohort');
 $router->post('/admin/remove_content', 'AdminController@removeContent');
+$router->get('/admin/addCompany', 'AdminController@addCompany');
+$router->post('/admin/addCompany', 'AdminController@addCompany');
+$router->get('/admin/manage_company', 'AdminController@manageCompany');
+$router->post('/admin/deleteCompany', 'AdminController@deleteCompany');
+$router->get('/admin/edit_company/(\d+)', 'AdminController@editCompany');
+$router->post('/admin/edit_company/(\d+)', 'AdminController@editCompany');
+$router->get('/admin/view_company/(\d+)', 'AdminController@viewCompany');
+$router->post('/admin/remove_universities', 'AdminController@removeUniversities');
+$router->post('/admin/add_university_to_company', 'AdminController@addUniversityToCompany');
 
 $router->get('/spoc', 'SpocController@dashboard');
 $router->get('/spoc/dashboard', 'SpocController@dashboard');

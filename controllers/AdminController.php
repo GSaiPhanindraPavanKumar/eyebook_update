@@ -17,6 +17,7 @@ use Models\Notification;
 use Models\Assignment;
 use Models\feedback;
 use Models\Cohort;
+use Models\Company;
 use PDO;
 use ZipArchive;
 use Models\VirtualClassroom;
@@ -280,12 +281,16 @@ class AdminController {
 
     public function addUniversity() {
         $conn = Database::getConnection();
+        
+        // Fetch companies
+        $companies = Company::getAll($conn);
     
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $long_name = $_POST['long_name'];
             $short_name = $_POST['short_name'];
             $location = $_POST['location'];
             $country = $_POST['country'];
+            $company_id = $_POST['company_id'];
             $spoc_name = $_POST['spoc_name'];
             $spoc_email = $_POST['spoc_email'];
             $spoc_phone = $_POST['spoc_phone'];
@@ -303,9 +308,17 @@ class AdminController {
                 $message_type = "warning";
             } else {
                 $university = new University($conn);
-                $result = $university->addUniversity($conn, $long_name, $short_name, $location, $country, $spoc_name, $spoc_email, $spoc_phone, $spoc_password);
+                $result = $university->addUniversity($conn, $long_name, $short_name, $location, $country, $company_id, $spoc_name, $spoc_email, $spoc_phone, $spoc_password);
                 $message = $result['message'];
                 $message_type = $result['message_type'];
+    
+                // Update the company's university_ids field
+                if ($result['message_type'] == 'success') {
+                    $company = Company::getById($conn, $company_id);
+                    $university_ids = json_decode($company['university_ids'], true) ?? [];
+                    $university_ids[] = $result['university_id'];
+                    Company::updateUniversityIds($conn, $company_id, json_encode($university_ids));
+                }
     
                 // Validate email address before sending
                 if (!empty($spoc_email) && filter_var($spoc_email, FILTER_VALIDATE_EMAIL)) {
@@ -318,6 +331,143 @@ class AdminController {
         }
     
         require 'views/admin/addUniversity.php';
+    }
+
+    public function addCompany() {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $name = $_POST['name'];
+            $description = $_POST['description'];
+
+            $conn = Database::getConnection();
+            $sql = "INSERT INTO company (name, description) VALUES (:name, :description)";
+            $stmt = $conn->prepare($sql);
+            $stmt->bindValue(':name', $name);
+            $stmt->bindValue(':description', $description);
+
+            if ($stmt->execute()) {
+                header("Location: /admin/manage_company");
+                exit();
+            } else {
+                echo "Error: Unable to create company.";
+            }
+        }
+
+        require 'views/admin/addCompany.php';
+    }
+
+    public function manageCompany() {
+        $conn = Database::getConnection();
+        $sql = "SELECT * FROM company";
+        $stmt = $conn->prepare($sql);
+        $stmt->execute();
+        $companies = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        require 'views/admin/manageCompany.php';
+    }
+
+    public function deleteCompany() {
+        $id = $_POST['id'];
+
+        $conn = Database::getConnection();
+        $sql = "DELETE FROM company WHERE id = :id";
+        $stmt = $conn->prepare($sql);
+        $stmt->bindValue(':id', $id);
+
+        if ($stmt->execute()) {
+            echo json_encode(['success' => true, 'message' => 'Company deleted successfully']);
+        } else {
+            echo json_encode(['success' => false, 'message' => 'Failed to delete company']);
+        }
+    }
+
+    public function editCompany($id) {
+        $conn = Database::getConnection();
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $name = $_POST['name'];
+            $description = $_POST['description'];
+
+            if (Company::update($conn, $id, $name, $description)) {
+                header("Location: /admin/manage_company");
+                exit();
+            } else {
+                echo "Error: Unable to update company.";
+            }
+        } else {
+            $company = Company::getById($conn, $id);
+
+            if (!$company) {
+                echo "Company not found.";
+                return;
+            }
+
+            require 'views/admin/editCompany.php';
+        }
+    }
+    public function viewCompany($id) {
+        $conn = Database::getConnection();
+        $company = Company::getById($conn, $id);
+    
+        if (!$company) {
+            echo "Company not found.";
+            return;
+        }
+    
+        // Fetch universities associated with the company
+        $university_ids = json_decode($company['university_ids'], true) ?? [];
+        $universities = [];
+        foreach ($university_ids as $university_id) {
+            $universities[] = University::getById($conn, $university_id);
+        }
+
+        // Fetch all universities
+        $allUniversities = University::getAll($conn);
+
+        require 'views/admin/viewCompany.php';
+    }
+
+    public function removeUniversities() {
+        $conn = Database::getConnection();
+        $university_ids = $_POST['university_ids'];
+    
+        foreach ($university_ids as $university_id) {
+            // Get the university details
+            $university = University::getById($conn, $university_id);
+            if ($university) {
+                // Remove the university_id from the company's university_ids
+                $company_id = $university['company_id'];
+                $company = Company::getById($conn, $company_id);
+                if ($company) {
+                    $university_ids = json_decode($company['university_ids'], true) ?? [];
+                    $university_ids = array_diff($university_ids, [$university_id]);
+                    Company::updateUniversityIds($conn, $company_id, json_encode($university_ids));
+                }
+    
+                // Set the company_id in the university to NULL
+                University::updateCompanyId($conn, $university_id, NULL);
+            }
+        }
+    
+        echo json_encode(['message' => 'Selected universities have been removed successfully.']);
+    }
+
+    public function addUniversityToCompany() {
+        $conn = Database::getConnection();
+        $university_ids = $_POST['university_ids'];
+        $company_id = $_POST['company_id'];
+
+        // Update the university's company_id
+        foreach ($university_ids as $university_id) {
+            University::updateCompanyId($conn, $university_id, $company_id);
+        }
+
+        // Update the company's university_ids
+        $company = Company::getById($conn, $company_id);
+        $existing_university_ids = json_decode($company['university_ids'], true) ?? [];
+        $updated_university_ids = array_merge($existing_university_ids, $university_ids);
+        Company::updateUniversityIds($conn, $company_id, json_encode($updated_university_ids));
+
+        echo json_encode(['message' => 'Universities added to company successfully']);
     }
     
     private function uploadLogoToS3($logo, $short_name) {

@@ -127,8 +127,10 @@ $adminModel = new \Models\Admin();
                     </a>
                     <div class="collapse" id="university">
                         <ul class="nav flex-column sub-menu">
-                            <li class="nav-item"> <a class="nav-link" href="/admin/addUniversity">Create University</a></li>
-                            <li class="nav-item"> <a class="nav-link" href="/admin/manage_university">Manage University</a></li>
+                            <li class="nav-item"> <a class="nav-link" href="/admin/addCompany">Create University</a></li>
+                            <li class="nav-item"> <a class="nav-link" href="/admin/manage_company">Manage University</a></li>
+                            <li class="nav-item"> <a class="nav-link" href="/admin/addUniversity">Create Sub-University</a></li>
+                            <li class="nav-item"> <a class="nav-link" href="/admin/manage_university">Manage Sub-University</a></li>
 <!--                            <li class="nav-item"> <a class="nav-link" href="#">Typography</a></li>-->
                         </ul>
                     </div>
