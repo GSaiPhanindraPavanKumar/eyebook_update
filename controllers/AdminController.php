@@ -189,7 +189,7 @@ class AdminController {
         $faculty = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
         // Fetch data for spocs
-        $stmt = $conn->query("SELECT id, name, email, last_login, first_login, login_count FROM spocs");
+        $stmt = $conn->query("SELECT id, name, email, created_at, last_login, first_login, login_count FROM spocs");
         $spocs = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
         // Create a new spreadsheet
@@ -468,6 +468,29 @@ class AdminController {
         Company::updateUniversityIds($conn, $company_id, json_encode($updated_university_ids));
 
         echo json_encode(['message' => 'Universities added to company successfully']);
+    }
+    public function deleteStudents() {
+        $conn = Database::getConnection();
+        $student_ids = $_POST['selected'];
+    
+        if (!empty($student_ids)) {
+            $placeholders = implode(',', array_fill(0, count($student_ids), '?'));
+            $sql = "DELETE FROM students WHERE id IN ($placeholders)";
+            $stmt = $conn->prepare($sql);
+            if ($stmt->execute($student_ids)) {
+                $_SESSION['message'] = 'Selected students deleted successfully.';
+                $_SESSION['message_type'] = 'success';
+            } else {
+                $_SESSION['message'] = 'Failed to delete selected students.';
+                $_SESSION['message_type'] = 'danger';
+            }
+        } else {
+            $_SESSION['message'] = 'No students selected for deletion.';
+            $_SESSION['message_type'] = 'warning';
+        }
+    
+        header('Location: /admin/manage_students');
+        exit();
     }
     
     private function uploadLogoToS3($logo, $short_name) {

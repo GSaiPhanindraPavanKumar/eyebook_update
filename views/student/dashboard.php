@@ -32,8 +32,13 @@ $leastProgressCourses = array_slice($leastProgressCourses, 0, 5); // Get the lea
 // Fetch all virtual classes for the calendar
 $virtualClasses = getAllVirtualClasses($studentId);
 
-// Fetch assignments for the calendar
+// Fetch assignments for the assigned courses
 $assignments = Assignment::getAssignmentsByStudentId($conn, $email);
+
+// Filter assignments to exclude those with passed due dates
+$upcomingAssignments = array_filter($assignments, function($assignment) {
+    return strtotime($assignment['due_date']) >= time();
+});
 
 // Filter virtual classes for the upcoming week
 $upcomingClasses = array_filter($virtualClasses, function($class) {
@@ -97,7 +102,7 @@ $thoughtOfTheDay = $quotes[date('z') % count($quotes)];
                             <div class="col-md-6">
                                 <h4 class="card-title">Weekly Agenda</h4>
                                 <ul class="list-group">
-                                    <?php if (!empty($upcomingClasses) || !empty($assignments)): ?>
+                                    <?php if (!empty($upcomingClasses) || !empty($upcomingAssignments)): ?>
                                         <?php foreach ($upcomingClasses as $class): ?>
                                             <?php
                                             $endTime = date('Y-m-d H:i:s', strtotime($class['start_time'] . ' + ' . $class['duration'] . ' minutes'));
@@ -108,7 +113,7 @@ $thoughtOfTheDay = $quotes[date('z') % count($quotes)];
                                                 <a href="<?php echo htmlspecialchars($class['join_url']); ?>" target="_blank">Join</a>
                                             </li>
                                         <?php endforeach; ?>
-                                        <?php foreach ($assignments as $assignment): ?>
+                                        <?php foreach ($upcomingAssignments as $assignment): ?>
                                             <li class="list-group-item">
                                                 <strong><?php echo htmlspecialchars($assignment['title']); ?></strong><br>
                                                 Due Date: <?php echo htmlspecialchars($assignment['due_date']); ?><br>
@@ -303,6 +308,7 @@ function getAllVirtualClasses($studentId) {
 <!-- Include FullCalendar -->
 <link href='https://cdn.jsdelivr.net/npm/fullcalendar@5.10.1/main.min.css' rel='stylesheet' />
 <script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.10.1/main.min.js'></script>
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     var calendarEl = document.getElementById('calendar');
@@ -321,9 +327,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 return [
                     'title' => $assignment['title'] . ' (Due Date)',
                     'start' => $assignment['due_date'],
-                    'allDay' => true
+                    'allDay' => true,
+                    'color' => 'red', // Set the color to red
+                    'url' => '/student/view_assignment/' . $assignment['id'] // Navigate to view assignment page
                 ];
-            }, $assignments)
+            }, $upcomingAssignments)
         )); ?>,
         eventDisplay: 'block' // Ensure event titles are always visible
     });

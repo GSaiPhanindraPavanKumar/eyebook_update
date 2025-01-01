@@ -12,7 +12,7 @@ $message = $message ?? ''; // Ensure $message is defined
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EyeBook</title>
+    <title>Knowbots</title>
     <link rel="apple-touch-icon" sizes="180x180" href="/views/public/assets/images/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/views/public/assets/images/android-chrome-512x512.png">
     <link rel="icon" type="image/png" sizes="16x16" href="/views/public/assets/images/android-chrome-192x192.png">
@@ -32,7 +32,7 @@ $message = $message ?? ''; // Ensure $message is defined
         <nav class="navbar navbar-light">
             <div class="container">
                 <a class="navbar-brand" href="#">
-                    <h2 style="font-family: cursive;">EyeBook</h2>
+                    <h2 style="font-family: cursive;">Knowbots</h2>
                 </a>
             </div>
         </nav>

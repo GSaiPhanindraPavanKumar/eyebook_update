@@ -65,7 +65,7 @@ function daysAgo($date) {
                                     </div>
                                 </div>
                             </form>
-                            <form id="studentForm" method="post" action="/admin/bulk_reset_student_password">
+                            <form id="studentForm" method="post" action="/admin/delete_students">
                                 <table class="table table-hover table-borderless table-striped">
                                     <thead class="thead-light">
                                         <tr>

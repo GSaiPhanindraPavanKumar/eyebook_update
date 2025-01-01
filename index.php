@@ -145,6 +145,7 @@ $router->post('/admin/edit_company/(\d+)', 'AdminController@editCompany');
 $router->get('/admin/view_company/(\d+)', 'AdminController@viewCompany');
 $router->post('/admin/remove_universities', 'AdminController@removeUniversities');
 $router->post('/admin/add_university_to_company', 'AdminController@addUniversityToCompany');
+$router->post('/admin/delete_students', 'AdminController@deleteStudents');
 
 $router->get('/spoc', 'SpocController@dashboard');
 $router->get('/spoc/dashboard', 'SpocController@dashboard');
@@ -342,9 +343,7 @@ $router->post('/faculty/grade_assignment/(\d+)/(\d+)', function($assignment_id, 
 
 $router->post('/student/submit_assignment', 'StudentController@submitAssignment');
 
-$router->post('/student/mark_as_completed', function() {
-    require 'views/student/mark_as_completed.php';
-});
+$router->post('/student/mark_as_completed', 'StudentController@markAsCompleted');
 
 $router->get('/student/view_course/([a-zA-Z0-9]+)', 'StudentController@viewCourse');
 

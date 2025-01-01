@@ -41,7 +41,7 @@ if ($userData) {
     <!-- Required meta tags -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <title>EyeBook</title>
+    <title>Knowbots</title>
     <!-- plugins:css -->
     <link rel="stylesheet" href="/views/public/vendors/feather/feather.css">
     <link rel="stylesheet" href="/views/public/vendors/ti-icons/css/themify-icons.css">
@@ -62,7 +62,7 @@ if ($userData) {
     <!-- partial:partials/_navbar.html -->
     <nav class="navbar col-lg-12 col-12 p-0 fixed-top d-flex flex-row">
         <div class="text-center navbar-brand-wrapper d-flex align-items-center justify-content-center">
-            <a class="navbar-brand brand-logo mr-5" href="#"><img src="/views/public\assets\images\logo1.png" class="mr-2" alt="logo" height="50">EyeBook</a>
+            <a class="navbar-brand brand-logo mr-5" href="#"><img src="/views/public\assets\images\logo1.png" class="mr-2" alt="logo" height="50">Knowbots</a>
             <a class="navbar-brand brand-logo-mini" href="#"><img src="/views/public\assets\images\logo1.png" alt="logo"/></a>
         </div>
         <div class="navbar-menu-wrapper d-flex align-items-center justify-content-end">

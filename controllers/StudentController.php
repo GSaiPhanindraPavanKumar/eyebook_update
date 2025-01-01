@@ -303,6 +303,38 @@ class StudentController {
 
         return $courses;
     }
+
+    public function markAsCompleted() {
+        $conn = Database::getConnection();
+        $studentId = $_SESSION['student_id'];
+        $courseId = $_POST['course_id'];
+        $indexPath = $_POST['indexPath'];
+
+        // Fetch the student's completed books
+        $stmt = $conn->prepare("SELECT completed_books FROM students WHERE id = :student_id");
+        $stmt->execute(['student_id' => $studentId]);
+        $student = $stmt->fetch(PDO::FETCH_ASSOC);
+        $completedBooks = !empty($student['completed_books']) ? json_decode($student['completed_books'], true) : [];
+
+        // Ensure the course ID exists in the completed books array
+        if (!isset($completedBooks[$courseId])) {
+            $completedBooks[$courseId] = [];
+        }
+
+        // Add the index path to the completed books array if not already present
+        if (!in_array($indexPath, $completedBooks[$courseId])) {
+            $completedBooks[$courseId][] = $indexPath;
+        }
+
+        // Update the student's completed books in the database
+        $stmt = $conn->prepare("UPDATE students SET completed_books = :completed_books WHERE id = :student_id");
+        $stmt->execute([
+            'completed_books' => json_encode($completedBooks),
+            'student_id' => $studentId
+        ]);
+
+        echo json_encode(['status' => 'success']);
+    }
     public function updatePassword() {
         $conn = Database::getConnection();
     

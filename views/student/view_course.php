@@ -2,6 +2,61 @@
 use Models\Course;
 use models\Assignment;
 use Models\feedback;
+
+// Fetch student ID from session
+$studentId = $_SESSION['student_id'];
+
+// Step 1: Get the assigned course IDs from the students table
+$sql = "SELECT assigned_courses FROM students WHERE id = :student_id";
+$stmt = $conn->prepare($sql);
+$stmt->execute(['student_id' => $studentId]);
+$assignedCourses = $stmt->fetchColumn();
+$assignedCourses = $assignedCourses ? json_decode($assignedCourses, true) : [];
+
+if (empty($assignedCourses)) {
+    $assignedCourses = [];
+}
+
+// Step 2: Get the virtual class IDs from the courses table
+$virtualClassIds = [];
+if (!empty($assignedCourses)) {
+    $placeholders = implode(',', array_fill(0, count($assignedCourses), '?'));
+    $sql = "SELECT virtual_class_id FROM courses WHERE id IN ($placeholders)";
+    $stmt = $conn->prepare($sql);
+    $stmt->execute($assignedCourses);
+    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+        $ids = !empty($row['virtual_class_id']) ? json_decode($row['virtual_class_id'], true) : [];
+        if (is_array($ids)) {
+            $virtualClassIds = array_merge($virtualClassIds, $ids);
+        }
+    }
+    $virtualClassIds = array_unique($virtualClassIds);
+}
+
+// Step 3: Fetch the virtual class details from the virtual classrooms table using the id column
+$allClassrooms = [];
+if (!empty($virtualClassIds)) {
+    $placeholders = implode(',', array_fill(0, count($virtualClassIds), '?'));
+    $sql = "SELECT * FROM virtual_classrooms WHERE id IN ($placeholders) ORDER BY start_time DESC";
+    $stmt = $conn->prepare($sql);
+    $stmt->execute($virtualClassIds);
+    $allClassrooms = $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
+// Fetch attendance data for the student from virtual_classrooms table
+$attendanceStatus = [];
+foreach ($allClassrooms as $classroom) {
+    if (!empty($classroom['attendance'])) {
+        $attendance = json_decode($classroom['attendance'], true);
+        if (isset($attendance[$studentId])) {
+            $attendanceStatus[$classroom['id']] = $attendance[$studentId];
+        } else {
+            $attendanceStatus[$classroom['id']] = 'Not Uploaded';
+        }
+    } else {
+        $attendanceStatus[$classroom['id']] = 'Not Uploaded';
+    }
+}
 ?>
 
 <div class="main-panel">
@@ -65,7 +120,7 @@ use Models\feedback;
                                         echo "<td>" . $serialNumber++ . "</td>"; // Increment the serial number
                                         echo "<td>" . htmlspecialchars($unit['unit_name']) . "</td>";
                                         $full_url = $unit['scorm_url'];
-                                        echo "<td><a href='/student/view_book/" . $hashedId . "?index_path=" . urlencode($full_url) . "' class='btn btn-primary'>View Course Book</a></td>";
+                                        echo "<td><button onclick=\"viewAndMarkAsCompleted('" . htmlspecialchars($full_url) . "', this)\" class='btn btn-primary'>View Course Book</button></td>";
                                         echo "<td class='status-cell'>" . ($isCompleted ? "Completed" : "Not Completed") . "</td>";
                                         echo "</tr>";
                                     }
@@ -165,6 +220,7 @@ use Models\feedback;
                             </tbody>
                         </table>
 
+                    
                         <!-- Virtual Classroom Section -->
                         <div class="d-flex justify-content-between align-items-center mt-4">
                             <h5 class="d-flex justify-content-between align-items-center">
@@ -172,7 +228,7 @@ use Models\feedback;
                             </h5>
                         </div>
                         <h6 class="d-flex justify-content-between align-items-center">Today's and Upcoming Classes</h6>
-                        <?php if (!empty($virtualClassrooms)): ?>
+                        <?php if (!empty($allClassrooms)): ?>
                         <table class="table table-hover mt-2">
                             <thead class="thead-dark">
                                 <tr>
@@ -181,17 +237,18 @@ use Models\feedback;
                                     <th scope="col">Start Time</th>
                                     <th scope="col">End Time</th>
                                     <th scope="col">Join URL</th>
-                                    <th scope="col">Actions</th>
+                                    <th scope="col">Attendance Status</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <?php
                                 $current_time = new DateTime('now', new DateTimeZone('UTC'));
-                                foreach ($virtualClassrooms as $classroom):
+                                foreach ($allClassrooms as $classroom):
                                     $start_time = new DateTime($classroom['start_time'], new DateTimeZone('UTC'));
                                     $end_time = clone $start_time;
                                     $end_time->modify('+' . $classroom['duration'] . ' minutes');
                                     if ($current_time <= $end_time):
+                                        $attendance = $attendanceStatus[$classroom['id']] ?? 'Not Uploaded';
                                 ?>
                                     <tr>
                                         <td><?php echo htmlspecialchars($classroom['topic']); ?></td>
@@ -200,10 +257,12 @@ use Models\feedback;
                                         <td><?php echo htmlspecialchars($end_time->format('H:i:s')); ?></td>
                                         <td><a href="<?php echo htmlspecialchars($classroom['join_url']); ?>" target="_blank" class="btn btn-primary">Join</a></td>
                                         <td>
-                                            <?php if (isset($classroom['attendance_taken']) && $classroom['attendance_taken']): ?>
-                                                <a href="/faculty/download_attendance?classroom_id=<?php echo htmlspecialchars($classroom['id']); ?>" class="btn btn-primary">Download</a>
+                                            <?php if ($attendance === 'present'): ?>
+                                                <span class="attendance-present">Present</span>
+                                            <?php elseif ($attendance === 'absent'): ?>
+                                                <span class="attendance-absent">Absent</span>
                                             <?php else: ?>
-                                                <a href="/faculty/take_attendance?classroom_id=<?php echo htmlspecialchars($classroom['id']); ?>" class="btn btn-warning">Take Attendance</a>
+                                                <span><?php echo htmlspecialchars($attendance); ?></span>
                                             <?php endif; ?>
                                         </td>
                                     </tr>
@@ -215,7 +274,7 @@ use Models\feedback;
                         <?php endif; ?>
 
                         <h6 class="d-flex justify-content-between align-items-center mt-4">Past Classes</h6>
-                        <?php if (!empty($virtualClassrooms)): ?>
+                        <?php if (!empty($allClassrooms)): ?>
                         <table class="table table-hover mt-2">
                             <thead class="thead-dark">
                                 <tr>
@@ -223,16 +282,17 @@ use Models\feedback;
                                     <th scope="col">Start Date</th>
                                     <th scope="col">Start Time</th>
                                     <th scope="col">End Time</th>
-                                    <th scope="col">Attendance</th>
+                                    <th scope="col">Attendance Status</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <?php
-                                foreach ($virtualClassrooms as $classroom):
+                                foreach ($allClassrooms as $classroom):
                                     $start_time = new DateTime($classroom['start_time'], new DateTimeZone('UTC'));
                                     $end_time = clone $start_time;
                                     $end_time->modify('+' . $classroom['duration'] . ' minutes');
                                     if ($current_time > $end_time):
+                                        $attendance = $attendanceStatus[$classroom['id']] ?? 'Not Uploaded';
                                 ?>
                                     <tr>
                                         <td><?php echo htmlspecialchars($classroom['topic']); ?></td>
@@ -240,10 +300,12 @@ use Models\feedback;
                                         <td><?php echo htmlspecialchars($start_time->format('H:i:s')); ?></td>
                                         <td><?php echo htmlspecialchars($end_time->format('H:i:s')); ?></td>
                                         <td>
-                                            <?php if (isset($classroom['attendance_taken']) && $classroom['attendance_taken']): ?>
-                                                <a href="/faculty/download_attendance?classroom_id=<?php echo htmlspecialchars($classroom['id']); ?>" class="btn btn-primary">Download</a>
+                                            <?php if ($attendance === 'present'): ?>
+                                                <span class="attendance-present">Present</span>
+                                            <?php elseif ($attendance === 'absent'): ?>
+                                                <span class="attendance-absent">Absent</span>
                                             <?php else: ?>
-                                                <a href="/faculty/take_attendance?classroom_id=<?php echo htmlspecialchars($classroom['id']); ?>" class="btn btn-warning">Take Attendance</a>
+                                                <span><?php echo htmlspecialchars($attendance); ?></span>
                                             <?php endif; ?>
                                         </td>
                                     </tr>
@@ -253,7 +315,6 @@ use Models\feedback;
                         <?php else: ?>
                             <p>No available classes.</p>
                         <?php endif; ?>
-
                         <!-- Assignments Section -->
                         <div class="d-flex justify-content-between align-items-center mt-4">
                             <h5 class="d-flex justify-content-between align-items-center">
