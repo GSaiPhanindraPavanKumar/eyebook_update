@@ -96,7 +96,7 @@ class Faculty {
     public static function unassignCourse($conn, $faculty_id, $course_id) {
         $assigned_courses = self::getAssignedCourses($conn, $faculty_id);
         if (in_array($course_id, $assigned_courses)) {
-            $assigned_courses = array_diff($assigned_courses, [$course_id]);
+            $assigned_courses = array_values(array_diff($assigned_courses, [$course_id]));
             $sql = "UPDATE faculty SET assigned_courses = :assigned_courses WHERE id = :id";
             $stmt = $conn->prepare($sql);
             $stmt->execute([
