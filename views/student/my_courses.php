@@ -83,7 +83,7 @@ $archivedCourses = array_filter($courses, function($course) {
                                     $hashedId = str_replace(['+', '/', '='], ['-', '_', ''], $hashedId);
                                     ?>
                                     <a href="view_course/<?php echo $hashedId; ?>" class="card-link">View Course</a>
-                                    <a href="/student/discussion_forum/<?php echo $course['id']; ?>" class="card-link">Chat Room</a>
+                                    <!-- <a href="/student/discussion_forum/<?php echo $course['id']; ?>" class="card-link">Chat Room</a> -->
                                 </div>
                             </div>
                         </div>

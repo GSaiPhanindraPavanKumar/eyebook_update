@@ -24,6 +24,10 @@ $message = $message ?? ''; // Ensure $message is defined
         h5 {
             color: blue;
         }
+        .custom-checkbox {
+            margin-top: 0px;
+            margin-bottom: 5px;
+        }
     </style>
 </head>
 <body class="login-page">
@@ -55,7 +59,11 @@ $message = $message ?? ''; // Ensure $message is defined
                         </div>
                         <div class="input-group custom">
                             <input type="password" class="form-control form-control-lg" placeholder="**********" name="password" id="password" required>
-                        </div><br>
+                        </div>
+                        <div class="input-group custom custom-checkbox">
+                            <input type="checkbox" name="agree" id="agree" required>
+                            <label for="agree" class="ml-2">I agree to the <a href="/#privacy-policy" style="color: blue;">Privacy Policy</a></label>
+                        </div>
                         <div class="row">
                             <div class="col-sm-12">
                                 <div class="input-group mb-0">
