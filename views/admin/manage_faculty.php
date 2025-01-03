@@ -46,17 +46,26 @@ function daysAgo($date) {
                 <div class="card shadow">
                     <div class="card-body">
                         <p class="card-title mb-0" style="font-size:larger">Faculty</p><br>
-                        <div class="table-responsive">
-                        <form method="get" action="">
-                            <div class="input-group mb-3">
-                                <input class="form-control" id="searchInput" name="search" type="text" placeholder="🔍 Search Faculty..." value="<?= htmlspecialchars($searchQuery) ?>">
-                                <div class="input-group-append">
-                                    <button class="btn btn-secondary" type="button" id="clearSearch">X</button>
-                                    <button class="btn btn-primary" type="submit">Search</button>
-                                </div>
+
+                        <!-- Display session message -->
+                        <?php if (isset($_SESSION['message'])): ?>
+                            <div class="alert alert-<?= $_SESSION['message_type'] ?>">
+                                <?= $_SESSION['message'] ?>
+                                <?php unset($_SESSION['message']); unset($_SESSION['message_type']); ?>
                             </div>
-                        </form>
-                            <form id="facultyForm" method="post" action="/admin/resetFacultyPasswords">
+                        <?php endif; ?>
+
+                        <div class="table-responsive">
+                            <form method="get" action="">
+                                <div class="input-group mb-3">
+                                    <input class="form-control" id="searchInput" name="search" type="text" placeholder="🔍 Search Faculty..." value="<?= htmlspecialchars($searchQuery) ?>">
+                                    <div class="input-group-append">
+                                        <button class="btn btn-secondary" type="button" id="clearSearch">X</button>
+                                        <button class="btn btn-primary" type="submit">Search</button>
+                                    </div>
+                                </div>
+                            </form>
+                            <form id="facultyForm" method="post" action="/admin/delete_facultys">
                                 <table class="table table-hover table-borderless table-striped">
                                     <thead class="thead-light">
                                         <tr>

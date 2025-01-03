@@ -493,6 +493,29 @@ class AdminController {
         exit();
     }
     
+    public function deleteFacultys() {
+        $conn = Database::getConnection();
+        $faculty_ids = $_POST['selected'];
+    
+        if (!empty($faculty_ids)) {
+            $placeholders = implode(',', array_fill(0, count($faculty_ids), '?'));
+            $sql = "DELETE FROM faculty WHERE id IN ($placeholders)";
+            $stmt = $conn->prepare($sql);
+            if ($stmt->execute($faculty_ids)) {
+                $_SESSION['message'] = 'Selected facultys deleted successfully.';
+                $_SESSION['message_type'] = 'success';
+            } else {
+                $_SESSION['message'] = 'Failed to delete selected faculty.';
+                $_SESSION['message_type'] = 'danger';
+            }
+        } else {
+            $_SESSION['message'] = 'No facultys selected for deletion.';
+            $_SESSION['message_type'] = 'warning';
+        }
+    
+        header('Location: /admin/manage_faculty');
+        exit();
+    }
     private function uploadLogoToS3($logo, $short_name) {
         $bucketName = AWS_BUCKET_NAME;
         $region = AWS_REGION;
@@ -646,7 +669,10 @@ class AdminController {
 
     public function uploadStudents() {
         $conn = Database::getConnection();
+        $universities = University::getAll($conn);
         $duplicateRecords = [];
+        $message = '';
+        $message_type = '';
     
         if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['file'])) {
             $file = $_FILES['file']['tmp_name'];
@@ -656,36 +682,83 @@ class AdminController {
             $sheet = $spreadsheet->getActiveSheet();
             $rows = $sheet->toArray();
     
-            // Assuming the first row contains headers
-            $headers = array_shift($rows);
+            $duplicateRecords = [];
+            $successCount = 0;
     
-            foreach ($rows as $row) {
-                $data = array_combine($headers, $row);
-                $result = Student::uploadStudents($conn, $data, $university_id);
-                if ($result['duplicate']) {
-                    $duplicateRecords[] = $result['data'];
-                } else {
-                    // Send account creation email
-                    $mailer = new Mailer();
-                    $subject = 'Welcome to EyeBook!';
-                    $body = "Dear {$data['name']},<br><br>Your account has been created successfully.<br><br>Username: {$data['email']}<br>Password: {$data['password']}<br><br>Best Regards,<br>EyeBook Team";
-                    $mailer->sendMail($data['email'], $subject, $body);
+            foreach ($rows as $index => $row) {
+                if ($index == 0) {
+                    // Skip header row
+                    continue;
                 }
+    
+                $regd_no = $row[0] ?? null;
+                $name = $row[1] ?? null;
+                $email = $row[2] ?? null;
+                $phone = $row[3] ?? null;
+                $section = $row[4] ?? null;
+                $stream = $row[5] ?? null;
+                $year = $row[6] ?? null;
+                $dept = $row[7] ?? null;
+                $password = $row[8] ?? null;
+    
+                // Validate required fields
+                if (empty($regd_no) || empty($name) || empty($email) || empty($password)) {
+                    continue; // Skip invalid records
+                }
+    
+                $passwordHash = password_hash($password, PASSWORD_BCRYPT);
+    
+                // Check for duplicate email or registration number
+                if (Student::existsByEmail($conn, $email) || Student::existsByRegdNo($conn, $regd_no)) {
+                    $duplicateRecords[] = [
+                        'regd_no' => $regd_no,
+                        'name' => $name,
+                        'email' => $email,
+                        'phone' => $phone,
+                        'section' => $section,
+                        'stream' => $stream,
+                        'year' => $year,
+                        'dept' => $dept,
+                        'university_id' => $university_id
+                    ];
+                    continue;
+                }
+    
+                // Insert student record
+                $sql = "INSERT INTO students (regd_no, name, email, phone, section, stream, year, dept, university_id, password) 
+                        VALUES (:regd_no, :name, :email, :phone, :section, :stream, :year, :dept, :university_id, :password)";
+                $stmt = $conn->prepare($sql);
+                $stmt->execute([
+                    ':regd_no' => $regd_no,
+                    ':name' => $name,
+                    ':email' => $email,
+                    ':phone' => $phone,
+                    ':section' => $section,
+                    ':stream' => $stream,
+                    ':year' => $year,
+                    ':dept' => $dept,
+                    ':university_id' => $university_id,
+                    ':password' => $passwordHash
+                ]);
+    
+                // Send email to the new student
+                $mailer = new Mailer();
+                $subject = 'Welcome to EyeBook!';
+                $body = "Dear $name,<br><br>Your account has been created successfully.<br><br>Username: $email <br>Password: $password<br><br>You can log in at <a href='https://eyebook.phemesoft.com/'>https://eyebook.phemesoft.com/</a><br><br>Best Regards,<br>EyeBook Team";
+                $mailer->sendMail($email, $subject, $body);
+    
+                $successCount++;
             }
     
             if (empty($duplicateRecords)) {
                 $message = "Students uploaded successfully.";
                 $message_type = "success";
-            } else if (!empty($duplicateRecords)) {
+            } else {
                 $message = "Some records were not uploaded due to duplicates.";
                 $message_type = "warning";
-            } else {
-                $message = "Failed to upload students.";
-                $message_type = "danger";
             }
-        } 
+        }
     
-        $universities = University::getAll($conn);
         require 'views/admin/uploadStudents.php';
     }
 
@@ -866,13 +939,20 @@ class AdminController {
                     ':university_id' => $university_id,
                     ':password' => $password
                 ]);
+
+                // Send email to the new faculty member
+                $mailer = new Mailer();
+                $subject = 'Welcome to EyeBook!';
+                $body = "Dear $name,<br><br>Your account has been created successfully.<br><br>Username: $email <br>Password: $password<br><br>You can log in at <a href='https://eyebook.phemesoft.com/'>https://eyebook.phemesoft.com/</a><br><br>Best Regards,<br>EyeBook Team";
+                $mailer->sendMail($email, $subject, $body);
+
     
                 $message = "Faculty uploaded successfully.";
                 $message_type = "success";
             }
         }
     
-        require 'views/admin/upload_faculty.php';
+        require 'views/admin/uploadfaculty.php';
     }
     
     public function uploadFaculty() {
@@ -934,7 +1014,12 @@ class AdminController {
                     ':university_id' => $university_id,
                     ':password' => $password
                 ]);
-    
+                // Send email to the new faculty member
+                $mailer = new Mailer();
+                $subject = 'Welcome to EyeBook!';
+                $body = "Dear $name,<br><br>Your account has been created successfully.<br><br>Username: $email <br>Password: $password<br><br>You can log in at <a href='https://eyebook.phemesoft.com/'>https://eyebook.phemesoft.com/</a><br><br>Best Regards,<br>EyeBook Team";
+                $mailer->sendMail($email, $subject, $body);
+
                 $successCount++;
             }
     
@@ -1538,29 +1623,60 @@ class AdminController {
 
     public function uploadSingleStudent() {
         $conn = Database::getConnection();
-        $data = [
-            'regd_no' => $_POST['regd_no'],
-            'name' => $_POST['name'],
-            'email' => $_POST['email'],
-            'section' => $_POST['section'],
-            'stream' => $_POST['stream'],
-            'year' => $_POST['year'],
-            'dept' => $_POST['dept'],
-            'password' => $_POST['password']
-        ];
-        $university_id = $_POST['university_id'];
     
-        $result = Student::uploadStudents($conn, $data, $university_id);
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            $university_id = $_POST['university_id'];
+            $regd_no = $_POST['regd_no'];
+            $name = $_POST['name'];
+            $email = $_POST['email'];
+            $phone = $_POST['phone'];
+            $section = $_POST['section'];
+            $stream = $_POST['stream'];
+            $year = $_POST['year'];
+            $dept = $_POST['dept'];
+            $password = $_POST['password'];
+            $hashed_password = password_hash($password, PASSWORD_BCRYPT);
     
-        if ($result['duplicate']) {
-            $message = "Duplicate record found: " . htmlspecialchars($data['regd_no']) . " - " . htmlspecialchars($data['email']);
-            $message_type = "warning";
-        } else {
-            $message = "Student uploaded successfully.";
-            $message_type = "success";
+            // Check for duplicate email
+            if (Student::existsByEmail($conn, $email)) {
+                $_SESSION['message'] = 'Duplicate entry for email: ' . $email;
+                $_SESSION['message_type'] = 'warning';
+                header('Location: /admin/uploadStudents');
+                exit();
+            }
+    
+            // Insert student into the database
+            $sql = "INSERT INTO students (university_id, regd_no, name, email, phone, section, stream, year, dept, password) 
+                    VALUES (:university_id, :regd_no, :name, :email, :phone, :section, :stream, :year, :dept, :password)";
+            $stmt = $conn->prepare($sql);
+            $stmt->bindValue(':university_id', $university_id);
+            $stmt->bindValue(':regd_no', $regd_no);
+            $stmt->bindValue(':name', $name);
+            $stmt->bindValue(':email', $email);
+            $stmt->bindValue(':phone', $phone);
+            $stmt->bindValue(':section', $section);
+            $stmt->bindValue(':stream', $stream);
+            $stmt->bindValue(':year', $year);
+            $stmt->bindValue(':dept', $dept);
+            $stmt->bindValue(':password', $hashed_password);
+    
+            if ($stmt->execute()) {
+                // Send email to the student
+                $mailer = new Mailer();
+                $subject = 'Welcome to EyeBook!';
+                $body = "Dear $name,<br><br>Your account has been created successfully.<br><br>Username: $email <br>Password: $password<br><br>You can log in at <a href='https://eyebook.phemesoft.com/'>https://eyebook.phemesoft.com/</a><br><br>Best Regards,<br>EyeBook Team";
+                $mailer->sendMail($email, $subject, $body);
+    
+                $_SESSION['message'] = 'Student uploaded successfully and email sent.';
+                $_SESSION['message_type'] = 'success';
+            } else {
+                $_SESSION['message'] = 'Failed to upload student.';
+                $_SESSION['message_type'] = 'danger';
+            }
+    
+            header('Location: /admin/manage_students');
+            exit();
         }
-    
-        require 'views/admin/uploadStudents.php';
     }
 
     public function assignFaculty() {

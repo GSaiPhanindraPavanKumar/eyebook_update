@@ -146,6 +146,7 @@ $router->get('/admin/view_company/(\d+)', 'AdminController@viewCompany');
 $router->post('/admin/remove_universities', 'AdminController@removeUniversities');
 $router->post('/admin/add_university_to_company', 'AdminController@addUniversityToCompany');
 $router->post('/admin/delete_students', 'AdminController@deleteStudents');
+$router->post('/admin/delete_facultys', 'AdminController@deleteFacultys');
 
 $router->get('/spoc', 'SpocController@dashboard');
 $router->get('/spoc/dashboard', 'SpocController@dashboard');

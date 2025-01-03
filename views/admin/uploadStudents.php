@@ -49,6 +49,10 @@
                                     <input type="email" id="email" name="email" class="form-control" required>
                                 </div>
                                 <div class="form-group">
+                                    <label for="phone">Phone</label>
+                                    <input type="text" id="phone" name="phone" class="form-control" required>
+                                </div>
+                                <div class="form-group">
                                     <label for="section">Section</label>
                                     <input type="text" id="section" name="section" class="form-control" required>
                                 </div>
@@ -110,9 +114,6 @@
                         <?php endif; ?>
                         <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
                         <script>
-                            <?php if (isset($message)): ?>
-                                toastr.<?php echo $message_type; ?>("<?php echo htmlspecialchars($message); ?>");
-                            <?php endif; ?>
                             document.addEventListener('DOMContentLoaded', function() {
                                 const singleUploadForm = document.getElementById('singleUploadForm');
                                 const bulkUploadForm = document.getElementById('bulkUploadForm');

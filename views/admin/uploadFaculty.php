@@ -106,9 +106,6 @@
                         <?php endif; ?>
                         <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
                         <script>
-                            <?php if (isset($message)): ?>
-                                toastr.<?php echo $message_type; ?>("<?php echo htmlspecialchars($message); ?>");
-                            <?php endif; ?>
                             document.addEventListener('DOMContentLoaded', function() {
                                 const singleUploadForm = document.getElementById('singleUploadForm');
                                 const bulkUploadForm = document.getElementById('bulkUploadForm');

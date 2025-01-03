@@ -28,6 +28,14 @@ class Student {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    public static function existsByEmail($conn, $email) {
+        $sql = "SELECT COUNT(*) as count FROM students WHERE email = :email";
+        $stmt = $conn->prepare($sql);
+        $stmt->execute(['email' => $email]);
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $result['count'] > 0;
+    }
+
     public function updateLoginDetails($student_id) {
         $conn = Database::getConnection();
         $sql = "UPDATE students SET 
@@ -120,13 +128,14 @@ class Student {
             ];
         } else {
             // Insert the new record
-            $sql = "INSERT INTO students (regd_no, name, email, section, stream, year, dept, university_id, password) 
-                    VALUES (:regd_no, :name, :email, :section, :stream, :year, :dept, :university_id, :password)";
+            $sql = "INSERT INTO students (regd_no, name, email, phone, section, stream, year, dept, university_id, password) 
+                    VALUES (:regd_no, :name, :email, :phone, :section, :stream, :year, :dept, :university_id, :password)";
             $stmt = $conn->prepare($sql);
             $stmt->execute([
                 ':regd_no' => $data['regd_no'],
                 ':name' => $data['name'],
                 ':email' => $data['email'],
+                ':phone' => $data['phone'],
                 ':section' => $data['section'],
                 ':stream' => $data['stream'],
                 ':year' => $data['year'],
@@ -139,6 +148,14 @@ class Student {
                 'duplicate' => false
             ];
         }
+    }
+
+    public static function existsByRegdNo($conn, $regd_no) {
+        $sql = "SELECT COUNT(*) as count FROM students WHERE regd_no = :regd_no";
+        $stmt = $conn->prepare($sql);
+        $stmt->execute([':regd_no' => $regd_no]);
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $result['count'] > 0;
     }
 
     public function login($username, $password) {
