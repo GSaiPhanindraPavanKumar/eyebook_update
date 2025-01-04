@@ -914,7 +914,8 @@ class AdminController {
             $section = $_POST['section'];
             $stream = $_POST['stream'];
             $department = $_POST['department'];
-            $password = password_hash($_POST['password'], PASSWORD_BCRYPT);
+            $passwordPlain = $_POST['password']; // Store the unhashed password
+            $password = password_hash($passwordPlain, PASSWORD_BCRYPT);
     
             // Check for duplicate email
             $sql = "SELECT COUNT(*) as count FROM faculty WHERE email = :email";
@@ -940,7 +941,7 @@ class AdminController {
                     ':password' => $password
                 ]);
 
-                $passwordPlain = $password; // Store the unhashed password
+                
                 $passwordHash = password_hash($passwordPlain, PASSWORD_BCRYPT);
                 // Send email to the new faculty member
                 $mailer = new Mailer();
@@ -987,7 +988,8 @@ class AdminController {
                 $section = $row[3];
                 $stream = $row[4];
                 $department = $row[5];
-                $password = password_hash($row[6], PASSWORD_BCRYPT);
+                $passwordPlain = $row[6];
+                $password = password_hash($passwordPlain, PASSWORD_BCRYPT);
     
                 // Check for duplicate email
                 if (Faculty::existsByEmail($conn, $email)) {
@@ -1019,7 +1021,7 @@ class AdminController {
                 // Send email to the new faculty member
                 $mailer = new Mailer();
                 $subject = 'Welcome to EyeBook!';
-                $body = "Dear $name,<br><br>Your account has been created successfully.<br><br>Username: $email <br>Password: $password<br><br>You can log in at <a href='https://eyebook.phemesoft.com/'>https://eyebook.phemesoft.com/</a><br><br>Best Regards,<br>EyeBook Team";
+                $body = "Dear $name,<br><br>Your account has been created successfully.<br><br>Username: $email <br>Password: $passwordPlain<br><br>You can log in at <a href='https://eyebook.phemesoft.com/'>https://eyebook.phemesoft.com/</a><br><br>Best Regards,<br>EyeBook Team";
                 $mailer->sendMail($email, $subject, $body);
 
                 $successCount++;
