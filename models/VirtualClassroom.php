@@ -44,6 +44,17 @@ class VirtualClassroom {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    public function getspocVirtualClassroomsByIds($ids) {
+        if (empty($ids)) {
+            return [];
+        }
+        $placeholders = implode(',', array_fill(0, count($ids), '?'));
+        $sql = "SELECT * FROM virtual_classrooms WHERE id IN ($placeholders)";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->execute($ids);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
     public function getByIds($virtualClassIds) {
         if (empty($virtualClassIds)) {
             return [];

@@ -57,15 +57,15 @@ class SpocController {
         $courses = Course::getAllspocByUniversity($conn, $university_id); // Fetch all courses for the university
 
         // Fetch virtual class IDs and assignment IDs for the courses
-        $virtualClassIds = Course::getVirtualClassIdsByCourseIds($conn, array_column($courses, 'id'));
-        $assignmentIds = Course::getAssignmentIdsByCourseIds($conn, array_column($courses, 'id'));
+        $virtualClassIds = Course::getspocVirtualClassIdsByCourseIds($conn, array_column($courses, 'id'));
+        $assignmentIds = Course::getspocAssignmentIdsByCourseIds($conn, array_column($courses, 'id'));
         
         // Fetch virtual classes and assignments for the courses
         $virtualClassroomModel = new VirtualClassroom($conn);
         $assignmentModel = new Assignment();
     
-        $virtualClasses = $virtualClassroomModel->getVirtualClassroomsByIdsspoc($virtualClassIds);
-        $assignments = $assignmentModel->getAssignmentsByIds($conn, $assignmentIds);
+        $virtualClasses = $virtualClassroomModel->getspocVirtualClassroomsByIds($virtualClassIds);
+        $assignments = $assignmentModel->getspocAssignmentsByIds($conn, $assignmentIds);
     
         require 'views/spoc/dashboard.php';
     }
