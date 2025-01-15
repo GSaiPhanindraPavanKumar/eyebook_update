@@ -85,7 +85,7 @@
                                                 echo "<td>" . $serialNumber++ . "</td>"; // Increment the serial number
                                                 echo "<td>" . htmlspecialchars($unit['unit_name'] ?? 'N/A') . "</td>";
                                                 $full_url = $unit['scorm_url'] ?? '';
-                                                echo "<td><a href='/admin/view_book/" . urlencode($hashedId) . "?index_path=" . urlencode($full_url) . "' class='btn btn-primary'>View Course Book</a></td>";
+                                                echo "<td><a href='/spoc/view_book/" . urlencode($hashedId) . "?index_path=" . urlencode($full_url) . "' class='btn btn-primary'>View Course Book</a></td>";
                                                 echo "</tr>";
                                             }
                                         } else {
