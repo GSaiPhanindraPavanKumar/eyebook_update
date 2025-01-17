@@ -83,15 +83,7 @@ $archivedCourses = array_filter($courses, function($course) {
                                     $hashedId = str_replace(['+', '/', '='], ['-', '_', ''], $hashedId);
                                     ?>
                                     <a href="view_course/<?php echo $hashedId; ?>" class="card-link">View Course</a>
-                                    <!-- <a href="/student/discussion_forum/<?php echo $course['id']; ?>" class="card-link">Chat Room</a> -->
-                                </div>
-                                <div class="card-body">
-                                    <?php 
-                                    $hashedId = base64_encode($course['id']);
-                                    $hashedId = str_replace(['+', '/', '='], ['-', '_', ''], $hashedId);
-                                    ?>
-                                    <a href="view_course/<?php echo $hashedId; ?>" class="card-link">View Course</a>
-                                    <a href="lab_view?id=<?php echo $course['id']; ?>" class="card-link">Lab</a>
+                                    <a href="view_lab/<?php echo $hashedId; ?>" class="card-link">View Lab</a>
                                     <!-- <a href="/student/discussion_forum/<?php echo $course['id']; ?>" class="card-link">Chat Room</a> -->
                                 </div>
                             </div>
@@ -117,7 +109,7 @@ $archivedCourses = array_filter($courses, function($course) {
                                     $hashedId = str_replace(['+', '/', '='], ['-', '_', ''], $hashedId);
                                     ?>
                                     <a href="view_course/<?php echo $hashedId; ?>" class="card-link">View Course</a>
-                                    <a href="lab_view?id=<?php echo $course['id']; ?>" class="card-link">Lab</a>
+                                    <a href="view_lab/<?php echo $hashedId; ?>" class="card-link">View Lab</a>
                                     <!-- <a href="/student/discussion_forum/<?php echo $course['id']; ?>" class="card-link">Chat Room</a> -->
                                 </div>
                             </div>

@@ -151,11 +151,12 @@ $router->get('/admin/lab_management', 'AdminController@labManagement');
 $router->post('/admin/lab_management', 'AdminController@labManagement');
 
 // Admin Lab Management Routes
-$router->get('/admin/lab_management', 'AdminController@labManagement');
-$router->post('/admin/add_lab_assignment', 'AdminController@addLabAssignment');
-$router->get('/admin/edit_lab/(\d+)', 'AdminController@editLab');
-$router->post('/admin/edit_lab/(\d+)', 'AdminController@editLab');
-$router->get('/admin/delete_lab/(\d+)', 'AdminController@deleteLab');
+$router->get('/admin/create_lab', 'AdminController@createLab');
+$router->post('/admin/create_lab', 'AdminController@createLab');
+$router->get('/admin/manage_labs', 'AdminController@manageLabs');
+$router->get('/admin/view_lab_detail/([0-9]+)', 'AdminController@viewLabDetail');
+$router->get('/admin/download_lab_report/([0-9]+)', 'AdminController@downloadLabReport');
+
 
 $router->get('/spoc', 'SpocController@dashboard');
 $router->get('/spoc/dashboard', 'SpocController@dashboard');
@@ -176,7 +177,9 @@ $router->post('/spoc/assign_students', 'SpocController@assignStudents');
 $router->post('/spoc/unassign_faculty', 'SpocController@unassignFaculty');
 $router->post('/spoc/unassign_students', 'SpocController@unassignStudents');
 $router->get('/spoc/view_book/([a-zA-Z0-9]+)', 'SpocController@viewBook');
-
+$router->get('/spoc/view_labs/([a-zA-Z0-9]+)', 'SpocController@viewLabs');
+$router->get('/spoc/view_lab_detail/([0-9]+)', 'SpocController@viewLabDetail');
+$router->get('/spoc/download_lab_report/([0-9]+)', 'SpocController@downloadLabReport');
 
 
 $router->get('/faculty/dashboard', 'FacultyController@dashboard');
@@ -262,8 +265,9 @@ $router->get('/faculty/view_assessment_report/(\d+)', function($assessmentId) {
 $router->get('/faculty/download_assessment_report/(\d+)', function($assessmentId) {
     require 'views/faculty/download_assessment_report.php';
 });
-
-
+$router->get('/faculty/view_labs/([a-zA-Z0-9]+)', 'FacultyController@viewLabs');
+$router->get('/faculty/view_lab_detail/([0-9]+)', 'FacultyController@viewLabDetail');
+$router->get('/faculty/download_lab_report/([0-9]+)', 'FacultyController@downloadLabReport');
 $router->post('/faculty/archive_course', 'FacultyController@archiveCourse');
 $router->get('/faculty/view_book/([a-zA-Z0-9]+)', 'FacultyController@viewBook');
 $router->get('/faculty/view_course_plan/(\w+)', 'FacultyController@viewCoursePlan');
@@ -301,7 +305,10 @@ $router->get('/student/discussion_forum/(\d+)', function(){
 $router->post('/student/discussion_forum/(\d+)', function(){
     require 'views/student/discussion_forum.php';
 });
-
+$router->get('/student/view_lab/([a-zA-Z0-9]+)', 'StudentController@viewLab');
+$router->get('/student/view_lab_detail/(\d+)', 'StudentController@viewLabDetail');
+$router->post('/student/submit_lab/(\d+)', 'StudentController@submitLab');
+$router->post('/student/update_lab_submission', 'StudentController@updateLabSubmission');
 $router->get('/student/my_courses', function(){
     require 'views/student/my_courses.php';
 });

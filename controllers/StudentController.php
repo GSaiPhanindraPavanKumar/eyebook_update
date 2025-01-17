@@ -8,6 +8,7 @@ use Models\Assignment;
 use Models\VirtualClassroom;
 use Models\Discussion;
 use Models\feedback;
+use Models\Lab;
 use PDO;
 use PDOException;
 
@@ -630,6 +631,130 @@ class StudentController {
     
         require 'views/student/lab_view.php';
     }
+    public function viewLab($hashedId) {
+
+        $conn = Database::getConnection();
+        $courseId = base64_decode($hashedId);
+        $student_id = $_SESSION['student_id'];
+
+        $labs = Lab::getAllByCourseId($conn, $courseId);
+
+        // Fetch submissions for each lab and determine the status
+        foreach ($labs as &$lab) {
+            $submissions = Lab::getSubmissionsByStudent($conn, $lab['id'], $student_id);
+            $lab['status'] = !empty($submissions);
+        }
+
+        require 'views/student/view_lab.php';
+    }
+    public function viewLabDetail($labId) {
+        $conn = Database::getConnection();
+        $lab = Lab::getByIds($conn, [$labId])[0];
+        require 'views/student/view_lab_detail.php';
+    }
+
+    public function submitLab($labId) {
+        $conn = Database::getConnection();
+        $studentId = $_SESSION['student_id']; // Assuming student_id is stored in session
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $code = $_POST['code'];
+            $submissionDate = date('Y-m-d H:i:s');
+
+            // Fetch existing submissions
+            $sql = "SELECT submissions FROM labs WHERE id = :lab_id";
+            $stmt = $conn->prepare($sql);
+            $stmt->execute([':lab_id' => $labId]);
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+            $submissions = $result ? json_decode($result['submissions'], true) : [];
+
+            // Add or update the student's submission
+            $updated = false;
+            foreach ($submissions as &$submission) {
+                if ($submission['student_id'] == $studentId) {
+                    $submission['code'] = base64_encode($code);
+                    $submission['date_of_submit'] = $submissionDate;
+                    $updated = true;
+                    break;
+                }
+            }
+            if (!$updated) {
+                $submissions[] = [
+                    'student_id' => $studentId,
+                    'code' => base64_encode($code),
+                    'date_of_submit' => $submissionDate
+                ];
+            }
+
+            // Update submissions in the database
+            $sql = "UPDATE labs SET submissions = :submissions WHERE id = :lab_id";
+            $stmt = $conn->prepare($sql);
+            $stmt->execute([
+                ':submissions' => json_encode($submissions),
+                ':lab_id' => $labId
+            ]);
+
+            header('Location: /student/view_lab_detail/' . $labId);
+            exit;
+        }
+    }
+    public function updateLabSubmission() {
+        $conn = Database::getConnection();
+        $data = json_decode(file_get_contents('php://input'), true);
+        $lab_id = $data['lab_id'];
+        $student_id = $data['student_id'];
+        $submission_date = $data['submission_date'];
+        $runtime = $data['runtime'];
     
+        // Log incoming data for debugging
+        error_log("Lab ID: $lab_id, Student ID: $student_id, Submission Date: $submission_date, Runtime: $runtime");
+    
+        // Fetch existing submissions
+        $sql = "SELECT submissions FROM labs WHERE id = :lab_id";
+        $stmt = $conn->prepare($sql);
+        $stmt->execute([':lab_id' => $lab_id]);
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        $submissions = $result ? json_decode($result['submissions'], true) : [];
+    
+        // Log existing submissions for debugging
+        error_log("Existing Submissions: " . json_encode($submissions));
+    
+        // Add or update the student's submission with runtime
+        $updated = false;
+        foreach ($submissions as &$submission) {
+            if ($submission['student_id'] == $student_id) {
+                $submission['runtime'] = $runtime;
+                $submission['submission_date'] = $submission_date;
+                $updated = true;
+                break;
+            }
+        }
+        if (!$updated) {
+            $submissions[] = [
+                'student_id' => $student_id,
+                'runtime' => $runtime,
+                'submission_date' => $submission_date
+            ];
+        }
+    
+        // Log updated submissions for debugging
+        error_log("Updated Submissions: " . json_encode($submissions));
+    
+        // Update submissions in the database
+        $sql = "UPDATE labs SET submissions = :submissions WHERE id = :lab_id";
+        $stmt = $conn->prepare($sql);
+        $stmt->execute([
+            ':submissions' => json_encode($submissions),
+            ':lab_id' => $lab_id
+        ]);
+    
+        // Check if the update was successful
+        if ($stmt->rowCount() > 0) {
+            echo json_encode(['status' => 'success']);
+        } else {
+            error_log("Failed to update submissions for Lab ID: $lab_id");
+            echo json_encode(['status' => 'error', 'message' => 'Failed to update submissions']);
+        }
+    }
 }
 ?>

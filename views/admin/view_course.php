@@ -115,7 +115,7 @@ $assignedUniversities = Course::getAssignedUniversities($conn, $course['id']);
                                                     $full_url = $content['indexPath'] ?? '#';
                                                     echo "<td>
                                                             <a href='/" . htmlspecialchars($full_url) . "' target='_blank' class='btn btn-primary'>View EC</a>
-                                                            <button class='btn btn-danger' onclick='removeContent(\"EC_content\", " . ($serialNumber - 1) . ")'>Remove</button>
+                                                            <button class='btn btn-danger' onclick='removeContent(\"EC_content\", " . ($serialNumber - 2) . ")'>Remove</button>
                                                         </td>";
                                                     echo "</tr>";
                                                 }
@@ -149,7 +149,7 @@ $assignedUniversities = Course::getAssignedUniversities($conn, $course['id']);
                                                     $full_url = $unit['scorm_url'] ?? '';
                                                     echo "<td>
                                                             <a href='/admin/view_book/" . urlencode($hashedId) . "?index_path=" . urlencode($full_url) . "' class='btn btn-primary'>View Course Book</a>
-                                                            <button class='btn btn-danger' onclick='removeContent(\"course_book\", " . ($serialNumber - 1) . ")'>Remove</button>
+                                                            <button class='btn btn-danger' onclick='removeContent(\"course_book\", " . ($serialNumber - 2) . ")'>Remove</button>
                                                         </td>";
                                                     echo "</tr>";
                                                 }
@@ -167,9 +167,7 @@ $assignedUniversities = Course::getAssignedUniversities($conn, $course['id']);
                                             <tr>
                                                 <th scope="col">S. No.</th>
                                                 <th scope="col">Title</th>
-                                                <th scope="col">Link</th>
-                                                <th scope="col">Action</th>
-                                            </tr>
+                                                <th scope="col">Link</th>                                            </tr>
                                         </thead>
                                         <tbody>
                                             <?php
@@ -183,7 +181,7 @@ $assignedUniversities = Course::getAssignedUniversities($conn, $course['id']);
                                                     $full_url = $content['link'] ?? '#';
                                                     echo "<td>
                                                             <a href='" . htmlspecialchars(string: $full_url) . "' target='_blank' class='btn btn-primary'>View Content</a>
-                                                            <button class='btn btn-danger' onclick='removeContent(\"additional_content\", " . ($serialNumber - 1) . ")'>Remove</button>
+                                                            <button class='btn btn-danger' onclick='removeContent(\"additional_content\", " . ($serialNumber - 2) . ")'>Remove</button>
                                                         </td>";
                                                     echo "</tr>";
                                                 }

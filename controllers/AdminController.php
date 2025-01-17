@@ -18,6 +18,7 @@ use Models\Assignment;
 use Models\feedback;
 use Models\Cohort;
 use Models\Company;
+use Models\Lab;
 use PDO;
 use ZipArchive;
 use Models\VirtualClassroom;
@@ -2384,56 +2385,72 @@ class AdminController {
     public function askguru(){
         require 'views/admin/askguru.php';
     }
-
-    public function labManagement() {
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            // Handle lab assignment creation
-            $this->addLabAssignment();
-            return;
-        }
-        
+    public function createLab() {
         $conn = Database::getConnection();
-        
-        // Fetch all labs
-        $sql = "SELECT l.*, c.name as course_name 
-                FROM labs l 
-                JOIN courses c ON l.course_id = c.id 
-                WHERE l.status = 'active'
-                ORDER BY l.created_at DESC";
-        $stmt = $conn->prepare($sql);
-        $stmt->execute();
-        $labs = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        
-        require 'views/admin/lab_management.php';
+        $courses = Course::getAll($conn);
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $title = $_POST['lab_title'];
+            $description = $_POST['lab_description'];
+            $due_date = $_POST['due_date'];
+            $course_ids = $_POST['course_id'];
+            $input = $_POST['input'];
+            $output = $_POST['output'];
+            $submissions = []; // Initialize submissions as an empty array
+
+            Lab::create($conn, $title, $description, $due_date, $course_ids, $input, $output, $submissions);
+            header('Location: /admin/manage_labs');
+            exit;
+        }
+
+        require 'views/admin/lab_create.php';
     }
 
-    public function addLabAssignment() {
+    public function manageLabs() {
         $conn = Database::getConnection();
-        
-        // Handle file upload
-        $filePath = '';
-        if (isset($_FILES['lab_file']) && $_FILES['lab_file']['error'] === 0) {
-            $uploadDir = 'uploads/labs/';
-            if (!file_exists($uploadDir)) {
-                mkdir($uploadDir, 0777, true);
-            }
-            
-            $fileName = time() . '_' . $_FILES['lab_file']['name'];
-            $filePath = $uploadDir . $fileName;
-            move_uploaded_file($_FILES['lab_file']['tmp_name'], $filePath);
+        $labs = Lab::getAll($conn);
+        require 'views/admin/manage_labs.php';
+    }
+    public function viewLabDetail($labId) {
+        $conn = Database::getConnection();
+        if (!is_numeric($labId)) {
+            die('Invalid lab ID');
         }
-        
-        $stmt = $conn->prepare("INSERT INTO labs (lab_name, description, file_path, due_date, status) 
-                               VALUES (?, ?, ?, ?, 'active')");
-        
-        $stmt->execute([
-            $_POST['lab_name'],
-            $_POST['description'],
-            $filePath,
-            $_POST['due_date']
-        ]);
-        
-        header('Location: /admin/lab_management');
+
+        $lab = Lab::getById($conn, $labId);
+        $lab['submissions'] = Lab::getSubmissions($conn, $labId);
+
+        require 'views/admin/view_lab_detail.php';
+    }
+    public function downloadLabReport($labId) {
+        $conn = Database::getConnection();
+        $submissions = Lab::getSubmissions($conn, $labId);
+
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setCellValue('A1', 'Student Name');
+        $sheet->setCellValue('B1', 'Runtime');
+        $sheet->setCellValue('C1', 'Submission Date');
+
+        foreach ($submissions as $index => $submission) {
+            $sheet->setCellValue('A' . ($index + 2), $submission['student_name']);
+            $sheet->setCellValue('B' . ($index + 2), $submission['runtime']);
+            $sheet->setCellValue('C' . ($index + 2), (new \DateTime($submission['submission_date']))->format('Y-m-d H:i:s'));
+        }
+
+        $writer = new Xlsx($spreadsheet);
+        $filename = 'lab_report_' . $labId . '.xlsx';
+
+        // Clear the output buffer
+        if (ob_get_contents()) ob_end_clean();
+
+        // Set headers to force download
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment; filename="' . $filename . '"');
+        header('Cache-Control: max-age=0');
+
+        // Save the file to the output
+        $writer->save('php://output');
         exit;
     }
 }

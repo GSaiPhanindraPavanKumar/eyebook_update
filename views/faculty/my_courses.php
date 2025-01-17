@@ -3,7 +3,6 @@ include 'sidebar.php';
 use Models\Database;
 use Models\Faculty;
 use Models\Course;
-use Models\Student;
 
 $conn = Database::getConnection();
 if (!isset($_SESSION['faculty_id'])) {
@@ -95,10 +94,11 @@ $archivedCourses = array_filter($courses, function($course) {
                                     $hashedId = str_replace(['+', '/', '='], ['-', '_', ''], $hashedId);
                                     ?>
                                     <a href="view_course/<?php echo $hashedId; ?>" class="card-link">View Course</a>
-                                    <form method="POST" action="/faculty/archive_course" style="display:inline;" onsubmit="return confirmArchive()">
+                                    <a href="view_labs/<?php echo $hashedId; ?>" class="card-link">View Labs</a>
+                                    <!-- <form method="POST" action="/faculty/archive_course" style="display:inline;" onsubmit="return confirmArchive()">
                                         <input type="hidden" name="archive_course_id" value="<?php echo $course['id']; ?>">
                                         <button type="submit" class="btn btn-warning btn-sm">Archive</button>
-                                    </form>
+                                    </form> -->
                                 </div>
                             </div>
                         </div>
@@ -123,6 +123,7 @@ $archivedCourses = array_filter($courses, function($course) {
                                     $hashedId = str_replace(['+', '/', '='], ['-', '_', ''], $hashedId);
                                     ?>
                                     <a href="view_course/<?php echo $hashedId; ?>" class="card-link">View Course</a>
+                                    <a href="view_labs/<?php echo $hashedId; ?>" class="card-link">View Labs</a>
                                 </div>
                             </div>
                         </div>

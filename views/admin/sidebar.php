@@ -205,11 +205,19 @@ $adminModel = new \Models\Admin();
                     </div>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="/admin/lab_management">
-                        <i class="ti-desktop menu-icon"></i>
-                        <span class="menu-title">Lab Management</span>
+                    <a class="nav-link" data-toggle="collapse" href="#labs" aria-expanded="false" aria-controls="labs">
+                        <i class="icon-layout menu-icon"></i>
+                        <span class="menu-title">Labs</span>
+                        <i class="menu-arrow"></i>
                     </a>
+                    <div class="collapse" id="labs">
+                        <ul class="nav flex-column sub-menu">
+                            <li class="nav-item"> <a class="nav-link" href="/admin/create_lab">Create Lab</a></li>
+                            <li class="nav-item"> <a class="nav-link" href="/admin/manage_labs">Manage Labs</a></li>
+                        </ul>
+                    </div>
                 </li>
+
                 <!-- <li class="nav-item">
                     <a class="nav-link" data-toggle="collapse" href="#streams" aria-expanded="false" aria-controls="streams">
                         <i class="icon-grid-2 menu-icon"></i>

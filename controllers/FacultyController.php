@@ -10,6 +10,7 @@ use Models\Database;
 use Models\Assignment;
 use Models\VirtualClassroom;
 use Models\Discussion;
+use Models\Lab;
 use PDO;
 use \PDOException;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
@@ -692,6 +693,65 @@ class FacultyController {
         } else {
             return 'F';
         }
+    }
+    public function viewLabs($hashedId) {
+        $conn = Database::getConnection();
+        $course_id = base64_decode($hashedId);
+        if (!is_numeric($course_id)) {
+            die('Invalid course ID');
+        }
+
+        $labs = Lab::getAllByCourseId($conn, $course_id);
+
+        // Fetch submissions for each lab
+        foreach ($labs as &$lab) {
+            $lab['submissions'] = Lab::getSubmissions($conn, $lab['id']);
+        }
+
+        require 'views/faculty/view_labs.php';
+    }
+
+    public function viewLabDetail($labId) {
+        $conn = Database::getConnection();
+        if (!is_numeric($labId)) {
+            die('Invalid lab ID');
+        }
+
+        $lab = Lab::getById($conn, $labId);
+        $lab['submissions'] = Lab::getSubmissions($conn, $labId);
+
+        require 'views/faculty/view_lab_detail.php';
+    }
+    public function downloadLabReport($labId) {
+        $conn = Database::getConnection();
+        $submissions = Lab::getSubmissions($conn, $labId);
+
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setCellValue('A1', 'Student Name');
+        $sheet->setCellValue('B1', 'Runtime');
+        $sheet->setCellValue('C1', 'Submission Date');
+
+        foreach ($submissions as $index => $submission) {
+            $sheet->setCellValue('A' . ($index + 2), $submission['student_name']);
+            $sheet->setCellValue('B' . ($index + 2), $submission['runtime']);
+            $sheet->setCellValue('C' . ($index + 2), (new \DateTime($submission['submission_date']))->format('Y-m-d H:i:s'));
+        }
+
+        $writer = new Xlsx($spreadsheet);
+        $filename = 'lab_report_' . $labId . '.xlsx';
+
+        // Clear the output buffer
+        if (ob_get_contents()) ob_end_clean();
+
+        // Set headers to force download
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment; filename="' . $filename . '"');
+        header('Cache-Control: max-age=0');
+
+        // Save the file to the output
+        $writer->save('php://output');
+        exit;
     }
 }
     
