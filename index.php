@@ -358,6 +358,8 @@ $router->post('/student/mark_as_completed', 'StudentController@markAsCompleted')
 $router->get('/student/view_course/([a-zA-Z0-9]+)', 'StudentController@viewCourse');
 
 
+// $router->get('/student/askguru','StudentController@askguru');
+// $router->post('/student/askguru','StudentController@askguru');
 
 $router->get('/student/askguru', function(){
     require 'views/student/askguru.php';

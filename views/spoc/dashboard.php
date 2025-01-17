@@ -23,8 +23,19 @@
                             <div class="col-md-6">
                                 <h4 class="card-title">Weekly Agenda</h4>
                                 <ul class="list-group">
-                                    <?php if (!empty($virtualClasses) || !empty($assignments)): ?>
-                                        <?php foreach ($virtualClasses as $class): ?>
+                                    <?php
+                                    $currentDateTime = new DateTime();
+                                    $upcomingClasses = array_filter($virtualClasses, function($class) use ($currentDateTime) {
+                                        $classStartTime = new DateTime($class['start_time']);
+                                        return $classStartTime >= $currentDateTime;
+                                    });
+                                    $upcomingAssignments = array_filter($assignments, function($assignment) use ($currentDateTime) {
+                                        $assignmentDueDate = new DateTime($assignment['due_date']);
+                                        return $assignmentDueDate >= $currentDateTime;
+                                    });
+                                    ?>
+                                    <?php if (!empty($upcomingClasses) || !empty($upcomingAssignments)): ?>
+                                        <?php foreach ($upcomingClasses as $class): ?>
                                             <?php
                                             $endTime = date('Y-m-d H:i:s', strtotime($class['start_time'] . ' + ' . $class['duration'] . ' minutes'));
                                             ?>
@@ -34,7 +45,7 @@
                                                 <a href="<?php echo htmlspecialchars($class['join_url']); ?>" target="_blank">Join</a>
                                             </li>
                                         <?php endforeach; ?>
-                                        <?php foreach ($assignments as $assignment): ?>
+                                        <?php foreach ($upcomingAssignments as $assignment): ?>
                                             <li class="list-group-item">
                                                 <strong><?php echo htmlspecialchars($assignment['title']); ?></strong><br>
                                                 Due: <?php echo htmlspecialchars($assignment['due_date']); ?><br>
@@ -208,7 +219,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     'title' => $assignment['title'] . ' (Due)',
                     'start' => $assignment['due_date'],
                     'color' => 'red',
-                    'url' => '/admin/view_assignment/' . $assignment['id'] // URL to view the assignment
+                    'url' => '/spoc/view_assignment/' . $assignment['id'] // URL to view the assignment
                 ];
             }, $assignments)
         )); ?>,

@@ -407,6 +407,10 @@ class StudentController {
         require 'views/student/view_assignment.php';
     }
 
+    public function askguru(){
+        require 'views/student/askguru.php';
+    }
+
     public function submitFeedback() {
         $conn = Database::getConnection();
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {

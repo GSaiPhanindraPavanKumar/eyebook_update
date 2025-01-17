@@ -2,7 +2,7 @@
 // Function to interact with Gemini API
 function askGemini($prompt) {
     $url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent';
-    $api_key = 'AIzaSyDsWdB-vnX5w5muU0uaQOM5dKQwU85EyAQ'; // Replace with your actual Gemini API key
+    $api_key = 'AIzaSyCF50DaE1rLpa-IjLugLTMDCpeD-d420ko'; // Replace with your actual Gemini API key
 
     $data = [
         'contents' => [
@@ -142,7 +142,7 @@ if (php_sapi_name() !== 'cli' && $_SERVER['REQUEST_METHOD'] === 'POST') {
         $('#chat-container').append('<div class="thinking"><div class="loader"></div>Guru is thinking...</div>');
         $('#chat-container').scrollTop($('#chat-container')[0].scrollHeight);
 
-        $.post('askguru.php', {user_input: userInput}, function(data) {
+        $.post('askguru', {user_input: userInput}, function(data) {
             $('.thinking').remove(); // Remove the thinking message
             var response = JSON.parse(data);
             $('#chat-container').append('<div class="message guru-message"><strong>AskGuru:</strong> ' + response.response + '</div>');

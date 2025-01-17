@@ -2381,6 +2381,9 @@ class AdminController {
             echo json_encode(['success' => false, 'message' => 'Failed to remove content']);
         }
     }
+    public function askguru(){
+        require 'views/admin/askguru.php';
+    }
 
     public function labManagement() {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {

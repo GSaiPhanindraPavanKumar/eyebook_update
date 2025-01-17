@@ -95,6 +95,18 @@ class Assignment {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    public static function getspocAssignmentsByIds($conn, $ids) {
+        if (empty($ids)) {
+            return [];
+        }
+        $placeholders = implode(',', array_fill(0, count($ids), '?'));
+        $sql = "SELECT * FROM assignments WHERE id IN ($placeholders)";
+        $stmt = $conn->prepare($sql);
+        $stmt->execute($ids);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    
     public static function getAssignmentsByCourseIdsForSpoc($conn, $course_ids) {
         if (empty($course_ids)) {
             return [];
