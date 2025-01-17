@@ -204,6 +204,12 @@ $adminModel = new \Models\Admin();
                         </ul>
                     </div>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/admin/lab_management">
+                        <i class="ti-desktop menu-icon"></i>
+                        <span class="menu-title">Lab Management</span>
+                    </a>
+                </li>
                 <!-- <li class="nav-item">
                     <a class="nav-link" data-toggle="collapse" href="#streams" aria-expanded="false" aria-controls="streams">
                         <i class="icon-grid-2 menu-icon"></i>

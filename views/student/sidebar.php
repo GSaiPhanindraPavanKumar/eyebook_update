@@ -210,8 +210,19 @@ if ($userData) {
                     </a>
                     <div class="collapse" id="discussion">
                         <ul class="nav flex-column sub-menu">
-                        <!-- <li class="nav-item"> <a class="nav-link" href="upload_students">Upload Students</a></li> -->
                             <li class="nav-item"> <a class="nav-link" href="discussion_forum">Discussion Forum</a></li>
+                        </ul>
+                    </div>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-toggle="collapse" href="#i-lab" aria-expanded="false" aria-controls="i-lab">
+                        <i class="icon-screen-desktop menu-icon"></i>
+                        <span class="menu-title">i-Lab</span>
+                        <i class="menu-arrow"></i>
+                    </a>
+                    <div class="collapse" id="i-lab">
+                        <ul class="nav flex-column sub-menu">
+                            <li class="nav-item"> <a class="nav-link" href="/student/ilab">Online Compiler</a></li>
                         </ul>
                     </div>
                 </li>
@@ -308,6 +319,7 @@ if ($userData) {
                         <span class="menu-title">Logout</span>
                 </a>
             </li>
+            
             </ul>
 
         </nav>

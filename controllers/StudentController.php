@@ -587,6 +587,45 @@ class StudentController {
         }
     }
 
+    public function iLab() {
+        $basePath = $_SERVER['DOCUMENT_ROOT'];
+        $iLabPath = $basePath . DIRECTORY_SEPARATOR . 'eyebook_update' . DIRECTORY_SEPARATOR . 'i-Lab' . DIRECTORY_SEPARATOR . 'index.html';
+        
+        // Log the path for debugging
+        error_log("Attempting to access i-Lab at: " . $iLabPath);
+        
+        if (file_exists($iLabPath)) {
+            require_once $iLabPath;
+        } else {
+            error_log("i-Lab file not found at: " . $iLabPath);
+            header("HTTP/1.0 404 Not Found");
+            echo "i-Lab page not found. Looking for file at: " . $iLabPath;
+        }
+    }
+    
+    public function labView($courseId = null) {
+        if (!$courseId) {
+            $courseId = $_GET['id'] ?? null;
+        }
+        
+        if (!$courseId) {
+            header('Location: /student/my_courses');
+            exit;
+        }
+    
+        $conn = Database::getConnection();
+        
+        // Fetch lab data
+        $sql = "SELECT l.*, c.name as course_name 
+                FROM labs l 
+                JOIN courses c ON l.course_id = c.id 
+                WHERE l.course_id = :course_id AND l.status = 'active'";
+        $stmt = $conn->prepare($sql);
+        $stmt->execute(['course_id' => $courseId]);
+        $labs = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    
+        require 'views/student/lab_view.php';
+    }
     
 }
 ?>

@@ -1,0 +1,64 @@
+.php
+
+<?php include "sidebar.php"; ?>
+
+<div class="main-panel">
+    <div class="content-wrapper">
+        <div class="row">
+            <div class="col-md-12 grid-margin">
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="card-title">Add New Course</h4>
+                        <form action="/admin/add_course" method="POST" enctype="multipart/form-data">
+                            <!-- Course Details -->
+                            <div class="form-group">
+                                <label for="course_name">Course Name</label>
+                                <input type="text" class="form-control" id="course_name" name="name" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="course_description">Course Description</label>
+                                <textarea class="form-control" id="course_description" name="description" rows="3" required></textarea>
+                            </div>
+
+                            <!-- Lab Content Section -->
+                            <div class="form-group">
+                                <label for="lab_content">Lab Content</label>
+                                <div id="lab-entries">
+                                    <div class="lab-entry mb-3 border p-3">
+                                        <input type="text" class="form-control mb-2" name="lab_name[]" placeholder="Lab Name" required>
+                                        <textarea class="form-control mb-2" name="lab_description[]" placeholder="Lab Description" required></textarea>
+                                        <div class="form-group">
+                                            <label>Due Date</label>
+                                            <input type="datetime-local" class="form-control mb-2" name="lab_due_date[]" required>
+                                        </div>
+                                        <input type="file" class="form-control mb-2" name="lab_file[]" required>
+                                    </div>
+                                </div>
+                                <button type="button" class="btn btn-secondary mt-2" id="add-lab">Add Another Lab</button>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary">Create Course</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById('add-lab').addEventListener('click', function() {
+    const labEntries = document.getElementById('lab-entries');
+    const newEntry = labEntries.children[0].cloneNode(true);
+    
+    // Clear input values
+    newEntry.querySelectorAll('input[type="text"], textarea').forEach(input => input.value = '');
+    newEntry.querySelector('input[type="file"]').value = '';
+    newEntry.querySelector('input[type="datetime-local"]').value = '';
+    
+    labEntries.appendChild(newEntry);
+});
+</script>
+
+<?php include "footer.html"; ?>

@@ -147,6 +147,15 @@ $router->post('/admin/remove_universities', 'AdminController@removeUniversities'
 $router->post('/admin/add_university_to_company', 'AdminController@addUniversityToCompany');
 $router->post('/admin/delete_students', 'AdminController@deleteStudents');
 $router->post('/admin/delete_facultys', 'AdminController@deleteFacultys');
+$router->get('/admin/lab_management', 'AdminController@labManagement');
+$router->post('/admin/lab_management', 'AdminController@labManagement');
+
+// Admin Lab Management Routes
+$router->get('/admin/lab_management', 'AdminController@labManagement');
+$router->post('/admin/add_lab_assignment', 'AdminController@addLabAssignment');
+$router->get('/admin/edit_lab/(\d+)', 'AdminController@editLab');
+$router->post('/admin/edit_lab/(\d+)', 'AdminController@editLab');
+$router->get('/admin/delete_lab/(\d+)', 'AdminController@deleteLab');
 
 $router->get('/spoc', 'SpocController@dashboard');
 $router->get('/spoc/dashboard', 'SpocController@dashboard');
@@ -365,6 +374,17 @@ $router->get('/student/virtual_classroom', function(){
 $router->get('/student/askguru', function(){
     require 'views/student/askguru.php';
 });
+$router->get('/student/ilab', function(){
+    require 'views\student\i-Lab\index.html';
+});
+$router->post('/student/ilab', function(){
+    require 'views\student\i-Lab\index.html';
+});
+
+// Add lab routes
+$router->get('/student/lab_view', 'StudentController@labView');
+$router->get('/student/lab_view/([0-9]+)', 'StudentController@labView');
+$router->post('/student/submit_lab/(\d+)', 'StudentController@submitLab');
 
 $router->get('/logout', 'AuthController@logout');
 $router->get('/admin/logout', 'AuthController@logout');

@@ -389,4 +389,23 @@ class SpocController {
         $stmt->execute([':university_id' => $university_id]);
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
+
+    public function iLab() {
+        $basePath = $_SERVER['DOCUMENT_ROOT'];
+        $iLabPath = $basePath . DIRECTORY_SEPARATOR . 'eyebook_update' . 
+                    DIRECTORY_SEPARATOR . 'views' . 
+                    DIRECTORY_SEPARATOR . 'student' . 
+                    DIRECTORY_SEPARATOR . 'i-Lab' . 
+                    DIRECTORY_SEPARATOR . 'index.html';
+        
+        error_log("SpocController: Attempting to access i-Lab at: " . $iLabPath);
+        
+        if (file_exists($iLabPath)) {
+            require_once $iLabPath;
+        } else {
+            error_log("i-Lab file not found at: " . $iLabPath);
+            header("HTTP/1.0 404 Not Found");
+            echo "i-Lab page not found. Path: " . $iLabPath;
+        }
+    }
 }

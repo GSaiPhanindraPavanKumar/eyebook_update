@@ -781,20 +781,54 @@ class AdminController {
     }
     
     public function addCourse() {
-        $conn = Database::getConnection();
-        $message = '';
-        $message_type = '';
-        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-            $name = $_POST['name'];
-            $description = $_POST['description'];
-            $message = Course::create($conn, $name, $description);
-            if ($message === "Course created successfully!") {
-                $message_type = 'success';
-            } else {
-                $message_type = 'error';
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $conn = Database::getConnection();
+            
+            try {
+                $conn->beginTransaction();
+                
+                // Insert course
+                $stmt = $conn->prepare("INSERT INTO courses (name, description, status) VALUES (?, ?, 'active')");
+                $stmt->execute([$_POST['name'], $_POST['description']]);
+                $courseId = $conn->lastInsertId();
+                
+                // Handle lab entries
+                if (!empty($_POST['lab_name'])) {
+                    foreach ($_POST['lab_name'] as $key => $labName) {
+                        $labFile = '';
+                        if (isset($_FILES['lab_file']['name'][$key])) {
+                            $fileName = time() . '_' . $_FILES['lab_file']['name'][$key];
+                            $uploadPath = 'uploads/labs/' . $fileName;
+                            move_uploaded_file($_FILES['lab_file']['tmp_name'][$key], $uploadPath);
+                            $labFile = $uploadPath;
+                        }
+                        
+                        $stmt = $conn->prepare("INSERT INTO labs (course_id, lab_name, description, file_path, due_date, status) 
+                                              VALUES (?, ?, ?, ?, ?, 'active')");
+                        $stmt->execute([
+                            $courseId,
+                            $labName,
+                            $_POST['lab_description'][$key],
+                            $labFile,
+                            $_POST['lab_due_date'][$key]
+                        ]);
+                    }
+                }
+                
+                $conn->commit();
+                header('Location: /admin/courses');
+                exit;
+                
+            } catch (Exception $e) {
+                $conn->rollBack();
+                error_log($e->getMessage());
+                $_SESSION['error'] = "Error creating course: " . $e->getMessage();
+                header('Location: /admin/add_course');
+                exit;
             }
         }
-        require 'views/admin/add_courses.php';
+        
+        require 'views/admin/add_course.php';
     }
 
     public function manageCourse() {
@@ -2348,5 +2382,56 @@ class AdminController {
         }
     }
 
+    public function labManagement() {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            // Handle lab assignment creation
+            $this->addLabAssignment();
+            return;
+        }
+        
+        $conn = Database::getConnection();
+        
+        // Fetch all labs
+        $sql = "SELECT l.*, c.name as course_name 
+                FROM labs l 
+                JOIN courses c ON l.course_id = c.id 
+                WHERE l.status = 'active'
+                ORDER BY l.created_at DESC";
+        $stmt = $conn->prepare($sql);
+        $stmt->execute();
+        $labs = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        require 'views/admin/lab_management.php';
+    }
+
+    public function addLabAssignment() {
+        $conn = Database::getConnection();
+        
+        // Handle file upload
+        $filePath = '';
+        if (isset($_FILES['lab_file']) && $_FILES['lab_file']['error'] === 0) {
+            $uploadDir = 'uploads/labs/';
+            if (!file_exists($uploadDir)) {
+                mkdir($uploadDir, 0777, true);
+            }
+            
+            $fileName = time() . '_' . $_FILES['lab_file']['name'];
+            $filePath = $uploadDir . $fileName;
+            move_uploaded_file($_FILES['lab_file']['tmp_name'], $filePath);
+        }
+        
+        $stmt = $conn->prepare("INSERT INTO labs (lab_name, description, file_path, due_date, status) 
+                               VALUES (?, ?, ?, ?, 'active')");
+        
+        $stmt->execute([
+            $_POST['lab_name'],
+            $_POST['description'],
+            $filePath,
+            $_POST['due_date']
+        ]);
+        
+        header('Location: /admin/lab_management');
+        exit;
+    }
 }
 ?>
