@@ -10,6 +10,8 @@ use Models\Course;
 use Models\Assignment;
 use Models\VirtualClassroom;
 use Models\Lab;
+use Models\contest;
+use Models\Discussion;
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 use PDO;
@@ -467,5 +469,101 @@ class SpocController {
         // Save the file to the output
         $writer->save('php://output');
         exit;
+    }
+    public function manageContests() {
+        $conn = Database::getConnection();
+        $email = $_SESSION['email']; // Assuming the email is stored in the session
+
+        // Fetch the spoc_id using the email
+        $sql = "SELECT id, university_id FROM spocs WHERE email = :email";
+        $stmt = $conn->prepare($sql);
+        $stmt->execute([':email' => $email]);
+        $spoc = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$spoc) {
+            die('SPOC not found.');
+        }
+
+        $spocId = $spoc['id'];
+        $spocUniversityId = $spoc['university_id'];
+
+        // Fetch contests by university ID
+        $contests = Contest::getByUniversityId($conn, $spocUniversityId);
+        require 'views/spoc/manage_contests.php';
+    }
+    public function viewContest($contestId) {
+        $conn = Database::getConnection();
+        $contest = Contest::getById($conn, $contestId);
+        $questions = Contest::getQuestions($conn, $contestId);
+        $leaderboard = Contest::getLeaderboard($conn, $contestId);
+        require 'views/spoc/view_contest.php';
+    }
+    public function viewQuestion($questionId) {
+        $conn = Database::getConnection();
+        $question = Contest::getQuestionById($conn, $questionId);
+        require 'views/spoc/view_question.php';
+    }
+    private function ensureUniversityIdInSession() {
+        if (!isset($_SESSION['university_id'])) {
+            $conn = Database::getConnection();
+            $email = $_SESSION['email']; // Assuming the email is stored in the session
+
+            // Fetch the spoc_id using the email
+            $sql = "SELECT university_id FROM spocs WHERE email = :email";
+            $stmt = $conn->prepare($sql);
+            $stmt->execute([':email' => $email]);
+            $spoc = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$spoc) {
+                die('SPOC not found.');
+            }
+
+            $_SESSION['university_id'] = $spoc['university_id'];
+        }
+    }
+
+    public function viewDiscussions() {
+        $this->ensureUniversityIdInSession();
+        $conn = Database::getConnection();
+        $university_id = $_SESSION['university_id']; // Assuming university_id is stored in session
+        $discussions = Discussion::getDiscussionsByUniversity($conn, $university_id);
+        require 'views/spoc/discussion_forum.php';
+    }
+
+    public function createDiscussion() {
+        $this->ensureUniversityIdInSession();
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $conn = Database::getConnection();
+            $name = $_SESSION['name']; // Assuming email is stored in session
+            $post = filter_input(INPUT_POST, 'msg', FILTER_SANITIZE_FULL_SPECIAL_CHARS); // Ensure 'msg' is retrieved correctly
+            $university_id = $_SESSION['university_id']; // Assuming university_id is stored in session
+
+            if (empty($post)) {
+                die("Post content cannot be empty.");
+            }
+
+            Discussion::addDiscussion($conn, $name, $post, $university_id);
+            header('Location: /spoc/discussion_forum');
+            exit();
+        }
+    }
+
+    public function replyDiscussion() {
+        $this->ensureUniversityIdInSession();
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $conn = Database::getConnection();
+            $parent_post_id = filter_input(INPUT_POST, 'parent_post_id', FILTER_VALIDATE_INT);
+            $name = $_SESSION['name']; // Assuming email is stored in session
+            $post = filter_input(INPUT_POST, 'msg', FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+            $university_id = $_SESSION['university_id']; // Assuming university_id is stored in session
+
+            if (empty($post)) {
+                die("Reply content cannot be empty.");
+            }
+
+            Discussion::addDiscussion($conn, $name, $post, $university_id, $parent_post_id);
+            header('Location: /spoc/discussion_forum');
+            exit();
+        }
     }
 }

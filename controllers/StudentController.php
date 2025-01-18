@@ -9,6 +9,8 @@ use Models\VirtualClassroom;
 use Models\Discussion;
 use Models\feedback;
 use Models\Lab;
+use Models\Notification;
+use Models\Contest;
 use PDO;
 use PDOException;
 
@@ -755,6 +757,75 @@ class StudentController {
             error_log("Failed to update submissions for Lab ID: $lab_id");
             echo json_encode(['status' => 'error', 'message' => 'Failed to update submissions']);
         }
+    }
+    public function manageContests() {
+        $conn = Database::getConnection();
+        $studentId = $_SESSION['student_id']; // Assuming the student's ID is stored in the session
+
+        // Fetch the student's university ID
+        $sql = "SELECT university_id FROM students WHERE id = :student_id";
+        $stmt = $conn->prepare($sql);
+        $stmt->execute([':student_id' => $studentId]);
+        $student = $stmt->fetch(PDO::FETCH_ASSOC);
+        $studentUniversityId = $student['university_id'];
+
+        // Fetch contests by university ID
+        $contests = Contest::getByUniversityId($conn, $studentUniversityId);
+        require 'views/student/manage_contests.php';
+    }
+
+    public function viewContest($contestId) {
+        $conn = Database::getConnection();
+        $contest = Contest::getById($conn, $contestId);
+        require 'views/student/view_contest.php';
+    }
+    public function viewQuestion($questionId) {
+        $conn = Database::getConnection();
+        $question = Contest::getQuestionById($conn, $questionId);
+        require 'views/student/view_question.php';
+    }
+    public function updateQuestionSubmission() {
+        $conn = Database::getConnection();
+        $data = json_decode(file_get_contents('php://input'), true);
+
+        $questionId = $data['question_id'];
+        $studentId = $data['student_id'];
+        $submissionDate = $data['submission_date'];
+        $runtime = $data['runtime'];
+
+        // Fetch the existing submissions
+        $question = Contest::getQuestionById($conn, $questionId);
+        $submissions = !empty($question['submissions']) ? json_decode($question['submissions'], true) : [];
+
+        // Update or add the student's submission
+        $updated = false;
+        foreach ($submissions as &$submission) {
+            if ($submission['student_id'] == $studentId) {
+                $submission['submission_date'] = $submissionDate;
+                $submission['runtime'] = $runtime;
+                $submission['status'] = 'passed';
+                $updated = true;
+                break;
+            }
+        }
+        if (!$updated) {
+            $submissions[] = [
+                'student_id' => $studentId,
+                'submission_date' => $submissionDate,
+                'runtime' => $runtime,
+                'status' => 'passed'
+            ];
+        }
+
+        // Update the submissions JSON column
+        $sql = "UPDATE contest_questions SET submissions = :submissions WHERE id = :question_id";
+        $stmt = $conn->prepare($sql);
+        $stmt->execute([
+            ':submissions' => json_encode($submissions),
+            ':question_id' => $questionId
+        ]);
+
+        echo json_encode(['status' => 'success']);
     }
 }
 ?>

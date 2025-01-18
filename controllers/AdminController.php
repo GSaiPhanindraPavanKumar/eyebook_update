@@ -19,6 +19,7 @@ use Models\feedback;
 use Models\Cohort;
 use Models\Company;
 use Models\Lab;
+use Models\Contest;
 use PDO;
 use ZipArchive;
 use Models\VirtualClassroom;
@@ -2452,6 +2453,93 @@ class AdminController {
         // Save the file to the output
         $writer->save('php://output');
         exit;
+    }
+    public function createContest() {
+        $conn = Database::getConnection();
+        $universities = University::getAll($conn);
+        require 'views/admin/create_contest.php';
+    }
+
+    public function manageContest() {
+        $conn = Database::getConnection();
+        $contests = Contest::getAll($conn);
+        require 'views/admin/manage_contest.php';
+    }
+
+    public function saveContest() {
+        $conn = Database::getConnection();
+        $data = $_POST;
+        $data['university_id'] = json_encode($data['university_id']); // Encode the university IDs as JSON
+        Contest::create($conn, $data);
+        header('Location: /admin/manage_contest');
+    }
+
+    public function viewContest($contestId) {
+        $conn = Database::getConnection();
+        $contest = Contest::getById($conn, $contestId);
+        $questions = Contest::getQuestions($conn, $contestId);
+        $leaderboard = Contest::getLeaderboard($conn, $contestId);
+        require 'views/admin/view_contest.php';
+    }
+
+    public function editContest($contestId) {
+        $conn = Database::getConnection();
+        $contest = Contest::getById($conn, $contestId);
+        $universities = University::getAll($conn);
+        require 'views/admin/edit_contest.php';
+    }
+
+    public function updateContest($contestId) {
+        $conn = Database::getConnection();
+        $data = $_POST;
+        $data['university_id'] = json_encode($data['university_id']); // Encode the university IDs as JSON
+        Contest::update($conn, $contestId, $data);
+        header('Location: /admin/view_contest/' . $contestId);
+    }
+
+    public function deleteContest($contestId) {
+        $conn = Database::getConnection();
+        Contest::delete($conn, $contestId);
+        header('Location: /admin/manage_contest');
+    }
+
+    public function addQuestions($contestId) {
+        $conn = Database::getConnection();
+        $contest = Contest::getById($conn, $contestId);
+        require 'views/admin/add_question.php';
+    }
+
+    public function saveQuestion($contestId) {
+        $conn = Database::getConnection();
+        $data = $_POST;
+        Contest::addQuestion($conn, $contestId, $data);
+        header('Location: /admin/view_contest/' . $contestId);
+    }
+    public function viewQuestion($questionId) {
+        $conn = Database::getConnection();
+        $question = Contest::getQuestionById($conn, $questionId);
+        require 'views/admin/view_question.php';
+    }
+
+    public function editQuestion($questionId) {
+        $conn = Database::getConnection();
+        $question = Contest::getQuestionById($conn, $questionId);
+        require 'views/admin/edit_question.php';
+    }
+
+    public function updateQuestion($questionId) {
+        $conn = Database::getConnection();
+        $data = $_POST;
+        Contest::updateQuestion($conn, $questionId, $data);
+        $question = Contest::getQuestionById($conn, $questionId);
+        header('Location: /admin/view_contest/' . $question['contest_id']);
+    }
+
+    public function deleteQuestion($questionId) {
+        $conn = Database::getConnection();
+        $question = Contest::getQuestionById($conn, $questionId);
+        Contest::deleteQuestion($conn, $questionId);
+        header('Location: /admin/view_contest/' . $question['contest_id']);
     }
 }
 ?>

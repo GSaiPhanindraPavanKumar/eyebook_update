@@ -11,6 +11,7 @@ use Models\Assignment;
 use Models\VirtualClassroom;
 use Models\Discussion;
 use Models\Lab;
+use Models\Contest;
 use PDO;
 use \PDOException;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
@@ -752,6 +753,33 @@ class FacultyController {
         // Save the file to the output
         $writer->save('php://output');
         exit;
+    }
+    public function manageContests() {
+        $conn = Database::getConnection();
+        $facultyId = $_SESSION['faculty_id']; // Assuming the faculty's ID is stored in the session
+
+        // Fetch contests by faculty's university ID
+        $sql = "SELECT university_id FROM faculty WHERE id = :faculty_id";
+        $stmt = $conn->prepare($sql);
+        $stmt->execute([':faculty_id' => $facultyId]);
+        $faculty = $stmt->fetch(PDO::FETCH_ASSOC);
+        $facultyUniversityId = $faculty['university_id'];
+
+        // Fetch contests by university ID
+        $contests = Contest::getByUniversityId($conn, $facultyUniversityId);
+        require 'views/faculty/manage_contests.php';
+    }
+    public function viewContest($contestId) {
+        $conn = Database::getConnection();
+        $contest = Contest::getById($conn, $contestId);
+        $questions = Contest::getQuestions($conn, $contestId);
+        $leaderboard = Contest::getLeaderboard($conn, $contestId);
+        require 'views/faculty/view_contest.php';
+    }
+    public function viewQuestion($questionId) {
+        $conn = Database::getConnection();
+        $question = Contest::getQuestionById($conn, $questionId);
+        require 'views/faculty/view_question.php';
     }
 }
     

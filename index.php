@@ -156,7 +156,19 @@ $router->post('/admin/create_lab', 'AdminController@createLab');
 $router->get('/admin/manage_labs', 'AdminController@manageLabs');
 $router->get('/admin/view_lab_detail/([0-9]+)', 'AdminController@viewLabDetail');
 $router->get('/admin/download_lab_report/([0-9]+)', 'AdminController@downloadLabReport');
-
+$router->get('/admin/create_contest', 'AdminController@createContest');
+$router->post('/admin/save_contest', 'AdminController@saveContest');
+$router->get('/admin/manage_contest', 'AdminController@manageContest');
+$router->get('/admin/view_contest/([0-9]+)', 'AdminController@viewContest');
+$router->get('/admin/edit_contest/([0-9]+)', 'AdminController@editContest');
+$router->post('/admin/update_contest/([0-9]+)', 'AdminController@updateContest');
+$router->get('/admin/delete_contest/([0-9]+)', 'AdminController@deleteContest');
+$router->get('/admin/add_questions/([0-9]+)', 'AdminController@addQuestions');
+$router->post('/admin/save_question/([0-9]+)', 'AdminController@saveQuestion');
+$router->get('/admin/view_question/([0-9]+)', 'AdminController@viewQuestion');
+$router->get('/admin/edit_question/([0-9]+)', 'AdminController@editQuestion');
+$router->post('/admin/update_question/([0-9]+)', 'AdminController@updateQuestion');
+$router->get('/admin/delete_question/([0-9]+)', 'AdminController@deleteQuestion');
 
 $router->get('/spoc', 'SpocController@dashboard');
 $router->get('/spoc/dashboard', 'SpocController@dashboard');
@@ -180,6 +192,14 @@ $router->get('/spoc/view_book/([a-zA-Z0-9]+)', 'SpocController@viewBook');
 $router->get('/spoc/view_labs/([a-zA-Z0-9]+)', 'SpocController@viewLabs');
 $router->get('/spoc/view_lab_detail/([0-9]+)', 'SpocController@viewLabDetail');
 $router->get('/spoc/download_lab_report/([0-9]+)', 'SpocController@downloadLabReport');
+$router->get('/spoc/manage_contests', 'SpocController@manageContests');
+$router->get('/spoc/view_contest/([0-9]+)', 'SpocController@viewContest');
+$router->get('/spoc/view_contest/([0-9]+)', 'SpocController@viewContest');
+$router->get('/spoc/view_question/([0-9]+)', 'SpocController@viewQuestion');
+$router->get('/spoc/discussion_forum', 'SpocController@viewDiscussions');
+$router->post('/spoc/discussion_forum', 'SpocController@createDiscussion');
+$router->post('/spoc/reply_discussion', 'SpocController@replyDiscussion');
+
 
 
 $router->get('/faculty/dashboard', 'FacultyController@dashboard');
@@ -274,8 +294,9 @@ $router->get('/faculty/view_course_plan/(\w+)', 'FacultyController@viewCoursePla
 $router->get('/faculty/view_material/(\w+)', 'FacultyController@viewMaterial');
 $router->get('/faculty/view_reports', 'FacultyController@viewReports');
 $router->get('/faculty/download_report/(\d+)', 'FacultyController@downloadReport');
-
-
+$router->get('/faculty/manage_contests', 'FacultyController@manageContests');
+$router->get('/faculty/view_contest/([0-9]+)', 'FacultyController@viewContest');
+$router->get('/faculty/view_question/([0-9]+)', 'FacultyController@viewQuestion');
 
 $router->get('/student/manage_assignments', 'StudentController@manageAssignments');
 $router->get('/student/view_assignment/(\d+)', 'StudentController@viewAssignment');
@@ -394,6 +415,10 @@ $router->post('/student/ilab', function(){
 $router->get('/student/lab_view', 'StudentController@labView');
 $router->get('/student/lab_view/([0-9]+)', 'StudentController@labView');
 $router->post('/student/submit_lab/(\d+)', 'StudentController@submitLab');
+$router->get('/student/manage_contests', 'StudentController@manageContests');
+$router->get('/student/view_contest/([0-9]+)', 'StudentController@viewContest');
+$router->get('/student/view_question/([0-9]+)', 'StudentController@viewQuestion');
+$router->post('/student/update_question_submission', 'StudentController@updateQuestionSubmission');
 
 $router->get('/logout', 'AuthController@logout');
 $router->get('/admin/logout', 'AuthController@logout');

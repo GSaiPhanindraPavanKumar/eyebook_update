@@ -198,6 +198,18 @@ if ($userData) {
                         </ul>
                     </div>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-toggle="collapse" href="#lab" aria-expanded="false" aria-controls="lab">
+                        <i class="icon-columns menu-icon"></i>
+                        <span class="menu-title">Lab</span>
+                        <i class="menu-arrow"></i>
+                    </a>
+                    <div class="collapse" id="lab">
+                        <ul class="nav flex-column sub-menu">
+                            <li class="nav-item"> <a class="nav-link" href="/faculty/manage_contests">Contests</a></li>
+                        </ul>
+                    </div>
+                </li>
                 <!-- <li class="nav-item">
                     <a class="nav-link" data-toggle="collapse" href="#streams" aria-expanded="false" aria-controls="streams">
                         <i class="icon-grid-2 menu-icon"></i>

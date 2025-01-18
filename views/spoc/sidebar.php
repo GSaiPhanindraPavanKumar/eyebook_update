@@ -155,7 +155,33 @@ if ($userData) {
                         </ul>
                     </div>
                 </li>
+                
+                <li class="nav-item">
+                    <a class="nav-link" data-toggle="collapse" href="#discussion" aria-expanded="false" aria-controls="discussion">
+                        <i class="icon-bar-graph menu-icon"></i>
+                        <span class="menu-title" >Discussion</span>
+                        <i class="menu-arrow"></i>
+                    </a>
+                    <div class="collapse" id="discussion">
+                        <ul class="nav flex-column sub-menu">
+                        <!-- <li class="nav-item"> <a class="nav-link" href="upload_students">Upload Students</a></li> -->
+                            <li class="nav-item"> <a class="nav-link" href="discussion_forum">Discussion Forum</a></li>
+                        </ul>
+                    </div>
+                </li>
 
+                <li class="nav-item">
+                    <a class="nav-link" data-toggle="collapse" href="#lab" aria-expanded="false" aria-controls="lab">
+                        <i class="icon-columns menu-icon"></i>
+                        <span class="menu-title">Lab</span>
+                        <i class="menu-arrow"></i>
+                    </a>
+                    <div class="collapse" id="lab">
+                        <ul class="nav flex-column sub-menu">
+                            <li class="nav-item"> <a class="nav-link" href="/spoc/manage_contests">Contests</a></li>
+                        </ul>
+                    </div>
+                </li>
 
 
                 <!-- <li class="nav-item">
