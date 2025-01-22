@@ -169,6 +169,7 @@ $router->get('/admin/view_question/([0-9]+)', 'AdminController@viewQuestion');
 $router->get('/admin/edit_question/([0-9]+)', 'AdminController@editQuestion');
 $router->post('/admin/update_question/([0-9]+)', 'AdminController@updateQuestion');
 $router->get('/admin/delete_question/([0-9]+)', 'AdminController@deleteQuestion');
+$router->get('/admin/download_feedback/(\d+)', 'AdminController@downloadFeedback');
 
 $router->get('/spoc', 'SpocController@dashboard');
 $router->get('/spoc/dashboard', 'SpocController@dashboard');

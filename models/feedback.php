@@ -32,4 +32,11 @@ class feedback {
         ]);
         return $stmt->fetchColumn() > 0;
     }
+
+    public static function getFeedbackByCourseId($conn, $courseId) {
+        $sql = "SELECT * FROM feedback WHERE course_id = :course_id";
+        $stmt = $conn->prepare($sql);
+        $stmt->execute([':course_id' => $courseId]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
 }

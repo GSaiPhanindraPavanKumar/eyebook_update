@@ -805,6 +805,64 @@ class AdminController {
         require 'views/admin/manage_courses.php';
     }
 
+    public function downloadFeedback($courseId) {
+        $conn = Database::getConnection();
+        $feedbacks = feedback::getFeedbackByCourseId($conn, $courseId);
+
+        if (empty($feedbacks)) {
+            die('No feedback available for this course.');
+        }
+
+        // Create a new spreadsheet
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setTitle('Feedback');
+
+        // Set the headers
+        $headers = [
+            'Student Name', 'Depth of Coverage', 'Emphasis on Fundamentals', 'Coverage of Modern Topics',
+            'Overall Rating', 'Benefits', 'Instructor Assistance', 'Instructor Feedback', 'Motivation',
+            'SME Help', 'Overall Very Good'
+        ];
+        $sheet->fromArray($headers, NULL, 'A1');
+
+        // Populate the feedback data
+        $row = 2;
+        foreach ($feedbacks as $feedback) {
+            $student = Student::getById($conn, $feedback['student_id']);
+            $data = [
+                $student['name'] ?? 'N/A',
+                $feedback['depth_of_coverage'],
+                $feedback['emphasis_on_fundamentals'],
+                $feedback['coverage_of_modern_topics'],
+                $feedback['overall_rating'],
+                $feedback['benefits'],
+                $feedback['instructor_assistance'],
+                $feedback['instructor_feedback'],
+                $feedback['motivation'],
+                $feedback['sme_help'],
+                $feedback['overall_very_good']
+            ];
+            $sheet->fromArray($data, NULL, 'A' . $row);
+            $row++;
+        }
+
+        // Write the spreadsheet to a file
+        $writer = new Xlsx($spreadsheet);
+        $fileName = 'feedback_course_' . $courseId . '.xlsx';
+        $filePath = sys_get_temp_dir() . '/' . $fileName;
+        $writer->save($filePath);
+
+        // Output the file for download
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment; filename="' . $fileName . '"');
+        header('Content-Length: ' . filesize($filePath));
+        readfile($filePath);
+
+        // Delete the temporary file
+        unlink($filePath);
+    }
+
     public function courseView($course_id) {
         $conn = Database::getConnection();
     
