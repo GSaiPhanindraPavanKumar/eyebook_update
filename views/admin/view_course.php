@@ -522,7 +522,7 @@ $assignedUniversities = Course::getAssignedUniversities($conn, $course['id']);
                             </form>
 
                             <div class="mt-4">
-                                <h5>View Feedback</h5>
+                            <h5 class="d-flex justify-content-between align-items-center">View Feedback <a href="/admin/download_feedback/<?php echo $course['id']; ?>" class="btn btn-primary">Download Feedback</a></h5>
                                 <div class="table-responsive mt-4">
                                     <table class="table table-hover table-borderless table-striped">
                                         <thead class="thead-light">
@@ -548,7 +548,7 @@ $assignedUniversities = Course::getAssignedUniversities($conn, $course['id']);
                                             } else {
                                                 foreach ($feedbacks as $feedback):
                                                     $student = Student::getById($conn, $feedback['student_id']);
-                                            ?>
+                                                ?>
                                                 <tr>
                                                     <td><?php echo htmlspecialchars($student['name']); ?></td>
                                                     <td><?php echo htmlspecialchars($feedback['depth_of_coverage']); ?></td>

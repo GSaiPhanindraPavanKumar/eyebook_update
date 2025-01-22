@@ -58,7 +58,7 @@ function daysAgo($date) {
                         <div class="table-responsive">
                             <form method="get" action="">
                                 <div class="input-group mb-3">
-                                    <input class="form-control" id="searchInput" name="search" type="text" placeholder="🔍 Search Faculty..." value="<?= htmlspecialchars($searchQuery) ?>">
+                                    <input class="form-control" id="searchInput" name="search" type="text" placeholder="🔍 Search Student..." value="<?= htmlspecialchars($searchQuery) ?>">
                                     <div class="input-group-append">
                                         <button class="btn btn-secondary" type="button" id="clearSearch">X</button>
                                         <button class="btn btn-primary" type="submit">Search</button>
@@ -81,7 +81,7 @@ function daysAgo($date) {
                                     </thead>
                                     <tbody id="studentTable">
                                         <?php
-                                        $limit = 25;
+                                        //$limit = 25;
                                         $page = isset($_GET['page']) ? $_GET['page'] : 1;
                                         $offset = ($page - 1) * $limit;
                                         $total_students = count($students);
