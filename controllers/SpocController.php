@@ -522,6 +522,16 @@ class SpocController {
         }
     }
 
+    public function viewAssignment($assignment_id) {
+        $conn = Database::getConnection();
+        $assignment = Assignment::getById($conn, $assignment_id);
+        $submissions = Assignment::getSubmissions($conn, $assignment_id);
+
+        $course_id = json_decode($assignment['course_id'], true)[0];
+
+        require 'views/spoc/view_assignment.php';
+    }
+
     public function viewDiscussions() {
         $this->ensureUniversityIdInSession();
         $conn = Database::getConnection();

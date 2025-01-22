@@ -200,6 +200,7 @@ $router->get('/spoc/view_question/([0-9]+)', 'SpocController@viewQuestion');
 $router->get('/spoc/discussion_forum', 'SpocController@viewDiscussions');
 $router->post('/spoc/discussion_forum', 'SpocController@createDiscussion');
 $router->post('/spoc/reply_discussion', 'SpocController@replyDiscussion');
+$router->get('/spoc/view_assignment/(\d+)', 'FacultyController@viewAssignment');
 
 
 
