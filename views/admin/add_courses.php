@@ -42,18 +42,6 @@ include "sidebar.php";
                             </div>
                             <button type="submit" class="btn btn-primary">Add Course</button>
                         </form>
-
-                        <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
-                        <script>
-                            <?php if (isset($message)): ?>
-                                toastr.<?php echo $message_type; ?>("<?php echo htmlspecialchars($message); ?>");
-                                <?php if ($message_type == 'success'): ?>
-                                    setTimeout(function() {
-                                        window.location.href = 'manage_courses';
-                                    }, 3000);
-                                <?php endif; ?>
-                            <?php endif; ?>
-                        </script>
                     </div>
                 </div>
             </div>
@@ -65,3 +53,15 @@ include "sidebar.php";
 
 <!-- Include Bootstrap CSS -->
 <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+<script>
+    <?php if (isset($message)): ?>
+        toastr.<?php echo $message_type; ?>("<?php echo htmlspecialchars($message); ?>");
+        <?php if ($message_type == 'success'): ?>
+            setTimeout(function() {
+                window.location.href = 'manage_courses';
+            }, 3000);
+        <?php endif; ?>
+    <?php endif; ?>
+</script>

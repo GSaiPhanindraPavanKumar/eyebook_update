@@ -783,54 +783,20 @@ class AdminController {
     }
     
     public function addCourse() {
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $conn = Database::getConnection();
-            
-            try {
-                $conn->beginTransaction();
-                
-                // Insert course
-                $stmt = $conn->prepare("INSERT INTO courses (name, description, status) VALUES (?, ?, 'active')");
-                $stmt->execute([$_POST['name'], $_POST['description']]);
-                $courseId = $conn->lastInsertId();
-                
-                // Handle lab entries
-                if (!empty($_POST['lab_name'])) {
-                    foreach ($_POST['lab_name'] as $key => $labName) {
-                        $labFile = '';
-                        if (isset($_FILES['lab_file']['name'][$key])) {
-                            $fileName = time() . '_' . $_FILES['lab_file']['name'][$key];
-                            $uploadPath = 'uploads/labs/' . $fileName;
-                            move_uploaded_file($_FILES['lab_file']['tmp_name'][$key], $uploadPath);
-                            $labFile = $uploadPath;
-                        }
-                        
-                        $stmt = $conn->prepare("INSERT INTO labs (course_id, lab_name, description, file_path, due_date, status) 
-                                              VALUES (?, ?, ?, ?, ?, 'active')");
-                        $stmt->execute([
-                            $courseId,
-                            $labName,
-                            $_POST['lab_description'][$key],
-                            $labFile,
-                            $_POST['lab_due_date'][$key]
-                        ]);
-                    }
-                }
-                
-                $conn->commit();
-                header('Location: /admin/courses');
-                exit;
-                
-            } catch (Exception $e) {
-                $conn->rollBack();
-                error_log($e->getMessage());
-                $_SESSION['error'] = "Error creating course: " . $e->getMessage();
-                header('Location: /admin/add_course');
-                exit;
+        $conn = Database::getConnection();
+        $message = '';
+        $message_type = '';
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            $name = $_POST['name'];
+            $description = $_POST['description'];
+            $message = Course::create($conn, $name, $description);
+            if ($message === "Course created successfully!") {
+                $message_type = 'success';
+            } else {
+                $message_type = 'error';
             }
         }
-        
-        require 'views/admin/add_course.php';
+        require 'views/admin/add_courses.php';
     }
 
     public function manageCourse() {
