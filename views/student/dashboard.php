@@ -308,12 +308,20 @@ function getAllVirtualClasses($studentId) {
 <!-- Include FullCalendar -->
 <link href='https://cdn.jsdelivr.net/npm/fullcalendar@5.10.1/main.min.css' rel='stylesheet' />
 <script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.10.1/main.min.js'></script>
-
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     var calendarEl = document.getElementById('calendar');
     var calendar = new FullCalendar.Calendar(calendarEl, {
         initialView: 'dayGridMonth',
+        // headerToolbar: {
+        //     left: 'prev,next today',
+        //     center: 'title',
+        //     right: 'dayGridMonth,timeGridWeek,timeGridDay'
+        // },
+        headerToolbar: {
+            left: 'title',
+            right: 'today prev,next'
+        },
         events: <?php echo json_encode(array_merge(
             array_map(function($class) {
                 return [
@@ -325,16 +333,81 @@ document.addEventListener('DOMContentLoaded', function() {
             }, $virtualClasses),
             array_map(function($assignment) {
                 return [
-                    'title' => $assignment['title'] . ' (Due Date)',
+                    'title' => $assignment['title'] . ' (Due)',
                     'start' => $assignment['due_date'],
-                    'allDay' => true,
-                    'color' => 'red', // Set the color to red
-                    'url' => '/student/view_assignment/' . $assignment['id'] // Navigate to view assignment page
+                    'color' => 'red',
+                    'url' => '/admin/view_assignment/' . $assignment['id'] // URL to view the assignment
                 ];
-            }, $upcomingAssignments)
+            }, $assignments)
         )); ?>,
         eventDisplay: 'block' // Ensure event titles are always visible
     });
     calendar.render();
 });
 </script>
+<style>
+/* Ensure FullCalendar navigation buttons are always visible */
+.fc .fc-toolbar-title {
+    font-size: 1.5em;
+    font-weight: bold;
+}
+
+.fc .fc-button {
+    background-color: transparent;
+    border: 1px solid #007bff;
+    color: #007bff;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.fc .fc-button:hover {
+    background-color: #007bff;
+    color: #fff;
+}
+
+.fc .fc-button:focus {
+    box-shadow: none;
+}
+
+.fc .fc-button-group .fc-button {
+    margin-right: 5px;
+}
+
+.fc .fc-toolbar-chunk {
+    display: flex;
+    align-items: center;
+}
+
+.fc .fc-toolbar-chunk:first-child {
+    justify-content: flex-start;
+}
+
+.fc .fc-toolbar-chunk:last-child {
+    justify-content: flex-end;
+}
+
+.fc .fc-toolbar-chunk .fc-button-group {
+    display: flex;
+    align-items: center;
+}
+
+.fc .fc-toolbar-chunk .fc-button-group .fc-button {
+    margin-right: 5px;
+}
+
+.fc .fc-toolbar-chunk .fc-button-group .fc-button:last-child {
+    margin-right: 0;
+}
+
+/* Ensure navigation buttons are always visible */
+.fc .fc-toolbar .fc-toolbar-chunk:first-child .fc-button-group .fc-button {
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+/* Ensure the entire toolbar is always visible */
+.fc .fc-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+</style>

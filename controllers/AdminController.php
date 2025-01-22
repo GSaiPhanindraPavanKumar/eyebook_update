@@ -693,9 +693,9 @@ class AdminController {
                     continue;
                 }
     
-                $regd_no = $row[0] ?? null;
-                $name = $row[1] ?? null;
-                $email = $row[2] ?? null;
+                $regd_no = $row[0];
+                $name = $row[1];
+                $email = $row[2];
                 $phone = $row[3] ?? null;
                 $section = $row[4] ?? null;
                 $stream = $row[5] ?? null;
