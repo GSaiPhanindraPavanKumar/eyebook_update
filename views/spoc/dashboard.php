@@ -228,7 +228,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     'title' => $assignment['title'] . ' (Due)',
                     'start' => $assignment['due_date'],
                     'color' => 'red',
-                    'url' => '/spoc/view_assignment/' . $assignment['id'] // URL to view the assignment
+                    // 'url' => '/spoc/view_assignment/' . $assignment['id'] // URL to view the assignment
                 ];
             }, $assignments)
         )); ?>,
