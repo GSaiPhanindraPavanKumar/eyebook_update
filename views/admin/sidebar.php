@@ -61,9 +61,8 @@ $adminModel = new \Models\Admin();
             </button>
 
             <ul class="navbar-nav navbar-nav-right">
-
                 <li class="nav-item nav-profile dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" data-toggle="#" id="#">
+                    <a class="nav-link dropdown-toggle" href="#" data-toggle="dropdown" id="profileDropdown">
                         <img src="/views/public/images/user.jpg" alt="profile"/>
                     </a>
                     <div class="dropdown-menu dropdown-menu-right navbar-dropdown" aria-labelledby="profileDropdown">
@@ -75,14 +74,12 @@ $adminModel = new \Models\Admin();
                             <i class="ti-power-off text-primary"></i>
                             Logout
                         </a>
-
+                    </div>
                 </li>
-
             </ul>
             <button class="navbar-toggler navbar-toggler-right d-lg-none align-self-center" type="button" data-toggle="offcanvas">
-          <span class="icon-menu"></span>
-        </button>
-                    </div>
+                <span class="icon-menu"></span>
+            </button>
         </div>
     </nav>
     <div class="container-fluid page-body-wrapper">
