@@ -81,7 +81,7 @@ function daysAgo($date) {
                                     </thead>
                                     <tbody id="studentTable">
                                         <?php
-                                        $limit = 25;
+                                        $limit = 500;
                                         $page = isset($_GET['page']) ? $_GET['page'] : 1;
                                         $offset = ($page - 1) * $limit;
                                         $total_students = count($students);
