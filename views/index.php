@@ -20,6 +20,7 @@ $message = $message ?? ''; // Ensure $message is defined
     <link rel="stylesheet" type="text/css" href="/views/public/assets/styles/core.css">
     <link rel="stylesheet" type="text/css" href="/views/public/assets/styles/icon-font.min.css">
     <link rel="stylesheet" type="text/css" href="/views/public/assets/styles/style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet"> <!-- Font Awesome -->
     <style>
         h5 {
             color: blue;
@@ -27,6 +28,20 @@ $message = $message ?? ''; // Ensure $message is defined
         .custom-checkbox {
             margin-top: 0px;
             margin-bottom: 5px;
+        }
+        .input-group.custom {
+            position: relative;
+        }
+        .input-group.custom .toggle-password {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #6c757d;
+        }
+        .toggle-password:hover {
+            color: #007bff;
         }
     </style>
 </head>
@@ -59,6 +74,9 @@ $message = $message ?? ''; // Ensure $message is defined
                         </div>
                         <div class="input-group custom">
                             <input type="password" class="form-control form-control-lg" placeholder="**********" name="password" id="password" required>
+                            <span class="toggle-password" onclick="togglePasswordVisibility()">
+                                <i class="fas fa-eye"></i>
+                            </span>
                         </div>
                         <div class="input-group custom custom-checkbox">
                             <input type="checkbox" name="agree" id="agree" required>
@@ -90,5 +108,20 @@ $message = $message ?? ''; // Ensure $message is defined
 <script src="/views/public/assets/scripts/script.min.js"></script>
 <script src="/views/public/assets/scripts/process.js"></script>
 <script src="/views/public/assets/scripts/layout-settings.js"></script>
+<script>
+function togglePasswordVisibility() {
+    var passwordInput = document.getElementById('password');
+    var toggleIcon = document.querySelector('.toggle-password i');
+    if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        toggleIcon.classList.remove('fa-eye');
+        toggleIcon.classList.add('fa-eye-slash');
+    } else {
+        passwordInput.type = 'password';
+        toggleIcon.classList.remove('fa-eye-slash');
+        toggleIcon.classList.add('fa-eye');
+    }
+}
+</script>
 </body>
 </html>

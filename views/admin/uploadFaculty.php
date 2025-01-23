@@ -26,7 +26,7 @@
                         <div id="singleUploadForm">
                             <form method="POST" action="/admin/uploadSingleFaculty">
                                 <div class="form-group">
-                                    <label for="university_id_single">Select University</label>
+                                    <label for="university_id_single">Select University <span style="color: red;">*</span></label>
                                     <select id="university_id_single" name="university_id" class="form-control" required>
                                         <option value="">Select a university</option>
                                         <?php foreach ($universities as $university): ?>
@@ -37,31 +37,31 @@
                                     </select>
                                 </div>
                                 <div class="form-group">
-                                    <label for="name">Name</label>
+                                    <label for="name">Name <span style="color: red;">*</span></label>
                                     <input type="text" id="name" name="name" class="form-control" required>
                                 </div>
                                 <div class="form-group">
-                                    <label for="email">Email</label>
+                                    <label for="email">Email <span style="color: red;">*</span></label>
                                     <input type="email" id="email" name="email" class="form-control" required>
                                 </div>
                                 <div class="form-group">
                                     <label for="phone">Phone</label>
-                                    <input type="text" id="phone" name="phone" class="form-control" required>
+                                    <input type="text" id="phone" name="phone" class="form-control">
                                 </div>
                                 <div class="form-group">
                                     <label for="section">Section</label>
-                                    <input type="text" id="section" name="section" class="form-control" required>
+                                    <input type="text" id="section" name="section" class="form-control">
                                 </div>
                                 <div class="form-group">
                                     <label for="stream">Stream</label>
-                                    <input type="text" id="stream" name="stream" class="form-control" required>
+                                    <input type="text" id="stream" name="stream" class="form-control">
                                 </div>
                                 <div class="form-group">
                                     <label for="department">Department</label>
-                                    <input type="text" id="department" name="department" class="form-control" required>
+                                    <input type="text" id="department" name="department" class="form-control">
                                 </div>
                                 <div class="form-group">
-                                    <label for="password">Password</label>
+                                    <label for="password">Password <span style="color: red;">*</span></label>
                                     <input type="password" id="password" name="password" class="form-control" required>
                                 </div>
                                 <div class="form-group">

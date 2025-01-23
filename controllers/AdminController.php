@@ -1044,10 +1044,10 @@ class AdminController {
     
                 $name = $row[0];
                 $email = $row[1];
-                $phone = $row[2];
-                $section = $row[3];
-                $stream = $row[4];
-                $department = $row[5];
+                $phone = $row[2] ?? null;
+                $section = $row[3] ?? null;
+                $stream = $row[4] ?? null;
+                $department = $row[5] ?? null;
                 $passwordPlain = $row[6];
                 $password = password_hash($passwordPlain, PASSWORD_BCRYPT);
     
