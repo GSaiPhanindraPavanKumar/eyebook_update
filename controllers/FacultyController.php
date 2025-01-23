@@ -526,6 +526,33 @@ class FacultyController {
 
         require 'views/faculty/manage_assignments.php';
     }
+
+    public function createLab() {
+        $conn = Database::getConnection();
+        $email = $_SESSION['email'];
+        // Fetch user data
+        $userData = Faculty::getUserDataByEmail($conn, $email);
+
+        // Fetch assigned courses
+        $assignedCourseIds = json_decode($userData['assigned_courses'], true);
+        $courses = Course::getCoursesByIds($conn, $assignedCourseIds);
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $title = $_POST['lab_title'];
+            $description = $_POST['lab_description'];
+            $due_date = $_POST['due_date'];
+            $course_ids = $_POST['course_id'];
+            $input = $_POST['input'];
+            $output = $_POST['output'];
+            $submissions = []; // Initialize submissions as an empty array
+
+            Lab::create($conn, $title, $description, $due_date, $course_ids, $input, $output, $submissions);
+            header('Location: /faculty/lab_create');
+            exit;
+        }
+
+        require 'views/faculty/lab_create.php';
+    }
     
 
     public function createAssignment() {

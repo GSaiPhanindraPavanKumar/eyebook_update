@@ -204,6 +204,7 @@ if ($userData) {
                     </a>
                     <div class="collapse" id="lab">
                         <ul class="nav flex-column sub-menu">
+                            <li class="nav-item"> <a class="nav-link" href="/faculty/create_lab">Create Lab</a></li>
                             <li class="nav-item"> <a class="nav-link" href="/faculty/manage_contests">Contests</a></li>
                         </ul>
                     </div>
