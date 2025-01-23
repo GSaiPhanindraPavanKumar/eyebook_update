@@ -306,11 +306,6 @@ document.addEventListener('DOMContentLoaded', function() {
     var calendarEl = document.getElementById('calendar');
     var calendar = new FullCalendar.Calendar(calendarEl, {
         initialView: 'dayGridMonth',
-        // headerToolbar: {
-        //     left: 'prev,next today',
-        //     center: 'title',
-        //     right: 'dayGridMonth,timeGridWeek,timeGridDay'
-        // },
         headerToolbar: {
             left: 'title',
             right: 'today prev,next'
@@ -323,15 +318,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     'end' => date('Y-m-d\TH:i:s', strtotime($class['start_time'] . ' + ' . $class['duration'] . ' minutes')),
                     'url' => $class['join_url']
                 ];
-            }, $virtualClasses),
-            array_map(function($assignment) {
-                return [
-                    'title' => $assignment['title'] . ' (Due)',
-                    'start' => $assignment['due_date'],
-                    'color' => 'red',
-                    'url' => '/faculty/view_assignment/' . $assignment['id'] // URL to view the assignment
-                ];
-            }, $assignments)
+            }, $virtualClasses)
         )); ?>,
         eventDisplay: 'block' // Ensure event titles are always visible
     });
