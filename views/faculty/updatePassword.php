@@ -95,7 +95,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                 </div>
                             </div>
                             <button type="submit" class="btn btn-primary mr-2">Submit</button>
-                            <button class="btn btn-light" type="button" onclick="window.location.href='profile.php'">Cancel</button>
+                            <button class="btn btn-light" type="button" onclick="window.location.href='profile'">Cancel</button>
                         </form>
                     </div>
                 </div>
