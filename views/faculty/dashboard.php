@@ -306,20 +306,14 @@ document.addEventListener('DOMContentLoaded', function() {
     var calendarEl = document.getElementById('calendar');
     var calendar = new FullCalendar.Calendar(calendarEl, {
         initialView: 'dayGridMonth',
-        headerToolbar: {
-            left: 'title',
-            right: 'today prev,next'
-        },
-        events: <?php echo json_encode(array_merge(
-            array_map(function($class) {
-                return [
-                    'title' => $class['topic'],
-                    'start' => $class['start_time'],
-                    'end' => date('Y-m-d\TH:i:s', strtotime($class['start_time'] . ' + ' . $class['duration'] . ' minutes')),
-                    'url' => $class['join_url']
-                ];
-            }, $virtualClasses)
-        )); ?>,
+        events: <?php echo json_encode(array_map(function($class) {
+            return [
+                'title' => $class['topic'],
+                'start' => $class['start_time'],
+                'end' => date('Y-m-d\TH:i:s', strtotime($class['start_time'] . ' + ' . $class['duration'] . ' minutes')),
+                'url' => $class['join_url']
+            ];
+        }, $virtualClasses)); ?>,
         eventDisplay: 'block' // Ensure event titles are always visible
     });
     calendar.render();
