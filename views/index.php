@@ -50,8 +50,9 @@ $message = $message ?? ''; // Ensure $message is defined
     <div class="container-fluid d-flex justify-content-between align-items-center">
         <nav class="navbar navbar-light">
             <div class="container">
-                <a class="navbar-brand" href="#">
-                    <h2 style="font-family: cursive;">Knowbots</h2>
+                <a class="navbar-brand brand-logo mr-5" href="#">
+                    <img src="/views/public/assets/images/logo1.png" class="mr-2" alt="logo" height="50" width="50">
+                    <h2 style="font-family: cursive; display: inline;">Knowbots</h2>
                 </a>
             </div>
         </nav>
