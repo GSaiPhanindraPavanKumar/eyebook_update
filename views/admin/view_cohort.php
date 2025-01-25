@@ -4,8 +4,8 @@
         <div class="row">
             <div class="col-md-12 grid-margin">
                 <div class="d-flex justify-content-between align-items-center">
-                    <h2 class="font-weight-bold mb-4">Cohort Management: <?php echo htmlspecialchars($cohort['name']); ?></h2>
-                    <span class="badge bg-primary text-white">Cohort ID: <?php echo htmlspecialchars($cohort['id']); ?></span>
+                    <h2 class="font-weight-bold mb-4">Cohort Management: <?php echo htmlspecialchars($cohort['name'] ?? ''); ?></h2>
+                    <span class="badge bg-primary text-white">Cohort ID: <?php echo htmlspecialchars($cohort['id'] ?? ''); ?></span>
                 </div>
             </div>
         </div>
@@ -16,7 +16,7 @@
                     <div class="card-body">
                         <!-- Cohort Details Section -->
                         <h4 class="card-title mt-3">Cohort Details</h4>
-                        <p><strong>Cohort Name:</strong> <?php echo htmlspecialchars($cohort['name']); ?></p>
+                        <p><strong>Cohort Name:</strong> <?php echo htmlspecialchars($cohort['name'] ?? ''); ?></p>
                         
                         <!-- Courses Section -->
                         <div class="d-flex justify-content-between align-items-center">
@@ -47,7 +47,7 @@
                         </ul>
                         <div id="addCourseForm" class="mt-3" style="display: none;">
                             <form method="POST" action="/admin/assign_courses_to_cohort">
-                                <input type="hidden" name="cohort_id" value="<?php echo htmlspecialchars($cohort['id']); ?>">
+                                <input type="hidden" name="cohort_id" value="<?php echo htmlspecialchars($cohort['id'] ?? ''); ?>">
                                 <div class="table-responsive">
                                     <table class="table table-hover table-borderless table-striped">
                                         <thead class="thead-light">
@@ -80,13 +80,14 @@
                         </div>
                         <input type="text" id="assignedStudentsSearch" class="form-control mb-3" placeholder="Search Assigned Students">
                         <form id="unassignStudentForm" method="POST" action="/admin/unassign_students_from_cohort">
-                            <input type="hidden" name="cohort_id" value="<?php echo htmlspecialchars($cohort['id']); ?>">
+                            <input type="hidden" name="cohort_id" value="<?php echo htmlspecialchars($cohort['id'] ?? ''); ?>">
                             <div class="table-responsive">
                                 <table class="table table-hover table-borderless table-striped" id="assignedStudentsTable">
                                     <thead class="thead-light">
                                         <tr>
                                             <th><input type="checkbox" id="selectAllAssigned"></th>
                                             <th>Student Name</th>
+                                            <th>Email</th>
                                             <th>University</th>
                                         </tr>
                                     </thead>
@@ -97,6 +98,7 @@
                                                     <input type="checkbox" name="student_ids[]" value="<?php echo $student['id']; ?>">
                                                 </td>
                                                 <td><?php echo htmlspecialchars($student['name']); ?></td>
+                                                <td><?php echo htmlspecialchars($student['email']); ?></td>
                                                 <td>
                                                     <?php
                                                     $university = array_filter($universities, function($u) use ($student) {
@@ -114,7 +116,21 @@
                         </form>
                         
                         <!-- Add Students Section -->
-                        <h5 class="mt-3">Add Students</h5>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h5 class="mt-3">Add Students</h5>
+                            <button id="bulkAddStudentButton" class="btn btn-primary">Bulk Add Students</button>
+                        </div>
+                        <!-- Bulk Add Students Form -->
+                        <div id="bulkAddStudentForm" class="mt-3" style="display: none;">
+                            <form method="POST" action="/admin/bulk_add_students_to_cohort/<?php echo $cohort['id']; ?>" enctype="multipart/form-data">
+                                <div class="form-group">
+                                    <label for="bulk_student_file">Upload Excel File</label>
+                                    <input type="file" class="form-control" id="bulk_student_file" name="bulk_student_file" accept=".xlsx, .xls" required>
+                                </div>
+                                <button type="submit" class="btn btn-primary">Upload</button>
+                                <button type="button" id="cancelBulkAddStudent" class="btn btn-secondary">Cancel</button>
+                            </form>
+                        </div>
                         <input type="text" id="addStudentsSearch" class="form-control mb-3" placeholder="Search Students to Add">
                         <form method="POST" action="/admin/add_students_to_cohort/<?php echo $cohort['id']; ?>">
                             <div class="form-group">
@@ -125,6 +141,7 @@
                                             <tr>
                                                 <th><input type="checkbox" id="selectAllAdd"></th>
                                                 <th>Student Name</th>
+                                                <th>Email</th>
                                                 <th>University</th>
                                             </tr>
                                         </thead>
@@ -135,6 +152,7 @@
                                                         <input type="checkbox" name="student_ids[]" value="<?php echo $student['id']; ?>" <?php echo in_array($student['id'], $existing_student_ids) ? 'disabled' : ''; ?>>
                                                     </td>
                                                     <td><?php echo htmlspecialchars($student['name']); ?></td>
+                                                    <td><?php echo htmlspecialchars($student['email']); ?></td>
                                                     <td>
                                                         <?php
                                                         $university = array_filter($universities, function($u) use ($student) {
@@ -177,6 +195,14 @@
 
         $('#unassignStudentButton').on('click', function () {
             $('#unassignStudentForm').submit();
+        });
+
+        $('#bulkAddStudentButton').on('click', function () {
+            $('#bulkAddStudentForm').show();
+        });
+
+        $('#cancelBulkAddStudent').on('click', function () {
+            $('#bulkAddStudentForm').hide();
         });
 
         // Search functionality for Assigned Students

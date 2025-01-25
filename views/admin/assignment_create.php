@@ -23,7 +23,7 @@
                                 <?php endforeach; ?>
                             </div>
                         <?php endif; ?>
-                        <form action="/admin/create_assignment" method="post" enctype="multipart/form-data">
+                        <form id="assignmentForm" action="/admin/create_assignment" method="post" enctype="multipart/form-data">
                             <div class="form-group">
                                 <label for="assignment_title">Assignment Title:</label>
                                 <input type="text" class="form-control" id="assignment_title" name="assignment_title" required>
@@ -31,6 +31,10 @@
                             <div class="form-group">
                                 <label for="assignment_description">Assignment Description:</label>
                                 <textarea class="form-control" id="assignment_description" name="assignment_description" required></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="start_date">Start Date:</label>
+                                <input type="datetime-local" class="form-control" id="start_date" name="start_date" required>
                             </div>
                             <div class="form-group">
                                 <label for="due_date">Due Date:</label>
@@ -70,3 +74,29 @@
 </div>
 
 <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('assignmentForm');
+    const startDateInput = document.getElementById('start_date');
+    const dueDateInput = document.getElementById('due_date');
+
+    form.addEventListener('submit', function(event) {
+        const now = new Date();
+        const startDate = new Date(startDateInput.value);
+        const dueDate = new Date(dueDateInput.value);
+
+        if (startDate < now) {
+            alert('Start date and time cannot be in the past.');
+            event.preventDefault();
+            return;
+        }
+
+        if (dueDate <= startDate) {
+            alert('Due date and time must be after the start date and time.');
+            event.preventDefault();
+            return;
+        }
+    });
+});
+</script>

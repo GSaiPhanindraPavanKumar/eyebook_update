@@ -3,6 +3,7 @@ include("sidebar.php");
 use Models\Database;
 use Models\Faculty;
 use Models\Course;
+use Models\Assignment;
 
 $email = $_SESSION['email'];
 
@@ -28,6 +29,7 @@ $virtualClasses = getAllVirtualClasses($userData['id']);
 $upcomingClasses = array_filter($virtualClasses, function($class) {
     return strtotime($class['start_time']) > time();
 });
+$assignments = Assignment::getAssignmentsByfacultyId($conn, $email);
 
 // Ensure university_short_name is set
 $universityShortName = isset($userData['university_short_name']) ? htmlspecialchars($userData['university_short_name']) : '';
@@ -306,14 +308,43 @@ document.addEventListener('DOMContentLoaded', function() {
     var calendarEl = document.getElementById('calendar');
     var calendar = new FullCalendar.Calendar(calendarEl, {
         initialView: 'dayGridMonth',
-        events: <?php echo json_encode(array_map(function($class) {
-            return [
-                'title' => $class['topic'],
-                'start' => $class['start_time'],
-                'end' => date('Y-m-d\TH:i:s', strtotime($class['start_time'] . ' + ' . $class['duration'] . ' minutes')),
-                'url' => $class['join_url']
-            ];
-        }, $virtualClasses)); ?>,
+        // headerToolbar: {
+        //     left: 'prev,next today',
+        //     center: 'title',
+        //     right: 'dayGridMonth,timeGridWeek,timeGridDay'
+        // },
+        headerToolbar: {
+            left: 'title',
+            right: 'today prev,next'
+        },
+        events: <?php echo json_encode(array_merge(
+            array_map(function($class) {
+                return [
+                    'title' => $class['topic'],
+                    'start' => $class['start_time'],
+                    'end' => date('Y-m-d\TH:i:s', strtotime($class['start_time'] . ' + ' . $class['duration'] . ' minutes')),
+                    'url' => $class['join_url']
+                ];
+            }, $virtualClasses),
+            array_map(function($assignment) {
+                return [
+                    'title' => $assignment['title'],
+                    'start' => $assignment['start_time'],
+                    'end' => $assignment['due_date'],
+                    'color' => 'red',
+                    'url' => '/admin/view_assignment/' . $assignment['id'] // URL to view the assignment
+                ];
+            }, $assignments),
+            array_map(function($contest) {
+                return [
+                    'title' => $contest['title'],
+                    'start' => $contest['start_date'],
+                    'end' => $contest['end_date'],
+                    'color' => 'green',
+                    'url' => '/admin/view_contest/' . $contest['id'] // URL to view the contest
+                ];
+            }, $contests)
+        )); ?>,
         eventDisplay: 'block' // Ensure event titles are always visible
     });
     calendar.render();

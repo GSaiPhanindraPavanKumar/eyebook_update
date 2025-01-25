@@ -325,7 +325,7 @@ foreach ($allClassrooms as $classroom) {
                             <thead class="thead-dark">
                                 <tr>
                                     <th scope="col">Title</th>
-                                    <th scope="col">Description</th>
+                                    <th scope="col">Start Time</th>
                                     <th scope="col">Due Date</th>
                                     <th>Submitted</th>
                                     <th>Grade</th>
@@ -347,11 +347,11 @@ foreach ($allClassrooms as $classroom) {
                                         }
                                         echo "<tr>";
                                         echo "<td>" . htmlspecialchars($assignment['title']) . "</td>";
-                                        echo "<td>" . htmlspecialchars($assignment['description']) . "</td>";
+                                        echo "<td class='start-time'>" . htmlspecialchars($assignment['start_time']) . "</td>";
                                         echo "<td>" . htmlspecialchars($assignment['due_date']) . "</td>";
                                         echo "<td>" . ($isSubmitted ? 'Submitted' : 'Not Submitted') . "</td>";
                                         echo "<td>" . htmlspecialchars($grade) . "</td>";
-                                        echo "<td><a href='/student/view_assignment/" . $assignment['id'] . "' class='btn btn-primary'>View</a></td>";
+                                        echo "<td><a href='/student/view_assignment/" . $assignment['id'] . "' class='btn btn-primary view-assignment-button'>View</a></td>";
                                         echo "</tr>";
                                     }
                                 } else {
@@ -493,4 +493,18 @@ function viewAndMarkAsCompleted(indexPath, button) {
     };
     xhr.send("indexPath=" + encodeURIComponent(indexPath) + "&course_id=<?php echo $course['id']; ?>");
 }
+document.addEventListener('DOMContentLoaded', function() {
+    const assignmentRows = document.querySelectorAll('table tbody tr');
+
+    assignmentRows.forEach(row => {
+        const startTime = new Date(row.querySelector('.start-time').textContent);
+        const viewButton = row.querySelector('.view-assignment-button');
+        const currentDate = new Date();
+
+        if (currentDate < startTime) {
+            viewButton.disabled = true;
+            viewButton.textContent = 'Not Available Yet';
+        }
+    });
+});
 </script>

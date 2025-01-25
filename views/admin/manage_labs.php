@@ -19,27 +19,25 @@
                         <table class="table">
                             <thead>
                                 <tr>
-                                    <th>Title</th>
-                                    <th>Course</th>
-                                    <th>Due Date</th>
+                                    <th>Course Name</th>
+                                    <th>College Name</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <?php if (!empty($labs)): ?>
-                                    <?php foreach ($labs as $lab): ?>
+                                <?php if (!empty($courses)): ?>
+                                    <?php foreach ($courses as $course): ?>
                                         <tr>
-                                            <td><?php echo htmlspecialchars($lab['title']); ?></td>
-                                            <td><?php echo htmlspecialchars($lab['course_name'] ?? ''); ?></td>
-                                            <td><?php echo htmlspecialchars($lab['due_date']); ?></td>
+                                            <td><?php echo htmlspecialchars($course['name'] ?? ''); ?></td>
+                                            <td><?php echo htmlspecialchars($course['university'] ?? ''); ?></td>
                                             <td>
-                                                <a href="/admin/view_lab_detail/<?php echo $lab['id']; ?>" class="btn btn-info">View</a>
+                                                <a href="/admin/view_labs_by_course/<?php echo $course['id']; ?>" class="btn btn-info">View</a>
                                             </td>
                                         </tr>
                                     <?php endforeach; ?>
                                 <?php else: ?>
                                     <tr>
-                                        <td colspan="4">No labs found.</td>
+                                        <td colspan="3">No courses found.</td>
                                     </tr>
                                 <?php endif; ?>
                             </tbody>

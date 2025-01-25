@@ -5,6 +5,7 @@ use Models\Student;
 use Models\Course;
 use Models\Assignment;
 use Models\VirtualClassroom;
+use Models\Contest;
 
 $email = $_SESSION['email'];
 
@@ -47,6 +48,10 @@ $upcomingClasses = array_filter($virtualClasses, function($class) {
     $oneWeekLater = strtotime('+1 week', $now);
     return $startTime >= $now && $startTime <= $oneWeekLater;
 });
+$student = Student::getById($conn, $studentId);
+$universityId = $student['university_id'];
+
+$contests = Contest::getByUniversityId($conn, $universityId);
 
 // Curated list of educational, inspiring, and motivational quotes
 $quotes = [
@@ -333,12 +338,22 @@ document.addEventListener('DOMContentLoaded', function() {
             }, $virtualClasses),
             array_map(function($assignment) {
                 return [
-                    'title' => $assignment['title'] . ' (Due)',
-                    'start' => $assignment['due_date'],
+                    'title' => $assignment['title'],
+                    'start' => $assignment['start_time'],
+                    'end' => $assignment['due_date'],
                     'color' => 'red',
-                    'url' => '/student/view_assignment/' . $assignment['id'] // URL to view the assignment
+                    'url' => '/admin/view_assignment/' . $assignment['id'] // URL to view the assignment
                 ];
-            }, $assignments)
+            }, $assignments),
+            array_map(function($contest) {
+                return [
+                    'title' => $contest['title'],
+                    'start' => $contest['start_date'],
+                    'end' => $contest['end_date'],
+                    'color' => 'green',
+                    'url' => '/admin/view_contest/' . $contest['id'] // URL to view the contest
+                ];
+            }, $contests)
         )); ?>,
         eventDisplay: 'block' // Ensure event titles are always visible
     });

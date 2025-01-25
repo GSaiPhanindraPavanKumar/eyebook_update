@@ -41,6 +41,8 @@ use Models\Contest;
                             <tbody>
                                 <?php 
                                 $questions = Contest::getQuestions($conn, $contest['id']);
+                                $currentTime = time();
+                                $startTime = strtotime($contest['start_date']);
                                 if (!empty($questions)): 
                                     foreach ($questions as $question): 
                                         // Determine the status of the question
@@ -60,7 +62,11 @@ use Models\Contest;
                                             <td><?php echo htmlspecialchars($question['grade']); ?></td>
                                             <td><?php echo htmlspecialchars($status); ?></td>
                                             <td>
-                                                <a href="/student/view_question/<?php echo $question['id']; ?>" class="btn btn-info">View</a>
+                                                <?php if ($currentTime >= $startTime): ?>
+                                                    <a href="/student/view_question/<?php echo $question['id']; ?>" class="btn btn-info">View</a>
+                                                <?php else: ?>
+                                                    <button class="btn btn-info" disabled>View</button>
+                                                <?php endif; ?>
                                             </td>
                                         </tr>
                                     <?php endforeach; 

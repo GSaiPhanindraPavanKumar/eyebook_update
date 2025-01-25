@@ -19,7 +19,7 @@ class Contest {
     }
 
     public static function getByUniversityId($conn, $universityId) {
-        $sql = "SELECT * FROM contests WHERE JSON_CONTAINS(university_id, :university_id)";
+        $sql = "SELECT * FROM contests WHERE JSON_CONTAINS(university_id, :university_id, '$')";
         $stmt = $conn->prepare($sql);
         $stmt->execute([':university_id' => json_encode((string)$universityId)]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -189,4 +189,12 @@ class Contest {
 
         return $leaderboard;
     }
+    public static function getCountByUniversityId($conn, $university_id) {
+        $sql = "SELECT COUNT(*) as contest_count FROM contests WHERE JSON_CONTAINS(university_id, :university_id)";
+        $stmt = $conn->prepare($sql);
+        $stmt->execute([':university_id' => json_encode($university_id)]);
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $result['contest_count'];
+    }
+    
 }

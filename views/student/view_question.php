@@ -65,7 +65,28 @@
 <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
 
 <script>
+document.addEventListener('DOMContentLoaded', function() {
+    const endDate = new Date('<?php echo $contest['end_date']; ?>');
+    const currentDate = new Date();
+
+    if (currentDate > endDate) {
+        document.getElementById('run-code').disabled = true;
+        document.getElementById('submit-code').disabled = true;
+        document.getElementById('message').textContent = 'The end date has passed. Submissions are no longer allowed.';
+        document.getElementById('message').classList.add('alert', 'alert-danger');
+    }
+});
+
 document.getElementById('run-code').addEventListener('click', async () => {
+    const endDate = new Date('<?php echo $contest['end_date']; ?>');
+    const currentDate = new Date();
+
+    if (currentDate > endDate) {
+        document.getElementById('message').textContent = 'The end date has passed. Running code is no longer allowed.';
+        document.getElementById('message').classList.add('alert', 'alert-danger');
+        return;
+    }
+
     const languageIdMap = {
         python: 71,
         javascript: 63,
@@ -158,6 +179,15 @@ document.getElementById('run-code').addEventListener('click', async () => {
 });
 
 document.getElementById('submit-code').addEventListener('click', async () => {
+    const endDate = new Date('<?php echo $contest['end_date']; ?>');
+    const currentDate = new Date();
+
+    if (currentDate > endDate) {
+        document.getElementById('message').textContent = 'The end date has passed. Submissions are no longer allowed.';
+        document.getElementById('message').classList.add('alert', 'alert-danger');
+        return;
+    }
+
     const languageIdMap = {
         python: 71,
         javascript: 63,

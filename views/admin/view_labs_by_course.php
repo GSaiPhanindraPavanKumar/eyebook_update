@@ -5,10 +5,8 @@
         <div class="row">
             <div class="col-md-12 grid-margin">
                 <div class="d-flex justify-content-between align-items-center">
-                    <h3 class="font-weight-bold">Manage Assignments</h3>
-                    <a href="/admin/create_assignment" class="btn btn-primary">
-                        <i class="fas fa-plus-circle"></i> Create Assignment
-                    </a>
+                    <h3 class="font-weight-bold">Labs for Course: <?php echo htmlspecialchars($course['name']); ?></h3>
+                    <a href="/admin/manage_labs" class="btn btn-secondary">Back to Manage Labs</a>
                 </div>
             </div>
         </div>
@@ -20,30 +18,26 @@
                             <thead>
                                 <tr>
                                     <th>Title</th>
-                                    <th>Course</th>
-                                    <th>Start Time</th>
                                     <th>Due Date</th>
-                                    <th>Submissions</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <?php if (!empty($assignments)): ?>
-                                    <?php foreach ($assignments as $assignment): ?>
+                                <?php if (!empty($labs)): ?>
+                                    <?php foreach ($labs as $lab): ?>
                                         <tr>
-                                            <td><?php echo htmlspecialchars($assignment['title']); ?></td>
-                                            <td><?php echo htmlspecialchars($assignment['course_name'] ?? ''); ?></td>
-                                            <td><?php echo htmlspecialchars($assignment['start_time']); ?></td>
-                                            <td><?php echo htmlspecialchars($assignment['due_date']); ?></td>
-                                            <td><?php echo htmlspecialchars($assignment['submission_count']); ?></td>
+                                            <td><?php echo htmlspecialchars($lab['title']); ?></td>
+                                            <td><?php echo htmlspecialchars($lab['due_date']); ?></td>
                                             <td>
-                                                <a href="/admin/view_assignment/<?php echo $assignment['id']; ?>" class="btn btn-info">View</a>
+                                                <a href="/admin/view_lab_detail/<?php echo $lab['id']; ?>" class="btn btn-info">View</a>
+                                                <a href="/admin/edit_lab/<?php echo $lab['id']; ?>" class="btn btn-warning">Edit</a>
+                                                <a href="/admin/delete_lab/<?php echo $lab['id']; ?>" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this lab?');">Delete</a>
                                             </td>
                                         </tr>
                                     <?php endforeach; ?>
                                 <?php else: ?>
                                     <tr>
-                                        <td colspan="6">No assignments found.</td>
+                                        <td colspan="3">No labs found for this course.</td>
                                     </tr>
                                 <?php endif; ?>
                             </tbody>

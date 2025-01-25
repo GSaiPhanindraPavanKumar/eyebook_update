@@ -16,6 +16,7 @@
                     <div class="card-body">
                         <h5 class="card-title"><?php echo htmlspecialchars($assignment['title']); ?></h5>
                         <p><strong>Description:</strong> <?php echo htmlspecialchars($assignment['description']); ?></p>
+                        <p><strong>Start Time:</strong> <?php echo htmlspecialchars($assignment['start_time']); ?></p>
                         <p><strong>Due Date:</strong> <?php echo htmlspecialchars($assignment['due_date']); ?></p>
                         <p><strong>File Content:</strong></p>
                         <?php if (!empty($assignment['file_content'])): ?>
@@ -37,16 +38,19 @@
                                     <th>Student Name</th>
                                     <th>Email</th>
                                     <th>Grade</th>
+                                    <th>Submission Date</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <?php if (!empty($submissions)): ?>
                                     <?php foreach ($submissions as $submission): ?>
-                                        <tr>
+                                        <?php $isLate = isset($submission['date_of_submit']) && strtotime($submission['date_of_submit']) > strtotime($assignment['due_date']); ?>
+                                        <tr style="color: <?php echo $isLate ? 'red' : 'inherit'; ?>">
                                             <td><?php echo htmlspecialchars($submission['name']); ?></td>
                                             <td><?php echo htmlspecialchars($submission['email']); ?></td>
                                             <td><?php echo htmlspecialchars($submission['grade'] ?? 'Not Graded'); ?></td>
+                                            <td><?php echo htmlspecialchars($submission['date_of_submit'] ?? ''); ?></td>
                                             <td>
                                                 <a href="/faculty/grade_submission/<?php echo $assignment['id']; ?>/<?php echo $submission['student_id']; ?>" class="btn btn-primary">Grade</a>
                                             </td>
@@ -54,7 +58,7 @@
                                     <?php endforeach; ?>
                                 <?php else: ?>
                                     <tr>
-                                        <td colspan="4">No submissions found.</td>
+                                        <td colspan="5">No submissions found.</td>
                                     </tr>
                                 <?php endif; ?>
                             </tbody>

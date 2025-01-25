@@ -102,4 +102,10 @@ class Lab {
 
         return $studentSubmissions;
     }
+    public static function getByCourseId($conn, $course_id) {
+        $sql = "SELECT * FROM labs WHERE JSON_CONTAINS(course_id, JSON_QUOTE(CAST(:course_id AS CHAR)), '$')";
+        $stmt = $conn->prepare($sql);
+        $stmt->execute(['course_id' => $course_id]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
 }

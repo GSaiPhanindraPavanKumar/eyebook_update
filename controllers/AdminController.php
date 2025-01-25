@@ -104,6 +104,39 @@ class AdminController {
         $usageData = $this->fetchUsageData($conn, 'today');
         $usageLabels = array_keys($usageData);
         $usageValues = array_values($usageData);
+
+        // Fetch all virtual classes
+        $virtualClassroomModel = new VirtualClassroom($conn);
+        $virtualClasses = $virtualClassroomModel->getAll();
+        $upcomingClasses = array_filter($virtualClasses, function($class) {
+            return strtotime($class['start_time']) > time();
+        });
+
+        // Fetch all assignments
+        $assignmentModel = new Assignment();
+        $assignments = $assignmentModel->getAll($conn);
+        $upcomingAssignments = array_filter($assignments, function($assignment) {
+            return strtotime($assignment['due_date']) > time();
+        });
+
+        $assignmentModel = new Assignment();
+        $assignments = $assignmentModel->getAll($conn);
+        $upcomingAssignments = array_filter($assignments, function($assignment) {
+            return strtotime($assignment['start_time']) > time();
+        });
+
+        // Fetch all contests
+        $contestModel = new Contest();
+        $contests = $contestModel->getAll($conn);
+        $upcomingContests = array_filter($contests, function($contest) {
+            return strtotime($contest['start_date']) > time();
+        });
+
+        $contestModel = new Contest();
+        $contests = $contestModel->getAll($conn);
+        $upcomingContests = array_filter($contests, function($contest) {
+            return strtotime($contest['end_date']) > time();
+        });
     
         require 'views/admin/dashboard.php';
     }
@@ -2016,21 +2049,23 @@ class AdminController {
         require 'views/admin/manage_assignments.php';
     }
 
-    public function createAssignment() {
+    public function editAssignment($assignmentId) {
         $conn = Database::getConnection();
-        $messages = [];
-
+        $assignment = Assignment::getById($conn, $assignmentId);
+        $courses = Course::getAll($conn);
+    
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $title = $_POST['assignment_title'];
             $description = $_POST['assignment_description'];
+            $start_date = $_POST['start_date'];
             $due_date = $_POST['due_date'];
             $course_ids = $_POST['course_id'];
-            $file_content = null;
-
+            $file_content = $assignment['file_content'];
+    
             if (isset($_FILES['assignment_file']) && $_FILES['assignment_file']['error'] == 0) {
                 $file_content = file_get_contents($_FILES['assignment_file']['tmp_name']);
             }
-
+    
             try {
                 $assignment_id = Assignment::create($conn, $title, $description, $due_date, $course_ids, $file_content);
             
@@ -2042,10 +2077,48 @@ class AdminController {
                 exit;
             } catch (PDOException $e) {
                 $messages[] = "Error creating assignment: " . $e->getMessage();
+            };
+        }
+    
+        require 'views/admin/edit_assignment.php';
+    }
+    
+    public function deleteAssignment($assignmentId) {
+        $conn = Database::getConnection();
+        Assignment::delete($conn, $assignmentId);
+    
+        $_SESSION['message'] = 'Assignment deleted successfully.';
+        $_SESSION['message_type'] = 'success';
+    
+        header('Location: /admin/manage_assignments');
+        exit();
+    }
+
+    public function createAssignment() {
+        $conn = Database::getConnection();
+        $courses = Course::getAll($conn);
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $title = $_POST['assignment_title'];
+            $description = $_POST['assignment_description'];
+            $start_date = $_POST['start_date'];
+            $due_date = $_POST['due_date'];
+            $course_ids = $_POST['course_id'];
+            $file_content = null;
+
+            if (isset($_FILES['assignment_file']) && $_FILES['assignment_file']['error'] == 0) {
+                $file_content = file_get_contents($_FILES['assignment_file']['tmp_name']);
             }
+
+            Assignment::create($conn, $title, $description, $start_date, $due_date, $course_ids, $file_content);
+
+            $_SESSION['message'] = 'Assignment created successfully.';
+            $_SESSION['message_type'] = 'success';
+
+            header('Location: /admin/manage_assignments');
+            exit();
         }
 
-        $courses = Course::getAll($conn);
         require 'views/admin/assignment_create.php';
     }
     public function archiveCourse() {
@@ -2277,7 +2350,7 @@ class AdminController {
         $universities = University::getAll($conn); // Fetch all universities
         $existing_student_ids = json_decode($cohort['student_ids'], true) ?? []; // Initialize existing student IDs
     
-        require 'views/admin/add_students_to_cohort.php';
+        require 'views/admin/view_cohort.php';
     }
 
     public function assignCoursesToCohort() {
@@ -2433,9 +2506,70 @@ class AdminController {
 
     public function manageLabs() {
         $conn = Database::getConnection();
-        $labs = Lab::getAll($conn);
+        $courses = Course::getAllWithUniversity($conn); // Fetch all courses with university details
         require 'views/admin/manage_labs.php';
     }
+
+    public function viewLabsByCourse($course_id) {
+        $conn = Database::getConnection();
+        $labs = Lab::getByCourseId($conn, $course_id);
+        $course = Course::getById($conn, $course_id);
+        require 'views/admin/view_labs_by_course.php';
+    }
+
+    public function editLab($lab_id) {
+        $conn = Database::getConnection();
+    
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $title = $_POST['title'];
+            $description = $_POST['description'];
+            $due_date = $_POST['due_date'];
+            $course_ids = $_POST['course_id'];
+            $input = $_POST['input'];
+            $output = $_POST['output'];
+    
+            $sql = "UPDATE labs SET title = :title, description = :description, due_date = :due_date, course_id = :course_id, input = :input, output = :output WHERE id = :id";
+            $stmt = $conn->prepare($sql);
+            $stmt->execute([
+                ':title' => $title,
+                ':description' => $description,
+                ':due_date' => $due_date,
+                ':course_id' => json_encode($course_ids),
+                ':input' => $input,
+                ':output' => $output,
+                ':id' => $lab_id
+            ]);
+    
+            $_SESSION['message'] = 'Lab updated successfully.';
+            $_SESSION['message_type'] = 'success';
+    
+            header('Location: /admin/view_labs_by_course/' . $course_ids[0]);
+            exit();
+        }
+    
+        $lab = Lab::getById($conn, $lab_id);
+        $courses = Course::getAll($conn);
+        $course_ids = json_decode($lab['course_id'], true);
+    
+        require 'views/admin/edit_lab.php';
+    }
+    
+    public function deleteLab($lab_id) {
+        $conn = Database::getConnection();
+        $lab = Lab::getById($conn, $lab_id);
+        $course_ids = json_decode($lab['course_id'], true);
+    
+        $sql = "DELETE FROM labs WHERE id = :id";
+        $stmt = $conn->prepare($sql);
+        $stmt->execute([':id' => $lab_id]);
+    
+        $_SESSION['message'] = 'Lab deleted successfully.';
+        $_SESSION['message_type'] = 'success';
+    
+        header('Location: /admin/view_labs_by_course/' . $course_ids[0]);
+        exit();
+    }
+
     public function viewLabDetail($labId) {
         $conn = Database::getConnection();
         if (!is_numeric($labId)) {
@@ -2487,6 +2621,7 @@ class AdminController {
     public function manageContest() {
         $conn = Database::getConnection();
         $contests = Contest::getAll($conn);
+        $universities = University::getAll($conn);
         require 'views/admin/manage_contest.php';
     }
 
@@ -2504,6 +2639,13 @@ class AdminController {
         $questions = Contest::getQuestions($conn, $contestId);
         $leaderboard = Contest::getLeaderboard($conn, $contestId);
         require 'views/admin/view_contest.php';
+    }
+    public function viewContestsByUniversity($university_id) {
+        $conn = Database::getConnection();
+        $contests = Contest::getByUniversityId($conn, $university_id);
+        $university = University::getById($conn, $university_id);
+    
+        require 'views/admin/view_contests_by_university.php';
     }
 
     public function editContest($contestId) {
@@ -2564,6 +2706,68 @@ class AdminController {
         $question = Contest::getQuestionById($conn, $questionId);
         Contest::deleteQuestion($conn, $questionId);
         header('Location: /admin/view_contest/' . $question['contest_id']);
+    }
+    public function bulkAddStudentsToCohort($cohort_id) {
+        $conn = Database::getConnection();
+        $cohort = Cohort::getById($conn, $cohort_id);
+        $existing_student_ids = json_decode($cohort['student_ids'], true) ?? [];
+    
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['bulk_student_file'])) {
+            $file = $_FILES['bulk_student_file']['tmp_name'];
+            $spreadsheet = IOFactory::load($file);
+            $sheet = $spreadsheet->getActiveSheet();
+            $rows = $sheet->toArray();
+    
+            $emailColumnIndex = 0; // Assuming email IDs are in the first column
+            $emailIds = array_column($rows, $emailColumnIndex);
+    
+            $placeholders = implode(',', array_fill(0, count($emailIds), '?'));
+            $sql = "SELECT id, email FROM students WHERE email IN ($placeholders)";
+            $stmt = $conn->prepare($sql);
+            $stmt->execute($emailIds);
+            $students = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    
+            $foundEmails = array_column($students, 'email');
+            $notFoundEmails = array_diff($emailIds, $foundEmails);
+            $course_ids = json_decode($cohort['course_ids'], true) ?? [];
+
+    
+            $studentIdsToAdd = array_column($students, 'id');
+            $studentIdsToAdd = array_map('strval', $studentIdsToAdd); // Convert IDs to strings
+            $existing_student_ids = array_map('strval', $existing_student_ids); // Convert existing IDs to strings
+            $newStudentIds = array_unique(array_merge($existing_student_ids, $studentIdsToAdd));
+    
+            Cohort::updateStudentIds($conn, $cohort_id, $newStudentIds);
+
+            Student::assignCoursesToStudents($conn, $newStudentIds, $course_ids);
+
+            // Update courses with new student IDs
+            foreach ($course_ids as $course_id) {
+                Course::assigncohortstudents($conn, $course_id, $newStudentIds);
+            }
+            $message = "Students added successfully.";
+            if (!empty($notFoundEmails)) {
+                $message .= " The following email IDs were not found: " . implode(', ', $notFoundEmails);
+            }
+    
+            $_SESSION['message'] = $message;
+            $_SESSION['message_type'] = "success";
+    
+            // Redirect to the view cohort page
+            header("Location: /admin/view_cohort/$cohort_id");
+            exit();
+        }
+    
+        // Fetch necessary data for the view
+        //$students = Student::getByIds($conn, $newStudentIds);
+        $allStudents = Student::getAll($conn);
+        $universities = University::getAll($conn);
+        $courses = Course::getAll($conn);
+        $allCourses = Course::getAll($conn);
+        $student_ids = json_decode($cohort['student_ids'], true) ?? [];
+        $existing_student_ids = $student_ids;
+    
+        require 'views/admin/view_cohort.php';
     }
 }
 ?>

@@ -24,6 +24,7 @@
                                     <tr>
                                         <th>Select</th>
                                         <th>Student Name</th>
+                                        <th>Email</th>
                                         <th>University</th>
                                     </tr>
                                 </thead>
@@ -36,6 +37,7 @@
                                                 <input type="checkbox" name="student_ids[]" value="<?php echo $student['id']; ?>" <?php echo in_array($student['id'], $existing_student_ids) ? 'disabled' : ''; ?>>
                                             </td>
                                             <td><?php echo htmlspecialchars($student['name']); ?></td>
+                                            <td><?php echo htmlspecialchars($student['email']); ?></td>
                                             <td><?php echo htmlspecialchars($student['university']); ?></td>
                                         </tr>
                                     <?php endforeach; ?>

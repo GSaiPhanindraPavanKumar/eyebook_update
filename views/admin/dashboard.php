@@ -3,6 +3,7 @@ include("sidebar.php");
 use Models\Database;
 use Models\VirtualClassroom;
 use Models\Assignment;
+use Models\Contest;
 
 // Fetch all virtual classes
 $virtualClassroomModel = new VirtualClassroom(Database::getConnection());
@@ -16,6 +17,25 @@ $assignmentModel = new Assignment();
 $assignments = $assignmentModel->getAll(Database::getConnection());
 $upcomingAssignments = array_filter($assignments, function($assignment) {
     return strtotime($assignment['due_date']) > time();
+});
+
+$assignmentModel = new Assignment();
+$assignments = $assignmentModel->getAll($conn);
+$upcomingAssignments = array_filter($assignments, function($assignment) {
+    return strtotime($assignment['start_time']) > time();
+});
+
+// Fetch all contests
+$contestModel = new Contest();
+$contests = $contestModel->getAll($conn);
+$upcomingContests = array_filter($contests, function($contest) {
+    return strtotime($contest['start_date']) > time();
+});
+
+$contestModel = new Contest();
+$contests = $contestModel->getAll($conn);
+$upcomingContests = array_filter($contests, function($contest) {
+    return strtotime($contest['end_date']) > time();
 });
 ?>
 
@@ -45,7 +65,7 @@ $upcomingAssignments = array_filter($assignments, function($assignment) {
                             <div class="col-md-6">
                                 <h4 class="card-title">Weekly Agenda</h4>
                                 <ul class="list-group">
-                                    <?php if (!empty($upcomingClasses) || !empty($upcomingAssignments)): ?>
+                                    <?php if (!empty($upcomingClasses) || !empty($upcomingAssignments) || !empty($upcomingContests)): ?>
                                         <?php foreach ($upcomingClasses as $class): ?>
                                             <?php
                                             $endTime = date('Y-m-d H:i:s', strtotime($class['start_time'] . ' + ' . $class['duration'] . ' minutes'));
@@ -59,7 +79,15 @@ $upcomingAssignments = array_filter($assignments, function($assignment) {
                                         <?php foreach ($upcomingAssignments as $assignment): ?>
                                             <li class="list-group-item">
                                                 <strong><?php echo htmlspecialchars($assignment['title']); ?></strong><br>
+                                                Start: <?php echo htmlspecialchars($assignment['start_time']); ?><br>
                                                 Due: <?php echo htmlspecialchars($assignment['due_date']); ?><br>
+                                            </li>
+                                        <?php endforeach; ?>
+                                        <?php foreach ($upcomingContests as $contest): ?>
+                                            <li class="list-group-item">
+                                                <strong><?php echo htmlspecialchars($contest['title']); ?></strong><br>
+                                                Start: <?php echo htmlspecialchars($contest['start_date']); ?><br>
+                                                End: <?php echo htmlspecialchars($contest['end_date']); ?><br>
                                             </li>
                                         <?php endforeach; ?>
                                     <?php else: ?>
@@ -332,12 +360,22 @@ document.addEventListener('DOMContentLoaded', function() {
             }, $virtualClasses),
             array_map(function($assignment) {
                 return [
-                    'title' => $assignment['title'] . ' (Due)',
-                    'start' => $assignment['due_date'],
+                    'title' => $assignment['title'],
+                    'start' => $assignment['start_time'],
+                    'end' => $assignment['due_date'],
                     'color' => 'red',
                     'url' => '/admin/view_assignment/' . $assignment['id'] // URL to view the assignment
                 ];
-            }, $assignments)
+            }, $assignments),
+            array_map(function($contest) {
+                return [
+                    'title' => $contest['title'],
+                    'start' => $contest['start_date'],
+                    'end' => $contest['end_date'],
+                    'color' => 'green',
+                    'url' => '/admin/view_contest/' . $contest['id'] // URL to view the contest
+                ];
+            }, $contests)
         )); ?>,
         eventDisplay: 'block' // Ensure event titles are always visible
     });

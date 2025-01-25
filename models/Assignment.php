@@ -271,6 +271,64 @@ class Assignment {
         return $assignments;
     }
 
+    public static function getAssignmentsByfacultyId($conn, $email) {
+        // Step 1: Fetch assigned courses for the student
+        $sql = "SELECT assigned_courses FROM faculty WHERE email = :email";
+        $stmt = $conn->prepare($sql);
+        $stmt->execute([':email' => $email]);
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        $assigned_courses = $result ? json_decode($result['assigned_courses'] ?? '[]', true) : [];
+
+        if (empty($assigned_courses)) {
+            return [];
+        }
+
+        // Step 2: Fetch assignments from the courses
+        $placeholders = implode(',', array_fill(0, count($assigned_courses), '?'));
+        $sql = "SELECT id, name, assignments FROM courses WHERE id IN ($placeholders)";
+        $stmt = $conn->prepare($sql);
+        $stmt->execute($assigned_courses);
+        $courses = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        $assignment_ids = [];
+        $course_names = [];
+        foreach ($courses as $course) {
+            $course_assignments = json_decode($course['assignments'] ?? '[]', true);
+            if (is_array($course_assignments)) {
+                $assignment_ids = array_merge($assignment_ids, $course_assignments);
+                foreach ($course_assignments as $assignment_id) {
+                    $course_names[$assignment_id] = $course['name']; // Store course name for each assignment
+                }
+            }
+        }
+
+        if (empty($assignment_ids)) {
+            return [];
+        }
+
+        // Remove duplicate assignment IDs
+        $assignment_ids = array_unique($assignment_ids);
+
+        // Step 3: Fetch assignment details from the assignments table
+        $placeholders = implode(',', array_fill(0, count($assignment_ids), '?'));
+        $sql = "SELECT * FROM assignments WHERE id IN ($placeholders)";
+        $stmt = $conn->prepare($sql);
+        $stmt->execute($assignment_ids);
+        $assignments = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        // Step 4: Add course names and grade information to assignments
+        foreach ($assignments as &$assignment) {
+            $assignment['course_name'] = $course_names[$assignment['id']] ?? 'Unknown Course';
+            $sql = "SELECT submissions FROM assignments WHERE id = :assignment_id";
+            $stmt = $conn->prepare($sql);
+            $stmt->execute([':assignment_id' => $assignment['id']]);
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+            $submissions = isset($result['submissions']) ? json_decode($result['submissions'] ?? '[]', true) : [];
+        }
+
+        return $assignments;
+    }
+
     public function viewAssignment($assignment_id) {
         $conn = Database::getConnection();
         $assignment = Assignment::getById($conn, $assignment_id);
@@ -324,16 +382,37 @@ class Assignment {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public static function create($conn, $title, $description, $due_date, $course_ids, $file_content) {
-        $sql = "INSERT INTO assignments (title, description, due_date, course_id, file_content) VALUES (:title, :description, :due_date, :course_id, :file_content)";
+
+    public static function create($conn, $title, $description, $start_date, $due_date, $course_ids, $file_content) {
+        $sql = "INSERT INTO assignments (title, description, start_time, due_date, course_id, file_content) VALUES (:title, :description, :start_time, :due_date, :course_id, :file_content)";
         $stmt = $conn->prepare($sql);
         $stmt->execute([
             ':title' => $title,
             ':description' => $description,
+            ':start_time' => $start_date,
             ':due_date' => $due_date,
             ':course_id' => json_encode($course_ids),
             ':file_content' => $file_content
         ]);
         return $conn->lastInsertId();
+    }
+    public static function update($conn, $id, $title, $description, $start_date, $due_date, $course_ids, $file_content) {
+        $sql = "UPDATE assignments SET title = :title, description = :description, start_time = :start_time, due_date = :due_date, course_id = :course_id, file_content = :file_content WHERE id = :id";
+        $stmt = $conn->prepare($sql);
+        $stmt->execute([
+            ':title' => $title,
+            ':description' => $description,
+            ':start_time' => $start_date,
+            ':due_date' => $due_date,
+            ':course_id' => json_encode($course_ids),
+            ':file_content' => $file_content,
+            ':id' => $id
+        ]);
+    }
+
+    public static function delete($conn, $id) {
+        $sql = "DELETE FROM assignments WHERE id = :id";
+        $stmt = $conn->prepare($sql);
+        $stmt->execute([':id' => $id]);
     }
 }

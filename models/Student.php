@@ -199,7 +199,7 @@ class Student {
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
     public static function getAllWithUniversity($conn) {
-        $sql = "SELECT students.id, students.name, universities.long_name as university 
+        $sql = "SELECT students.id, students.name, students.email, universities.long_name as university 
                 FROM students 
                 LEFT JOIN universities ON students.university_id = universities.id";
         $stmt = $conn->query($sql);

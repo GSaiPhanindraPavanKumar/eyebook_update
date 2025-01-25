@@ -8,22 +8,16 @@
                 <table class="table">
                     <thead>
                         <tr>
-                            <th>Title</th>
-                            <th>Description</th>
-                            <th>Start Date</th>
-                            <th>End Date</th>
+                            <th>University Name</th>
                             <th>Action</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <?php foreach ($contests as $contest): ?>
+                        <?php foreach ($universities as $university): ?>
                             <tr>
-                                <td><?php echo htmlspecialchars($contest['title']); ?></td>
-                                <td><?php echo htmlspecialchars($contest['description']); ?></td>
-                                <td><?php echo htmlspecialchars($contest['start_date']); ?></td>
-                                <td><?php echo htmlspecialchars($contest['end_date']); ?></td>
+                                <td><?php echo htmlspecialchars($university['long_name']); ?></td>
                                 <td>
-                                    <a href="/admin/view_contest/<?php echo $contest['id']; ?>" class="btn btn-info">View</a>
+                                    <a href="/admin/view_contests_by_university/<?php echo $university['id']; ?>" class="btn btn-info">View</a>
                                 </td>
                             </tr>
                         <?php endforeach; ?>

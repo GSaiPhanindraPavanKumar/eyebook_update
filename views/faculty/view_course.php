@@ -322,6 +322,10 @@
                                     <textarea class="form-control" id="assignment_description" name="assignment_description" required></textarea>
                                 </div>
                                 <div class="form-group">
+                                    <label for="start_date">Start Date:</label>
+                                    <input type="datetime-local" class="form-control" id="start_date" name="start_date" required>
+                                </div>
+                                <div class="form-group">
                                     <label for="due_date">Due Date:</label>
                                     <input type="datetime-local" class="form-control" id="due_date" name="due_date" required>
                                 </div>
@@ -338,6 +342,7 @@
                                 <tr>
                                     <th scope="col">Title</th>
                                     <th scope="col">Description</th>
+                                    <th scope="col">Start Time</th>
                                     <th scope="col">Due Date</th>
                                     <th>Submissions</th>
                                     <th scope="col">Actions</th>
@@ -350,6 +355,7 @@
                                         echo "<tr>";
                                         echo "<td>" . htmlspecialchars($assignment['title']) . "</td>";
                                         echo "<td>" . htmlspecialchars($assignment['description']) . "</td>";
+                                        echo "<td>" . htmlspecialchars($assignment['start_time']) . "</td>";
                                         echo "<td>" . htmlspecialchars($assignment['due_date']) . "</td>";
                                         echo "<td>" . htmlspecialchars($assignment['submission_count']). "</td>";
                                         echo "<td><a href='/faculty/view_assignment/" . $assignment['id'] . "' class='btn btn-primary'>View</a></td>";
@@ -475,4 +481,27 @@ function toggleAssignmentForm() {
     var form = document.getElementById('assignmentForm');
     form.style.display = form.style.display === 'none' ? 'block' : 'none';
 }
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('assignmentForm');
+    const startDateInput = document.getElementById('start_date');
+    const dueDateInput = document.getElementById('due_date');
+
+    form.addEventListener('submit', function(event) {
+        const now = new Date();
+        const startDate = new Date(startDateInput.value);
+        const dueDate = new Date(dueDateInput.value);
+
+        if (startDate < now) {
+            alert('Start date and time cannot be in the past.');
+            event.preventDefault();
+            return;
+        }
+
+        if (dueDate <= startDate) {
+            alert('Due date and time must be after the start date and time.');
+            event.preventDefault();
+            return;
+        }
+    });
+});
 </script>

@@ -54,10 +54,22 @@ class FacultyController {
     }
 
     public function dashboard() {
+        $conn = Database::getConnection();
         $faculty = new Faculty();
         $faculty_id = $_SESSION['email'];
         $email = $faculty_id;
 
+        // Fetch user data
+        $userData = Faculty::getUserDataByEmail($conn, $email);
+
+
+        // Fetch all assignments for the faculty
+        $assignments = Assignment::getAssignmentsByFaculty($conn, $faculty_id);
+
+        // Fetch all contests for the faculty
+        $contests = Contest::getAll($conn);
+
+    
         require 'views/faculty/dashboard.php';
     }
 
@@ -562,6 +574,7 @@ class FacultyController {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $title = $_POST['assignment_title'];
             $description = $_POST['assignment_description'];
+            $start_date = $_POST['start_date'];
             $due_date = $_POST['due_date'];
             $course_ids = $_POST['course_id'];
             $file_content = null;
@@ -571,7 +584,7 @@ class FacultyController {
             }
 
             try {
-                $assignment_id = Assignment::create($conn, $title, $description, $due_date, $course_ids, $file_content);
+                $assignment_id = Assignment::create($conn, $title, $description,$start_date, $due_date, $course_ids, $file_content);
             
                 foreach ($course_ids as $course_id) {
                     Course::addAssignmentToCourse($conn, $course_id, $assignment_id);

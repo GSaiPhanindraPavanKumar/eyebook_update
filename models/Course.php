@@ -209,11 +209,30 @@ class Course {
     }
 
     public static function getAllWithUniversity($conn) {
-        $sql = "SELECT c.id, c.name, c.description, u.long_name, u.short_name as university_short_name
-                FROM courses c 
-                LEFT JOIN universities u ON c.university_id = u.id";
-        $stmt = $conn->query($sql);
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $sql = "SELECT courses.*, courses.university_id AS university_ids
+                FROM courses";
+        $stmt = $conn->prepare($sql);
+        $stmt->execute();
+        $courses = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    
+        foreach ($courses as &$course) {
+            $university_ids = !empty($course['university_ids']) ? json_decode($course['university_ids'], true) : [];
+            if (is_array($university_ids) && !empty($university_ids)) {
+                $placeholders = implode(',', array_fill(0, count($university_ids), '?'));
+                $sql = "SELECT long_name, short_name FROM universities WHERE id IN ($placeholders)";
+                $stmt = $conn->prepare($sql);
+                $stmt->execute($university_ids);
+                $universities = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                $university_names = array_map(function($university) {
+                    return $university['long_name'] . ' (' . $university['short_name'] . ')';
+                }, $universities);
+                $course['university'] = implode(', ', $university_names);
+            } else {
+                $course['university'] = 'N/A';
+            }
+        }
+    
+        return $courses;
     }
 
     public static function addUnit($conn, $course_id, $unit_name, $scorm_file) {

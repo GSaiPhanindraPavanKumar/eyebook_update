@@ -782,6 +782,7 @@ class StudentController {
     public function viewQuestion($questionId) {
         $conn = Database::getConnection();
         $question = Contest::getQuestionById($conn, $questionId);
+        $contest = Contest::getById($conn, $question['contest_id']);
         require 'views/student/view_question.php';
     }
     public function updateQuestionSubmission() {

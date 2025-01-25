@@ -114,7 +114,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                                         <tr>
                                                             <td><input type="checkbox" name="courses[]" value="<?php echo $course['id']; ?>"></td>
                                                             <td><?php echo htmlspecialchars($course['name'] ?? 'N/A'); ?></td>
-                                                            <td><?php echo htmlspecialchars($course['university_short_name'] ?? 'N/A'); ?></td>
+                                                            <td><?php echo htmlspecialchars($course['university'] ?? 'N/A'); ?></td>
                                                         </tr>
                                                     <?php endforeach; ?>
                                                 </tbody>
