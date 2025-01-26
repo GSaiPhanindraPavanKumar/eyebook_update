@@ -132,13 +132,24 @@ class Assignment {
     }
 
     public static function getSubmissionCount($conn, $assignment_id) {
-        $sql = "SELECT submissions FROM assignments WHERE id = :assignment_id";
-        $stmt = $conn->prepare($sql);
-        $stmt->execute([':assignment_id' => $assignment_id]);
-        $result = $stmt->fetch(PDO::FETCH_ASSOC);
-        $submissions = isset($result['submissions']) ? json_decode($result['submissions'], true) : [];
-        return is_array($submissions) ? count($submissions) : 0;
+        try {
+            $sql = "SELECT submissions FROM assignments WHERE id = :assignment_id";
+            $stmt = $conn->prepare($sql);
+            $stmt->execute([':assignment_id' => $assignment_id]);
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+            if (!$result) {
+                return 0; // No record found
+            }
+            
+            $submissions = isset($result['submissions']) ? json_decode($result['submissions'], true) : [];
+            return is_array($submissions) ? count($submissions) : 0;
+        } catch (PDOException $e) {
+            error_log("Database Error: " . $e->getMessage());
+            return 0; // Return zero submissions on error
+        }
     }
+    
 
     public static function getById($conn, $id) {
         $sql = "SELECT * FROM assignments WHERE id = :id";

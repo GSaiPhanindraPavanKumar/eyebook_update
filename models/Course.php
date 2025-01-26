@@ -194,6 +194,13 @@ class Course {
         ]);
     }
 
+    public static function getAssignedCohorts($conn, $courseId) {
+        $sql = "SELECT id FROM cohorts WHERE JSON_CONTAINS(course_ids, :course_id, '$')";
+        $stmt = $conn->prepare($sql);
+        $stmt->execute([':course_id' => json_encode((string)$courseId)]);
+        return $stmt->fetchAll(PDO::FETCH_COLUMN);
+    }
+
     public static function create($conn, $name, $description) {
         $sql = "SELECT COUNT(*) as count FROM courses WHERE name = ?";
         $stmt = $conn->prepare($sql);

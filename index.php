@@ -152,6 +152,8 @@ $router->post('/admin/delete_students', 'AdminController@deleteStudents');
 $router->post('/admin/delete_facultys', 'AdminController@deleteFacultys');
 $router->get('/admin/lab_management', 'AdminController@labManagement');
 $router->post('/admin/lab_management', 'AdminController@labManagement');
+$router->post('/admin/assign_cohort_to_course', 'AdminController@assignCohortToCourse');
+$router->post('/admin/unassign_cohort_from_course', 'AdminController@unassignCohortFromCourse');
 
 // Admin Lab Management Routes
 $router->get('/admin/create_lab', 'AdminController@createLab');

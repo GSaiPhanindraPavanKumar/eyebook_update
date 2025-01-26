@@ -4,15 +4,24 @@ use Models\Faculty;
 use Models\Student;
 use Models\Course;
 use Models\feedback;
-?>
+use Models\Cohort;
 
-<?php
 // Fetch all faculties and students for the assigned university
 $feedbackEnabled = $course['feedback_enabled'];
 
 
 // Fetch assigned universities
 $assignedUniversities = Course::getAssignedUniversities($conn, $course['id']);
+
+// Fetch all cohorts
+$allCohorts = Cohort::getAll($conn); // Add this line
+
+// Fetch assigned cohorts
+$assignedCohorts = Course::getAssignedCohorts($conn, $course['id']);
+$assignedCohorts = is_array($assignedCohorts) ? $assignedCohorts : json_decode($assignedCohorts, true);
+if ($assignedCohorts === null) {
+    $assignedCohorts = [];
+}
 ?>
 
 <div class="main-panel">
@@ -53,6 +62,9 @@ $assignedUniversities = Course::getAssignedUniversities($conn, $course['id']);
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link" id="assign-students-tab" data-toggle="tab" href="#assign-students" role="tab" aria-controls="assign-students" aria-selected="false">Assign Students</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id="assign-cohort-tab" data-toggle="tab" href="#assign-cohort" role="tab" aria-controls="assign-cohort" aria-selected="false">Assign Cohort</a>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link" id="feedback-tab" data-toggle="tab" href="#feedback" role="tab" aria-controls="feedback" aria-selected="false">Feedback</a>
@@ -377,7 +389,7 @@ $assignedUniversities = Course::getAssignedUniversities($conn, $course['id']);
                                     <button type="submit" class="btn btn-primary">Assign Course</button>
                                 </form>
 
-                                <h5 class="mt-5">Unassigned Universities</h5>
+                                <h5 class="mt-5">Unassign Universities</h5>
                                 <form id="unassignCourseForm" method="POST" action="/admin/unassign_course">
                                     <input type="hidden" name="course_id" value="<?php echo $course['id']; ?>">
                                     <div class="table-responsive">
@@ -503,6 +515,65 @@ $assignedUniversities = Course::getAssignedUniversities($conn, $course['id']);
                                     </div>
                                     <input type="hidden" name="course_id" value="<?php echo htmlspecialchars($course['id']); ?>">
                                     <button type="submit" class="btn btn-primary">Assign Students</button>
+                                </form>
+                            </div>
+
+                            <!-- Assign Cohort Tab -->
+                            <div class="tab-pane fade" id="assign-cohort" role="tabpanel" aria-labelledby="assign-cohort-tab">
+                                <h5 class="mt-3">Assign Course to Cohort</h5>
+                                <form id="assignCohortForm" method="POST" action="/admin/assign_cohort_to_course">
+                                    <input type="hidden" name="course_id" value="<?php echo $course['id']; ?>">
+                                    <div class="table-responsive">
+                                        <table class="table table-hover table-borderless table-striped">
+                                            <thead class="thead-light">
+                                                <tr>
+                                                    <th>Select</th>
+                                                    <th>Cohort Name</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <?php
+                                                foreach ($allCohorts as $cohort): ?>
+                                                    <tr>
+                                                        <td>
+                                                            <input type="checkbox" name="cohort_ids[]" value="<?php echo $cohort['id']; ?>" <?php echo in_array($cohort['id'], $assignedCohorts) ? 'disabled' : ''; ?>>
+                                                        </td>
+                                                        <td><?php echo htmlspecialchars($cohort['name']); ?></td>
+                                                    </tr>
+                                                <?php endforeach; ?>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">Assign Cohort</button>
+                                </form>
+
+                                <h5 class="mt-5">Unassign Cohorts</h5>
+                                <form id="unassignCohortForm" method="POST" action="/admin/unassign_cohort_from_course">
+                                    <input type="hidden" name="course_id" value="<?php echo $course['id']; ?>">
+                                    <div class="table-responsive">
+                                        <table class="table table-hover table-borderless table-striped">
+                                            <thead class="thead-light">
+                                                <tr>
+                                                    <th>Select</th>
+                                                    <th>Cohort Name</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <?php
+                                                foreach ($allCohorts as $cohort):
+                                                    if (in_array($cohort['id'], $assignedCohorts)): ?>
+                                                        <tr>
+                                                            <td>
+                                                                <input type="checkbox" name="cohort_ids[]" value="<?php echo $cohort['id']; ?>">
+                                                            </td>
+                                                            <td><?php echo htmlspecialchars($cohort['name']); ?></td>
+                                                        </tr>
+                                                    <?php endif;
+                                                endforeach; ?>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <button type="submit" class="btn btn-danger">Unassign Cohort</button>
                                 </form>
                             </div>
 

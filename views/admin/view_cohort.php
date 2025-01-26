@@ -129,6 +129,7 @@
                                 </div>
                                 <button type="submit" class="btn btn-primary">Upload</button>
                                 <button type="button" id="cancelBulkAddStudent" class="btn btn-secondary">Cancel</button>
+                                <a href="https://mobileappliaction.s3.us-east-1.amazonaws.com/Templates/cohort.xlsx" class="btn btn-info">Download Template</a>
                             </form>
                         </div>
                         <input type="text" id="addStudentsSearch" class="form-control mb-3" placeholder="Search Students to Add">

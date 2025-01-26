@@ -938,8 +938,10 @@ class AdminController {
             $assigned_courses = $student['assigned_courses'] ? json_decode($student['assigned_courses'], true) : [];
             return in_array($course_id, $assigned_courses);
         });
+        $allCohorts = Cohort::getAll($conn); // Fetch all cohorts
+        $assignedCohorts = Course::getAssignedCohorts($conn, $course_id);
 
-    
+
         require 'views/admin/view_course.php';
     }
 
@@ -2040,12 +2042,19 @@ class AdminController {
     public function manageAssignments() {
         $conn = Database::getConnection();
         $assignments = Assignment::getAll($conn);
+        
         foreach ($assignments as &$assignment) {
             $assignment['submission_count'] = Assignment::getSubmissionCount($conn, $assignment['id']);
         }
+        
         usort($assignments, function($a, $b) {
             return strtotime($b['due_date']) - strtotime($a['due_date']);
         });
+        
+        if (!file_exists('views/admin/manage_assignments.php')) {
+            throw new Exception("View file not found: manage_assignments.php");
+        }
+        
         require 'views/admin/manage_assignments.php';
     }
 
@@ -2353,6 +2362,56 @@ class AdminController {
         $existing_student_ids = json_decode($cohort['student_ids'], true) ?? []; // Initialize existing student IDs
     
         require 'views/admin/view_cohort.php';
+    }
+
+    public function assignCohortToCourse() {
+        $conn = Database::getConnection();
+        $courseId = $_POST['course_id'];
+        $cohortIds = $_POST['cohort_ids'] ?? [];
+
+        foreach ($cohortIds as $cohortId) {
+            Cohort::addCourse($conn, $cohortId, $courseId);
+
+            // Get student IDs from cohort
+            $cohort = Cohort::getById($conn, $cohortIds);
+            $student_ids = json_decode($cohort['student_ids'], true) ?? [];
+
+            // Assign course to students
+            Student::assignCourseToStudents($conn, $student_ids, $courseId);
+
+            // Assign students to course
+            Course::assignStudentsToCourse($conn, $courseId, $student_ids);
+        }
+
+        $_SESSION['message'] = 'Cohorts assigned successfully.';
+        $_SESSION['message_type'] = 'success';
+
+        header('Location: ' . $_SERVER['HTTP_REFERER']);
+        exit();
+    }
+    public function unassignCohortFromCourse() {
+        $conn = Database::getConnection();
+        $courseId = $_POST['course_id'];
+        $cohortIds = $_POST['cohort_ids'] ?? [];
+
+        foreach ($cohortIds as $cohortId) {
+            Cohort::unassignCourse($conn, $cohortId, $courseId);
+
+            $student_ids = json_decode($cohortId['student_ids'], true) ?? [];
+    
+        // Unassign course from students
+        Student::unassignCourseFromStudents($conn, $student_ids, $courseId);
+    
+        // Unassign students from course
+        Course::unassignStudentsFromCourse($conn, $courseId, $student_ids);
+    
+        }
+
+        $_SESSION['message'] = 'Cohorts unassigned successfully.';
+        $_SESSION['message_type'] = 'success';
+
+        header('Location: ' . $_SERVER['HTTP_REFERER']);
+        exit();
     }
 
     public function assignCoursesToCohort() {
