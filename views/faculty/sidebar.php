@@ -157,7 +157,7 @@ if ($userData) {
                         </ul>
                     </div>
                 </li>
-                <li class="nav-item">
+                <!-- <li class="nav-item">
                     <a class="nav-link" data-toggle="collapse" href="#assessments" aria-expanded="false" aria-controls="assessments">
                         <i class="icon-bar-graph menu-icon"></i>
                         <span class="menu-title">Assignments</span>
@@ -169,7 +169,7 @@ if ($userData) {
                             <li class="nav-item"> <a class="nav-link" href="/faculty/manage_assignments">Manage Assignments</a></li>
                         </ul>
                     </div>
-                </li>
+                </li> -->
                 <li class="nav-item">
                     <a class="nav-link" data-toggle="collapse" href="#discussion" aria-expanded="false" aria-controls="discussion">
                         <i class="icon-bar-graph menu-icon"></i>
