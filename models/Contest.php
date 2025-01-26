@@ -145,9 +145,31 @@ class Contest {
     }
 
     public static function deleteQuestion($conn, $id) {
-        $sql = "DELETE FROM contest_questions WHERE id = :id";
+        // Fetch the contest ID associated with the question
+        $sql = "SELECT contest_id FROM contest_questions WHERE id = :id";
         $stmt = $conn->prepare($sql);
         $stmt->execute([':id' => $id]);
+        $question = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if ($question) {
+            $contestId = $question['contest_id'];
+
+            // Delete the question from the contest_questions table
+            $sql = "DELETE FROM contest_questions WHERE id = :id";
+            $stmt = $conn->prepare($sql);
+            $stmt->execute([':id' => $id]);
+
+            // Update the questions JSON column in the contests table
+            $contest = self::getById($conn, $contestId);
+            $questions = json_decode($contest['questions'], true) ?? [];
+            $updatedQuestions = array_diff($questions, [$id]);
+            $sql = "UPDATE contests SET questions = :questions WHERE id = :id";
+            $stmt = $conn->prepare($sql);
+            $stmt->execute([
+                ':questions' => json_encode(array_values($updatedQuestions)),
+                ':id' => $contestId
+            ]);
+        }
     }
 
     public static function getLeaderboard($conn, $contestId) {

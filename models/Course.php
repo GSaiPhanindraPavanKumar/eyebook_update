@@ -185,6 +185,15 @@ class Course {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    public static function updateAssignments($conn, $courseId, $assignments) {
+        $sql = "UPDATE courses SET assignments = :assignments WHERE id = :id";
+        $stmt = $conn->prepare($sql);
+        $stmt->execute([
+            ':assignments' => $assignments,
+            ':id' => $courseId
+        ]);
+    }
+
     public static function create($conn, $name, $description) {
         $sql = "SELECT COUNT(*) as count FROM courses WHERE name = ?";
         $stmt = $conn->prepare($sql);

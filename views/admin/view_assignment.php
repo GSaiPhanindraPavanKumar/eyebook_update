@@ -39,11 +39,11 @@
                         <table class="table">
                             <thead>
                                 <tr>
-                                    <th>Student Name</th>
-                                    <th>Email</th>
-                                    <th>Grade</th>
-                                    <th>Submission Date</th>
-                                    <th>Actions</th>
+                                    <th style="width: 30%;">Student Name</th>
+                                    <th style="width: 30%;">Email</th>
+                                    <th style="width: 10%;">Grade</th>
+                                    <th style="width: 20%;">Submission Date</th>
+                                    <th style="width: 10%;">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -51,8 +51,8 @@
                                     <?php foreach ($submissions as $submission): ?>
                                         <?php $isLate = isset($submission['date_of_submit']) && strtotime($submission['date_of_submit']) > strtotime($assignment['due_date']); ?>
                                         <tr style="color: <?php echo $isLate ? 'red' : 'inherit'; ?>">
-                                            <td><?php echo htmlspecialchars($submission['name']); ?></td>
-                                            <td><?php echo htmlspecialchars($submission['email']); ?></td>
+                                            <td><?php echo htmlspecialchars($submission['name'] ?? 'Unknown(Deleted)'); ?></td>
+                                            <td><?php echo htmlspecialchars($submission['email'] ?? 'Unknown(Deleted)'); ?></td>
                                             <td><?php echo htmlspecialchars($submission['grade'] ?? 'Not Graded'); ?></td>
                                             <td><?php echo htmlspecialchars($submission['date_of_submit'] ?? ''); ?></td>
                                             <td>

@@ -2049,35 +2049,23 @@ class AdminController {
         require 'views/admin/manage_assignments.php';
     }
 
-    public function editAssignment($assignmentId) {
+    public function editAssignment($id) {
         $conn = Database::getConnection();
-        $assignment = Assignment::getById($conn, $assignmentId);
+        $assignment = Assignment::getById($conn, $id);
         $courses = Course::getAll($conn);
     
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $title = $_POST['assignment_title'];
-            $description = $_POST['assignment_description'];
-            $start_date = $_POST['start_date'];
+            $title = $_POST['title'];
+            $description = $_POST['description'];
+            $start_time = $_POST['start_time'];
             $due_date = $_POST['due_date'];
             $course_ids = $_POST['course_id'];
-            $file_content = $assignment['file_content'];
+            $file_content = !empty($_FILES['file_content']['tmp_name']) ? file_get_contents($_FILES['file_content']['tmp_name']) : $assignment['file_content'];
     
-            if (isset($_FILES['assignment_file']) && $_FILES['assignment_file']['error'] == 0) {
-                $file_content = file_get_contents($_FILES['assignment_file']['tmp_name']);
-            }
+            Assignment::update($conn, $id, $title, $description, $start_time, $due_date, $course_ids, $file_content);
     
-            try {
-                $assignment_id = Assignment::create($conn, $title, $description, $due_date, $course_ids, $file_content);
-            
-                foreach ($course_ids as $course_id) {
-                    Course::addAssignmentToCourse($conn, $course_id, $assignment_id);
-                }
-            
-                header('Location: /admin/manage_assignments');
-                exit;
-            } catch (PDOException $e) {
-                $messages[] = "Error creating assignment: " . $e->getMessage();
-            };
+            header('Location: /admin/manage_assignments');
+            exit;
         }
     
         require 'views/admin/edit_assignment.php';
@@ -2085,11 +2073,25 @@ class AdminController {
     
     public function deleteAssignment($assignmentId) {
         $conn = Database::getConnection();
+
+        // Fetch the assignment details to get the course IDs
+        $assignment = Assignment::getById($conn, $assignmentId);
+        $courseIds = json_decode($assignment['course_id'], true);
+
+        // Delete the assignment
         Assignment::delete($conn, $assignmentId);
-    
+
+        // Update the assignments column in the courses table
+        foreach ($courseIds as $courseId) {
+            $course = Course::getById($conn, $courseId);
+            $assignments = json_decode($course['assignments'], true);
+            $updatedAssignments = array_diff($assignments, [$assignmentId]);
+            Course::updateAssignments($conn, $courseId, json_encode(array_values($updatedAssignments)));
+        }
+
         $_SESSION['message'] = 'Assignment deleted successfully.';
         $_SESSION['message_type'] = 'success';
-    
+
         header('Location: /admin/manage_assignments');
         exit();
     }
@@ -2703,9 +2705,13 @@ class AdminController {
 
     public function deleteQuestion($questionId) {
         $conn = Database::getConnection();
-        $question = Contest::getQuestionById($conn, $questionId);
         Contest::deleteQuestion($conn, $questionId);
-        header('Location: /admin/view_contest/' . $question['contest_id']);
+
+        $_SESSION['message'] = 'Question deleted successfully.';
+        $_SESSION['message_type'] = 'success';
+
+        header('Location: ' . $_SERVER['HTTP_REFERER']);
+        exit();
     }
     public function bulkAddStudentsToCohort($cohort_id) {
         $conn = Database::getConnection();

@@ -161,7 +161,7 @@ class Assignment {
         $stmt->execute([':assignment_id' => $assignmentId]);
         $result = $stmt->fetch(PDO::FETCH_ASSOC);
         $submissions = isset($result['submissions']) ? json_decode($result['submissions'] ?? '[]', true) : [];
-
+    
         // Fetch student details for each submission
         $submissionDetails = [];
         foreach ($submissions as $submission) {
@@ -169,9 +169,15 @@ class Assignment {
             $stmt = $conn->prepare($sql);
             $stmt->execute([':student_id' => $submission['student_id']]);
             $student = $stmt->fetch(PDO::FETCH_ASSOC);
-            $submissionDetails[] = array_merge($submission, $student);
+    
+            if ($student) {
+                $submissionDetails[] = array_merge($submission, $student);
+            } else {
+                // Handle case where student data is not found
+                $submissionDetails[] = $submission;
+            }
         }
-
+    
         return $submissionDetails;
     }
 
