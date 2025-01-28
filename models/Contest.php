@@ -34,7 +34,7 @@ class Contest {
             ':description' => $data['description'],
             ':start_date' => $data['start_date'],
             ':end_date' => $data['end_date'],
-            ':university_id' => json_encode($data['university_id'])
+            ':university_id' => $data['university_id']
         ]);
     }
 
