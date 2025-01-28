@@ -128,8 +128,29 @@ if ($userData) {
     </nav>
     <div class="container-fluid page-body-wrapper">
         <!-- partial:partials/_settings-panel.html -->
+        <div id="chatbot-trigger" style="position: fixed; bottom: 100px; right: 30px; z-index: 1032; background-color: #4B49AC; width: 45px; height: 45px; border-radius: 100%; cursor: pointer; transition: rotate .3s ease; color: white; display: flex; align-items: center; justify-content: center;" onclick="openChatbot()">
+            <i class="ti-comments" style="font-size: 20px;"></i>
+            <div class="pulse" style="position: absolute; width: 100%; height: 100%; border-radius: 100%; border: 3px solid #4B49AC; animation: pulse 2s infinite;"></div>
+        </div>
+        <style>
+            @keyframes pulse {
+                0% {
+                    transform: scale(1);
+                    opacity: 1;
+                }
+                100% {
+                    transform: scale(1.5);
+                    opacity: 0;
+                }
+            }
+            #chatbot-trigger:hover {
+                transform: scale(1.1);
+                box-shadow: 0 0 15px rgba(75, 73, 172, 0.5);
+                transition: transform 0.3s ease;
+            }
+        </style>
         <div class="theme-setting-wrapper">
-            <div id="settings-trigger" onclick="openChatbot()"><i class="ti-user"></i></div>
+            <div id="settings-trigger"><i class="ti-settings"></i></div>
             <div id="theme-settings" class="settings-panel">
                 <i class="settings-close ti-close"></i>
                 <p class="settings-heading">SIDEBAR SKINS</p>
