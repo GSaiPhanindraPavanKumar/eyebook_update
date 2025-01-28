@@ -7,5 +7,4 @@ uploads
 .env
 aws_config.php
 uploads
-Database.php
 mailer.log
