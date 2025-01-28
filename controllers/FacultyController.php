@@ -116,7 +116,10 @@ class FacultyController {
                     $stmt->execute([$profileImageUrl, $userId]);
     
                     // Update the userData array for display
-                    $userData['profile_image_url'] = $profileImageUrl;
+                    $userData = Faculty::getById($conn, $userId);
+                    if ($userData === false) {
+                        $userData = [];
+                    }
                 } catch (AwsException $e) {
                     echo "Error uploading image: " . $e->getMessage();
                 }
