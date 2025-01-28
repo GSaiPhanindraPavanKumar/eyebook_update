@@ -67,6 +67,9 @@ if ($assignedCohorts === null) {
                                 <a class="nav-link" id="assign-cohort-tab" data-toggle="tab" href="#assign-cohort" role="tab" aria-controls="assign-cohort" aria-selected="false">Assign Cohort</a>
                             </li>
                             <li class="nav-item">
+                                <a class="nav-link" id="assignment-tab" data-toggle="tab" href="#assignment" role="tab" aria-controls="assignment" aria-selected="false">Assignment</a>
+                            </li>
+                            <li class="nav-item">
                                 <a class="nav-link" id="feedback-tab" data-toggle="tab" href="#feedback" role="tab" aria-controls="feedback" aria-selected="false">Feedback</a>
                             </li>
                         </ul>
@@ -575,6 +578,41 @@ if ($assignedCohorts === null) {
                                     </div>
                                     <button type="submit" class="btn btn-danger">Unassign Cohort</button>
                                 </form>
+                            </div>
+
+                            <div class="tab-pane fade" id="assignment" role="tabpanel" aria-labelledby="assignment-tab">
+                                <h5 class="mt-3">Assignment</h5>
+                                <!-- Add your assignment content here -->
+                                 <table class="table table-hover mt-2">
+                                    <thead class="thead-dark">
+                                        <tr>
+                                            <th scope="col">Title</th>
+                                            <th scope="col">Description</th>
+                                            <th scope="col">Start Time</th>
+                                            <th scope="col">Due Date</th>
+                                            <th>Submissions</th>
+                                            <th scope="col">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <?php
+                                        if (!empty($assignments)) {
+                                            foreach ($assignments as $assignment) {
+                                                echo "<tr>";
+                                                echo "<td>" . htmlspecialchars($assignment['title']) . "</td>";
+                                                echo "<td>" . htmlspecialchars($assignment['description']) . "</td>";
+                                                echo "<td>" . htmlspecialchars($assignment['start_time']) . "</td>";
+                                                echo "<td>" . htmlspecialchars($assignment['due_date']) . "</td>";
+                                                echo "<td>" . htmlspecialchars($assignment['submission_count']). "</td>";
+                                                echo "<td><a href='/faculty/view_assignment/" . $assignment['id'] . "' class='btn btn-primary'>View</a></td>";
+                                                echo "</tr>";
+                                            }
+                                        } else {
+                                            echo "<tr><td colspan='5'>No assignments available.</td></tr>";
+                                        }
+                                        ?>
+                                    </tbody>
+                                </table>
                             </div>
 
                             <!-- Feedback Tab -->

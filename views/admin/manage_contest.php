@@ -1,4 +1,4 @@
-<?php include 'sidebar.php'; ?>
+<?php include("sidebar.php"); ?>
 
 <div class="main-panel">
     <div class="content-wrapper">
@@ -26,4 +26,5 @@
             </div>
         </div>
     </div>
+    <?php include 'footer.html'; ?>
 </div>

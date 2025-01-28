@@ -16,7 +16,7 @@
             <div class="col-md-12 grid-margin stretch-card">
                 <div class="card">
                     <div class="card-body">
-                        <h5 class="card-title">Create Company</h5>
+                        <h5 class="card-title">Create University</h5>
                         <?php if (isset($message)): ?>
                             <div class="alert alert-<?php echo $message_type; ?>" role="alert">
                                 <?php echo htmlspecialchars($message); ?>
@@ -38,7 +38,7 @@
                                 <label for="description">Description <span class="text-danger">*</span></label>
                                 <textarea class="form-control" id="description" name="description" required></textarea>
                             </div>
-                            <button type="submit" class="btn btn-primary">Add Company</button>
+                            <button type="submit" class="btn btn-primary">Add University</button>
                         </form>
 
                         <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>

@@ -941,6 +941,20 @@ class AdminController {
         $allCohorts = Cohort::getAll($conn); // Fetch all cohorts
         $assignedCohorts = Course::getAssignedCohorts($conn, $course_id);
 
+        // Fetch assignments for the course
+        $assignmentIds = !empty($course['assignments']) ? json_decode($course['assignments'], true) : [];
+        $assignments = [];
+        if (!empty($assignmentIds)) {
+            $assignments = Assignment::getByIds($conn, $assignmentIds);
+        }
+
+        foreach ($assignments as &$assignment) {
+            $assignment['submission_count'] = Assignment::getSubmissionCount($conn, $assignment['id']);
+        }
+
+        usort($assignments, function($a, $b) {
+            return strtotime($b['due_date']) - strtotime($a['due_date']);
+        });
 
         require 'views/admin/view_course.php';
     }

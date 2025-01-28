@@ -7,7 +7,7 @@
             <div class="col-md-12 grid-margin">
                 <div class="row">
                     <div class="col-12 col-xl-8 mb-4 mb-xl-0">
-                        <h3 class="font-weight-bold">View Company</h3>
+                        <h3 class="font-weight-bold">View University</h3>
                     </div>
                 </div>
             </div>
@@ -16,7 +16,7 @@
             <div class="col-md-12 grid-margin stretch-card">
                 <div class="card">
                     <div class="card-body">
-                        <h5 class="card-title">Company Details</h5>
+                        <h5 class="card-title">University Details</h5>
                         <p><strong>Name:</strong> <?php echo htmlspecialchars($company['name']); ?></p>
                         <p><strong>Description:</strong> <?php echo htmlspecialchars($company['description']); ?></p>
                     </div>

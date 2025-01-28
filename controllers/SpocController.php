@@ -10,7 +10,7 @@ use Models\Course;
 use Models\Assignment;
 use Models\VirtualClassroom;
 use Models\Lab;
-use Models\contest;
+use Models\Contest;
 use Models\Discussion;
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;

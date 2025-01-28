@@ -15,8 +15,6 @@ include 'sidebar.php';
                         <input type="password" class="form-control" id="currentPassword" placeholder="Current Password" name="currentPassword">
                       </div>
                     </div>
-
-
                     <div class="form-group row">
                         <label for="newPassword" class="col-sm-3 col-form-label">New Password</label>
                         <div class="col-sm-9">
@@ -30,7 +28,7 @@ include 'sidebar.php';
                         </div>
                     </div>
                     <button type="submit" class="btn btn-primary mr-2">Submit</button>
-                    <button class="btn btn-light" type="cancel">Cancel</button>
+                    <button class="btn btn-light" type="button" onclick="window.location.href='profile'">Cancel</button>
                   </form>
                 </div>
               </div>

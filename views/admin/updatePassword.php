@@ -35,7 +35,7 @@ include "sidebar.php";
                                 </div>
                             </div>
                             <button type="submit" class="btn btn-primary mr-2">Submit</button>
-                            <button class="btn btn-light" type="cancel">Cancel</button>
+                            <button class="btn btn-light" type="button" onclick="window.location.href='profile'">Cancel</button>
                         </form>
                     </div>
                 </div>

@@ -162,7 +162,7 @@ if ($userData) {
                     <div class="collapse" id="discussion">
                         <ul class="nav flex-column sub-menu">
                         <!-- <li class="nav-item"> <a class="nav-link" href="upload_students">Upload Students</a></li> -->
-                            <li class="nav-item"> <a class="nav-link" href="discussion_forum">Discussion Forum</a></li>
+                            <li class="nav-item"> <a class="nav-link" href="/spoc/discussion_forum">Discussion Forum</a></li>
                         </ul>
                     </div>
                 </li>

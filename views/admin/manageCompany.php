@@ -5,11 +5,11 @@
             <div class="col-md-12 grid-margin">
                 <div class="row">
                     <div class="col-12 col-xl-8 mb-4 mb-xl-0">
-                        <h3 class="font-weight-bold">Manage Companies</h3>
+                        <h3 class="font-weight-bold">Manage University</h3>
                     </div>
                     <div class="col-12 col-xl-4 text-right">
                         <a href="addCompany" class="btn btn-primary">
-                            <i class="fas fa-plus-circle"></i> Create Company
+                            <i class="fas fa-plus-circle"></i> Create University
                         </a>
                     </div>
                 </div>
@@ -28,7 +28,7 @@
                                     <thead class="thead-light">
                                         <tr>
                                             <th data-sort="serialNumber">S.no <i class="fas fa-sort"></i></th>
-                                            <th data-sort="name">Company Name <i class="fas fa-sort"></i></th>
+                                            <th data-sort="name">University Name <i class="fas fa-sort"></i></th>
                                             <th data-sort="description">Description <i class="fas fa-sort"></i></th>
                                             <th>Actions</th>
                                         </tr>
