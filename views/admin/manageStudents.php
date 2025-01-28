@@ -60,7 +60,7 @@ function daysAgo($date) {
                                 <div class="input-group mb-3">
                                     <input class="form-control" id="searchInput" name="search" type="text" placeholder="🔍 Search Student..." value="<?= htmlspecialchars($searchQuery) ?>">
                                     <div class="input-group-append">
-                                        <button class="btn btn-secondary" type="button" id="clearSearch">X</button>
+                                        <button class="btn btn-secondary" type="button" id="clearSearch"><i class="fas fa-times"></i></button>
                                         <button class="btn btn-primary" type="submit">Search</button>
                                     </div>
                                 </div>

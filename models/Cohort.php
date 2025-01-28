@@ -15,7 +15,7 @@ class Cohort {
     }
 
     public static function getAll($conn) {
-        $sql = "SELECT * FROM cohorts";
+        $sql = "SELECT * FROM cohorts ORDER BY id ASC";
         $stmt = $conn->query($sql);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }

@@ -3,13 +3,23 @@ include("sidebar.php");
 use Models\Database;
 $conn = Database::getConnection();
 
-$sql = "SELECT courses.*, courses.university_id AS university_ids
-        FROM courses";
+$sql = "SELECT courses.*, courses.university_id AS university_ids 
+        FROM courses 
+        ORDER BY courses.id ASC"; // Add ordering to ensure consistent results
 $stmt = $conn->prepare($sql);
 $stmt->execute();
 $courses = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-foreach ($courses as &$course) {
+// Debug log to check courses array
+error_log("Courses before processing: " . print_r($courses, true));
+
+$processed_courses = array();
+foreach ($courses as $course) {
+    // Skip if we've already processed this course ID
+    if (isset($processed_courses[$course['id']])) {
+        continue;
+    }
+    
     $university_ids = !empty($course['university_ids']) ? json_decode($course['university_ids'], true) : [];
     if (is_array($university_ids) && !empty($university_ids)) {
         $placeholders = implode(',', array_fill(0, count($university_ids), '?'));
@@ -21,7 +31,15 @@ foreach ($courses as &$course) {
     } else {
         $course['university'] = 'N/A';
     }
+    
+    $processed_courses[$course['id']] = $course;
 }
+
+// Debug log to check processed courses
+error_log("Processed courses: " . print_r($processed_courses, true));
+
+// Convert back to indexed array
+$courses = array_values($processed_courses);
 ?>
 
 <!-- HTML Content -->
@@ -60,9 +78,10 @@ foreach ($courses as &$course) {
                                         </tr>
                                     </thead>
                                     <tbody id="courseTable">
-                                        <?php
+                                        <?php 
                                         $serialNumber = 1;
-                                        foreach ($courses as $course): ?>
+                                        foreach ($courses as $course): 
+                                        ?>
                                             <tr>
                                                 <td style="max-width: 50px; word-wrap: break-word;"><?= $serialNumber++ ?></td>
                                                 <td style="max-width: 150px; word-wrap: break-word;"><?= htmlspecialchars($course['name']) ?></td>
