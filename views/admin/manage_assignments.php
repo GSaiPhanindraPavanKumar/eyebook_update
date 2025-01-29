@@ -28,19 +28,21 @@
                                 </tr>
                             </thead>
                             <tbody>
+                                <?php error_log(print_r($assignments,true))?>
+                                <?php error_log(print_r(count($assignments))) ?>
                                 <?php if (!empty($assignments)): ?>
-                                    <?php foreach ($assignments as $assignment): ?>
+                                    <?php for($i = 0; $i < count($assignments); $i++): ?>
                                         <tr>
-                                            <td><?php echo htmlspecialchars($assignment['title']); ?></td>
-                                            <td><?php echo htmlspecialchars($assignment['course_name'] ?? ''); ?></td>
-                                            <td><?php echo htmlspecialchars($assignment['start_time']); ?></td>
-                                            <td><?php echo htmlspecialchars($assignment['due_date']); ?></td>
-                                            <td><?php echo htmlspecialchars($assignment['submission_count']); ?></td>
+                                            <td><?php echo htmlspecialchars($assignments[$i]['title']); ?></td>
+                                            <td><?php echo htmlspecialchars($assignments[$i]['course_name'] ?? ''); ?></td>
+                                            <td><?php echo htmlspecialchars($assignments[$i]['start_time']); ?></td>
+                                            <td><?php echo htmlspecialchars($assignments[$i]['due_date']); ?></td>
+                                            <td><?php echo htmlspecialchars($assignments[$i]['submission_count']); ?></td>
                                             <td>
-                                                <a href="/admin/view_assignment/<?php echo $assignment['id']; ?>" class="btn btn-info">View</a>
+                                                <a href="/admin/view_assignment/<?php echo $assignments[$i]['id']; ?>" class="btn btn-info">View</a>
                                             </td>
                                         </tr>
-                                    <?php endforeach; ?>
+                                    <?php endfor; ?>
                                 <?php else: ?>
                                     <tr>
                                         <td colspan="6">No assignments found.</td>
