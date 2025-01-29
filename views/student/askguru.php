@@ -162,7 +162,7 @@ if (php_sapi_name() !== 'cli' && $_SERVER['REQUEST_METHOD'] === 'POST') {
                      "- Keep formatting simple and clean\n" .
                      "- Focus on educational context\n" .
                      "- Maintain professional tone\n" .
-                     "- Provide plain text if no formatting is needed" . "Ensure none of the guidelines are violated" );
+                     "- Provide plain text if no formatting is needed" . "Ensure none of the guidelines are violated temperature:0.2" );
     echo json_encode(['response' => $response]);
     exit;
 }
