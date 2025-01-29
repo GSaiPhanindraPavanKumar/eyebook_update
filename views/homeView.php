@@ -48,6 +48,7 @@
               <li class="nav-item"><a class="nav-link fw-medium" href="#">Help</a></li>
               <li class="nav-item"><a class="nav-link fw-medium" href="#">Features</a></li>
               <li class="nav-item"><a class="nav-link fw-medium" href="#">Signup</a></li> -->
+              <img src="https://i.ibb.co/7xL13b10/knowbots-logo.png" alt="Knowbots Logo" class="img-fluid" style="height: 10%; width: 10%; padding-right: 10px;">
               <h3>Knowbots</h3>
             </ul>
             <form class="d-flex py-3 py-lg-0"><a class="btn btn-light rounded-pill shadow fw-bold" href="login" role="button">Login
