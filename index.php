@@ -446,4 +446,10 @@ $router->set404(function() {
     require 'views/404.html';
 });
 
+// Certificate Generation Routes
+$router->get('/admin/certificate_generations', 'CertificateController@index');
+$router->get('/admin/certificate_generations/create', 'CertificateController@create');
+$router->post('/admin/certificate_generations/store', 'CertificateController@store');
+$router->get('/admin/certificate_generations/download/(\d+)', 'CertificateController@download');
+
 $router->run();
