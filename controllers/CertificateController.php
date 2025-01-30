@@ -25,9 +25,30 @@ class CertificateController {
 
     public function index() {
         $conn = Database::getConnection();
-        $stmt = $conn->prepare("SELECT * FROM certificate_generations ORDER BY created_at DESC");
+        
+        // Get total count for pagination
+        $countStmt = $conn->prepare("SELECT COUNT(*) as total FROM certificate_generations");
+        $countStmt->execute();
+        $totalRecords = $countStmt->fetch(\PDO::FETCH_ASSOC)['total'];
+        
+        // Pagination settings
+        $recordsPerPage = 10;
+        $currentPage = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+        $offset = ($currentPage - 1) * $recordsPerPage;
+        $totalPages = ceil($totalRecords / $recordsPerPage);
+        
+        // Get paginated records
+        $stmt = $conn->prepare("SELECT * FROM certificate_generations ORDER BY created_at DESC LIMIT ? OFFSET ?");
+        $stmt->bindValue(1, $recordsPerPage, \PDO::PARAM_INT);
+        $stmt->bindValue(2, $offset, \PDO::PARAM_INT);
         $stmt->execute();
         $generations = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        
+        // Get all records for client-side search
+        $allStmt = $conn->prepare("SELECT * FROM certificate_generations ORDER BY created_at DESC");
+        $allStmt->execute();
+        $allGenerations = $allStmt->fetchAll(\PDO::FETCH_ASSOC);
+        
         require 'views/admin/certificate_generations.php';
     }
 
