@@ -66,11 +66,21 @@ function daysAgo($date) {
                                         <tr>
                                             <th><input type="checkbox" id="selectAll"></th>
                                             <th>S.No</th>
-                                            <th>Registration Number</th>
-                                            <th>Name</th>
-                                            <th>Email</th>
-                                            <th>University</th>
-                                            <th>Last Usage (Days Ago)</th>
+                                            <th class="sortable" data-sort="regd_no">
+                                                Registration Number <i class="fas fa-sort"></i>
+                                            </th>
+                                            <th class="sortable" data-sort="name">
+                                                Name <i class="fas fa-sort"></i>
+                                            </th>
+                                            <th class="sortable" data-sort="email">
+                                                Email <i class="fas fa-sort"></i>
+                                            </th>
+                                            <th class="sortable" data-sort="university_short_name">
+                                                University <i class="fas fa-sort"></i>
+                                            </th>
+                                            <th class="sortable" data-sort="last_login">
+                                                Last Usage (Days Ago) <i class="fas fa-sort"></i>
+                                            </th>
                                             <th>Actions</th>
                                         </tr>
                                     </thead>
@@ -225,6 +235,12 @@ let currentPage = 1;
 let recordsPerPage = 10;
 let filteredRecords = [...allRecords];
 
+// Add these variables at the top with other declarations
+let currentSort = {
+    column: 'name',
+    direction: 'asc'
+};
+
 function generateTableRow(student, index) {
     const daysAgo = student.last_login ? calculateDaysAgo(student.last_login) : 'N/A';
     return `
@@ -264,8 +280,29 @@ function filterAndDisplayRecords() {
                student.university_short_name.toLowerCase().includes(searchTerm);
     });
     
+    // Sort records
+    filteredRecords.sort((a, b) => {
+        let aValue = a[currentSort.column];
+        let bValue = b[currentSort.column];
+        
+        // Special handling for last_login
+        if (currentSort.column === 'last_login') {
+            aValue = aValue ? new Date(aValue).getTime() : 0;
+            bValue = bValue ? new Date(bValue).getTime() : 0;
+        } else {
+            // Convert to lowercase for string comparison
+            aValue = String(aValue).toLowerCase();
+            bValue = String(bValue).toLowerCase();
+        }
+        
+        if (aValue < bValue) return currentSort.direction === 'asc' ? -1 : 1;
+        if (aValue > bValue) return currentSort.direction === 'asc' ? 1 : -1;
+        return 0;
+    });
+    
     updatePagination();
     displayCurrentPage();
+    updateSortIcons();
 }
 
 function displayCurrentPage() {
@@ -343,6 +380,19 @@ function updatePagination() {
     });
 }
 
+function updateSortIcons() {
+    // Remove all sort classes
+    document.querySelectorAll('.sortable').forEach(th => {
+        th.classList.remove('asc', 'desc');
+    });
+    
+    // Add sort class to current sort column
+    const currentTh = document.querySelector(`.sortable[data-sort="${currentSort.column}"]`);
+    if (currentTh) {
+        currentTh.classList.add(currentSort.direction);
+    }
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     // Initial display
     filterAndDisplayRecords();
@@ -372,6 +422,26 @@ document.addEventListener('DOMContentLoaded', function() {
         document.querySelectorAll('input[name="selected[]"]')
             .forEach(checkbox => checkbox.checked = this.checked);
     });
+    
+    // Add sort handlers
+    document.querySelectorAll('.sortable').forEach(th => {
+        th.addEventListener('click', () => {
+            const column = th.dataset.sort;
+            
+            // Toggle sort direction if clicking the same column
+            if (currentSort.column === column) {
+                currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
+            } else {
+                currentSort.column = column;
+                currentSort.direction = 'asc';
+            }
+            
+            filterAndDisplayRecords();
+        });
+    });
+    
+    // Initial sort
+    updateSortIcons();
 });
 </script>
 
@@ -415,5 +485,36 @@ document.addEventListener('DOMContentLoaded', function() {
     /* Ensure the pagination is centered */
     .pagination {
         margin: 0;
+    }
+
+    .sortable {
+        cursor: pointer;
+        user-select: none;
+    }
+
+    .sortable:hover {
+        background-color: #f8f9fa;
+    }
+
+    .sortable i {
+        margin-left: 5px;
+        color: #ddd;
+    }
+
+    .sortable.asc i::before {
+        content: "\f0de";
+        color: #1971c2;
+    }
+
+    .sortable.desc i::before {
+        content: "\f0dd";
+        color: #1971c2;
+    }
+
+    .table thead th {
+        border-top: none;
+        border-bottom: 2px solid #dee2e6;
+        font-weight: 600;
+        padding: 12px 8px;
     }
 </style>
