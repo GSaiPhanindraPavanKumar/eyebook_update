@@ -318,4 +318,4 @@ $adminModel = new \Models\Admin();
         <script src="/views/public/js/todolist.js"></script>
         <!-- End custom js for this page-->
     </body>
-</html> -->
+</html>
