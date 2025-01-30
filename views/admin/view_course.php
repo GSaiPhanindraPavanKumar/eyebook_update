@@ -607,7 +607,7 @@ if ($assignedCohorts === null) {
                                                 echo "<td>" . htmlspecialchars($assignment['start_time']) . "</td>";
                                                 echo "<td>" . htmlspecialchars($assignment['due_date']) . "</td>";
                                                 echo "<td>" . htmlspecialchars($assignment['submission_count']). "</td>";
-                                                echo "<td><a href='/faculty/view_assignment/" . $assignment['id'] . "' class='btn btn-primary'>View</a></td>";
+                                                echo "<td><a href='/admin/view_assignment/" . $assignment['id'] . "' class='btn btn-primary'>View</a></td>";
                                                 echo "</tr>";
                                             }
                                         } else {
