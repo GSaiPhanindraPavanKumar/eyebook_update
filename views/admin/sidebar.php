@@ -85,7 +85,9 @@ $adminModel = new \Models\Admin();
     <div class="container-fluid page-body-wrapper">
         <!-- partial:partials/_settings-panel.html -->
         <div class="theme-setting-wrapper">
-            <div id="settings-trigger"><i class="ti-settings"></i></div>
+            <div id="settings-trigger" style="z-index: 9999; width: 40px; height: 40px; background: #4B49AC; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 15px rgba(0,0,0,0.1);">
+                <i class="ti-settings" style="color: #ffffff;"></i>
+            </div>
             <div id="theme-settings" class="settings-panel">
                 <i class="settings-close ti-close"></i>
                 <p class="settings-heading">SIDEBAR SKINS</p>

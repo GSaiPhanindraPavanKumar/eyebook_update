@@ -149,37 +149,78 @@ if ($userData) {
                 transition: transform 0.3s ease;
             }
 
-            /* Add these styles for settings panel */
+            /* Updated settings panel styles */
             .theme-setting-wrapper {
-                position: fixed;
-                right: 0;
-                width: 40px;
-                z-index: 1033; /* Increased z-index to ensure visibility */
+                position: fixed !important;
+                bottom: 40px !important;
+                right: 30px !important;
+                z-index: 9999 !important;
+                display: block !important;
+                width: 40px !important;
+                height: 40px !important;
             }
             
             #settings-trigger {
-                position: fixed;
-                bottom: 40px;
-                right: 30px;
-                width: 40px;
-                height: 40px;
-                background: #4B49AC;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                border-radius: 100%;
-                color: #fff;
-                cursor: pointer;
-                box-shadow: 0 0 10px rgba(0,0,0,0.2);
+                position: absolute !important;
+                width: 40px !important;
+                height: 40px !important;
+                background: #4B49AC !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                border-radius: 100% !important;
+                color: #fff !important;
+                cursor: pointer !important;
+                box-shadow: 0 0 10px rgba(0,0,0,0.2) !important;
+                transition: all 0.3s ease !important;
+                bottom: 0 !important;
+                right: 0 !important;
             }
 
-            /* Ensure settings panel is visible in mobile */
+            #settings-trigger:hover {
+                transform: scale(1.1) !important;
+                box-shadow: 0 0 15px rgba(75, 73, 172, 0.5) !important;
+            }
+
+            .settings-panel {
+                position: fixed !important;
+                right: 80px !important;
+                bottom: 40px !important;
+                z-index: 9998 !important;
+                background: white !important;
+                padding: 20px !important;
+                border-radius: 5px !important;
+                box-shadow: 0 0 15px rgba(0,0,0,0.1) !important;
+            }
+
+            /* Mobile-specific styles */
             @media (max-width: 991px) {
-                #settings-trigger {
-                    display: flex !important;
-                }
                 .theme-setting-wrapper {
+                    position: fixed !important;
+                    bottom: 20px !important;
+                    right: 20px !important;
                     display: block !important;
+                    z-index: 9999 !important;
+                }
+                
+                #settings-trigger {
+                    position: absolute !important;
+                    display: flex !important;
+                    visibility: visible !important;
+                    opacity: 1 !important;
+                }
+
+                .settings-panel {
+                    position: fixed !important;
+                    right: 20px !important;
+                    bottom: 70px !important;
+                    max-width: 300px !important;
+                    width: calc(100vw - 40px) !important;
+                }
+
+                /* Ensure the settings panel doesn't conflict with the chatbot trigger */
+                #chatbot-trigger {
+                    bottom: 120px !important;
                 }
             }
         </style>
