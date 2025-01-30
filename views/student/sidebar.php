@@ -148,7 +148,42 @@ if ($userData) {
                 box-shadow: 0 0 15px rgba(75, 73, 172, 0.5);
                 transition: transform 0.3s ease;
             }
+
+            /* Add these styles for settings panel */
+            .theme-setting-wrapper {
+                position: fixed;
+                right: 0;
+                width: 40px;
+                z-index: 1033; /* Increased z-index to ensure visibility */
+            }
+            
+            #settings-trigger {
+                position: fixed;
+                bottom: 40px;
+                right: 30px;
+                width: 40px;
+                height: 40px;
+                background: #4B49AC;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                border-radius: 100%;
+                color: #fff;
+                cursor: pointer;
+                box-shadow: 0 0 10px rgba(0,0,0,0.2);
+            }
+
+            /* Ensure settings panel is visible in mobile */
+            @media (max-width: 991px) {
+                #settings-trigger {
+                    display: flex !important;
+                }
+                .theme-setting-wrapper {
+                    display: block !important;
+                }
+            }
         </style>
+
         <div class="theme-setting-wrapper">
             <div id="settings-trigger"><i class="ti-settings"></i></div>
             <div id="theme-settings" class="settings-panel">
