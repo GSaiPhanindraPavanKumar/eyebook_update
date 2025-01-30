@@ -2,6 +2,93 @@
 
 require_once 'vendor/autoload.php';
 
+// Custom error handler
+function customErrorHandler($errno, $errstr, $errfile, $errline) {
+    if (!(error_reporting() & $errno)) {
+        return false;
+    }
+
+    // Check for undefined "email" key error which indicates user is not logged in
+    if (strpos($errstr, 'Undefined array key "email"') !== false) {
+        // Log the attempt but suppress all other errors
+        error_reporting(0);
+        ini_set('display_errors', 0);
+        
+        // Clear any existing session
+        session_start();
+        session_destroy();
+        
+        // Show only the session timeout page
+        require 'views/session_timeout.php';
+        exit;
+    }
+
+    // Regular error handling for other errors...
+    error_log("Error ($errno): $errstr in $errfile on line $errline");
+
+    // For development environment, show detailed error
+    if (getenv('APP_ENV') !== 'production') {
+        echo "<h1>Development Error</h1>";
+        echo "<p><strong>Type:</strong> $errno</p>";
+        echo "<p><strong>Message:</strong> $errstr</p>";
+        echo "<p><strong>File:</strong> $errfile</p>";
+        echo "<p><strong>Line:</strong> $errline</p>";
+    } else {
+        // For production, show user-friendly error page
+        require 'views/error.php';
+    }
+
+    // Don't execute PHP internal error handler
+    return true;
+}
+
+// Custom exception handler
+function customExceptionHandler($exception) {
+    // Check if the error is related to undefined "email" key
+    if (strpos($exception->getMessage(), 'Undefined array key "email"') !== false) {
+        // Log the attempt but suppress all other errors
+        error_reporting(0);
+        ini_set('display_errors', 0);
+        
+        // Clear any existing session
+        session_start();
+        session_destroy();
+        
+        // Show only the session timeout page
+        require 'views/session_timeout.php';
+        exit;
+    }
+
+    // Regular exception handling for other exceptions...
+    error_log("Exception: " . $exception->getMessage());
+    
+    // Get the status code
+    $statusCode = 500;
+    if (method_exists($exception, 'getStatusCode')) {
+        $statusCode = $exception->getStatusCode();
+    }
+    
+    // Set the HTTP response code
+    http_response_code($statusCode);
+
+    // For development environment, show detailed error
+    if (getenv('APP_ENV') !== 'production') {
+        echo "<h1>Development Exception</h1>";
+        echo "<p><strong>Type:</strong> " . get_class($exception) . "</p>";
+        echo "<p><strong>Message:</strong> " . $exception->getMessage() . "</p>";
+        echo "<p><strong>File:</strong> " . $exception->getFile() . "</p>";
+        echo "<p><strong>Line:</strong> " . $exception->getLine() . "</p>";
+        echo "<h2>Stack Trace:</h2>";
+        echo "<pre>" . $exception->getTraceAsString() . "</pre>";
+    } else {
+        // For production, show user-friendly error page
+        require 'views/error.php';
+    }
+}
+
+// Set custom error and exception handlers
+set_error_handler("customErrorHandler");
+set_exception_handler("customExceptionHandler");
 
 use Dotenv\Dotenv;
 
@@ -450,6 +537,15 @@ $router->set404(function() {
 $router->get('/admin/certificate_generations', 'CertificateController@index');
 $router->get('/admin/certificate_generations/create', 'CertificateController@create');
 $router->post('/admin/certificate_generations/store', 'CertificateController@store');
+$router->get('/admin/certificate_generations/progress/(\d+)', 'CertificateController@progress');
+$router->get('/admin/certificate_generations/check-progress/(\d+)', 'CertificateController@checkProgress');
 $router->get('/admin/certificate_generations/download/(\d+)', 'CertificateController@download');
+$router->post('/admin/certificate_generations/preview', 'CertificateController@preview');
+
+if (getenv('APP_ENV') !== 'production') {
+    $router->get('/admin/certificate_generations/debug/(\d+)', 'CertificateController@debug');
+}
+
+$router->post('/admin/certificate_generations/start/(\d+)', 'CertificateController@startGeneration');
 
 $router->run();

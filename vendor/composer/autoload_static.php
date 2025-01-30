@@ -73,6 +73,7 @@ class ComposerStaticInit731ca70c2952c0916b16b9d44ba77970
         array (
             'Controllers\\' => 12,
             'Config\\' => 7,
+            'Composer\\Pcre\\' => 14,
             'Complex\\' => 8,
         ),
         'A' => 
@@ -191,6 +192,10 @@ class ComposerStaticInit731ca70c2952c0916b16b9d44ba77970
         array (
             0 => __DIR__ . '/../..' . '/config',
         ),
+        'Composer\\Pcre\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/composer/pcre/src',
+        ),
         'Complex\\' => 
         array (
             0 => __DIR__ . '/..' . '/markbaker/complex/classes/src',
@@ -202,6 +207,13 @@ class ComposerStaticInit731ca70c2952c0916b16b9d44ba77970
     );
 
     public static $prefixesPsr0 = array (
+        'I' => 
+        array (
+            'Imagick' => 
+            array (
+                0 => __DIR__ . '/..' . '/calcinai/php-imagick/src',
+            ),
+        ),
         'B' => 
         array (
             'Bramus' => 

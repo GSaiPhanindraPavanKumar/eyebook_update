@@ -330,6 +330,8 @@ class SpocController {
                     $userData['profile_image_url'] = $profileImageUrl;
                 } catch (AwsException $e) {
                     echo "Error uploading image: " . $e->getMessage();
+                } catch (Exception $e) {
+                    echo "Error uploading image: " . $e->getMessage();
                 }
             }
 

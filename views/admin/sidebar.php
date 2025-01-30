@@ -46,6 +46,66 @@ $adminModel = new \Models\Admin();
     <link rel="stylesheet" href="/views/public/css/vertical-layout-light/style.css">
     <!-- endinject -->
     <link rel="shortcut icon" href="/views/public/assets/images/android-chrome-512x512.png" />
+    <style>
+    .nav-link, .dropdown-item {
+        cursor: pointer;
+    }
+
+    .dropdown-menu {
+        z-index: 1021;  /* Ensure dropdown appears above other elements */
+    }
+
+    .nav-profile .dropdown-toggle::after {
+        display: none;  /* Remove default dropdown arrow if needed */
+    }
+
+    /* Ensure clickable areas are properly sized */
+    .nav-item.nav-profile {
+        min-width: 40px;
+        position: relative;
+    }
+
+    .dropdown-menu {
+        min-width: 160px;
+    }
+
+    .dropdown-item {
+        padding: 8px 16px;
+    }
+
+    /* Add hover effect */
+    .dropdown-item:hover {
+        background-color: rgba(0,0,0,0.05);
+    }
+
+    /* Increase sidebar width */
+    .sidebar {
+        min-width: 300px !important;  
+        width: 300px !important;
+    }
+
+    /* Adjust main panel margin to account for wider sidebar
+    .main-panel {
+        margin-left: 300px !important;
+        width: calc(100% - 300px) !important;
+    } */
+
+    /* Adjust brand wrapper width to match sidebar */
+    .navbar .navbar-brand-wrapper {
+        width: 300px !important;
+    }
+
+    /* Adjust navbar menu wrapper width */
+    .navbar .navbar-menu-wrapper {
+        width: calc(100% - 300px) !important;
+    }
+
+    /* Ensure text doesn't wrap in sidebar menu items */
+    .sidebar .nav .nav-item .nav-link {
+        padding: 1rem 1.875rem;
+        white-space: nowrap;
+    }
+    </style>
 </head>
 <body>
 <div class="container-scroller">
@@ -216,7 +276,12 @@ $adminModel = new \Models\Admin();
                         </ul>
                     </div>
                 </li>
-
+                <li class="nav-item">
+                    <a class="nav-link" href="/admin/certificate_generations">
+                        <i class="icon-grid menu-icon"></i>
+                        <span class="menu-title">Certificate Generation</span>
+                    </a>
+                </li>
                 <!-- <li class="nav-item">
                     <a class="nav-link" data-toggle="collapse" href="#streams" aria-expanded="false" aria-controls="streams">
                         <i class="icon-grid-2 menu-icon"></i>
@@ -295,8 +360,8 @@ $adminModel = new \Models\Admin();
                     <a class="nav-link" href="/admin/logout">
                         <i class="ti-power-off menu-icon"></i>
                         <span class="menu-title">Logout</span>
-                </a>
-            </li>
+                    </a>
+                </li>
             </ul>
 
         </nav>
