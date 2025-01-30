@@ -317,6 +317,7 @@ if ($assignedCohorts === null) {
                                     <div class="form-group">
                                         <label for="scormFile">SCORM File</label>
                                         <input type="file" class="form-control" id="scormFile" name="scorm_file" required>
+                                        <small class="form-text text-muted">Allowed file formats: .zip inside .xml in main directory</small>
                                     </div>
                                     <input type="hidden" name="course_id" value="<?php echo htmlspecialchars($course['id']); ?>">
                                     <button type="submit" class="btn btn-primary">Add Course Book</button>
@@ -330,6 +331,7 @@ if ($assignedCohorts === null) {
                                     <div class="form-group">
                                         <label for="ecContentFile">Upload ZIP File</label>
                                         <input type="file" class="form-control" id="ecContentFile" name="ec_content_file" accept=".zip" required>
+                                        <small class="form-text text-muted">Allowed file format: .zip</small>
                                     </div>
                                     <input type="hidden" name="course_id" value="<?php echo htmlspecialchars($course['id']); ?>">
                                     <button type="submit" class="btn btn-primary">Upload EC Content</button>
@@ -354,6 +356,7 @@ if ($assignedCohorts === null) {
                                     <div class="form-group" id="fileInput" style="display: none;">
                                         <label for="contentFile">File</label>
                                         <input type="file" class="form-control" id="contentFile" name="content_file" accept=".pdf,video/*,image/*">
+                                        <small class="form-text text-muted">Allowed file formats: .pdf, video files, image files</small>
                                     </div>
                                     <input type="hidden" name="course_id" value="<?php echo htmlspecialchars($course['id']); ?>">
                                     <button type="submit" class="btn btn-primary">Add Additional Content</button>

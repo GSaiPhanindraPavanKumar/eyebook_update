@@ -685,21 +685,40 @@ class AdminController {
 
     public function updatePassword() {
         $conn = Database::getConnection();
+        $admin_id = $_SESSION['admin']['id']; // Assuming admin ID is stored in session
 
-        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-            $admin_id = $_POST['admin_id'];
-            $new_password = password_hash($_POST['newPassword'], PASSWORD_BCRYPT);
+        // Check if the form is submitted
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $currentPassword = $_POST['currentPassword'] ?? null;
+            $newPassword = $_POST['newPassword'] ?? null;
+            $confirmPassword = $_POST['confirmPassword'] ?? null;
 
-            AdminModel::updatePassword($conn, $admin_id, $new_password);
+            // Fetch the current password from the database
+            $admin = AdminModel::getById($conn, $admin_id);
+            if (!$admin) {
+                $message = "Admin not found.";
+                $message_type = "danger";
+            } elseif (!password_verify($currentPassword, $admin['password'])) {
+                $message = "Current password is incorrect.";
+                $message_type = "danger";
+            } elseif ($newPassword !== $confirmPassword) {
+                $message = "New password and re-type password do not match.";
+                $message_type = "warning";
+            } else {
+                // Update the password
+                $hashedPassword = password_hash($newPassword, PASSWORD_BCRYPT);
+                AdminModel::updatePassword($conn, $admin_id, $hashedPassword);
+                $message = "Password updated successfully.";
+                $message_type = "success";
+            }
 
-            $message = "Password updated successfully.";
-            $message_type = "success";
+            // Pass the message to the view
+            require 'views/admin/updatePassword.php';
+        } else {
+            // If not a POST request, just show the form
+            require 'views/admin/updatePassword.php';
         }
-
-        require 'views/admin/updatePassword.php';
     }
-
-
 
 
     public function uploadStudents() {
@@ -1970,6 +1989,109 @@ class AdminController {
         $course_count = Course::getCountByUniversityId($conn, $university_id);
     
         require 'views/admin/view_university.php';
+    }
+
+    public function virtual_classroom_dashboard() {
+        $conn = Database::getConnection();
+        $zoom = new ZoomAPI(ZOOM_CLIENT_ID, ZOOM_CLIENT_SECRET, ZOOM_ACCOUNT_ID, $conn);
+
+        // Fetch all classrooms
+        $adminClassrooms = $zoom->getAllClassrooms();
+
+        // Fetch all courses with university short name
+        $courses = Course::getAllWithUniversity($conn);
+
+        // Sort classrooms by start_time in descending order
+        usort($adminClassrooms, function($a, $b) {
+            return strtotime($b['start_time']) - strtotime($a['start_time']);
+        });
+
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            $action = $_POST['action'] ?? null;
+            $topic = $_POST['topic'] ?? null;
+            $start_time_local = $_POST['start_time'] ?? null;
+            $duration = $_POST['duration'] ?? null;
+            $selectedCourses = $_POST['courses'] ?? [];
+            $join_url = $_POST['join_url'] ?? [];
+            $classroom_id = $_POST['classroom_id'] ?? [];
+
+            // // Convert local time to UTC and then to ISO 8601 format
+            // $start_time = new \DateTime($start_time_local, new \DateTimeZone('Asia/Kolkata')); // Set the local time zone
+            // $start_time_utc = clone $start_time;
+            // $start_time_utc->setTimezone(new \DateTimeZone('UTC')); // Convert to UTC
+            // $start_time_iso8601 = $start_time_utc->format(\DateTime::ATOM);
+
+            if (empty($join_url)) {
+                $topic = $_POST['topic'];
+                $start_time_local = $_POST['start_time'];
+                $duration = $_POST['duration'];
+                $selectedCourses = $_POST['courses'];
+        
+                // Convert local time to UTC for Zoom
+                $start_time_local_dt = new \DateTime($start_time_local, new \DateTimeZone('Asia/Kolkata')); // Set the local time zone
+                $start_time_utc = clone $start_time_local_dt;
+                $start_time_utc->setTimezone(new \DateTimeZone('UTC'));
+                $start_time_iso8601 = $start_time_utc->format(\DateTime::ATOM);
+        
+                $zoom = new ZoomAPI(ZOOM_CLIENT_ID, ZOOM_CLIENT_SECRET, ZOOM_ACCOUNT_ID, $conn);
+                $classroom = $zoom->createVirtualClassroom($topic, $start_time_iso8601, $duration);
+
+                if (isset($classroom['id'])) {
+                    // Save the virtual classroom to the database and get the virtual class ID
+                    $virtualClassId = $zoom->saveVirtualClassroomToDatabase($classroom, $selectedCourses, $start_time_local_dt->format('Y-m-d H:i:s'));
+        
+                    // Update the courses with the virtual class ID
+                    foreach ($selectedCourses as $courseId) {
+                        $course = Course::getById($conn, $courseId);
+                        $virtualClassIds = !empty($course['virtual_class_id']) ? json_decode($course['virtual_class_id'], true) : [];
+                        $virtualClassIds[] = $virtualClassId;
+                        $stmt = $conn->prepare("UPDATE courses SET virtual_class_id = ? WHERE id = ?");
+                        $stmt->execute([json_encode($virtualClassIds), $courseId]);
+                    }
+        
+                    // Redirect to the admin virtual classroom dashboard
+                    header('Location: /admin/virtual_classroom');
+                    exit();
+                } else {
+                    echo "Error creating virtual classroom.";
+                }    
+            }
+
+            if ($join_url) {
+                $topic = $_POST['topic'] ?? null;
+                $start_time_local = $_POST['start_time'] ?? null;
+                $duration = $_POST['duration'] ?? null;
+                $selectedCourses = $_POST['courses'] ?? [];
+                $join_url = $_POST['join_url'] ?? [];
+                $classroom_id = $_POST['classroom_id'] ?? [];
+
+                $start_time = new \DateTime($start_time_local, new \DateTimeZone('Asia/Kolkata')); // Set the local time zone
+                $start_time_utc = clone $start_time;
+                $start_time_utc->setTimezone(new \DateTimeZone('UTC')); // Convert to UTC
+                $start_time_iso8601 = $start_time_utc->format(\DateTime::ATOM);
+
+                // Save the start time and course IDs with the classroom in the correct format
+                $stmt = $conn->prepare("INSERT INTO virtual_classrooms (classroom_id, topic, start_time, duration, join_url, course_id) VALUES (?, ?, ?, ?, ?, ?)");
+                $stmt->execute([$classroom_id, $topic, $start_time->format('Y-m-d H:i:s'), $duration, $join_url, json_encode($selectedCourses)]);
+
+                // Update the courses with the virtual class ID
+                foreach ($selectedCourses as $courseId) {
+                    $course = Course::getById($conn, $courseId);
+                    $virtualClassIds = !empty($course['virtual_class_id']) ? json_decode($course['virtual_class_id'], true) : [];
+                    $virtualClassIds[] = $classroom['id'] ?? null;
+                    $stmt = $conn->prepare("UPDATE courses SET virtual_class_id = ? WHERE id = ?");
+                    $stmt->execute([json_encode($virtualClassIds), $courseId]);
+                }
+
+                // Redirect to the admin virtual classroom dashboard
+                header('Location: /admin/virtual_classroom');
+                exit();
+            } else {
+                echo "Error creating or saving virtual classroom.";
+            }
+        }
+
+        require 'views/admin/virtual_classroom_dashboard.php';
     }
 
     public function createVirtualClassroom() {

@@ -15,10 +15,18 @@ class VirtualClassroom {
         $stmt->execute([$data['id'], $data['topic'], $data['start_time'], $data['duration'], $data['join_url'], json_encode($data['course_id'])]);
     }
 
+    public function save($topic, $start_time, $duration, $join_url, $selectedCourses) {
+        $stmt = $this->conn->prepare("INSERT INTO virtual_classrooms (topic, start_time, duration, join_url, course_id) VALUES (?, ?, ?, ?, ?)");
+        $stmt->execute([$topic, $start_time, $duration, $join_url, json_encode($selectedCourses)]);
+        return $this->conn->lastInsertId();
+    }
+
     public function getAll() {
         $stmt = $this->conn->query("SELECT * FROM virtual_classrooms ORDER BY start_time DESC");
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+
+    
 
     public function getVirtualClassroomsByIds($virtualClassIds) {
         if (empty($virtualClassIds)) {

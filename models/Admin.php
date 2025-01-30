@@ -43,12 +43,20 @@ class Admin {
     }
 
 
-    public static function updatePassword($conn, $admin_id, $new_password) {
-        $stmt = $conn->prepare("UPDATE admins SET password = :new_password WHERE id = :admin_id");
-        $stmt->execute([
-            ':new_password' => $new_password,
-            ':admin_id' => $admin_id
-        ]);
+    public static function getById($conn, $id) {
+        $sql = "SELECT * FROM admins WHERE id = :id";
+        $stmt = $conn->prepare($sql);
+        $stmt->bindValue(':id', $id);
+        $stmt->execute();
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+    public static function updatePassword($conn, $id, $password) {
+        $sql = "UPDATE admins SET password = :password WHERE id = :id";
+        $stmt = $conn->prepare($sql);
+        $stmt->bindValue(':password', $password);
+        $stmt->bindValue(':id', $id);
+        return $stmt->execute();
     }
 
     public function updateLastLogin($admin_id) {

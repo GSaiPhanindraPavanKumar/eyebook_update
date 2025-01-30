@@ -161,6 +161,9 @@ $router->get('/admin/download_usage_report', 'AdminController@downloadUsageRepor
 $router->get('/admin/view_university/(\d+)', 'AdminController@viewUniversity');
 $router->get('/admin/create_virtual_classroom', 'AdminController@createVirtualClassroom');
 $router->post('/admin/create_virtual_classroom', 'AdminController@createVirtualClassroom');
+
+$router->get('/admin/virtual_classroom_dashboard', 'AdminController@virtual_classroom_dashboard');
+$router->post('/admin/virtual_classroom_dashboard', 'AdminController@virtual_classroom_dashboard');
 $router->get('/admin/virtual_classroom', 'AdminController@virtualClassroom');
 $router->get('/admin/edit_course/(\d+)', 'AdminController@editCourse');
 $router->post('/admin/edit_course/(\d+)', 'AdminController@editCourse');
