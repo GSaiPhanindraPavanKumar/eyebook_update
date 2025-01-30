@@ -19,12 +19,12 @@
                         <table class="table">
                             <thead>
                                 <tr>
-                                    <th>Title</th>
-                                    <th>Course</th>
-                                    <th>Start Time</th>
-                                    <th>Due Date</th>
-                                    <th>Submissions</th>
-                                    <th>Actions</th>
+                                    <th style="width: 20%;">Title</th>
+                                    <th style="width: 20%;">Course</th>
+                                    <th style="width: 15%;">Start Time</th>
+                                    <th style="width: 15%;">Due Date</th>
+                                    <th style="width: 15%;">Submissions</th>
+                                    <th style="width: 15%;">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>

@@ -342,7 +342,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     'start' => $assignment['start_time'],
                     'end' => $assignment['due_date'],
                     'color' => 'red',
-                    'url' => '/admin/view_assignment/' . $assignment['id'] // URL to view the assignment
+                    'url' => '/student/view_assignment/' . $assignment['id'] // URL to view the assignment
                 ];
             }, $assignments),
             array_map(function($contest) {
@@ -351,7 +351,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     'start' => $contest['start_date'],
                     'end' => $contest['end_date'],
                     'color' => 'green',
-                    'url' => '/admin/view_contest/' . $contest['id'] // URL to view the contest
+                    'url' => '/student/view_contest/' . $contest['id'] // URL to view the contest
                 ];
             }, $contests)
         )); ?>,

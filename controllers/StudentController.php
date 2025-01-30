@@ -121,6 +121,30 @@ class StudentController {
         require 'views/student/book_view.php';
     }
 
+    public function viewECContent($hashedId) {
+        $conn = Database::getConnection();
+        $course_id = base64_decode($hashedId);
+        if (!is_numeric($course_id)) {
+            die('Invalid course ID');
+        }
+        $course = Course::getById($conn, $course_id);
+    
+        if (!$course || empty($course['EC_content'])) {
+            echo 'EC content not found.';
+            exit;
+        }
+    
+        // Ensure EC_content is an array
+        if (!is_array($course['EC_content'])) {
+            $course['EC_content'] = json_decode($course['EC_content'], true) ?? [];
+        }
+    
+        // Get the index_path from the query parameter
+        $index_path = $_GET['index_path'] ?? $course['EC_content'][0]['indexPath'];
+    
+        require 'views/student/book_view.php';
+    }
+
     public function viewMaterial($hashedId) {
         $conn = Database::getConnection();
         $course_id = base64_decode($hashedId);
@@ -337,6 +361,18 @@ class StudentController {
         ]);
 
         echo json_encode(['status' => 'success']);
+    }
+
+    public function viewCourseBook() {
+        $conn = Database::getConnection();
+        $index_path = $_GET['index_path'] ?? '';
+    
+        if (empty($index_path)) {
+            echo 'Course book content not found.';
+            exit;
+        }
+    
+        require 'views/student/book_view.php';
     }
     public function updatePassword() {
         $conn = Database::getConnection();
