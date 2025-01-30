@@ -11,6 +11,24 @@ function handlePredefinedQuery($query) {
         'hello' => "<div class='response-text'>
             <p>Hello! How can I assist you today?</p>
             </div>",
+        'hey' => "<div class='response-text'>
+            <p>Hey there! What can I help you with?</p>
+            </div>",
+        'good morning' => "<div class='response-text'>
+            <p>Good morning! How may I help you today?</p>
+            </div>",
+        'good afternoon' => "<div class='response-text'>
+            <p>Good afternoon! What can I assist you with?</p>
+            </div>", 
+        'good evening' => "<div class='response-text'>
+            <p>Good evening! How can I be of assistance?</p>
+            </div>",
+        'howdy' => "<div class='response-text'>
+            <p>Howdy! What brings you here today?</p>
+            </div>",
+        'greetings' => "<div class='response-text'>
+            <p>Greetings! How may I help you?</p>
+            </div>",
         'forgot password' => "<div class='response-text'>
             <p>To reset your password:</p>
             <p>1. Visit the login page<br>
