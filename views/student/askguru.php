@@ -3,8 +3,25 @@
 function handlePredefinedQuery($query) {
     $query = strtolower(trim($query));
     
-    // Common responses
-    $responses = [
+    // Greetings that should match exactly
+    $exactMatches = [
+        'hi' => "<div class='response-text'><p>Hello! How can I assist you today?</p></div>",
+        'hello' => "<div class='response-text'><p>Hello! How can I assist you today?</p></div>",
+        'hey' => "<div class='response-text'><p>Hey there! What can I help you with?</p></div>",
+        'good morning' => "<div class='response-text'><p>Good morning! How may I help you today?</p></div>",
+        'good afternoon' => "<div class='response-text'><p>Good afternoon! What can I assist you with?</p></div>", 
+        'good evening' => "<div class='response-text'><p>Good evening! How can I be of assistance?</p></div>",
+        'howdy' => "<div class='response-text'><p>Howdy! What brings you here today?</p></div>",
+        'greetings' => "<div class='response-text'><p>Greetings! How may I help you?</p></div>",
+    ];
+
+    // Check for exact matches first (greetings)
+    if (array_key_exists($query, $exactMatches)) {
+        return $exactMatches[$query];
+    }
+
+    // Other responses that can use partial matching
+    $partialMatches = [
         'forgot password' => "<div class='response-text'>
             <p>To reset your password:</p>
             <p>1. Visit the login page<br>
@@ -95,14 +112,14 @@ function handlePredefinedQuery($query) {
             </div>",
     ];
     
-    // Check for keyword matches
-    foreach ($responses as $key => $response) {
+    // Check for partial matches for other queries
+    foreach ($partialMatches as $key => $response) {
         if (strpos($query, $key) !== false) {
             return $response;
         }
     }
     
-    // If no predefined response matches, use Gemini API
+    // If no matches found, return null to proceed with Gemini API
     return null;
 }
 

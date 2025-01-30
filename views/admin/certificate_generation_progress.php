@@ -9,29 +9,22 @@
                     <div class="card-body">
                         <h4 class="card-title"><?= htmlspecialchars($generation['subject']) ?></h4>
                         <div class="progress mb-3">
-                            <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                            <div id="progressBar" 
+                                 class="progress-bar progress-bar-striped progress-bar-animated" 
                                  role="progressbar" 
-                                 style="width: <?= $generation['progress'] ?>%" 
-                                 aria-valuenow="<?= $generation['progress'] ?>" 
+                                 style="width: 0%" 
+                                 aria-valuenow="0" 
                                  aria-valuemin="0" 
                                  aria-valuemax="100">
-                                <?= round($generation['progress']) ?>%
+                                <span id="progressText">0%</span>
                             </div>
                         </div>
-                        <p>Generated: <?= $generation['generated_count'] ?> / <?= $generation['total_count'] ?></p>
+                        <div id="statusText" class="text-muted">
+                            Processing certificates... Please wait.
+                        </div>
                         
-                        <div id="status-message" class="alert alert-info">
-                            <div id="status-text">Processing certificates... Please wait.</div>
-                            <div id="error-details" class="mt-2 small" style="display: none;"></div>
+                        <div id="error-message" class="alert alert-danger mt-3" style="display: none;">
                         </div>
-
-                        <!-- Add debug information section -->
-                        <?php if (getenv('APP_ENV') !== 'production'): ?>
-                        <div id="debug-info" class="mt-4 p-3 bg-light">
-                            <h5>Debug Information</h5>
-                            <pre id="debug-log" style="max-height: 200px; overflow-y: auto;"></pre>
-                        </div>
-                        <?php endif; ?>
                     </div>
                 </div>
             </div>
@@ -39,138 +32,124 @@
     </div>
 </div>
 
-<!-- Add jQuery -->
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
 <script>
-// Add logging function
-function log(message) {
-    console.log(`[Certificate Progress] ${message}`);
-    <?php if (getenv('APP_ENV') !== 'production'): ?>
-    const debugLog = document.getElementById('debug-log');
-    const timestamp = new Date().toISOString();
-    debugLog.innerHTML += `${timestamp} - ${message}\n`;
-    debugLog.scrollTop = debugLog.scrollHeight;
-    <?php endif; ?>
-}
-
-let failedAttempts = 0;
-const MAX_RETRIES = 5;
-
 function checkProgress() {
-    log('Checking progress...');
-    
-    fetch('/admin/certificate_generations/check-progress/<?= $generationId ?>', {
+    fetch('/admin/certificate_generations/progress/<?= $generationId ?>', {
         headers: {
             'Accept': 'application/json'
+        },
+        // Add redirect handling
+        redirect: 'follow'
+    })
+    .then(response => {
+        // Check if response is a redirect
+        if (response.redirected) {
+            window.location.href = response.url;
+            return;
+        }
+        
+        // Check if response is ok
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        // Parse JSON response
+        return response.json().catch(e => {
+            throw new Error('Invalid JSON response from server');
+        });
+    })
+    .then(data => {
+        if (!data) return; // Skip if redirected or no data
+        
+        const progressBar = document.getElementById('progressBar');
+        const progressText = document.getElementById('progressText');
+        const statusText = document.getElementById('statusText');
+        
+        if (data.progress !== undefined) {
+            const progress = Math.round(data.progress);
+            progressBar.style.width = progress + '%';
+            progressBar.setAttribute('aria-valuenow', progress);
+            progressText.textContent = progress + '%';
+            
+            if (data.generated_count && data.total_count) {
+                statusText.textContent = `Processing: ${data.generated_count} of ${data.total_count} certificates`;
+            }
+        }
+        
+        if (data.status === 'completed') {
+            clearInterval(progressInterval);
+            statusText.textContent = 'Generation completed!';
+            
+            // Add download button
+            const downloadBtn = document.createElement('a');
+            downloadBtn.href = `/admin/certificate_generations/download/${<?= $generationId ?>}`;
+            downloadBtn.className = 'btn btn-primary mt-3';
+            downloadBtn.innerHTML = '<i class="ti-download mr-1"></i> Download Certificates';
+            document.querySelector('.card-body').appendChild(downloadBtn);
+            
+            // Redirect after 3 seconds
+            setTimeout(() => {
+                window.location.href = '/admin/certificate_generations';
+            }, 3000);
+            
+        } else if (data.status === 'failed') {
+            clearInterval(progressInterval);
+            statusText.textContent = 'Generation failed.';
+            progressBar.classList.remove('bg-primary');
+            progressBar.classList.add('bg-danger');
+            
+            if (data.error) {
+                const errorDiv = document.getElementById('error-message');
+                errorDiv.textContent = data.error;
+                errorDiv.style.display = 'block';
+            }
         }
     })
-        .then(async response => {
-            if (!response.ok) {
-                const text = await response.text();
-                throw new Error(`HTTP error! status: ${response.status}, body: ${text}`);
-            }
-            return response.json();
-        })
-        .then(data => {
-            log(`Status update: ${JSON.stringify(data)}`);
-            
-            // Update progress bar
-            const progress = Math.round(data.progress || 0);
-            $('.progress-bar')
-                .css('width', progress + '%')
-                .text(progress + '%')
-                .attr('aria-valuenow', progress);
-            
-            // Update status message
-            $('#status-text').text(
-                `Processing: ${data.generated_count || 0} of ${data.total_count || 0} certificates (${progress}%)`
-            );
-            
-            if (data.status === 'completed') {
-                $('#status-message')
-                    .removeClass('alert-info')
-                    .addClass('alert-success');
-                $('#status-text').text('Certificate generation completed!');
-                setTimeout(() => {
-                    window.location.href = '/admin/certificate_generations';
-                }, 2000);
-            } else if (data.status === 'failed') {
-                $('#status-message')
-                    .removeClass('alert-info')
-                    .addClass('alert-danger');
-                $('#status-text').text('Certificate generation failed');
-            } else {
-                setTimeout(checkProgress, 2000);
-            }
-        })
-        .catch(error => {
-            log('Error checking progress: ' + error.message);
-            $('#error-details')
-                .text(error.message)
-                .show();
-            setTimeout(checkProgress, 5000);
-        });
+    .catch(error => {
+        console.error('Error checking progress:', error);
+        const errorDiv = document.getElementById('error-message');
+        errorDiv.textContent = 'Error checking progress: ' + error.message;
+        errorDiv.style.display = 'block';
+        
+        // Stop checking if we get too many errors
+        if (error.message.includes('Invalid JSON')) {
+            clearInterval(progressInterval);
+        }
+    });
 }
 
-// Add debug endpoint check in non-production
-<?php if (getenv('APP_ENV') !== 'production'): ?>
-async function checkDebugInfo() {
-    try {
-        log('Fetching debug information...');
-        const response = await fetch('/admin/certificate_generations/debug/<?= $generationId ?>');
-        const debugData = await response.json();
-        log(`Debug data: ${JSON.stringify(debugData, null, 2)}`);
-    } catch (error) {
-        log(`Error fetching debug info: ${error.message}`);
+// Check progress every 2 seconds
+const progressInterval = setInterval(checkProgress, 2000);
+
+// Initial check
+checkProgress();
+
+// Start the generation process
+fetch('/admin/certificate_generations/start/<?= $generationId ?>', {
+    method: 'POST',
+    headers: {
+        'Accept': 'application/json'
+    },
+    redirect: 'follow'
+})
+.then(response => {
+    // Handle redirect
+    if (response.redirected) {
+        window.location.href = response.url;
+        return;
     }
-}
-<?php endif; ?>
-
-// Start the generation process immediately when the page loads
-$(document).ready(function() {
-    startGeneration();
-    setTimeout(checkProgress, 2000);
+    return response.json();
+})
+.then(data => {
+    if (!data) return; // Skip if redirected
+    if (!data.success) {
+        throw new Error(data.error || 'Failed to start generation');
+    }
+})
+.catch(error => {
+    console.error('Error starting generation:', error);
+    const errorDiv = document.getElementById('error-message');
+    errorDiv.textContent = 'Error starting generation: ' + error.message;
+    errorDiv.style.display = 'block';
 });
-
-async function startGeneration() {
-    try {
-        $('#status-text').text('Starting certificate generation...');
-        
-        const response = await fetch('/admin/certificate_generations/start/<?= $generationId ?>', {
-            method: 'POST',
-            headers: {
-                'Accept': 'application/json'
-            }
-        });
-        
-        const text = await response.text();
-        log('Raw response: ' + text);
-        
-        // Try to extract only the JSON part if there's additional output
-        const jsonMatch = text.match(/\{.*\}/);
-        if (!jsonMatch) {
-            throw new Error('No JSON found in response');
-        }
-        
-        const data = JSON.parse(jsonMatch[0]);
-        
-        if (!data.success) {
-            throw new Error(data.error || 'Failed to start generation');
-        }
-        
-        $('#status-text').text('Generation process started successfully');
-        log('Generation process started');
-        
-    } catch (error) {
-        log('Error starting generation: ' + error.message);
-        $('#status-message')
-            .removeClass('alert-info')
-            .addClass('alert-danger');
-        $('#status-text').text('Error starting generation');
-        $('#error-details')
-            .text(error.message)
-            .show();
-    }
-}
 </script> 

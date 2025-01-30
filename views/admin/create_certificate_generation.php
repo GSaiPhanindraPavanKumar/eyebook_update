@@ -257,4 +257,59 @@ function cancelGeneration() {
 function proceedGeneration() {
     document.getElementById('certificate-form').submit();
 }
+
+// Update the preview function
+function generatePreview() {
+    const formData = new FormData(document.getElementById('generationForm'));
+    formData.append('positions', JSON.stringify(textPositions));
+
+    fetch('/admin/certificate_generations/preview', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            document.getElementById('previewImage').src = data.previewUrl;
+            document.getElementById('previewContainer').style.display = 'block';
+            
+            // Update preview text positions
+            Object.keys(data.data).forEach(field => {
+                const text = data.data[field];
+                updatePreviewText(field, text);
+            });
+        } else {
+            alert('Error generating preview: ' + data.error);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error generating preview');
+    });
+}
+
+// Update form submission
+document.getElementById('generationForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    formData.append('positions', JSON.stringify(textPositions));
+
+    fetch('/admin/certificate_generations/store', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            window.location.href = `/admin/certificate_generations/progress/${data.generationId}`;
+        } else {
+            alert('Error: ' + data.error);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error submitting form');
+    });
+});
 </script> 
