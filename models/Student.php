@@ -48,9 +48,12 @@ class Student {
     }
 
     public static function getAll($conn) {
-        $sql = "SELECT * FROM students";
-        $stmt = $conn->query($sql);
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $stmt = $conn->prepare("SELECT s.*, u.short_name as university_short_name, u.long_name as university
+                               FROM students s 
+                               LEFT JOIN universities u ON s.university_id = u.id 
+                               ORDER BY s.name");
+        $stmt->execute();
+        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
     }
     public static function getUserDataByEmail($conn, $email) {
         $sql = "SELECT students.*, universities.long_name as university, universities.short_name as university_short_name 

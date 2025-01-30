@@ -7,11 +7,8 @@ use Models\Student;
 $conn = Database::getConnection();
 $universities = University::getAll($conn);
 
-// Handle search query and sorting
-$searchQuery = $_GET['search'] ?? '';
-$sortColumn = $_GET['sort'] ?? 'name';
-$sortOrder = $_GET['order'] ?? 'asc';
-$students = Student::search($conn, $searchQuery, $sortColumn, $sortOrder);
+// Get all students for client-side search
+$allStudents = Student::getAll($conn);
 
 function daysAgo($date) {
     if ($date === null) {
@@ -56,55 +53,39 @@ function daysAgo($date) {
                         <?php endif; ?>
 
                         <div class="table-responsive">
-                            <form method="get" action="">
-                                <div class="input-group mb-3">
-                                    <input class="form-control" id="searchInput" name="search" type="text" placeholder="🔍 Search Student..." value="<?= htmlspecialchars($searchQuery) ?>">
-                                    <div class="input-group-append">
-                                        <button class="btn btn-secondary" type="button" id="clearSearch"><i class="fas fa-times"></i></button>
-                                        <button class="btn btn-primary" type="submit">Search</button>
-                                    </div>
+                            <div class="input-group mb-3">
+                                <input class="form-control" id="searchInput" type="text" placeholder="🔍 Search Student by Name, Regd no or Email..." style="height: 38px; border-radius: 5px;">
+                                <div class="input-group-append">
+                                    <button style="font-size: 10px;" class="btn btn-secondary" type="button" id="clearSearch"><i style="font-size: 10px;" class="fas fa-times"></i></button>
                                 </div>
-                            </form>
+                            </div>
+
                             <form id="studentForm" method="post" action="/admin/delete_students">
                                 <table class="table table-hover table-borderless table-striped">
                                     <thead class="thead-light">
                                         <tr>
                                             <th><input type="checkbox" id="selectAll"></th>
-                                            <th data-sort="serialNumber">S.No</th>
-                                            <th data-sort="regd_no"><a href="?search=<?= htmlspecialchars($searchQuery) ?>&sort=regd_no&order=<?= $sortOrder === 'asc' ? 'desc' : 'asc' ?>">Registration Number <i class="fas fa-sort"></i></a></th>
-                                            <th data-sort="name"><a href="?search=<?= htmlspecialchars($searchQuery) ?>&sort=name&order=<?= $sortOrder === 'asc' ? 'desc' : 'asc' ?>">Name <i class="fas fa-sort"></i></a></th>
-                                            <th data-sort="email"><a href="?search=<?= htmlspecialchars($searchQuery) ?>&sort=email&order=<?= $sortOrder === 'asc' ? 'desc' : 'asc' ?>">Email <i class="fas fa-sort"></i></a></th>
-                                            <th data-sort="university"><a href="?search=<?= htmlspecialchars($searchQuery) ?>&sort=university_short_name&order=<?= $sortOrder === 'asc' ? 'desc' : 'asc' ?>">University <i class="fas fa-sort"></i></a></th>
-                                            <th data-sort="last_usage"><a href="?search=<?= htmlspecialchars($searchQuery) ?>&sort=last_login&order=<?= $sortOrder === 'asc' ? 'desc' : 'asc' ?>">Last Usage (Days Ago) <i class="fas fa-sort"></i></a></th>
+                                            <th>S.No</th>
+                                            <th class="sortable" data-sort="regd_no">
+                                                Registration Number <i class="fas fa-sort"></i>
+                                            </th>
+                                            <th class="sortable" data-sort="name">
+                                                Name <i class="fas fa-sort"></i>
+                                            </th>
+                                            <th class="sortable" data-sort="email">
+                                                Email <i class="fas fa-sort"></i>
+                                            </th>
+                                            <th class="sortable" data-sort="university_short_name">
+                                                University <i class="fas fa-sort"></i>
+                                            </th>
+                                            <th class="sortable" data-sort="last_login">
+                                                Last Usage (Days Ago) <i class="fas fa-sort"></i>
+                                            </th>
                                             <th>Actions</th>
                                         </tr>
                                     </thead>
-                                    <tbody id="studentTable">
-                                        <?php
-                                        $limit = 500;
-                                        $page = isset($_GET['page']) ? $_GET['page'] : 1;
-                                        $offset = ($page - 1) * $limit;
-                                        $total_students = count($students);
-                                        $total_pages = ceil($total_students / $limit);
-                                        $students_paginated = array_slice($students, $offset, $limit);
-                                        $serialNumber = $offset + 1;
-
-                                        foreach ($students_paginated as $student):
-                                            $daysAgo = daysAgo($student['last_login']);
-                                        ?>
-                                            <tr>
-                                                <td><input type="checkbox" name="selected[]" value="<?= $student['id'] ?>"></td>
-                                                <td><?= $serialNumber++ ?></td>
-                                                <td data-filter="regd_no"><?= htmlspecialchars($student['regd_no']) ?></td>
-                                                <td data-filter="name"><?= htmlspecialchars($student['name']) ?></td>
-                                                <td data-filter="email"><?= htmlspecialchars($student['email']) ?></td>
-                                                <td data-filter="university"><?= htmlspecialchars($student['university_short_name']) ?></td>
-                                                <td data-filter="last_usage"><?= htmlspecialchars($daysAgo) ?></td>
-                                                <td>
-                                                    <a href="viewStudentProfile/<?= $student['id'] ?>" class="btn btn-outline-primary btn-sm"><i class="fas fa-eye"></i> View</a>
-                                                </td>
-                                            </tr>
-                                        <?php endforeach; ?>
+                                    <tbody id="studentTableBody">
+                                        <!-- Will be populated by JavaScript -->
                                     </tbody>
                                 </table>
                                 <div id="noRecords" style="display: none;" class="text-center">No records found</div>
@@ -113,16 +94,29 @@ function daysAgo($date) {
                                     <button type="submit" name="bulk_delete" class="btn btn-danger">Delete Selected</button>
                                 </div>
                             </form>
+
+                            <!-- Pagination -->
+                            <div class="pagination-container">
+                                <div class="entries-container">
+                                    <span class="page-info">Show</span>
+                                    <select class="form-control records-per-page" id="recordsPerPage">
+                                        <option value="10">10</option>
+                                        <option value="25">25</option>
+                                        <option value="50">50</option>
+                                        <option value="100">100</option>
+                                    </select>
+                                    <span class="page-info">entries</span>
+                                </div>
+                                
+                                <ul class="pagination" id="pagination">
+                                    <!-- Pagination will be generated by JavaScript -->
+                                </ul>
+                                
+                                <div class="page-info">
+                                    Showing <span id="startRecord">1</span> to <span id="endRecord">10</span> of <span id="totalRecords">0</span> entries
+                                </div>
+                            </div>
                         </div>
-                        <nav aria-label="Page navigation">
-                            <ul class="pagination justify-content-center">
-                                <?php for ($i = 1; $i <= $total_pages; $i++): ?>
-                                    <li class="page-item <?= ($i == $page) ? 'active' : '' ?>">
-                                        <a class="page-link" href="?page=<?= $i ?>&search=<?= htmlspecialchars($searchQuery) ?>&sort=<?= htmlspecialchars($sortColumn) ?>&order=<?= htmlspecialchars($sortOrder) ?>"><?= $i ?></a>
-                                    </li>
-                                <?php endfor; ?>
-                            </ul>
-                        </nav>
                     </div>
                 </div>
             </div>
@@ -234,3 +228,293 @@ function daysAgo($date) {
         });
     });
 </script>
+<script>
+// Store all records for client-side pagination and search
+const allRecords = <?= json_encode($allStudents) ?>;
+let currentPage = 1;
+let recordsPerPage = 10;
+let filteredRecords = [...allRecords];
+
+// Add these variables at the top with other declarations
+let currentSort = {
+    column: 'name',
+    direction: 'asc'
+};
+
+function generateTableRow(student, index) {
+    const daysAgo = student.last_login ? calculateDaysAgo(student.last_login) : 'N/A';
+    return `
+        <tr>
+            <td><input type="checkbox" name="selected[]" value="${student.id}"></td>
+            <td>${index + 1}</td>
+            <td>${student.regd_no}</td>
+            <td>${student.name}</td>
+            <td>${student.email}</td>
+            <td>${student.university_short_name}</td>
+            <td>${daysAgo}</td>
+            <td>
+                <a href="viewStudentProfile/${student.id}" class="btn btn-outline-primary btn-sm">
+                    <i class="fas fa-eye"></i> View
+                </a>
+            </td>
+        </tr>
+    `;
+}
+
+function calculateDaysAgo(date) {
+    if (!date) return 'N/A';
+    const now = new Date();
+    const lastUsage = new Date(date);
+    const diffTime = Math.abs(now - lastUsage);
+    return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+}
+
+function filterAndDisplayRecords() {
+    const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+    
+    // Filter records
+    filteredRecords = allRecords.filter(student => {
+        return student.name.toLowerCase().includes(searchTerm) ||
+               student.regd_no.toLowerCase().includes(searchTerm) ||
+               student.email.toLowerCase().includes(searchTerm) ||
+               student.university_short_name.toLowerCase().includes(searchTerm);
+    });
+    
+    // Sort records
+    filteredRecords.sort((a, b) => {
+        let aValue = a[currentSort.column];
+        let bValue = b[currentSort.column];
+        
+        // Special handling for last_login
+        if (currentSort.column === 'last_login') {
+            aValue = aValue ? new Date(aValue).getTime() : 0;
+            bValue = bValue ? new Date(bValue).getTime() : 0;
+        } else {
+            // Convert to lowercase for string comparison
+            aValue = String(aValue).toLowerCase();
+            bValue = String(bValue).toLowerCase();
+        }
+        
+        if (aValue < bValue) return currentSort.direction === 'asc' ? -1 : 1;
+        if (aValue > bValue) return currentSort.direction === 'asc' ? 1 : -1;
+        return 0;
+    });
+    
+    updatePagination();
+    displayCurrentPage();
+    updateSortIcons();
+}
+
+function displayCurrentPage() {
+    const startIndex = (currentPage - 1) * recordsPerPage;
+    const endIndex = Math.min(startIndex + recordsPerPage, filteredRecords.length);
+    const recordsToShow = filteredRecords.slice(startIndex, endIndex);
+    
+    const tableBody = document.getElementById('studentTableBody');
+    tableBody.innerHTML = recordsToShow.map((student, idx) => 
+        generateTableRow(student, startIndex + idx)
+    ).join('');
+    
+    // Update page info
+    document.getElementById('startRecord').textContent = filteredRecords.length ? startIndex + 1 : 0;
+    document.getElementById('endRecord').textContent = endIndex;
+    document.getElementById('totalRecords').textContent = filteredRecords.length;
+    
+    // Show/hide no records message
+    const table = document.querySelector('.table');
+    const noRecords = document.getElementById('noRecords');
+    table.style.display = filteredRecords.length ? '' : 'none';
+    noRecords.style.display = filteredRecords.length ? 'none' : 'block';
+}
+
+function updatePagination() {
+    const totalPages = Math.ceil(filteredRecords.length / recordsPerPage);
+    const pagination = document.getElementById('pagination');
+    
+    let paginationHtml = '';
+    
+    // Previous button
+    paginationHtml += `
+        <li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
+            <a class="page-link" href="#" data-page="${currentPage - 1}">Previous</a>
+        </li>
+    `;
+    
+    // Page numbers
+    for (let i = 1; i <= totalPages; i++) {
+        if (i === 1 || i === totalPages || (i >= currentPage - 2 && i <= currentPage + 2)) {
+            paginationHtml += `
+                <li class="page-item ${i === currentPage ? 'active' : ''}">
+                    <a class="page-link" href="#" data-page="${i}">${i}</a>
+                </li>
+            `;
+        } else if (i === currentPage - 3 || i === currentPage + 3) {
+            paginationHtml += `
+                <li class="page-item disabled">
+                    <a class="page-link" href="#">...</a>
+                </li>
+            `;
+        }
+    }
+    
+    // Next button
+    paginationHtml += `
+        <li class="page-item ${currentPage === totalPages ? 'disabled' : ''}">
+            <a class="page-link" href="#" data-page="${currentPage + 1}">Next</a>
+        </li>
+    `;
+    
+    pagination.innerHTML = paginationHtml;
+    
+    // Add click handlers
+    pagination.querySelectorAll('.page-link').forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            const newPage = parseInt(e.target.dataset.page);
+            if (!isNaN(newPage) && newPage > 0 && newPage <= totalPages) {
+                currentPage = newPage;
+                displayCurrentPage();
+                updatePagination();
+            }
+        });
+    });
+}
+
+function updateSortIcons() {
+    // Remove all sort classes
+    document.querySelectorAll('.sortable').forEach(th => {
+        th.classList.remove('asc', 'desc');
+    });
+    
+    // Add sort class to current sort column
+    const currentTh = document.querySelector(`.sortable[data-sort="${currentSort.column}"]`);
+    if (currentTh) {
+        currentTh.classList.add(currentSort.direction);
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Initial display
+    filterAndDisplayRecords();
+    
+    // Search input handler
+    document.getElementById('searchInput').addEventListener('input', () => {
+        currentPage = 1;
+        filterAndDisplayRecords();
+    });
+    
+    // Clear search handler
+    document.getElementById('clearSearch').addEventListener('click', () => {
+        document.getElementById('searchInput').value = '';
+        currentPage = 1;
+        filterAndDisplayRecords();
+    });
+    
+    // Records per page handler
+    document.getElementById('recordsPerPage').addEventListener('change', (e) => {
+        recordsPerPage = parseInt(e.target.value);
+        currentPage = 1;
+        filterAndDisplayRecords();
+    });
+    
+    // Select all checkbox handler
+    document.getElementById('selectAll').addEventListener('change', function() {
+        document.querySelectorAll('input[name="selected[]"]')
+            .forEach(checkbox => checkbox.checked = this.checked);
+    });
+    
+    // Add sort handlers
+    document.querySelectorAll('.sortable').forEach(th => {
+        th.addEventListener('click', () => {
+            const column = th.dataset.sort;
+            
+            // Toggle sort direction if clicking the same column
+            if (currentSort.column === column) {
+                currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
+            } else {
+                currentSort.column = column;
+                currentSort.direction = 'asc';
+            }
+            
+            filterAndDisplayRecords();
+        });
+    });
+    
+    // Initial sort
+    updateSortIcons();
+});
+</script>
+
+<!-- Add this style block after your existing styles -->
+<style>
+    /* Previous styles remain... */
+
+    /* Records per page select styling */
+    .entries-container {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .records-per-page {
+        width: 70px !important;
+        height: 35px;
+        padding: 4px 8px;
+        border-radius: 4px;
+        border: 1px solid #ddd;
+        background-color: white;
+        font-size: 0.875rem;
+    }
+
+    .page-info {
+        color: #6c757d;
+        font-size: 0.875rem;
+        white-space: nowrap;
+    }
+
+    .pagination-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem;
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        margin-top: 1rem;
+    }
+
+    /* Ensure the pagination is centered */
+    .pagination {
+        margin: 0;
+    }
+
+    .sortable {
+        cursor: pointer;
+        user-select: none;
+    }
+
+    .sortable:hover {
+        background-color: #f8f9fa;
+    }
+
+    .sortable i {
+        margin-left: 5px;
+        color: #ddd;
+    }
+
+    .sortable.asc i::before {
+        content: "\f0de";
+        color: #1971c2;
+    }
+
+    .sortable.desc i::before {
+        content: "\f0dd";
+        color: #1971c2;
+    }
+
+    .table thead th {
+        border-top: none;
+        border-bottom: 2px solid #dee2e6;
+        font-weight: 600;
+        padding: 12px 8px;
+    }
+</style>

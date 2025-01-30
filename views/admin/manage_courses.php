@@ -121,49 +121,48 @@ $courses = array_values($processed_courses);
 <!-- Include Bootstrap CSS -->
 <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
 
-<!-- Scripts -->
-<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js"></script>
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/js/all.min.js"></script>
+<!-- Move these script tags before your existing scripts -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.min.js"></script>
+
+<!-- Replace your existing scripts section with this -->
 <script>
-    $(document).ready(function() {
-        $('#searchInput').on('keyup', function() {
-            var value = $(this).val().toLowerCase();
-            var visibleRows = 0;
-            $('#courseTable tr').filter(function() {
-                var isVisible = $(this).text().toLowerCase().indexOf(value) > -1;
-                $(this).toggle(isVisible);
-                if (isVisible) visibleRows++;
-            });
-            $('#noRecords').toggle(visibleRows === 0);
+$(document).ready(function() {
+    // Initialize dropdowns
+    $('.dropdown-toggle').dropdown();
+    
+    // Search functionality
+    $('#searchInput').on('keyup', function() {
+        var value = $(this).val().toLowerCase();
+        var visibleRows = 0;
+        $('#courseTable tr').filter(function() {
+            var isVisible = $(this).text().toLowerCase().indexOf(value) > -1;
+            $(this).toggle(isVisible);
+            if (isVisible) visibleRows++;
         });
-
-        $('th[data-sort]').on('click', function() {
-            var table = $(this).parents('table').eq(0);
-            var rows = table.find('tbody tr').toArray().sort(comparer($(this).index()));
-            this.asc = !this.asc;
-            if (!this.asc) { rows = rows.reverse(); }
-            for (var i = 0; i < rows.length; i++) { table.append(rows[i]); }
-        });
-
-        function comparer(index) {
-            return function(a, b) {
-                var valA = getCellValue(a, index), valB = getCellValue(b, index);
-                return $.isNumeric(valA) && $.isNumeric(valB) ? valA - valB : valA.localeCompare(valB);
-            };
-        }
-
-        function getCellValue(row, index) {
-            return $(row).children('td').eq(index).text();
-        }
+        $('#noRecords').toggle(visibleRows === 0);
     });
 
-    function confirmArchive() {
-        return confirm("Are you sure you want to archive this course?");
+    // Table sorting
+    $('th[data-sort]').on('click', function() {
+        var table = $(this).parents('table').eq(0);
+        var rows = table.find('tbody tr').toArray().sort(comparer($(this).index()));
+        this.asc = !this.asc;
+        if (!this.asc) { rows = rows.reverse(); }
+        for (var i = 0; i < rows.length; i++) { table.append(rows[i]); }
+    });
+
+    function comparer(index) {
+        return function(a, b) {
+            var valA = getCellValue(a, index), valB = getCellValue(b, index);
+            return $.isNumeric(valA) && $.isNumeric(valB) ? valA - valB : valA.localeCompare(valB);
+        };
     }
 
-    function confirmUnarchive() {
-        return confirm("Are you sure you want to unarchive this course?");
+    function getCellValue(row, index) {
+        return $(row).children('td').eq(index).text();
     }
+});
+
 </script>
