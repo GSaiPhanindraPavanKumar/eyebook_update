@@ -16,12 +16,12 @@
             <div class="col-md-12 grid-margin stretch-card"><br>
                 <div class="card">
                     <div class="card-body" style="text-align: center;">
-                        <table class="table">
+                        <table class="table table-responsive">
                             <thead>
                                 <tr>
-                                    <th>Course Name</th>
-                                    <th>College Name</th>
-                                    <th>Actions</th>
+                                    <th class="col-course-name">Course Name</th>
+                                    <th class="col-college-name">College Name</th>
+                                    <th class="col-actions">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -53,3 +53,18 @@
 
 <!-- Include Font Awesome -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+<style>
+    .table-responsive {
+        width: 100%;
+        overflow-x: auto;
+    }
+    .col-course-name { width: 40%; }
+    .col-college-name { width: 40%; }
+    .col-actions { width: 20%; }
+    @media (max-width: 768px) {
+        .col-course-name, .col-college-name, .col-actions {
+            width: auto;
+        }
+    }
+</style>

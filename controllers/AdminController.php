@@ -449,7 +449,7 @@ class AdminController {
         }
     
         // Fetch universities associated with the company
-        $university_ids = json_decode($company['university_ids'], true) ?? [];
+        $university_ids = !empty($company['university_ids']) ? json_decode($company['university_ids'], true) : [];
         $universities = [];
         foreach ($university_ids as $university_id) {
             $universities[] = University::getById($conn, $university_id);

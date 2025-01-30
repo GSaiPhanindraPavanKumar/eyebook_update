@@ -34,13 +34,13 @@ use Models\Contest;
                 </div>
                 <div class="card">
                     <div class="card-body">
-                        <table class="table">
+                        <table class="table table-responsive">
                             <thead>
                                 <tr>
-                                    <th>Question</th>
-                                    <th>Grade</th>
-                                    <th>No of Submissions</th>
-                                    <th>Action</th>
+                                    <th class="col-question">Question</th>
+                                    <th class="col-grade">Grade</th>
+                                    <th class="col-submissions">No of Submissions</th>
+                                    <th class="col-action">Action</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -72,12 +72,12 @@ use Models\Contest;
                 </div>
                 <div class="card">
                     <div class="card-body">
-                        <table class="table">
+                        <table class="table table-responsive">
                             <thead>
                                 <tr>
-                                    <th>Rank</th>
-                                    <th>Student Name</th>
-                                    <th>Total Grade</th>
+                                    <th class="col-rank">Rank</th>
+                                    <th class="col-student-name">Student Name</th>
+                                    <th class="col-total-grade">Total Grade</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -105,3 +105,25 @@ use Models\Contest;
     </div>
     <?php include 'footer.html'; ?>
 </div>
+
+<!-- Include Font Awesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+<style>
+    .table-responsive {
+        width: 100%;
+        overflow-x: auto;
+    }
+    .col-question { width: 40%; }
+    .col-grade { width: 20%; }
+    .col-submissions { width: 20%; }
+    .col-action { width: 20%; }
+    .col-rank { width: 10%; }
+    .col-student-name { width: 60%; }
+    .col-total-grade { width: 30%; }
+    @media (max-width: 768px) {
+        .col-question, .col-grade, .col-submissions, .col-action, .col-rank, .col-student-name, .col-total-grade {
+            width: auto;
+        }
+    }
+</style>

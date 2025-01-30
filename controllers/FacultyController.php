@@ -562,7 +562,7 @@ class FacultyController {
             $submissions = []; // Initialize submissions as an empty array
 
             Lab::create($conn, $title, $description, $due_date, $course_ids, $input, $output, $submissions);
-            header('Location: /faculty/lab_create');
+            header('Location: /faculty/create_lab');
             exit;
         }
 

@@ -23,12 +23,12 @@
                 <h3 class="font-weight-bold">Submissions</h3>
                 <div class="card">
                     <div class="card-body">
-                        <table class="table">
+                        <table class="table table-responsive">
                             <thead>
                                 <tr>
-                                    <th>Student Name</th>
-                                    <th>Submission Date</th>
-                                    <th>Runtime</th>
+                                    <th class="col-student-name">Student Name</th>
+                                    <th class="col-submission-date">Submission Date</th>
+                                    <th class="col-runtime">Runtime</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -56,3 +56,21 @@
     </div>
     <?php include 'footer.html'; ?>
 </div>
+
+<!-- Include Font Awesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+<style>
+    .table-responsive {
+        width: 100%;
+        overflow-x: auto;
+    }
+    .col-student-name { width: 40%; }
+    .col-submission-date { width: 30%; }
+    .col-runtime { width: 30%; }
+    @media (max-width: 768px) {
+        .col-student-name, .col-submission-date, .col-runtime {
+            width: auto;
+        }
+    }
+</style>

@@ -316,6 +316,6 @@ $adminModel = new \Models\Admin();
         <script src="/views/public/js/template.js"></script>
         <script src="/views/public/js/settings.js"></script>
         <script src="/views/public/js/todolist.js"></script>
-        <!-- End custom js for this page-->
+        End custom js for this page-->
     </body>
-</html> -->
+</html>

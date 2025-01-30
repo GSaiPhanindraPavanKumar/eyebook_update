@@ -71,10 +71,10 @@ $courses = array_values($processed_courses);
                                 <table class="table table-hover table-borderless table-striped">
                                     <thead class="thead-light">
                                         <tr>
-                                            <th data-sort="serialNumber" style="max-width: 50px;">S.no <i class="fas fa-sort"></i></th>
-                                            <th data-sort="courseName" style="max-width: 200px;">Course Name <i class="fas fa-sort"></i></th>
-                                            <th data-sort="university" style="max-width: 200px;">University <i class="fas fa-sort"></i></th>
-                                            <th style="max-width: 150px;">Actions</th>
+                                            <th class="col-serial-number" data-sort="serialNumber">S.no <i class="fas fa-sort"></i></th>
+                                            <th class="col-course-name" data-sort="courseName">Course Name <i class="fas fa-sort"></i></th>
+                                            <th class="col-university" data-sort="university">University <i class="fas fa-sort"></i></th>
+                                            <th class="col-actions">Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody id="courseTable">
@@ -83,10 +83,10 @@ $courses = array_values($processed_courses);
                                         foreach ($courses as $course): 
                                         ?>
                                             <tr>
-                                                <td style="max-width: 50px; word-wrap: break-word;"><?= $serialNumber++ ?></td>
-                                                <td style="max-width: 150px; word-wrap: break-word;"><?= htmlspecialchars($course['name']) ?></td>
-                                                <td style="max-width: 250px; word-wrap: break-word;"><?= htmlspecialchars($course['university'] ?? 'N/A') ?></td>
-                                                <td style="max-width: 150px; word-wrap: break-word;">
+                                                <td class="col-serial-number"><?= $serialNumber++ ?></td>
+                                                <td class="col-course-name"><?= htmlspecialchars($course['name']) ?></td>
+                                                <td class="col-university"><?= htmlspecialchars($course['university'] ?? 'N/A') ?></td>
+                                                <td class="col-actions">
                                                     <a href="/admin/view_course/<?= $course['id'] ?>" class="btn btn-outline-info btn-sm"><i class="fas fa-eye"></i> View</a>
                                                     <a href="/admin/edit_course/<?= $course['id'] ?>" class="btn btn-outline-warning btn-sm"><i class="fas fa-edit"></i> Edit</a>
                                                     <?php if ($course['status'] === 'archived'): ?>
@@ -164,5 +164,20 @@ $(document).ready(function() {
         return $(row).children('td').eq(index).text();
     }
 });
-
 </script>
+
+<style>
+    .table-responsive {
+        width: 100%;
+        overflow-x: auto;
+    }
+    .col-serial-number { width: 10%; }
+    .col-course-name { width: 30%; }
+    .col-university { width: 30%; }
+    .col-actions { width: 30%; }
+    @media (max-width: 768px) {
+        .col-serial-number, .col-course-name, .col-university, .col-actions {
+            width: auto;
+        }
+    }
+</style>

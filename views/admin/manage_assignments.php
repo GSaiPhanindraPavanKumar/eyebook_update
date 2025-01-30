@@ -16,20 +16,18 @@
             <div class="col-md-12 grid-margin stretch-card"><br>
                 <div class="card">
                     <div class="card-body" style="text-align: center;">
-                        <table class="table">
+                        <table class="table table-responsive">
                             <thead>
                                 <tr>
-                                    <th style="width: 20%;">Title</th>
-                                    <th style="width: 20%;">Course</th>
-                                    <th style="width: 15%;">Start Time</th>
-                                    <th style="width: 15%;">Due Date</th>
-                                    <th style="width: 15%;">Submissions</th>
-                                    <th style="width: 15%;">Actions</th>
+                                    <th class="col-title">Title</th>
+                                    <th class="col-course">Course</th>
+                                    <th class="col-start-time">Start Time</th>
+                                    <th class="col-due-date">Due Date</th>
+                                    <th class="col-submissions">Submissions</th>
+                                    <th class="col-actions">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <?php error_log(print_r($assignments,true))?>
-                                <?php error_log(print_r(count($assignments))) ?>
                                 <?php if (!empty($assignments)): ?>
                                     <?php for($i = 0; $i < count($assignments); $i++): ?>
                                         <tr>
@@ -61,3 +59,21 @@
 
 <!-- Include Font Awesome -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+<style>
+    .table-responsive {
+        width: 100%;
+        overflow-x: auto;
+    }
+    .col-title { width: 20%; }
+    .col-course { width: 20%; }
+    .col-start-time { width: 15%; }
+    .col-due-date { width: 15%; }
+    .col-submissions { width: 15%; }
+    .col-actions { width: 15%; }
+    @media (max-width: 768px) {
+        .col-title, .col-course, .col-start-time, .col-due-date, .col-submissions, .col-actions {
+            width: auto;
+        }
+    }
+</style>
