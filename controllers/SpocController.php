@@ -46,6 +46,10 @@ $s3Client = new S3Client([
 ]);
 class SpocController {
     public function dashboard() {
+        if (!isset($_SESSION['email'])) {
+            header('Location: /session-timeout');
+            exit;
+        }
         $conn = Database::getConnection();
         $spocModel = new Spoc($conn);
     
@@ -74,6 +78,10 @@ class SpocController {
     }
 
     public function manageStudents() {
+        if (!isset($_SESSION['email'])) {
+            header('Location: /session-timeout');
+            exit;
+        }
         $conn = Database::getConnection();
         $spocModel = new Spoc($conn);
 
@@ -87,6 +95,10 @@ class SpocController {
     }
 
     public function manageCourses() {
+        if (!isset($_SESSION['email'])) {
+            header('Location: /session-timeout');
+            exit;
+        }
         $conn = Database::getConnection();
         $spocModel = new Spoc($conn);
     
@@ -101,6 +113,10 @@ class SpocController {
 
     
     public function viewCourse($encoded_course_id) {
+        if (!isset($_SESSION['email'])) {
+            header('Location: /session-timeout');
+            exit;
+        }
         $conn = Database::getConnection();
         $course_id = base64_decode(str_replace(['-', '_'], ['+', '/'], $encoded_course_id));
         
@@ -136,6 +152,10 @@ class SpocController {
     }
 
     public function assignFaculty() {
+        if (!isset($_SESSION['email'])) {
+            header('Location: /session-timeout');
+            exit;
+        }
         $conn = Database::getConnection();
         $course_id = $_POST['course_id'];
         $faculty_ids = $_POST['faculty_ids'];
@@ -151,6 +171,10 @@ class SpocController {
     }
     
     public function assignStudents() {
+        if (!isset($_SESSION['email'])) {
+            header('Location: /session-timeout');
+            exit;
+        }
         $conn = Database::getConnection();
         $course_id = $_POST['course_id'];
         $student_ids = $_POST['student_ids'];
@@ -166,6 +190,10 @@ class SpocController {
     }
 
     public function unassignFaculty() {
+        if (!isset($_SESSION['email'])) {
+            header('Location: /session-timeout');
+            exit;
+        }
         $conn = Database::getConnection();
         $course_id = $_POST['course_id'];
         $faculty_ids = $_POST['faculty_ids'];
@@ -181,6 +209,10 @@ class SpocController {
     }
     
     public function unassignStudents() {
+        if (!isset($_SESSION['email'])) {
+            header('Location: /session-timeout');
+            exit;
+        }
         $conn = Database::getConnection();
         $course_id = $_POST['course_id'];
         $student_ids = $_POST['student_ids'] ?? [];
@@ -198,6 +230,10 @@ class SpocController {
     }
 
     public function viewBook($hashedId) {
+        if (!isset($_SESSION['email'])) {
+            header('Location: /session-timeout');
+            exit;
+        }
         $conn = Database::getConnection();
         $course_id = base64_decode($hashedId);
         if (!is_numeric($course_id)) {
@@ -222,6 +258,10 @@ class SpocController {
     }
 
     public function manageFaculties() {
+        if (!isset($_SESSION['email'])) {
+            header('Location: /session-timeout');
+            exit;
+        }
         $conn = Database::getConnection();
         $spocModel = new Spoc($conn);
 
@@ -264,6 +304,10 @@ class SpocController {
     }
 
     public function userProfile() {
+        if (!isset($_SESSION['email'])) {
+            header('Location: /session-timeout');
+            exit;
+        }
         $conn = Database::getConnection();
         $spocModel = new Spoc($conn);
         $spoc = $spocModel->getUserProfile($conn);
@@ -271,14 +315,12 @@ class SpocController {
     }
 
     public function profile() {
-        $conn = Database::getConnection();
-        $spocModel = new Spoc($conn);
-
-        // Check if the user is not logged in
         if (!isset($_SESSION['email'])) {
-            header("Location: login");
+            header('Location: /session-timeout');
             exit;
         }
+        $conn = Database::getConnection();
+        $spocModel = new Spoc($conn);
 
         // Get the email from the session
         $email = $_SESSION['email'];
@@ -351,6 +393,10 @@ class SpocController {
     }
 
     public function addFaculty() {
+        if (!isset($_SESSION['email'])) {
+            header('Location: /session-timeout');
+            exit;
+        }
         $conn = Database::getConnection();
         $spocModel = new Spoc($conn);
         $profile = $spocModel->getUserProfile($conn);
@@ -374,6 +420,10 @@ class SpocController {
     }
 
     public function updatePassword() {
+        if (!isset($_SESSION['email'])) {
+            header('Location: /session-timeout');
+            exit;
+        }
         $conn = Database::getConnection();
 
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
@@ -396,6 +446,10 @@ class SpocController {
     }
 
     public function iLab() {
+        if (!isset($_SESSION['email'])) {
+            header('Location: /session-timeout');
+            exit;
+        }
         $basePath = $_SERVER['DOCUMENT_ROOT'];
         $iLabPath = $basePath . DIRECTORY_SEPARATOR . 'eyebook_update' . 
                     DIRECTORY_SEPARATOR . 'views' . 
@@ -414,6 +468,10 @@ class SpocController {
         }
     }
     public function viewLabs($hashedId) {
+        if (!isset($_SESSION['email'])) {
+            header('Location: /session-timeout');
+            exit;
+        }
         $conn = Database::getConnection();
         $course_id = base64_decode($hashedId);
         if (!is_numeric($course_id)) {
@@ -431,6 +489,10 @@ class SpocController {
     }
 
     public function viewLabDetail($labId) {
+        if (!isset($_SESSION['email'])) {
+            header('Location: /session-timeout');
+            exit;
+        }
         $conn = Database::getConnection();
         if (!is_numeric($labId)) {
             die('Invalid lab ID');
@@ -442,6 +504,10 @@ class SpocController {
         require 'views/spoc/view_lab_detail.php';
     }
     public function downloadLabReport($labId) {
+        if (!isset($_SESSION['email'])) {
+            header('Location: /session-timeout');
+            exit;
+        }
         $conn = Database::getConnection();
         $submissions = Lab::getSubmissions($conn, $labId);
 
@@ -473,6 +539,10 @@ class SpocController {
         exit;
     }
     public function manageContests() {
+        if (!isset($_SESSION['email'])) {
+            header('Location: /session-timeout');
+            exit;
+        }
         $conn = Database::getConnection();
         $email = $_SESSION['email']; // Assuming the email is stored in the session
 
@@ -494,6 +564,10 @@ class SpocController {
         require 'views/spoc/manage_contests.php';
     }
     public function viewContest($contestId) {
+        if (!isset($_SESSION['email'])) {
+            header('Location: /session-timeout');
+            exit;
+        }
         $conn = Database::getConnection();
         $contest = Contest::getById($conn, $contestId);
         $questions = Contest::getQuestions($conn, $contestId);
@@ -501,6 +575,10 @@ class SpocController {
         require 'views/spoc/view_contest.php';
     }
     public function viewQuestion($questionId) {
+        if (!isset($_SESSION['email'])) {
+            header('Location: /session-timeout');
+            exit;
+        }
         $conn = Database::getConnection();
         $question = Contest::getQuestionById($conn, $questionId);
         require 'views/spoc/view_question.php';
@@ -525,6 +603,10 @@ class SpocController {
     }
 
     public function viewAssignment($assignment_id) {
+        if (!isset($_SESSION['email'])) {
+            header('Location: /session-timeout');
+            exit;
+        }
         $conn = Database::getConnection();
         $assignment = Assignment::getById($conn, $assignment_id);
         $submissions = Assignment::getSubmissions($conn, $assignment_id);
@@ -535,6 +617,10 @@ class SpocController {
     }
 
     public function viewDiscussions() {
+        if (!isset($_SESSION['email'])) {
+            header('Location: /session-timeout');
+            exit;
+        }
         $this->ensureUniversityIdInSession();
         $conn = Database::getConnection();
         $university_id = $_SESSION['university_id']; // Assuming university_id is stored in session
@@ -543,6 +629,10 @@ class SpocController {
     }
 
     public function createDiscussion() {
+        if (!isset($_SESSION['email'])) {
+            header('Location: /session-timeout');
+            exit;
+        }
         $this->ensureUniversityIdInSession();
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $conn = Database::getConnection();
@@ -561,6 +651,10 @@ class SpocController {
     }
 
     public function replyDiscussion() {
+        if (!isset($_SESSION['email'])) {
+            header('Location: /session-timeout');
+            exit;
+        }
         $this->ensureUniversityIdInSession();
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $conn = Database::getConnection();

@@ -45,6 +45,10 @@ $s3Client = new S3Client([
 
 class StudentController {
     public function viewCourse($hashedId) {
+        if (!isset($_SESSION['email'])) {
+            header('Location: /session-timeout');
+            exit;
+        }
         $conn = Database::getConnection();
         $course_id = base64_decode($hashedId);
         if (!is_numeric($course_id)) {
@@ -53,9 +57,6 @@ class StudentController {
         $course = Course::getById($conn, $course_id);
     
         // Fetch the student data
-        if (!isset($_SESSION['email'])) {
-            die('Email not set in session.');
-        }
         $student = Student::getByEmail($conn, $_SESSION['email']);
     
         // Ensure course_book is an array
@@ -98,6 +99,10 @@ class StudentController {
     }
     
     public function viewBook($hashedId) {
+        if (!isset($_SESSION['email'])) {
+            header('Location: /session-timeout');
+            exit;
+        }
         $conn = Database::getConnection();
         $course_id = base64_decode($hashedId);
         if (!is_numeric($course_id)) {
@@ -122,6 +127,10 @@ class StudentController {
     }
 
     public function viewECContent($hashedId) {
+        if (!isset($_SESSION['email'])) {
+            header('Location: /session-timeout');
+            exit;
+        }
         $conn = Database::getConnection();
         $course_id = base64_decode($hashedId);
         if (!is_numeric($course_id)) {
@@ -146,6 +155,10 @@ class StudentController {
     }
 
     public function viewMaterial($hashedId) {
+        if (!isset($_SESSION['email'])) {
+            header('Location: /session-timeout');
+            exit;
+        }
         $conn = Database::getConnection();
         $course_id = base64_decode($hashedId);
         if (!is_numeric($course_id)) {
@@ -165,6 +178,10 @@ class StudentController {
     }
     
     public function viewCoursePlan($hashedId) {
+        if (!isset($_SESSION['email'])) {
+            header('Location: /session-timeout');
+            exit;
+        }
         $conn = Database::getConnection();
         $course_id = base64_decode($hashedId);
         if (!is_numeric($course_id)) {
@@ -183,13 +200,11 @@ class StudentController {
         require 'views/student/pdf_view.php';
     }
     public function profile() {
-        $conn = Database::getConnection();
-
-        // Check if the user is not logged in
         if (!isset($_SESSION['email'])) {
-            header("Location: /login");
+            header('Location: /session-timeout');
             exit;
         }
+        $conn = Database::getConnection();
 
         // Get the email from the session
         $email = $_SESSION['email'];
@@ -306,6 +321,10 @@ class StudentController {
     // }
 
     function getCoursesWithProgress($studentId) {
+        if (!isset($_SESSION['email'])) {
+            header('Location: /session-timeout');
+            exit;
+        }
         $conn = Database::getConnection();
         $stmt = $conn->prepare("SELECT * FROM courses WHERE status = 'ongoing'");
         $stmt->execute();
@@ -332,6 +351,10 @@ class StudentController {
     }
 
     public function markAsCompleted() {
+        if (!isset($_SESSION['email'])) {
+            header('Location: /session-timeout');
+            exit;
+        }
         $conn = Database::getConnection();
         $studentId = $_SESSION['student_id'];
         $courseId = $_POST['course_id'];
@@ -364,6 +387,10 @@ class StudentController {
     }
 
     public function viewCourseBook() {
+        if (!isset($_SESSION['email'])) {
+            header('Location: /session-timeout');
+            exit;
+        }
         $conn = Database::getConnection();
         $index_path = $_GET['index_path'] ?? '';
     
@@ -375,6 +402,10 @@ class StudentController {
         require 'views/student/book_view.php';
     }
     public function updatePassword() {
+        if (!isset($_SESSION['email'])) {
+            header('Location: /session-timeout');
+            exit;
+        }
         $conn = Database::getConnection();
     
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
@@ -392,6 +423,10 @@ class StudentController {
 
     
     public function manageAssignments() {
+        if (!isset($_SESSION['email'])) {
+            header('Location: /session-timeout');
+            exit;
+        }
         $conn = Database::getConnection();
         $student_email = $_SESSION['email'];
         $student_id = $_SESSION['student_id']; // Assuming student_id is stored in session
@@ -411,6 +446,10 @@ class StudentController {
     }
 
     public function viewAssignment($assignment_id) {
+        if (!isset($_SESSION['email'])) {
+            header('Location: /session-timeout');
+            exit;
+        }
         $conn = Database::getConnection();
         $assignment = Assignment::getById($conn, $assignment_id);
         $student_id = $_SESSION['student_id']; // Assuming student_id is stored in session
@@ -447,10 +486,18 @@ class StudentController {
     }
 
     public function askguru(){
+        if (!isset($_SESSION['email'])) {
+            header('Location: /session-timeout');
+            exit;
+        }
         require 'views/student/askguru.php';
     }
 
     public function submitFeedback() {
+        if (!isset($_SESSION['email'])) {
+            header('Location: /session-timeout');
+            exit;
+        }
         $conn = Database::getConnection();
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $course_id = $_POST['course_id'];
@@ -479,6 +526,10 @@ class StudentController {
     
 
     public function submitAssignment($assignment_id) {
+        if (!isset($_SESSION['email'])) {
+            header('Location: /session-timeout');
+            exit;
+        }
         $conn = Database::getConnection();
         $student_id = $_SESSION['student_id']; // Assuming student_id is stored in session
 
@@ -532,6 +583,10 @@ class StudentController {
     }
 
     public function deleteSubmission($assignment_id) {
+        if (!isset($_SESSION['email'])) {
+            header('Location: /session-timeout');
+            exit;
+        }
         $conn = Database::getConnection();
         $student_id = $_SESSION['student_id']; // Assuming student_id is stored in session
 
@@ -560,6 +615,10 @@ class StudentController {
     }
     
     public function viewGrades() {
+        if (!isset($_SESSION['email'])) {
+            header('Location: /session-timeout');
+            exit;
+        }
         $conn = Database::getConnection();
         $student_id = $_SESSION['student_id'];
         $grades = Assignment::getGradesByStudentId($conn, $student_id);
@@ -586,6 +645,10 @@ class StudentController {
     }
     
     public function viewDiscussions() {
+        if (!isset($_SESSION['email'])) {
+            header('Location: /session-timeout');
+            exit;
+        }
         $this->ensureUniversityIdInSession();
         $conn = Database::getConnection();
         $university_id = $_SESSION['university_id']; // Assuming university_id is stored in session
@@ -594,6 +657,10 @@ class StudentController {
     }
 
     public function createDiscussion() {
+        if (!isset($_SESSION['email'])) {
+            header('Location: /session-timeout');
+            exit;
+        }
         $this->ensureUniversityIdInSession();
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $conn = Database::getConnection();
@@ -606,12 +673,16 @@ class StudentController {
             }
 
             Discussion::addDiscussion($conn, $name, $post, $university_id);
-            header('Location: /student/discussion_forum');
+            header('Location: /session-timeout');
             exit();
         }
     }
 
     public function replyDiscussion() {
+        if (!isset($_SESSION['email'])) {
+            header('Location: /session-timeout');
+            exit;
+        }
         $this->ensureUniversityIdInSession();
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $conn = Database::getConnection();
@@ -625,12 +696,16 @@ class StudentController {
             }
 
             Discussion::addDiscussion($conn, $name, $post, $university_id, $parent_post_id);
-            header('Location: /student/discussion_forum');
+            header('Location: /session-timeout');
             exit();
         }
     }
 
     public function iLab() {
+        if (!isset($_SESSION['email'])) {
+            header('Location: /session-timeout');
+            exit;
+        }
         $basePath = $_SERVER['DOCUMENT_ROOT'];
         $iLabPath = $basePath . DIRECTORY_SEPARATOR . 'eyebook_update' . DIRECTORY_SEPARATOR . 'i-Lab' . DIRECTORY_SEPARATOR . 'index.html';
         
@@ -647,6 +722,10 @@ class StudentController {
     }
     
     public function labView($courseId = null) {
+        if (!isset($_SESSION['email'])) {
+            header('Location: /session-timeout');
+            exit;
+        }
         if (!$courseId) {
             $courseId = $_GET['id'] ?? null;
         }
@@ -670,7 +749,10 @@ class StudentController {
         require 'views/student/lab_view.php';
     }
     public function viewLab($hashedId) {
-
+        if (!isset($_SESSION['email'])) {
+            header('Location: /session-timeout');
+            exit;
+        }
         $conn = Database::getConnection();
         $courseId = base64_decode($hashedId);
         $student_id = $_SESSION['student_id'];
@@ -686,12 +768,20 @@ class StudentController {
         require 'views/student/view_lab.php';
     }
     public function viewLabDetail($labId) {
+        if (!isset($_SESSION['email'])) {
+            header('Location: /session-timeout');
+            exit;
+        }
         $conn = Database::getConnection();
         $lab = Lab::getByIds($conn, [$labId])[0];
         require 'views/student/view_lab_detail.php';
     }
 
     public function submitLab($labId) {
+        if (!isset($_SESSION['email'])) {
+            header('Location: /session-timeout');
+            exit;
+        }
         $conn = Database::getConnection();
         $studentId = $_SESSION['student_id']; // Assuming student_id is stored in session
 
@@ -737,6 +827,10 @@ class StudentController {
         }
     }
     public function updateLabSubmission() {
+        if (!isset($_SESSION['email'])) {
+            header('Location: /session-timeout');
+            exit;
+        }
         $conn = Database::getConnection();
         $data = json_decode(file_get_contents('php://input'), true);
         $lab_id = $data['lab_id'];
@@ -795,6 +889,10 @@ class StudentController {
         }
     }
     public function manageContests() {
+        if (!isset($_SESSION['email'])) {
+            header('Location: /session-timeout');
+            exit;
+        }
         $conn = Database::getConnection();
         $studentId = $_SESSION['student_id']; // Assuming the student's ID is stored in the session
 
@@ -811,17 +909,29 @@ class StudentController {
     }
 
     public function viewContest($contestId) {
+        if (!isset($_SESSION['email'])) {
+            header('Location: /session-timeout');
+            exit;
+        }
         $conn = Database::getConnection();
         $contest = Contest::getById($conn, $contestId);
         require 'views/student/view_contest.php';
     }
     public function viewQuestion($questionId) {
+        if (!isset($_SESSION['email'])) {
+            header('Location: /session-timeout');
+            exit;
+        }
         $conn = Database::getConnection();
         $question = Contest::getQuestionById($conn, $questionId);
         $contest = Contest::getById($conn, $question['contest_id']);
         require 'views/student/view_question.php';
     }
     public function updateQuestionSubmission() {
+        if (!isset($_SESSION['email'])) {
+            header('Location: /session-timeout');
+            exit;
+        }
         $conn = Database::getConnection();
         $data = json_decode(file_get_contents('php://input'), true);
 

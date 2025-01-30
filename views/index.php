@@ -60,6 +60,16 @@ $message = $message ?? ''; // Ensure $message is defined
 </div>
 <div class="login-wrap d-flex align-items-center flex-wrap justify-content-center">
     <div class="container">
+        <?php if (!empty($warning)): ?>
+            <div class="row justify-content-center">
+                <div class="col-md-6 col-lg-5">
+                    <div class="alert alert-warning" role="alert">
+                        <?php echo htmlspecialchars($warning); ?>
+                    </div>
+                </div>
+            </div>
+        <?php endif; ?>
+
         <div class="row align-items-center">
             <div class="col-md-6 col-lg-7">
                 <img src="/views/public/assets/images/login-page-img.webp" alt="">
@@ -92,9 +102,11 @@ $message = $message ?? ''; // Ensure $message is defined
                                     <div class="forgot-password"><a href="/forgot_password" style="color: blue;">Forgot Password?</a></div>
                                 </div>
                             </div>
-                            <div style="color: red;">
-                                <?php echo htmlspecialchars($message); ?>
-                            </div>
+                            <?php if (!empty($message)): ?>
+                                <div class="alert alert-danger">
+                                    <?php echo htmlspecialchars($message); ?>
+                                </div>
+                            <?php endif; ?>
                         </div>
                     </form>
                 </div>

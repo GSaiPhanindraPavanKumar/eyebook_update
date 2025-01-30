@@ -48,6 +48,14 @@ $s3Client = new S3Client([
     ],
 ]);
 class FacultyController {
+    public function __construct() {
+        // Check if faculty_id exists in session
+        if (!isset($_SESSION['faculty_id'])) {
+            header('Location: /session-timeout');
+            exit;
+        }
+    }
+
     public function index() {
         $faculty = new Faculty();
         require 'views/faculty/index.php';
@@ -150,7 +158,8 @@ class FacultyController {
         $course = Course::getById($conn, $course_id);
     
         if (!isset($_SESSION['email'])) {
-            die('Email not set in session.');
+            header('Location: /session-timeout');
+            exit;
         }
         $student = Student::getByEmail($conn, $_SESSION['email']);
     
@@ -530,6 +539,11 @@ class FacultyController {
 
 
     public function manageAssignments() {
+        if (!isset($_SESSION['faculty_id'])) {
+            header('Location: /session-timeout');
+            exit;
+        }
+        
         $conn = Database::getConnection();
         $faculty_id = $_SESSION['faculty_id'];
         $assignments = Assignment::getAssignmentsByFaculty($conn, $faculty_id);
@@ -571,6 +585,11 @@ class FacultyController {
     
 
     public function createAssignment() {
+        if (!isset($_SESSION['faculty_id'])) {
+            header('Location: /session-timeout');
+            exit;
+        }
+
         $conn = Database::getConnection();
         $messages = [];
 
@@ -625,9 +644,14 @@ class FacultyController {
     }
 
     private function ensureUniversityIdInSession() {
+        if (!isset($_SESSION['faculty_id'])) {
+            header('Location: /session-timeout');
+            exit;
+        }
+
         if (!isset($_SESSION['university_id'])) {
             $conn = Database::getConnection();
-            $faculty_id = $_SESSION['faculty_id']; // Assuming faculty_id is stored in session
+            $faculty_id = $_SESSION['faculty_id'];
 
             // Fetch the university_id from the faculty table
             $sql = "SELECT university_id FROM faculty WHERE id = :faculty_id";
@@ -644,7 +668,12 @@ class FacultyController {
     }
 
     public function viewDiscussions() {
+        if (!isset($_SESSION['faculty_id'])) {
+            header('Location: /session-timeout');
+            exit;
+        }
         $this->ensureUniversityIdInSession();
+
         $conn = Database::getConnection();
         $university_id = $_SESSION['university_id']; // Assuming university_id is stored in session
         $discussions = Discussion::getDiscussionsByUniversity($conn, $university_id);
@@ -798,8 +827,13 @@ class FacultyController {
         exit;
     }
     public function manageContests() {
+        if (!isset($_SESSION['faculty_id'])) {
+            header('Location: /session-timeout');
+            exit;
+        }
+
         $conn = Database::getConnection();
-        $facultyId = $_SESSION['faculty_id']; // Assuming the faculty's ID is stored in the session
+        $facultyId = $_SESSION['faculty_id'];
 
         // Fetch contests by faculty's university ID
         $sql = "SELECT university_id FROM faculty WHERE id = :faculty_id";

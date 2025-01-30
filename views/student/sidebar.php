@@ -148,7 +148,83 @@ if ($userData) {
                 box-shadow: 0 0 15px rgba(75, 73, 172, 0.5);
                 transition: transform 0.3s ease;
             }
+
+            /* Updated settings panel styles */
+            .theme-setting-wrapper {
+                position: fixed !important;
+                bottom: 40px !important;
+                right: 30px !important;
+                z-index: 9999 !important;
+                display: block !important;
+                width: 40px !important;
+                height: 40px !important;
+            }
+            
+            #settings-trigger {
+                position: absolute !important;
+                width: 40px !important;
+                height: 40px !important;
+                background: #4B49AC !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                border-radius: 100% !important;
+                color: #fff !important;
+                cursor: pointer !important;
+                box-shadow: 0 0 10px rgba(0,0,0,0.2) !important;
+                transition: all 0.3s ease !important;
+                bottom: 0 !important;
+                right: 0 !important;
+            }
+
+            #settings-trigger:hover {
+                transform: scale(1.1) !important;
+                box-shadow: 0 0 15px rgba(75, 73, 172, 0.5) !important;
+            }
+
+            .settings-panel {
+                position: fixed !important;
+                right: 80px !important;
+                bottom: 40px !important;
+                z-index: 9998 !important;
+                background: white !important;
+                padding: 20px !important;
+                border-radius: 5px !important;
+                box-shadow: 0 0 15px rgba(0,0,0,0.1) !important;
+            }
+
+            /* Mobile-specific styles */
+            @media (max-width: 991px) {
+                .theme-setting-wrapper {
+                    position: fixed !important;
+                    bottom: 20px !important;
+                    right: 20px !important;
+                    display: block !important;
+                    z-index: 9999 !important;
+                }
+                
+                #settings-trigger {
+                    position: absolute !important;
+                    display: flex !important;
+                    visibility: visible !important;
+                    opacity: 1 !important;
+                }
+
+                .settings-panel {
+                    position: fixed !important;
+                    right: 20px !important;
+                    bottom: 70px !important;
+                    max-width: 300px !important;
+                    width: calc(100vw - 40px) !important;
+                }
+
+                /* Ensure the settings panel doesn't conflict with the chatbot trigger */
+                #chatbot-trigger {
+                    bottom: 120px !important;
+                }
+            }
         </style>
+
         <div class="theme-setting-wrapper">
             <div id="settings-trigger"><i class="ti-settings"></i></div>
             <div id="theme-settings" class="settings-panel">
