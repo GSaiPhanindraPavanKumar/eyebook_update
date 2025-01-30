@@ -21,6 +21,14 @@ class CertificateController {
                 'secret' => AWS_SECRET_ACCESS_KEY,
             ],
         ]);
+
+        // Create storage directory if it doesn't exist
+        if (!file_exists('storage/certificates')) {
+            mkdir('storage/certificates', 0777, true);
+        }
+
+        // Clean up old files (files older than 1 hour)
+        $this->cleanupOldFiles('storage/certificates');
     }
 
     public function index() {
@@ -533,6 +541,13 @@ class CertificateController {
 
     public function download($generationId) {
         try {
+            // Set execution time limit to 100 seconds
+            set_time_limit(100);
+            ini_set('max_execution_time', '100');
+            
+            // Also set memory limit higher if needed
+            // ini_set('memory_limit', '256M');
+            
             $conn = Database::getConnection();
             $stmt = $conn->prepare("SELECT * FROM certificates WHERE generation_id = ?");
             $stmt->execute([$generationId]);
@@ -555,48 +570,103 @@ class CertificateController {
             if ($zip->open($zipPath, ZipArchive::CREATE) !== TRUE) {
                 throw new \Exception('Cannot create zip file');
             }
+
+            $successfulDownloads = 0;
             
             // Download and add files to zip
             foreach ($certificates as $cert) {
                 try {
-                    // Get file key from S3 path
-                    $s3Key = str_replace('https://' . AWS_BUCKET_NAME . '.s3.' . AWS_REGION . '.amazonaws.com/', '', $cert['file_path']);
+                    $s3Url = $cert['file_path'];
+                    error_log("Processing file - Original URL: " . $s3Url);
                     
-                    // Download file from S3 to temp location
-                    $tempFilePath = $tempDir . '/' . basename($cert['file_path']);
-                    $this->s3->getObject([
-                        'Bucket' => AWS_BUCKET_NAME,
-                        'Key' => $s3Key,
-                        'SaveAs' => $tempFilePath
-                    ]);
+                    // Extract the path after amazonaws.com/
+                    $pathParts = explode('amazonaws.com/', $s3Url);
+                    if (count($pathParts) < 2) {
+                        error_log("Invalid S3 URL format: " . $s3Url);
+                        continue;
+                    }
                     
-                    // Add to zip with proper name
-                    $zip->addFile(
-                        $tempFilePath,
-                        "{$cert['registration_number']}_{$cert['student_name']}.jpg"
-                    );
+                    $relativePath = $pathParts[1];
+                    error_log("Extracted relative path: " . $relativePath);
+                    
+                    // Create temp file path maintaining folder structure
+                    $tempFilePath = $tempDir . '/' . basename($relativePath);
+                    
+                    // Download file from URL
+                    $fileContents = @file_get_contents($s3Url);
+                    if ($fileContents === false) {
+                        error_log("Failed to download file from URL: " . $s3Url);
+                        continue;
+                    }
+                    
+                    // Save to temp location
+                    if (@file_put_contents($tempFilePath, $fileContents) === false) {
+                        error_log("Failed to save file to temp location: " . $tempFilePath);
+                        continue;
+                    }
+                    
+                    // Add to zip if file exists
+                    if (file_exists($tempFilePath)) {
+                        // Use registration number and student name for the file name in zip
+                        $zipFileName = sprintf(
+                            "%s_%s.%s",
+                            $cert['registration_number'],
+                            preg_replace('/[^a-zA-Z0-9]/', '_', $cert['student_name']),
+                            pathinfo($relativePath, PATHINFO_EXTENSION)
+                        );
+                        
+                        if ($zip->addFile($tempFilePath, $zipFileName)) {
+                            $successfulDownloads++;
+                            error_log("Added to ZIP: " . $zipFileName);
+                        } else {
+                            error_log("Failed to add file to ZIP: " . $zipFileName);
+                        }
+                    }
                     
                 } catch (\Exception $e) {
-                    error_log("Error downloading certificate {$cert['file_path']}: " . $e->getMessage());
+                    error_log("Error processing certificate: " . $e->getMessage());
                     continue;
                 }
             }
             
+            // Close the ZIP file
             $zip->close();
             
-            // Send zip file
-            header('Content-Type: application/zip');
-            header('Content-Disposition: attachment; filename=' . $zipName);
-            header('Content-Length: ' . filesize($zipPath));
-            readfile($zipPath);
-            
-            // Cleanup temp directory and files
-            $this->cleanupTempFiles($tempDir);
+            // Check if we have any files in the ZIP
+            if ($successfulDownloads > 0 && file_exists($zipPath)) {
+                error_log("Serving ZIP file with {$successfulDownloads} certificates");
+                
+                // Clear any output that might have been sent
+                if (ob_get_level()) ob_end_clean();
+                
+                header('Content-Type: application/zip');
+                header('Content-Disposition: attachment; filename=' . $zipName);
+                header('Content-Length: ' . filesize($zipPath));
+                header('Pragma: no-cache');
+                header('Expires: 0');
+                
+                readfile($zipPath);
+                
+                // Register cleanup function
+                register_shutdown_function(function() use ($tempDir, $zipPath) {
+                    if (file_exists($zipPath)) {
+                        unlink($zipPath);
+                    }
+                    if (is_dir($tempDir)) {
+                        $this->cleanupTempFiles($tempDir);
+                    }
+                });
+                
+                exit;
+            } else {
+                throw new \Exception("No certificates could be downloaded successfully");
+            }
             
         } catch (\Exception $e) {
             error_log("Download error: " . $e->getMessage());
-            $_SESSION['error'] = 'Failed to download certificates';
+            $_SESSION['error'] = 'Failed to download certificates: ' . $e->getMessage();
             header('Location: /admin/certificate_generations');
+            exit;
         }
     }
 
@@ -679,7 +749,18 @@ class CertificateController {
                 ob_end_clean();
             }
             
+            // Set JSON header
             header('Content-Type: application/json');
+            
+            // Check if user is logged in
+            if (!isset($_SESSION['admin'])) {
+                http_response_code(401);
+                echo json_encode([
+                    'error' => 'Unauthorized',
+                    'redirect' => '/'
+                ]);
+                exit;
+            }
             
             $conn = Database::getConnection();
             $stmt = $conn->prepare("SELECT status, progress, generated_count, total_count FROM certificate_generations WHERE id = ?");
@@ -687,7 +768,11 @@ class CertificateController {
             $data = $stmt->fetch(\PDO::FETCH_ASSOC);
             
             if (!$data) {
-                throw new \Exception("Generation not found");
+                http_response_code(404);
+                echo json_encode([
+                    'error' => 'Generation not found'
+                ]);
+                exit;
             }
             
             error_log("[Progress Check] Status for ID $generationId: " . json_encode($data));
@@ -702,8 +787,11 @@ class CertificateController {
         } catch (\Exception $e) {
             error_log("[Progress Check] Error: " . $e->getMessage());
             http_response_code(500);
-            echo json_encode(['error' => $e->getMessage()]);
+            echo json_encode([
+                'error' => $e->getMessage()
+            ]);
         }
+        exit;
     }
 
     public function debug($generationId) {
@@ -735,26 +823,34 @@ class CertificateController {
             
             // Validate files
             if (!isset($_FILES['template']) || !isset($_FILES['data_file'])) {
-                throw new \Exception('Missing required files');
+                throw new \Exception('Please upload both template and data file');
             }
 
             // Create temp directory if it doesn't exist
-            $tempDir = __DIR__ . '/../storage/temp/';
+            $tempDir = __DIR__ . '/../storage/temp';
             if (!file_exists($tempDir)) {
                 mkdir($tempDir, 0777, true);
             }
 
-            // Save template temporarily
-            $tempTemplatePath = $tempDir . uniqid() . '_' . $_FILES['template']['name'];
+            // Handle template file
+            $tempTemplatePath = $tempDir . '/template_' . uniqid() . '.jpg';
             if (!move_uploaded_file($_FILES['template']['tmp_name'], $tempTemplatePath)) {
-                throw new \Exception("Failed to save template file");
+                throw new \Exception('Failed to upload template');
             }
 
-            // Load first row from Excel
-            $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($_FILES['data_file']['tmp_name']);
+            // Handle Excel file
+            $tempExcelPath = $tempDir . '/data_' . uniqid() . '.xlsx';
+            if (!move_uploaded_file($_FILES['data_file']['tmp_name'], $tempExcelPath)) {
+                throw new \Exception('Failed to upload data file');
+            }
+
+            // Load Excel file
+            $spreadsheet = IOFactory::load($tempExcelPath);
             $worksheet = $spreadsheet->getActiveSheet();
+            
+            // Get first row data
             $firstRow = [];
-            foreach ($worksheet->getRowIterator(2, 2) as $row) { // Get first data row
+            foreach ($worksheet->getRowIterator(2, 2) as $row) { // Start from row 2
                 foreach ($row->getCellIterator() as $cell) {
                     $firstRow[] = $cell->getValue();
                 }
@@ -765,9 +861,20 @@ class CertificateController {
                 throw new \Exception("No data found in Excel file");
             }
 
-            // Generate preview certificate
+            // Get positions from POST data
             $positions = json_decode($_POST['positions'], true);
-            $previewPath = $this->generatePreviewCertificate($firstRow, $tempTemplatePath, $positions);
+            if (!$positions) {
+                throw new \Exception("Invalid text positions data");
+            }
+
+            error_log("[Certificate Preview] Generating preview with positions: " . json_encode($positions));
+
+            // Pass tempDir to generatePreviewCertificate
+            $previewPath = $this->generatePreviewCertificate($firstRow, $tempTemplatePath, $positions, $tempDir);
+
+            // Clean up temp files
+            unlink($tempExcelPath);
+            unlink($tempTemplatePath);
 
             // Return preview path and data
             header('Content-Type: application/json');
@@ -775,15 +882,16 @@ class CertificateController {
                 'success' => true,
                 'previewUrl' => '/storage/temp/' . basename($previewPath),
                 'data' => [
-                    'registration_number' => $firstRow[0],
-                    'name' => $firstRow[1],
-                    'grade' => $firstRow[2]
+                    'registration_number' => $firstRow[0] ?? '',
+                    'name' => $firstRow[1] ?? '',
+                    'grade' => $firstRow[2] ?? ''
                 ]
             ]);
 
         } catch (\Exception $e) {
             error_log("[Certificate Preview] Error: " . $e->getMessage());
             header('Content-Type: application/json');
+            http_response_code(500);
             echo json_encode([
                 'success' => false,
                 'error' => $e->getMessage()
@@ -791,23 +899,21 @@ class CertificateController {
         }
     }
 
-    private function generatePreviewCertificate($data, $templatePath, $positions) {
+    private function generatePreviewCertificate($data, $templatePath, $positions, $tempDir) {
         try {
+            error_log("[Preview Generation] Starting with template: $templatePath");
+            
             // Create image from template
             $imageInfo = getimagesize($templatePath);
-            $image = null;
+            if (!$imageInfo) {
+                throw new \Exception("Invalid template image");
+            }
             
             // Get original image dimensions
             $imageWidth = $imageInfo[0];
             $imageHeight = $imageInfo[1];
             
-            // Standard preview width used in frontend
-            $PREVIEW_WIDTH = 1000;
-            
-            // Calculate scaling factors
-            $scaleX = $imageWidth / $PREVIEW_WIDTH;
-            $scaleY = $imageHeight / $PREVIEW_WIDTH;
-
+            // Create image based on type
             switch ($imageInfo['mime']) {
                 case 'image/jpeg':
                     $image = imagecreatefromjpeg($templatePath);
@@ -816,7 +922,7 @@ class CertificateController {
                     $image = imagecreatefrompng($templatePath);
                     break;
                 default:
-                    throw new \Exception('Unsupported image type');
+                    throw new \Exception('Unsupported image type: ' . $imageInfo['mime']);
             }
 
             if (!$image) {
@@ -827,39 +933,44 @@ class CertificateController {
             imagesavealpha($image, true);
             imagealphablending($image, true);
 
-            // Add text
+            // Create text color (black)
             $textColor = imagecolorallocate($image, 0, 0, 0);
+            
+            // Use font
             $fontPath = __DIR__ . '/../assets/fonts/Poppins-Bold.ttf';
+            if (!file_exists($fontPath)) {
+                throw new \Exception("Font file not found: $fontPath");
+            }
 
+            // Add text to image
             foreach ($positions as $field => $pos) {
                 $text = '';
+                $fontSize = 0;
+                
                 switch ($field) {
-                    case 'registration_number': 
-                        $text = $data[0]; 
-                        $fontSize = round(24 * min($scaleX, $scaleY));
+                    case 'registration_number':
+                        $text = $data[0] ?? '';
+                        $fontSize = 24;
                         break;
-                    case 'name': 
-                        $text = $data[1]; 
-                        $fontSize = round(32 * min($scaleX, $scaleY));
+                    case 'name':
+                        $text = $data[1] ?? '';
+                        $fontSize = 32;
                         break;
-                    case 'grade': 
-                        $text = $data[2]; 
-                        $fontSize = round(24 * min($scaleX, $scaleY));
+                    case 'grade':
+                        $text = $data[2] ?? '';
+                        $fontSize = 24;
                         break;
-                    default: 
-                        continue 2;
+                    default:
+                        continue 2; // Continue the outer foreach loop
                 }
 
-                // Calculate actual coordinates using both scaling factors
-                $x = round($pos['x'] * $scaleX);
-                $y = round($pos['y'] * $scaleY);
+                if (empty($text)) continue;
 
-                // Calculate text dimensions
-                $bbox = imagettfbbox($fontSize, 0, $fontPath, $text);
-                
-                // Adjust Y position to account for text baseline
-                $y = $y + abs($bbox[7]);
+                // Calculate text position
+                $x = $pos['x'];
+                $y = $pos['y'];
 
+                // Add text to image
                 imagettftext(
                     $image,
                     $fontSize,
@@ -873,23 +984,135 @@ class CertificateController {
             }
 
             // Save preview
-            $previewPath = __DIR__ . '/../storage/temp/preview_' . uniqid() . '.jpg';
+            $previewPath = $tempDir . '/preview_' . uniqid() . '.jpg';
             imagejpeg($image, $previewPath, 90);
             imagedestroy($image);
 
-            // Clean up after successful preview generation
-            if (file_exists($previewPath)) {
-                register_shutdown_function(function() use ($previewPath) {
-                    if (file_exists($previewPath)) {
-                        unlink($previewPath);
-                    }
-                });
-            }
-
+            error_log("[Preview Generation] Preview saved to: $previewPath");
             return $previewPath;
+
         } catch (\Exception $e) {
             error_log("[Preview Generation] Error: " . $e->getMessage());
             throw $e;
+        }
+    }
+
+    public function downloadGeneration($id) {
+        try {
+            // Set execution time limit to 100 seconds
+            set_time_limit(100);
+            ini_set('max_execution_time', '100');
+            
+            // Also set memory limit higher if needed
+            // ini_set('memory_limit', '256M');
+            
+            $conn = Database::getConnection();
+            $stmt = $conn->prepare("SELECT * FROM certificate_generations WHERE id = ?");
+            $stmt->execute([$id]);
+            $generation = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$generation) {
+                throw new \Exception("Certificate generation not found");
+            }
+
+            // Check if local directory exists, if not create it
+            $localDir = "storage/certificates/{$id}";
+            if (!file_exists($localDir)) {
+                mkdir($localDir, 0777, true);
+            }
+
+            // Path for the final zip file
+            $zipPath = "storage/certificates/generation_{$id}.zip";
+            
+            // If zip doesn't exist locally, create it
+            if (!file_exists($zipPath)) {
+                // Create ZIP archive
+                $zip = new \ZipArchive();
+                if ($zip->open($zipPath, \ZipArchive::CREATE) !== TRUE) {
+                    throw new \Exception("Cannot create zip file");
+                }
+
+                // Get certificates for this generation
+                $stmt = $conn->prepare("SELECT * FROM certificates WHERE generation_id = ?");
+                $stmt->execute([$id]);
+                $certificates = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+                foreach ($certificates as $cert) {
+                    try {
+                        // Extract just the path part after 'certificates/'
+                        $s3Key = '';
+                        if (strpos($cert['file_path'], 'https://') !== false) {
+                            // If it's a full URL, extract just the path part
+                            $pathParts = parse_url($cert['file_path']);
+                            $s3Key = ltrim($pathParts['path'], '/');
+                        } else {
+                            // If it's already a path, use it directly
+                            $s3Key = ltrim($cert['file_path'], '/');
+                        }
+
+                        $localFilePath = "{$localDir}/" . basename($s3Key);
+
+                        // Download from S3 if file doesn't exist locally
+                        if (!file_exists($localFilePath)) {
+                            error_log("Downloading certificate from S3: " . $s3Key);
+                            $result = $this->s3->getObject([
+                                'Bucket' => AWS_BUCKET_NAME,
+                                'Key'    => $s3Key,
+                                'SaveAs' => $localFilePath
+                            ]);
+                        }
+
+                        // Add to ZIP
+                        $zip->addFile($localFilePath, basename($localFilePath));
+                    } catch (\Exception $e) {
+                        error_log("Error downloading certificate {$cert['file_path']}: " . $e->getMessage());
+                        continue; // Skip this file and continue with others
+                    }
+                }
+
+                $zip->close();
+            }
+
+            // Serve the ZIP file
+            if (file_exists($zipPath)) {
+                header('Content-Type: application/zip');
+                header('Content-Disposition: attachment; filename="certificates_' . $id . '.zip"');
+                header('Content-Length: ' . filesize($zipPath));
+                header('Pragma: no-cache');
+                header('Expires: 0');
+                
+                readfile($zipPath);
+                
+                // Clean up after sending
+                register_shutdown_function(function() use ($zipPath, $localDir) {
+                    if (file_exists($zipPath)) {
+                        unlink($zipPath);
+                    }
+                    $this->cleanupTempFiles($localDir);
+                });
+                exit;
+            } else {
+                throw new \Exception("ZIP file could not be created");
+            }
+
+        } catch (\Exception $e) {
+            error_log("Error downloading certificates: " . $e->getMessage());
+            $_SESSION['error'] = "Error downloading certificates: " . $e->getMessage();
+            header('Location: /admin/certificate_generations');
+            exit;
+        }
+    }
+
+    // Helper function to clean up old files
+    private function cleanupOldFiles($directory, $maxAge = 3600) {
+        if (is_dir($directory)) {
+            foreach (new \DirectoryIterator($directory) as $file) {
+                if (!$file->isDot() && $file->isFile()) {
+                    if (time() - $file->getCTime() >= $maxAge) {
+                        unlink($file->getPathname());
+                    }
+                }
+            }
         }
     }
 } 
