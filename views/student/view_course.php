@@ -149,7 +149,7 @@ foreach ($allClassrooms as $classroom) {
                                         echo "<td>" . $serialNumber++ . "</td>";
                                         echo "<td>" . htmlspecialchars($content['unitTitle'] ?? 'N/A') . "</td>";
                                         $full_url = $content['indexPath'] ?? '#';
-                                        echo "<td><a href='/" . htmlspecialchars($full_url) . "' target='_blank' class='btn btn-primary'>View EC</a></td>";
+                                        echo "<td><a href='/student/view_ec_content/" . $hashedId . "?index_path=" . urlencode($full_url) . "' class='btn btn-primary'>View EC</a></td>";
                                         echo "</tr>";
                                     }
                                 } else {
@@ -507,4 +507,11 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 });
+function viewAndMarkAsCompleted(url, button) {
+    // Open the content in a new tab or iframe
+    window.open('/student/view_course_book?index_path=' + encodeURIComponent(url), '_blank');
+
+    // Mark as completed (you can replace this with an AJAX call to update the status in the database)
+    button.closest('tr').querySelector('.status-cell').innerText = 'Completed';
+}
 </script>

@@ -398,8 +398,8 @@ $router->post('/student/submit_assignment', 'StudentController@submitAssignment'
 $router->post('/student/mark_as_completed', 'StudentController@markAsCompleted');
 
 $router->get('/student/view_course/([a-zA-Z0-9]+)', 'StudentController@viewCourse');
-
-
+$router->get('/student/view_course_book', 'StudentController@viewCourseBook');
+$router->get('/student/view_ec_content/([a-zA-Z0-9]+)', 'StudentController@viewECContent');
 // $router->get('/student/askguru','StudentController@askguru');
 // $router->post('/student/askguru','StudentController@askguru');
 
