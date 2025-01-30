@@ -46,66 +46,6 @@ $adminModel = new \Models\Admin();
     <link rel="stylesheet" href="/views/public/css/vertical-layout-light/style.css">
     <!-- endinject -->
     <link rel="shortcut icon" href="/views/public/assets/images/android-chrome-512x512.png" />
-    <style>
-    .nav-link, .dropdown-item {
-        cursor: pointer;
-    }
-
-    .dropdown-menu {
-        z-index: 1021;  /* Ensure dropdown appears above other elements */
-    }
-
-    .nav-profile .dropdown-toggle::after {
-        display: none;  /* Remove default dropdown arrow if needed */
-    }
-
-    /* Ensure clickable areas are properly sized */
-    .nav-item.nav-profile {
-        min-width: 40px;
-        position: relative;
-    }
-
-    .dropdown-menu {
-        min-width: 160px;
-    }
-
-    .dropdown-item {
-        padding: 8px 16px;
-    }
-
-    /* Add hover effect */
-    .dropdown-item:hover {
-        background-color: rgba(0,0,0,0.05);
-    }
-
-    /* Increase sidebar width */
-    .sidebar {
-        min-width: 300px !important;  
-        width: 300px !important;
-    }
-
-    /* Adjust main panel margin to account for wider sidebar
-    .main-panel {
-        margin-left: 300px !important;
-        width: calc(100% - 300px) !important;
-    } */
-
-    /* Adjust brand wrapper width to match sidebar */
-    .navbar .navbar-brand-wrapper {
-        width: 300px !important;
-    }
-
-    /* Adjust navbar menu wrapper width */
-    .navbar .navbar-menu-wrapper {
-        width: calc(100% - 300px) !important;
-    }
-
-    /* Ensure text doesn't wrap in sidebar menu items */
-    .sidebar .nav .nav-item .nav-link {
-        padding: 1rem 1.875rem;
-        white-space: nowrap;
-    }
-    </style>
 </head>
 <body>
 <div class="container-scroller">
@@ -184,10 +124,10 @@ $adminModel = new \Models\Admin();
                     </a>
                     <div class="collapse" id="university">
                         <ul class="nav flex-column sub-menu">
-                            <li class="nav-item"> <a class="nav-link" href="/admin/addCompany">Create University</a></li>
-                            <li class="nav-item"> <a class="nav-link" href="/admin/manage_company">Manage University</a></li>
-                            <li class="nav-item"> <a class="nav-link" href="/admin/addUniversity">Create Sub-University</a></li>
-                            <li class="nav-item"> <a class="nav-link" href="/admin/manage_university">Manage Sub-University</a></li>
+                            <li class="nav-item"> <a class="nav-link" href="/admin/addCompany" style="font-size: 12px;">Create University</a></li>
+                            <li class="nav-item"> <a class="nav-link" href="/admin/manage_company" style="font-size: 12px;">Manage University</a></li>
+                            <li class="nav-item"> <a class="nav-link" href="/admin/addUniversity" style="font-size: 12px;">Create Sub-University</a></li>
+                            <li class="nav-item"> <a class="nav-link" href="/admin/manage_university" style="font-size: 12px;">Manage Sub-University</a></li>
 <!--                            <li class="nav-item"> <a class="nav-link" href="#">Typography</a></li>-->
                         </ul>
                     </div>
@@ -202,9 +142,9 @@ $adminModel = new \Models\Admin();
                     </a>
                     <div class="collapse" id="courses">
                         <ul class="nav flex-column sub-menu">
-                            <li class="nav-item"><a class="nav-link" href="/admin/add_courses">Add Courses</a></li>
-                            <li class="nav-item"><a class="nav-link" href="/admin/manage_courses">Manage Courses</a></li>
-                            <li class="nav-item"><a class="nav-link" href="/admin/virtual_classroom">Virtual Classroom</a></li>
+                            <li class="nav-item"><a class="nav-link" href="/admin/add_courses" style="font-size: 12px;">Add Courses</a></li>
+                            <li class="nav-item"><a class="nav-link" href="/admin/manage_courses" style="font-size: 12px;">Manage Courses</a></li>
+                            <li class="nav-item"><a class="nav-link" href="/admin/virtual_classroom" style="font-size: 12px;">Virtual Classroom</a></li>
                             <!-- <li class="nav-item"><a class="nav-link" href="courses">Submission</a></li> -->
                         </ul>
                     </div>
@@ -217,8 +157,8 @@ $adminModel = new \Models\Admin();
                     </a>
                     <div class="collapse" id="faculty">
                         <ul class="nav flex-column sub-menu">
-                            <li class="nav-item"> <a class="nav-link" href="/admin/uploadFaculty">Upload Faculty</a></li>
-                            <li class="nav-item"> <a class="nav-link" href="/admin/manage_faculty">Manage Faculty</a></li>
+                            <li class="nav-item"> <a class="nav-link" href="/admin/uploadFaculty" style="font-size: 12px;">Upload Faculty</a></li>
+                            <li class="nav-item"> <a class="nav-link" href="/admin/manage_faculty" style="font-size: 12px;">Manage Faculty</a></li>
                         </ul>
                     </div>
                 </li>
@@ -230,8 +170,8 @@ $adminModel = new \Models\Admin();
                     </a>
                     <div class="collapse" id="student">
                         <ul class="nav flex-column sub-menu">
-                        <li class="nav-item"> <a class="nav-link" href="/admin/uploadStudents">Upload Students</a></li>
-                            <li class="nav-item"> <a class="nav-link" href="/admin/manage_students">Manage Student</a></li>
+                        <li class="nav-item"> <a class="nav-link" href="/admin/uploadStudents" style="font-size: 12px;">Upload Students</a></li>
+                            <li class="nav-item"> <a class="nav-link" href="/admin/manage_students" style="font-size: 12px;">Manage Student</a></li>
                         </ul>
                     </div>
                 </li>
@@ -243,8 +183,8 @@ $adminModel = new \Models\Admin();
                     </a>
                     <div class="collapse" id="assessments">
                         <ul class="nav flex-column sub-menu">
-                            <li class="nav-item"> <a class="nav-link" href="/admin/create_assignment">Create Assignments</a></li>
-                            <li class="nav-item"> <a class="nav-link" href="/admin/manage_assignments">Manage Assignments</a></li>
+                            <li class="nav-item"> <a class="nav-link" href="/admin/create_assignment" style="font-size: 12px;">Create Assignments</a></li>
+                            <li class="nav-item"> <a class="nav-link" href="/admin/manage_assignments" style="font-size: 12px;">Manage Assignments</a></li>
                         </ul>
                     </div>
                 </li>
@@ -256,8 +196,8 @@ $adminModel = new \Models\Admin();
                     </a>
                     <div class="collapse" id="cohort">
                         <ul class="nav flex-column sub-menu">
-                            <li class="nav-item"> <a class="nav-link" href="/admin/create_cohort">Create Cohort</a></li>
-                            <li class="nav-item"> <a class="nav-link" href="/admin/manage_cohort">Manage Cohort</a></li>
+                            <li class="nav-item"> <a class="nav-link" href="/admin/create_cohort" style="font-size: 12px;">Create Cohort</a></li>
+                            <li class="nav-item"> <a class="nav-link" href="/admin/manage_cohort" style="font-size: 12px;">Manage Cohort</a></li>
                         </ul>
                     </div>
                 </li>
@@ -269,19 +209,21 @@ $adminModel = new \Models\Admin();
                     </a>
                     <div class="collapse" id="labs">
                         <ul class="nav flex-column sub-menu">
-                            <li class="nav-item"> <a class="nav-link" href="/admin/create_lab">Create Lab</a></li>
-                            <li class="nav-item"> <a class="nav-link" href="/admin/manage_labs">Manage Labs</a></li>
-                            <li class="nav-item"> <a class="nav-link" href="/admin/create_contest">Create Contest</a></li>
-                            <li class="nav-item"> <a class="nav-link" href="/admin/manage_contest">Manage Contest</a></li>
+                            <li class="nav-item"> <a class="nav-link" href="/admin/create_lab" style="font-size: 12px;">Create Lab</a></li>
+                            <li class="nav-item"> <a class="nav-link" href="/admin/manage_labs" style="font-size: 12px;">Manage Labs</a></li>
+                            <li class="nav-item"> <a class="nav-link" href="/admin/create_contest" style="font-size: 12px;">Create Contest</a></li>
+                            <li class="nav-item"> <a class="nav-link" href="/admin/manage_contest" style="font-size: 12px;">Manage Contest</a></li>
                         </ul>
                     </div>
                 </li>
+
                 <li class="nav-item">
                     <a class="nav-link" href="/admin/certificate_generations">
                         <i class="icon-grid menu-icon"></i>
                         <span class="menu-title">Certificate Generation</span>
                     </a>
                 </li>
+
                 <!-- <li class="nav-item">
                     <a class="nav-link" data-toggle="collapse" href="#streams" aria-expanded="false" aria-controls="streams">
                         <i class="icon-grid-2 menu-icon"></i>
@@ -360,14 +302,14 @@ $adminModel = new \Models\Admin();
                     <a class="nav-link" href="/admin/logout">
                         <i class="ti-power-off menu-icon"></i>
                         <span class="menu-title">Logout</span>
-                    </a>
-                </li>
+                </a>
+            </li>
             </ul>
 
         </nav>
         <!-- partial -->
-
-        <!-- Add these script tags before closing body tag -->
+        
+        <!-- Add these script tags before closing body tag
         <script src="/views/public/vendors/js/vendor.bundle.base.js"></script>
         <script src="/views/public/js/off-canvas.js"></script>
         <script src="/views/public/js/hoverable-collapse.js"></script>
@@ -376,4 +318,4 @@ $adminModel = new \Models\Admin();
         <script src="/views/public/js/todolist.js"></script>
         <!-- End custom js for this page-->
     </body>
-</html>
+</html> -->
