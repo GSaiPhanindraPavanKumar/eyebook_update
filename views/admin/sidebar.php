@@ -366,3 +366,14 @@ $adminModel = new \Models\Admin();
 
         </nav>
         <!-- partial -->
+
+        <!-- Add these script tags before closing body tag -->
+        <script src="/views/public/vendors/js/vendor.bundle.base.js"></script>
+        <script src="/views/public/js/off-canvas.js"></script>
+        <script src="/views/public/js/hoverable-collapse.js"></script>
+        <script src="/views/public/js/template.js"></script>
+        <script src="/views/public/js/settings.js"></script>
+        <script src="/views/public/js/todolist.js"></script>
+        <!-- End custom js for this page-->
+    </body>
+</html>
