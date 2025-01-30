@@ -5,6 +5,12 @@ function handlePredefinedQuery($query) {
     
     // Common responses
     $responses = [
+        'hi' => "<div class='response-text'>
+            <p>Hello! How can I assist you today?</p>
+            </div>",
+        'hello' => "<div class='response-text'>
+            <p>Hello! How can I assist you today?</p>
+            </div>",
         'forgot password' => "<div class='response-text'>
             <p>To reset your password:</p>
             <p>1. Visit the login page<br>
