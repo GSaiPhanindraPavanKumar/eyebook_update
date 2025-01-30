@@ -150,7 +150,8 @@ class FacultyController {
         $course = Course::getById($conn, $course_id);
     
         if (!isset($_SESSION['email'])) {
-            die('Email not set in session.');
+            header('Location: /session-timeout');
+            exit;
         }
         $student = Student::getByEmail($conn, $_SESSION['email']);
     

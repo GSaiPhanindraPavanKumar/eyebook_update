@@ -548,4 +548,11 @@ if (getenv('APP_ENV') !== 'production') {
 
 $router->post('/admin/certificate_generations/start/(\d+)', 'CertificateController@startGeneration');
 
+$router->get('/session-timeout', function() {
+    require 'views/session_timeout.php';
+});
+$router->get('/student/login', function() {
+    require 'views/session_timeout.php';
+});
+
 $router->run();
