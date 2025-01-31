@@ -82,7 +82,7 @@ if ($userData) {
                         <p class="mb-0 font-weight-normal float-left dropdown-header">Notifications</p>
                         <?php if (!empty($notifications)): ?>
                             <?php foreach ($notifications as $notification): ?>
-                                <a class="dropdown-item preview-item">
+                                <a class="dropdown-item preview-item notification-item" href="#" data-notification-id="<?php echo htmlspecialchars($notification['id']); ?>">
                                     <div class="preview-thumbnail">
                                         <div class="preview-icon bg-info">
                                             <i class="ti-info-alt mx-0"></i>
@@ -191,6 +191,7 @@ if ($userData) {
                 padding: 20px !important;
                 border-radius: 5px !important;
                 box-shadow: 0 0 15px rgba(0,0,0,0.1) !important;
+                display: none;
             }
 
             /* Mobile-specific styles */
@@ -223,6 +224,47 @@ if ($userData) {
                     bottom: 120px !important;
                 }
             }
+
+            /* Add these styles for notification count positioning */
+            .count-indicator {
+                position: relative;
+                padding: 0.75rem;
+                margin-right: 1rem;
+            }
+
+            .count-indicator .count {
+                position: absolute;
+                right: 0px;
+                top: 4px;
+                width: 18px;
+                height: 18px;
+                border-radius: 50%;
+                background: #ff0000;
+                color: #ffffff;
+                font-size: 11px;
+                line-height: 18px;
+                text-align: center;
+                padding: 0;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .count-indicator i {
+                font-size: 20px;
+                margin-right: 0;
+                vertical-align: middle;
+            }
+
+            /* Add these styles for read notifications */
+            .notification-item.read {
+                opacity: 0.7;
+                background-color: #f8f9fa;
+            }
+
+            .count {
+                display: none; /* Initially hidden, shown by JS if there are unread notifications */
+            }
         </style>
 
         <div class="theme-setting-wrapper">
@@ -248,10 +290,212 @@ if ($userData) {
             </div>
         </div>
         
+        <!-- Add all necessary scripts in the correct order -->
+        <script src="../../views/public/vendors/js/vendor.bundle.base.js"></script>
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <script src="../../views/public/vendors/bootstrap/js/bootstrap.bundle.min.js"></script>
+        <script src="../../views/public/js/off-canvas.js"></script>
+        <script src="../../views/public/js/hoverable-collapse.js"></script>
+        <script src="../../views/public/js/template.js"></script>
+        
         <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            if (typeof jQuery !== 'undefined') {
+                // Settings panel toggle
+                $('#settings-trigger').on('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    $('#theme-settings').stop().fadeToggle(300); // Added stop() and animation duration
+                });
+
+                // Close settings panel
+                $('.settings-close').on('click', function(e) {
+                    e.preventDefault();
+                    $('#theme-settings').fadeOut(300);
+                });
+
+                // Close settings when clicking outside
+                $(document).on('click', function(e) {
+                    if (!$(e.target).closest('.theme-setting-wrapper').length) {
+                        $('#theme-settings').fadeOut(300);
+                    }
+                });
+
+                // Prevent settings panel from closing when clicking inside it
+                $('#theme-settings').on('click', function(e) {
+                    e.stopPropagation();
+                });
+
+                // Profile dropdown
+                $('.nav-profile.dropdown').on('click', function(e) {
+                    e.stopPropagation();
+                    $(this).find('.dropdown-menu').toggleClass('show');
+                });
+
+                // Notification dropdown
+                $('#notificationDropdown').on('click', function(e) {
+                    e.stopPropagation();
+                    $(this).next('.dropdown-menu').toggleClass('show');
+                });
+
+                // Close dropdowns when clicking outside
+                $(document).on('click', function(e) {
+                    if (!$(e.target).closest('.dropdown').length) {
+                        $('.dropdown-menu').removeClass('show');
+                    }
+                });
+            }
+        });
+
         function openChatbot() {
             window.location.href = '/student/askguru';
         }
+        </script>
+
+        <!-- Add before your existing scripts -->
+        <script>
+        // IndexedDB initialization and functions
+        const dbName = 'NotificationsDB';
+        const storeName = 'readNotifications';
+        let db;
+
+        const initDB = () => {
+            return new Promise((resolve, reject) => {
+                const request = indexedDB.open(dbName, 1);
+                
+                request.onerror = () => reject(request.error);
+                
+                request.onsuccess = (event) => {
+                    db = event.target.result;
+                    resolve(db);
+                };
+                
+                request.onupgradeneeded = (event) => {
+                    const db = event.target.result;
+                    if (!db.objectStoreNames.contains(storeName)) {
+                        db.createObjectStore(storeName, { keyPath: 'id' });
+                    }
+                };
+            });
+        };
+
+        const markNotificationAsRead = async (notificationId, userId) => {
+            const store = db.transaction(storeName, 'readwrite').objectStore(storeName);
+            await store.put({
+                id: `${userId}_${notificationId}`,
+                userId: userId,
+                notificationId: notificationId,
+                readAt: new Date().toISOString()
+            });
+        };
+
+        const isNotificationRead = async (notificationId, userId) => {
+            return new Promise((resolve) => {
+                const store = db.transaction(storeName, 'readonly').objectStore(storeName);
+                const request = store.get(`${userId}_${notificationId}`);
+                request.onsuccess = () => resolve(!!request.result);
+                request.onerror = () => resolve(false);
+            });
+        };
+
+        const updateNotificationCount = async () => {
+            const unreadCount = await getUnreadCount();
+            const countElement = document.querySelector('.count');
+            if (unreadCount > 0) {
+                countElement.style.display = 'flex';
+                countElement.textContent = unreadCount;
+            } else {
+                countElement.style.display = 'none';
+            }
+        };
+
+        const getUnreadCount = async () => {
+            const notifications = <?php echo json_encode($notifications); ?>;
+            const userId = <?php echo json_encode($studentId); ?>;
+            let unreadCount = 0;
+            
+            for (const notification of notifications) {
+                const isRead = await isNotificationRead(notification.id, userId);
+                if (!isRead) unreadCount++;
+            }
+            
+            return unreadCount;
+        };
+
+        const updateNotificationPanel = async () => {
+            const notifications = <?php echo json_encode($notifications); ?>;
+            const userId = <?php echo json_encode($studentId); ?>;
+            const notificationsList = [];
+            
+            // Get unread notifications
+            for (const notification of notifications) {
+                const isRead = await isNotificationRead(notification.id, userId);
+                if (!isRead) {
+                    notificationsList.push(notification);
+                }
+            }
+            
+            // Update the notification panel content
+            const dropdownMenu = $('.dropdown-menu.preview-list');
+            const header = '<p class="mb-0 font-weight-normal float-left dropdown-header">Notifications</p>';
+            
+            if (notificationsList.length > 0) {
+                const notificationsHtml = notificationsList.map(notification => `
+                    <a class="dropdown-item preview-item notification-item" href="#" data-notification-id="${notification.id}">
+                        <div class="preview-thumbnail">
+                            <div class="preview-icon bg-info">
+                                <i class="ti-info-alt mx-0"></i>
+                            </div>
+                        </div>
+                        <div class="preview-item-content">
+                            <h6 class="preview-subject font-weight-normal">${notification.message}</h6>
+                            <p class="font-weight-light small-text mb-0 text-muted">
+                                ${notification.created_at}
+                            </p>
+                        </div>
+                    </a>
+                `).join('');
+                
+                dropdownMenu.html(header + notificationsHtml);
+            } else {
+                const noNotificationsHtml = `
+                    <p class="mb-0 font-weight-normal float-left dropdown-header">Notifications</p>
+                    <a class="dropdown-item preview-item">
+                        <div class="preview-item-content">
+                            <h6 class="preview-subject font-weight-normal">No new notifications</h6>
+                        </div>
+                    </a>
+                `;
+                dropdownMenu.html(noNotificationsHtml);
+            }
+
+            // Reattach click handlers for new notification items
+            $('.notification-item').on('click', handleNotificationClick);
+        };
+
+        const handleNotificationClick = async function(e) {
+            e.preventDefault();
+            const notificationId = $(this).data('notification-id');
+            const userId = <?php echo json_encode($studentId); ?>;
+            
+            await markNotificationAsRead(notificationId, userId);
+            await updateNotificationCount();
+            await updateNotificationPanel(); // Update the panel after marking as read
+        };
+
+        // Update the existing DOMContentLoaded event listener
+        document.addEventListener('DOMContentLoaded', async function() {
+            await initDB();
+            await updateNotificationCount();
+            await updateNotificationPanel(); // Initial panel update
+
+            if (typeof jQuery !== 'undefined') {
+                // Your existing jQuery code...
+
+                // Replace the old notification click handler with the new one
+                $('.notification-item').on('click', handleNotificationClick);
+            }
+        });
         </script>
 
         <!-- partial -->

@@ -66,50 +66,64 @@ $archivedCourses = array_filter($courses, function($course) {
             <div class="col-md-12 grid-margin">
                 <p class="card-title mb-0" style="font-size:x-large">Ongoing Courses</p><br>
                 <div class="row">
-                    <?php foreach ($ongoingCourses as $course): ?>
-                        <div class="col-md-4 d-flex align-items-stretch">
-                            <div class="card mb-4" style="width: 100%;">
-                                <div class="card-body">
-                                    <h5 class="card-title" style="font-family:cursive"><?php echo htmlspecialchars($course['name']); ?></h5>
-                                    <p class="card-text"><?php echo htmlspecialchars($course['description']); ?></p>
-                                    <div class="progress">
-                                        <div class="progress-bar" role="progressbar" style="width: <?php echo $progressData[$course['id']]; ?>%;" aria-valuenow="<?php echo $progressData[$course['id']]; ?>" aria-valuemin="0" aria-valuemax="100"><?php echo round($progressData[$course['id']], 2); ?>%</div>
+                    <?php if (empty($ongoingCourses)): ?>
+                        <div class="col-12 text-center">
+                            <img src="https://i.ibb.co/0SpmPCg/empty-box.png" alt="No courses found" style="max-width: 200px; margin: 20px auto;">
+                            <p class="text-muted" style="font-size: 1.1em;">No ongoing courses found</p>
+                        </div>
+                    <?php else: ?>
+                        <?php foreach ($ongoingCourses as $course): ?>
+                            <div class="col-md-4 d-flex align-items-stretch">
+                                <div class="card mb-4" style="width: 100%;">
+                                    <div class="card-body">
+                                        <h5 class="card-title" style="font-family:cursive"><?php echo htmlspecialchars($course['name']); ?></h5>
+                                        <p class="card-text"><?php echo htmlspecialchars($course['description']); ?></p>
+                                        <div class="progress">
+                                            <div class="progress-bar" role="progressbar" style="width: <?php echo $progressData[$course['id']]; ?>%;" aria-valuenow="<?php echo $progressData[$course['id']]; ?>" aria-valuemin="0" aria-valuemax="100"><?php echo round($progressData[$course['id']], 2); ?>%</div>
+                                        </div>
+                                    </div>
+                                    <div class="card-body">
+                                        <?php 
+                                        $hashedId = base64_encode($course['id']);
+                                        $hashedId = str_replace(['+', '/', '='], ['-', '_', ''], $hashedId);
+                                        ?>
+                                        <a href="view_course/<?php echo $hashedId; ?>" class="card-link">View Course</a>
+                                        <a href="view_labs/<?php echo $hashedId; ?>" class="card-link">View Lab</a>
                                     </div>
                                 </div>
-                                <div class="card-body">
-                                    <?php 
-                                    $hashedId = base64_encode($course['id']);
-                                    $hashedId = str_replace(['+', '/', '='], ['-', '_', ''], $hashedId);
-                                    ?>
-                                    <a href="view_course/<?php echo $hashedId; ?>" class="card-link">View Course</a>
-                                    <a href="view_labs/<?php echo $hashedId; ?>" class="card-link">View Lab</a>
-                                </div>
                             </div>
-                        </div>
-                    <?php endforeach; ?>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
                 </div>
                 <p class="card-title mb-0" style="font-size:x-large">Archived Courses</p><br>
                 <div class="row">
-                    <?php foreach ($archivedCourses as $course): ?>
-                        <div class="col-md-4 d-flex align-items-stretch">
-                            <div class="card mb-4" style="width: 100%;">
-                                <div class="card-body">
-                                    <h5 class="card-title" style="font-family:cursive"><?php echo htmlspecialchars($course['name']); ?></h5>
-                                    <p class="card-text"><?php echo htmlspecialchars($course['description']); ?></p>
-                                    <div class="progress">
-                                        <div class="progress-bar" role="progressbar" style="width: <?php echo $progressData[$course['id']]; ?>%;" aria-valuenow="<?php echo $progressData[$course['id']]; ?>" aria-valuemin="0" aria-valuemax="100"><?php echo round($progressData[$course['id']], 2); ?>%</div>
+                    <?php if (empty($archivedCourses)): ?>
+                        <div class="col-12 text-center">
+                            <img src="https://i.ibb.co/0SpmPCg/empty-box.png" alt="No archived courses" style="max-width: 200px; margin: 20px auto;">
+                            <p class="text-muted" style="font-size: 1.1em;">No archived courses found</p>
+                        </div>
+                    <?php else: ?>
+                        <?php foreach ($archivedCourses as $course): ?>
+                            <div class="col-md-4 d-flex align-items-stretch">
+                                <div class="card mb-4" style="width: 100%;">
+                                    <div class="card-body">
+                                        <h5 class="card-title" style="font-family:cursive"><?php echo htmlspecialchars($course['name']); ?></h5>
+                                        <p class="card-text"><?php echo htmlspecialchars($course['description']); ?></p>
+                                        <div class="progress">
+                                            <div class="progress-bar" role="progressbar" style="width: <?php echo $progressData[$course['id']]; ?>%;" aria-valuenow="<?php echo $progressData[$course['id']]; ?>" aria-valuemin="0" aria-valuemax="100"><?php echo round($progressData[$course['id']], 2); ?>%</div>
+                                        </div>
+                                    </div>
+                                    <div class="card-body">
+                                        <?php 
+                                        $hashedId = base64_encode($course['id']);
+                                        $hashedId = str_replace(['+', '/', '='], ['-', '_', ''], $hashedId);
+                                        ?>
+                                        <a href="view_course/<?php echo $hashedId; ?>" class="card-link">View Course</a>
                                     </div>
                                 </div>
-                                <div class="card-body">
-                                    <?php 
-                                    $hashedId = base64_encode($course['id']);
-                                    $hashedId = str_replace(['+', '/', '='], ['-', '_', ''], $hashedId);
-                                    ?>
-                                    <a href="view_course/<?php echo $hashedId; ?>" class="card-link">View Course</a>
-                                </div>
                             </div>
-                        </div>
-                    <?php endforeach; ?>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
                 </div>
             </div>
         </div>
@@ -126,3 +140,28 @@ function confirmArchive() {
     return confirm("Are you sure you want to archive this course? You will not be able to make any updates to this course.");
 }
 </script>
+
+<style>
+/* Add some animation for the empty state images */
+.text-center img {
+    transition: transform 0.3s ease;
+}
+
+.text-center img:hover {
+    transform: scale(1.05);
+}
+
+/* Style for the empty state message */
+.text-center .text-muted {
+    margin-top: 15px;
+    color: #6c757d;
+    font-weight: 500;
+}
+
+/* Add some spacing between sections */
+.card-title.mb-0 {
+    margin-top: 30px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #f0f0f0;
+}
+</style>
