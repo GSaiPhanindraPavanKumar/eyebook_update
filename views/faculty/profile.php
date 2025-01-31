@@ -87,6 +87,7 @@ $profileImage = isset($userData['profile_image_url']) ? $userData['profile_image
                                 <div class="form-group">
                                     <label for="profile_image">Profile Image:</label>
                                     <input type="file" class="form-control" id="profile_image" name="profile_image" accept="image/*">
+                                    <small class="form-text text-muted">Allowed file formats: .png, .jpeg, .jpg</small>
                                 </div>
                                 <button type="submit" class="btn btn-primary">Save Changes</button>
                                 <button type="button" class="btn btn-secondary" onclick="document.getElementById('editProfileForm').style.display='none'">Cancel</button>

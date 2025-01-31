@@ -61,7 +61,8 @@
                             </div>
                             <div class="form-group">
                                 <label for="assignment_file">Upload Assignment File:</label>
-                                <input type="file" class="form-control" id="assignment_file" name="assignment_file">
+                                <input type="file" class="form-control" id="assignment_file" name="assignment_file" accept=".pdf">
+                                <small class="form-text text-muted">Allowed file formats: .pdf</small>
                             </div>
                             <button type="submit" class="btn btn-primary">Create Assignment</button>
                         </form>

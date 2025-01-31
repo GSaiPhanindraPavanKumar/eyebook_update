@@ -69,7 +69,7 @@
             <div class="col-md-5 col-lg-7 order-md-1 pt-8"><img class="img-fluid" src="/views/landing/assets/img/user1.png" alt="" /></div>
             <div class="col-md-7 col-lg-5 text-center text-md-start pt-5 pt-md-9">
               <h1 class="mb-4 display-2 fw-bold">Welcome to the LMS <br class="d-block d-lg-none d-xl-block" />Let's start</h1>
-              <p class="mt-3 mb-4">Elevate Your Learning Experience <br />Access a World of Knowledge at Your Fingertips<br />Empower Yourself with Lifelong Learning. <br /></p><a class="btn btn-lg btn-info rounded-pill" href="#" role="button">Learn more</a>
+              <p class="mt-3 mb-4">Elevate Your Learning Experience <br />Access a World of Knowledge at Your Fingertips<br />Empower Yourself with Lifelong Learning. <br /></p>
             </div>
           </div>
         </div>

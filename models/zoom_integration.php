@@ -61,6 +61,12 @@ class ZoomAPI {
         $data = json_decode($response->getBody(), true);
         return $data;
     }
+    public function saveVirtualClassroom($topic, $start_time, $duration, $join_url, $selectedCourses) {
+        // Save the start time and course IDs with the classroom in the correct format
+        $stmt = $this->conn->prepare("INSERT INTO virtual_classrooms (topic, start_time, duration, join_url, course_id) VALUES (?, ?, ?, ?, ?)");
+        $stmt->execute([$topic, $start_time, $duration, $join_url, json_encode($selectedCourses)]);
+        return $this->conn->lastInsertId();
+    }
 
     public function saveVirtualClassroomToDatabase($data, $selectedCourses, $start_time_local) {
         // Use the provided local start time

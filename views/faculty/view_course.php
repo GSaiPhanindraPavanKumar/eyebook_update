@@ -39,7 +39,11 @@
                         <?php if ($course['status'] !== 'archived') : ?>
                             <form id="uploadCoursePlanForm" action="upload_course_plan" method="post" enctype="multipart/form-data" style="display: none; margin-top: 10px;">
                                 <input type="hidden" name="course_id" value="<?php echo $course['id']; ?>">
-                                <input type="file" name="course_plan_file" accept="application/pdf" required>
+                                <div class="form-group">
+                                    <label for="course_plan_file">Upload Course Plan (PDF only):</label>
+                                    <input type="file" class="form-control" id="course_plan_file" name="course_plan_file" accept="application/pdf" required>
+                                    <small class="form-text text-muted">Allowed file format: .pdf</small>
+                                </div>
                                 <button type="submit" class="btn btn-success">Upload</button>
                                 <button type="button" class="btn btn-secondary" onclick="toggleCoursePlanForm()">Cancel</button>
                             </form>
@@ -160,7 +164,8 @@
                                         <input type="text" class="form-control" name="topic" id="topic">
                                     </div>
                                     <div class="form-group d-flex justify-content-between align-items-center">
-                                        <input type="file" name="course_materials_file" accept="application/pdf">
+                                        <input type="file" name="course_materials_file" accept="application/pdf" required>
+                                        <small class="form-text text-muted">Allowed file format: .pdf</small>
                                         <div>
                                             <button type="submit" class="btn btn-success">Upload</button>
                                             <button type="button" class="btn btn-secondary" onclick="toggleCourseMaterialsForm()">Cancel</button>
@@ -174,6 +179,7 @@
                                     </div>
                                     <div class="form-group d-flex justify-content-between align-items-center">
                                         <input type="file" name="bulk_course_materials_file" accept=".zip">
+                                        <small class="form-text text-muted">Allowed file format: .zip</small>
                                         <div>
                                             <button type="submit" class="btn btn-success">Upload</button>
                                             <button type="button" class="btn btn-secondary" onclick="toggleCourseMaterialsForm()">Cancel</button>
@@ -331,7 +337,8 @@
                                 </div>
                                 <div class="form-group">
                                     <label for="assignment_file">Upload Assignment File:</label>
-                                    <input type="file" class="form-control" id="assignment_file" name="assignment_file">
+                                    <input type="file" class="form-control" id="assignment_file" name="assignment_file" accept=".pdf">
+                                    <small class="form-text text-muted">Allowed file format: .pdf</small>
                                 </div>
                                 <input type="hidden" name="course_id[]" value="<?php echo $course['id']; ?>">
                                 <button type="submit" class="btn btn-primary">Create Assignment</button>

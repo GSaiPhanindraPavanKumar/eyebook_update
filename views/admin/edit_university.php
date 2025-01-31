@@ -65,6 +65,7 @@ include "sidebar.php";
                             <div class="form-group">
                                 <label for="logo">University Logo</label>
                                 <input type="file" class="form-control" id="logo" name="logo" accept="image/*">
+                                <small class="form-text text-muted">Allowed file formats: .png, .jpeg, .jpg</small>
                             </div>
                             <button type="submit" class="btn btn-primary">Update University</button>
                             <a href="/admin/view_university/<?php echo $university['id']; ?>" class="btn btn-secondary">Cancel</a>

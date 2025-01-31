@@ -14,24 +14,23 @@ include "sidebar.php";
                                 <?= $message; ?>
                             </div>
                         <?php endif; ?>
-                        <form class="forms-sample" action="updatePassword" method="post">
-                            <input type="hidden" name="admin_id" value="<?= $admin_id; ?>">
+                        <form class="forms-sample" action="/admin/updatePassword" method="post">
                             <div class="form-group row">
                                 <label for="currentPassword" class="col-sm-3 col-form-label">Current Password</label>
                                 <div class="col-sm-9">
-                                    <input type="password" class="form-control" id="currentPassword" placeholder="Current Password" name="currentPassword">
+                                    <input type="password" class="form-control" id="currentPassword" placeholder="Current Password" name="currentPassword" required>
                                 </div>
                             </div>
                             <div class="form-group row">
                                 <label for="newPassword" class="col-sm-3 col-form-label">New Password</label>
                                 <div class="col-sm-9">
-                                    <input type="password" class="form-control" id="newPassword" placeholder="New Password" name="newPassword">
+                                    <input type="password" class="form-control" id="newPassword" placeholder="New Password" name="newPassword" required>
                                 </div>
                             </div>
                             <div class="form-group row">
                                 <label for="confirmPassword" class="col-sm-3 col-form-label">Re-Type Password</label>
                                 <div class="col-sm-9">
-                                    <input type="password" class="form-control" id="confirmPassword" placeholder="Confirm Password" name="confirmPassword">
+                                    <input type="password" class="form-control" id="confirmPassword" placeholder="Confirm Password" name="confirmPassword" required>
                                 </div>
                             </div>
                             <button type="submit" class="btn btn-primary mr-2">Submit</button>
