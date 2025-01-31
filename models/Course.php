@@ -225,8 +225,9 @@ class Course {
     }
 
     public static function getAllWithUniversity($conn) {
-        $sql = "SELECT courses.*, courses.university_id AS university_ids
-                FROM courses";
+        $sql = "SELECT courses.*, courses.university_id AS university_ids 
+                FROM courses 
+                ORDER BY courses.id ASC";
         $stmt = $conn->prepare($sql);
         $stmt->execute();
         $courses = $stmt->fetchAll(PDO::FETCH_ASSOC);

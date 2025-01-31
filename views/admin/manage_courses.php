@@ -1,41 +1,11 @@
 <?php
 include("sidebar.php");
 use Models\Database;
+use Models\Course;
 $conn = Database::getConnection();
 
-// Get all courses for search and filtering
-$all_sql = "SELECT courses.*, courses.university_id AS university_ids, 
-            courses.name, courses.status FROM courses 
-            ORDER BY courses.id ASC";
-$all_stmt = $conn->prepare($all_sql);
-$all_stmt->execute();
-$all_courses = $all_stmt->fetchAll(PDO::FETCH_ASSOC);
-
-// Process all courses
-$processed_courses = array();
-foreach ($all_courses as $course) {
-    // Skip if we've already processed this course ID
-    if (isset($processed_courses[$course['id']])) {
-        continue;
-    }
-    
-    $university_ids = !empty($course['university_ids']) ? json_decode($course['university_ids'], true) : [];
-    if (is_array($university_ids) && !empty($university_ids)) {
-        $placeholders = implode(',', array_fill(0, count($university_ids), '?'));
-        $sql = "SELECT short_name FROM universities WHERE id IN ($placeholders)";
-        $stmt = $conn->prepare($sql);
-        $stmt->execute($university_ids);
-        $universities = $stmt->fetchAll(PDO::FETCH_COLUMN);
-        $course['university'] = implode(', ', $universities);
-    } else {
-        $course['university'] = 'N/A';
-    }
-    
-    $processed_courses[$course['id']] = $course;
-}
-
-// Convert to indexed array and JSON for JavaScript
-$courses = array_values($processed_courses);
+// Alternative way to fetch courses using the Course model
+$courses = Course::getAllWithUniversity($conn);
 $courses_json = json_encode($courses, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP);
 
 // Calculate initial pagination values
@@ -153,6 +123,9 @@ $(document).ready(function() {
     let allCourses = <?php echo $courses_json; ?>;
     console.log('Total courses loaded:', allCourses.length); // Debug line
     
+    // Update debug info
+    $('#totalCoursesCount').text(allCourses.length);
+    
     let currentPage = 1;
     let recordsPerPage = parseInt($('#recordsPerPage').val() || 10);
 
@@ -175,12 +148,9 @@ $(document).ready(function() {
     function displayCourses() {
         const filteredCourses = filterCourses();
         const totalRecords = filteredCourses.length;
-        const totalPages = Math.ceil(totalRecords / recordsPerPage);
+        const totalPages = Math.ceil(totalRecords / recordsPerPage) || 1;
         
-        // Ensure current page is within valid range
-        if (currentPage > totalPages) {
-            currentPage = totalPages || 1;
-        }
+        currentPage = Math.max(1, Math.min(currentPage, totalPages));
         
         const startIndex = (currentPage - 1) * recordsPerPage;
         const endIndex = Math.min(startIndex + recordsPerPage, totalRecords);
@@ -191,11 +161,10 @@ $(document).ready(function() {
 
         if (displayedCourses.length === 0) {
             $('#noRecords').show();
-            $('.pagination-container').hide();
             $('.records-info').text('No matching records found');
         } else {
             $('#noRecords').hide();
-
+            
             displayedCourses.forEach((course, index) => {
                 const row = `
                     <tr data-status="${course.status || 'active'}">
@@ -219,11 +188,11 @@ $(document).ready(function() {
                 `;
                 tbody.append(row);
             });
-
-            // Update pagination info
-            updatePaginationInfo(startIndex + 1, endIndex, totalRecords);
-            updatePaginationControls(totalPages);
         }
+
+        // Always update pagination info and controls
+        updatePaginationInfo(startIndex + 1, endIndex, totalRecords);
+        updatePaginationControls(totalPages);
     }
 
     function updatePaginationInfo(start, end, total) {
@@ -236,23 +205,22 @@ $(document).ready(function() {
         const pagination = $('.pagination');
         pagination.empty();
 
-        if (totalPages <= 1) {
-            $('.pagination-container').hide();
-            return;
-        }
-
+        // Always show pagination container
         $('.pagination-container').show();
 
         // Previous button
+        const prevDisabled = currentPage === 1 ? 'disabled' : '';
         pagination.append(`
-            <li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
-                <a class="page-link" href="#" data-page="${currentPage - 1}">&laquo; Previous</a>
+            <li class="page-item ${prevDisabled}">
+                <button class="page-link" data-page="${currentPage - 1}" ${prevDisabled}>
+                    <i class="fas fa-chevron-left"></i> Previous
+                </button>
             </li>
         `);
 
         // Calculate visible page range
         let startPage = Math.max(1, currentPage - 2);
-        let endPage = Math.min(totalPages, startPage + 4);
+        let endPage = Math.min(totalPages || 1, startPage + 4);
         
         if (endPage - startPage < 4) {
             startPage = Math.max(1, endPage - 4);
@@ -260,37 +228,53 @@ $(document).ready(function() {
 
         // First page and ellipsis
         if (startPage > 1) {
-            pagination.append('<li class="page-item"><a class="page-link" href="#" data-page="1">1</a></li>');
+            pagination.append(`
+                <li class="page-item">
+                    <button class="page-link" data-page="1">1</button>
+                </li>
+            `);
             if (startPage > 2) {
-                pagination.append('<li class="page-item disabled"><span class="page-link">...</span></li>');
+                pagination.append(`
+                    <li class="page-item disabled">
+                        <span class="page-link">...</span>
+                    </li>
+                `);
             }
         }
 
         // Page numbers
         for (let i = startPage; i <= endPage; i++) {
+            const isActive = currentPage === i ? 'active' : '';
             pagination.append(`
-                <li class="page-item ${currentPage === i ? 'active' : ''}">
-                    <a class="page-link" href="#" data-page="${i}">${i}</a>
+                <li class="page-item ${isActive}">
+                    <button class="page-link" data-page="${i}">${i}</button>
                 </li>
             `);
         }
 
         // Last page and ellipsis
-        if (endPage < totalPages) {
-            if (endPage < totalPages - 1) {
-                pagination.append('<li class="page-item disabled"><span class="page-link">...</span></li>');
+        if (endPage < (totalPages || 1)) {
+            if (endPage < (totalPages || 1) - 1) {
+                pagination.append(`
+                    <li class="page-item disabled">
+                        <span class="page-link">...</span>
+                    </li>
+                `);
             }
             pagination.append(`
                 <li class="page-item">
-                    <a class="page-link" href="#" data-page="${totalPages}">${totalPages}</a>
+                    <button class="page-link" data-page="${totalPages || 1}">${totalPages || 1}</button>
                 </li>
             `);
         }
 
         // Next button
+        const nextDisabled = currentPage === (totalPages || 1) ? 'disabled' : '';
         pagination.append(`
-            <li class="page-item ${currentPage === totalPages ? 'disabled' : ''}">
-                <a class="page-link" href="#" data-page="${currentPage + 1}">Next &raquo;</a>
+            <li class="page-item ${nextDisabled}">
+                <button class="page-link" data-page="${currentPage + 1}" ${nextDisabled}>
+                    Next <i class="fas fa-chevron-right"></i>
+                </button>
             </li>
         `);
     }
@@ -340,6 +324,8 @@ $(document).ready(function() {
 
     $(document).on('click', '.page-link', function(e) {
         e.preventDefault();
+        if ($(this).attr('disabled')) return;
+        
         const newPage = parseInt($(this).data('page'));
         if (!isNaN(newPage) && newPage > 0) {
             currentPage = newPage;
@@ -365,9 +351,42 @@ $(document).ready(function() {
     .col-actions { width: 30%; }
     .pagination {
         margin-bottom: 0;
+        gap: 5px;
+    }
+    .page-item {
+        margin: 0 2px;
     }
     .page-link {
-        padding: 0.5rem 0.75rem;
+        border-radius: 4px;
+        padding: 8px 12px;
+        color: #333;
+        border: 1px solid #dee2e6;
+        background-color: #fff;
+        cursor: pointer;
+    }
+    .page-item.active .page-link {
+        background-color: #007bff;
+        border-color: #007bff;
+        color: #fff;
+    }
+    .page-item.disabled .page-link {
+        background-color: #e9ecef;
+        border-color: #dee2e6;
+        cursor: not-allowed;
+    }
+    .page-link:hover:not([disabled]) {
+        background-color: #e9ecef;
+        border-color: #dee2e6;
+        color: #0056b3;
+    }
+    .page-link:focus {
+        box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+        outline: none;
+    }
+    .pagination-container {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
     }
     .search-filters {
         margin-bottom: 1rem;
@@ -381,3 +400,8 @@ $(document).ready(function() {
         }
     }
 </style>
+
+<!-- Add this debug output near the top of your HTML -->
+<div class="debug-info" style="display: none;">
+    Total courses available: <span id="totalCoursesCount">0</span>
+</div>
