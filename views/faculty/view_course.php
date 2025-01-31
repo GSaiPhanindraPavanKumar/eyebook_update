@@ -338,6 +338,7 @@
                                 <div class="form-group">
                                     <label for="assignment_file">Upload Assignment File:</label>
                                     <input type="file" class="form-control" id="assignment_file" name="assignment_file" accept=".pdf">
+                                    <small class="form-text text-muted">Allowed file format: .pdf</small>
                                 </div>
                                 <input type="hidden" name="course_id[]" value="<?php echo $course['id']; ?>">
                                 <button type="submit" class="btn btn-primary">Create Assignment</button>
