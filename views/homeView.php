@@ -135,11 +135,10 @@
                     <div class="card-body px-0">
                       <h4 class="card-title pt-md-5">Personalized Learning</h4>
                       <p class="mb-0">Tailor your learning experience to your specific needs and goals <br class="d-none d-lg-block"> Our LMS adapts to your learning style and pace, providing you with customized content and recommendations. <br class="d-none d-lg-block">  <br class="d-none d-lg-block">  <br class="d-none d-lg-block"> <br class="d-none d-lg-block"> </p>
-                      <div><a class="btn btn-lg ps-0 pe-3" href="#" role="button">Learn more</a>
+                      <div><button class="btn btn-lg ps-0 pe-3 learn-more-btn" type="button">Learn more
                         <svg class="bi bi-arrow-right" xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="#9C69E2" viewBox="0 0 16 16">
                           <path fill-rule="evenodd" d="M1 8a.5.5 0 0 1 .5-.5h11.793l-3.147-3.146a.5.5 0 0 1 .708-.708l4 4a.5.5 0 0 1 0 .708l-4 4a.5.5 0 0 1-.708-.708L13.293 8.5H1.5A.5.5 0 0 1 1 8z"></path>
-                        </svg>
-                      </div>
+                        </svg></button></div>
                     </div>
                   </div>
                 </div>
@@ -161,11 +160,10 @@
                     <div class="card-body px-0">
                       <h4 class="card-title pt-md-5">Interactive Content </h4>
                       <p class="mb-0">Engage with a variety of learning materials, including videos, quizzes, and simulations <br class="d-none d-lg-block"> Our interactive content makes learning fun and effective. <br class="d-none d-lg-block">  <br class="d-none d-lg-block">  <br class="d-none d-lg-block"> <br class="d-none d-lg-block"> </p>
-                      <div><a class="btn btn-lg ps-0 pe-3" href="#" role="button">Learn more</a>
+                      <div><button class="btn btn-lg ps-0 pe-3 learn-more-btn" type="button">Learn more
                         <svg class="bi bi-arrow-right" xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="#9C69E2" viewBox="0 0 16 16">
                           <path fill-rule="evenodd" d="M1 8a.5.5 0 0 1 .5-.5h11.793l-3.147-3.146a.5.5 0 0 1 .708-.708l4 4a.5.5 0 0 1 0 .708l-4 4a.5.5 0 0 1-.708-.708L13.293 8.5H1.5A.5.5 0 0 1 1 8z"></path>
-                        </svg>
-                      </div>
+                        </svg></button></div>
                     </div>
                   </div>
                 </div>
@@ -187,11 +185,10 @@
                     <div class="card-body px-0">
                       <h4 class="card-title pt-md-5">Collaborative Learning</h4>
                       <p class="mb-0">Connect with fellow learners and experts to share knowledge and solve problems together <br class="d-none d-lg-block"> Our platform fosters a supportive learning community where you can collaborate on projects, discuss ideas, and learn from each other. <br class="d-none d-lg-block">  <br class="d-none d-lg-block">  <br class="d-none d-lg-block"> <br class="d-none d-lg-block"> </p>
-                      <div><a class="btn btn-lg ps-0 pe-3" href="#" role="button">Learn more</a>
+                      <div><button class="btn btn-lg ps-0 pe-3 learn-more-btn" type="button">Learn more
                         <svg class="bi bi-arrow-right" xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="#9C69E2" viewBox="0 0 16 16">
                           <path fill-rule="evenodd" d="M1 8a.5.5 0 0 1 .5-.5h11.793l-3.147-3.146a.5.5 0 0 1 .708-.708l4 4a.5.5 0 0 1 0 .708l-4 4a.5.5 0 0 1-.708-.708L13.293 8.5H1.5A.5.5 0 0 1 1 8z"></path>
-                        </svg>
-                      </div>
+                        </svg></button></div>
                     </div>
                   </div>
                 </div>
@@ -213,11 +210,10 @@
                     <div class="card-body px-0">
                       <h4 class="card-title pt-md-5">Certification and Badges</h4>
                       <p class="mb-0">Showcase your achievements and validate your skills with our certification and badging system <br class="d-none d-lg-block"> Earn digital badges to recognize your accomplishments and share them with your professional network. <br class="d-none d-lg-block">  <br class="d-none d-lg-block">  <br class="d-none d-lg-block"> <br class="d-none d-lg-block"> </p>
-                      <div><a class="btn btn-lg ps-0 pe-3" href="#" role="button">Learn more</a>
+                      <div><button class="btn btn-lg ps-0 pe-3 learn-more-btn" type="button">Learn more
                         <svg class="bi bi-arrow-right" xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="#9C69E2" viewBox="0 0 16 16">
                           <path fill-rule="evenodd" d="M1 8a.5.5 0 0 1 .5-.5h11.793l-3.147-3.146a.5.5 0 0 1 .708-.708l4 4a.5.5 0 0 1 0 .708l-4 4a.5.5 0 0 1-.708-.708L13.293 8.5H1.5A.5.5 0 0 1 1 8z"></path>
-                        </svg>
-                      </div>
+                        </svg></button></div>
                     </div>
                   </div>
                 </div>
@@ -392,7 +388,7 @@
                             <h4 class="mt-4">Information We Collect</h4>
                             <p>We collect information to provide better services to all our users. We collect information in the following ways:</p>
                             <ul>
-                                <li><strong>Information you give us:</strong> For example, our service requires you to sign up for an Knowbots Account. When you do, we’ll ask for personal information, like your name, email address, telephone number, or credit card.</li>
+                                <li><strong>Information you give us:</strong> For example, our service requires you to sign up for an Knowbots Account. When you do, we'll ask for personal information, like your name, email address, telephone number, or credit card.</li>
                                 <li><strong>Information we get from your use of our services:</strong> We collect information about the services that you use and how you use them, like when you visit a website that uses our advertising services or view and interact with our ads and content.</li>
                             </ul>
                             <h4 class="mt-4">How We Use Information We Collect</h4>
@@ -473,65 +469,6 @@
 
 
 
-      <!-- ============================================-->
-   <!-- <section> begin ============================-->
-    <!-- <section class="py-6 pb-0">
-
-      <div class="container">
-        <hr class="text-info opacity-25" />
-        <div class="row py-7 justify-content-sm-between text-center text-md-start">
-          <div class="col-md-6">
-            <h1 class="fw-bold">Try for free!</h1>
-            <p>Get limited 1 week free try our features!</p>
-          </div>
-          <div class="col-md-6 text-lg-end"><a class="btn btn-lg btn-danger rounded-pill me-4 me-md-3 me-lg-4" href="#" role="button">Learn more</a><a class="btn btn-light rounded-pill shadow fw-bold" href="#" role="button">Request Demo
-              <svg class="bi bi-arrow-right" xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="#9C69E2" viewBox="0 0 16 16">
-                <path fill-rule="evenodd" d="M1 8a.5.5 0 0 1 .5-.5h11.793l-3.147-3.146a.5.5 0 0 1 .708-.708l4 4a.5.5 0 0 1 0 .708l-4 4a.5.5 0 0 1-.708-.708L13.293 8.5H1.5A.5.5 0 0 1 1 8z"></path>
-              </svg></a></div>
-        </div>
-        <div class="row justify-content-lg-around">
-          <div class="col-12 col-sm-12 col-lg-3 mb-4 order-0 order-sm-0"><a class="text-decoration-none" href="#"><img class="img-fluid me-3" src="assets/img/icons/logo.png" alt="" /><span class="fw-bold fs-1 text-1000">DataWarehouse</span></a>
-            <p class="mt-4">Warehouse Society, 234 <br />Bahagia Ave Street PRBW 29281</p>
-            <p>info@warehouse.project<br />1-232-3434 (Main) </p>
-          </div>
-          <div class="col-6 col-sm-4 col-lg-3 mb-3 order-2 order-sm-1">
-            <h6 class="lh-lg fw-bold mb-4">About</h6>
-            <ul class="list-unstyled mb-md-4 mb-lg-0">
-              <li class="lh-lg"><a class="text-dark fs--1 text-decoration-none" href="#!">Profile</a></li>
-              <li class="lh-lg"><a class="text-dark fs--1 text-decoration-none" href="#!">Features</a></li>
-              <li class="lh-lg"><a class="text-dark fs--1 text-decoration-none" href="#!">Careers</a></li>
-              <li class="lh-lg"><a class="text-dark fs--1 text-decoration-none" href="#!">DW News</a></li>
-            </ul>
-          </div>
-          <div class="col-6 col-sm-4 col-lg-3 mb-3 order-3 order-sm-2">
-            <h6 class="lh-lg fw-bold mb-4"> Help </h6>
-            <ul class="list-unstyled mb-md-4 mb-lg-0">
-              <li class="lh-lg"><a class="text-dark fs--1 text-decoration-none" href="#!">Support</a></li>
-              <li class="lh-lg"><a class="text-dark fs--1 text-decoration-none" href="#!">Sign Up </a></li>
-              <li class="lh-lg"><a class="text-dark fs--1 text-decoration-none" href="#!">Guide</a></li>
-              <li class="lh-lg"><a class="text-dark fs--1 text-decoration-none" href="#!">Reports</a></li>
-              <li class="lh-lg"><a class="text-dark fs--1 text-decoration-none" href="#!">Q&amp;A</a></li>
-            </ul>
-          </div>
-          <div class="col-12 col-sm-4 col-lg-3 mb-3 order-1 order-sm-3">
-            <h6 class="lh-lg fw-bold mb-4">Social Media </h6>
-            <ul class="list-unstyled mb-md-4 mb-lg-0">
-              <li class="list-inline-item"><a class="text-dark fs--1 text-decoration-none" href="#!"><img class="img-fluid" src="assets/img/icons/f.png" width="40" alt="" /></a></li>
-              <li class="list-inline-item"><a class="text-dark fs--1 text-decoration-none" href="#!"><img class="img-fluid" src="assets/img/icons/t.png" width="40" alt="" /></a></li>
-              <li class="list-inline-item"><a class="text-dark fs--1 text-decoration-none" href="#!"><img class="img-fluid" src="assets/img/icons/i.png" width="40" alt="" /></a></li>
-            </ul>
-          </div>
-        </div>
-      </div> -->
-      <!-- end of .container-->
-
-    <!-- </section> -->
-    <!-- <section> close ============================-->
-    <!-- ============================================-->
-
-
-
-
     <!-- ============================================-->
     <!-- <section> begin ============================-->
     <section class="py-6">
@@ -546,7 +483,7 @@
                 </svg>&nbsp;by&nbsp;<a class="text-1000" href="https://themewagon.com/" target="_blank">ThemeWagon </a>
               </p>
             </div>
-          </div> -->
+          </div>
           <!-- <div class="col-12 col-md-6 text-center text-md-end mb-3 mb-md-0"> <a href="#"><img class="img-fluid" src="assets/img/icons/pre-footer.png" height="14" alt="" /></a></div> -->
         </div>
       </div>
@@ -575,6 +512,217 @@
   <script src="/views/landing/assets/js/theme.js"></script>
 
   <link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,300;0,400;0,700;0,900;1,300;1,700;1,900&amp;display=swap" rel="stylesheet">
+
+  <!-- Add these modal definitions after the main content but before the scripts -->
+  <!-- Personalized Learning Modal -->
+  <div class="modal fade" id="personalizedLearningModal" tabindex="-1" aria-labelledby="personalizedLearningModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="personalizedLearningModalLabel">Personalized Learning</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <h4>Adaptive Learning Path</h4>
+          <p>Our system analyzes your learning style, pace, and preferences to create a customized learning journey just for you.</p>
+          
+          <h4>Smart Recommendations</h4>
+          <p>Get personalized content recommendations based on your interests, goals, and previous learning activities.</p>
+          
+          <h4>Progress Tracking</h4>
+          <p>Monitor your learning progress with detailed analytics and adjust your learning path accordingly.</p>
+          
+          <h4>Flexible Learning Schedule</h4>
+          <p>Learn at your own pace with 24/7 access to course materials and flexible deadlines.</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Interactive Content Modal -->
+  <div class="modal fade" id="interactiveContentModal" tabindex="-1" aria-labelledby="interactiveContentModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="interactiveContentModalLabel">Interactive Content</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <h4>Multimedia Learning Materials</h4>
+          <p>Access a rich variety of content formats including videos, animations, and interactive presentations.</p>
+          
+          <h4>Interactive Assessments</h4>
+          <p>Engage with dynamic quizzes, simulations, and exercises that provide immediate feedback.</p>
+          
+          <h4>Gamified Learning</h4>
+          <p>Stay motivated with gamification elements like points, badges, and leaderboards.</p>
+          
+          <h4>Hands-on Practice</h4>
+          <p>Apply your knowledge through practical exercises and real-world scenarios.</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Collaborative Learning Modal -->
+  <div class="modal fade" id="collaborativeLearningModal" tabindex="-1" aria-labelledby="collaborativeLearningModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="collaborativeLearningModalLabel">Collaborative Learning</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <h4>Discussion Forums</h4>
+          <p>Engage in meaningful discussions with peers and experts on various topics.</p>
+          
+          <h4>Group Projects</h4>
+          <p>Work together on team assignments and learn from diverse perspectives.</p>
+          
+          <h4>Peer Review</h4>
+          <p>Give and receive feedback to improve learning outcomes.</p>
+          
+          <h4>Expert Mentoring</h4>
+          <p>Connect with industry experts and experienced mentors for guidance.</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Certification Modal -->
+  <div class="modal fade" id="certificationModal" tabindex="-1" aria-labelledby="certificationModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="certificationModalLabel">Certification and Badges</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <h4>Industry-Recognized Certificates</h4>
+          <p>Earn verified certificates upon course completion to showcase your expertise.</p>
+          
+          <h4>Digital Badges</h4>
+          <p>Collect and share digital badges for specific skills and achievements.</p>
+          
+          <h4>Professional Portfolio</h4>
+          <p>Build a comprehensive portfolio of your learning achievements.</p>
+          
+          <h4>Social Sharing</h4>
+          <p>Share your accomplishments on professional networks and social media.</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Update the Learn More buttons to trigger modals -->
+  <script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Update the learn more buttons to trigger respective modals
+    const learnMoreButtons = document.querySelectorAll('.learn-more-btn');
+    const modalIds = [
+      '#personalizedLearningModal',
+      '#interactiveContentModal', 
+      '#collaborativeLearningModal',
+      '#certificationModal'
+    ];
+    
+    learnMoreButtons.forEach((button, index) => {
+      if (index < modalIds.length) {
+        button.setAttribute('data-bs-toggle', 'modal');
+        button.setAttribute('data-bs-target', modalIds[index]);
+      }
+    });
+  });
+  </script>
+
+  <!-- Add these styles to fix content overflow -->
+  <style>
+  .card {
+    height: 100%;
+    overflow: hidden;
+  }
+
+  .card-body {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .card-text {
+    flex-grow: 1;
+    overflow: hidden;
+  }
+
+  .modal-dialog {
+    margin: 1.75rem auto;
+  }
+
+  .modal-content {
+    border-radius: 1rem;
+  }
+
+  .modal-header {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #dee2e6;
+  }
+
+  .modal-body h4 {
+    color: #9C69E2;
+    margin-top: 1.5rem;
+  }
+
+  .modal-body p {
+    margin-bottom: 1.5rem;
+  }
+
+  @media (max-width: 768px) {
+    .card {
+      margin-bottom: 1rem;
+    }
+    
+    .modal-dialog {
+      margin: 0.5rem;
+    }
+  }
+
+  .learn-more-btn {
+    background: none;
+    border: none;
+    padding: 0;
+    font: inherit;
+    cursor: pointer;
+    outline: inherit;
+    display: inline-flex;
+    align-items: center;
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .learn-more-btn:hover {
+    color: #9C69E2;
+  }
+
+  .learn-more-btn svg {
+    margin-left: 8px;
+    transition: transform 0.2s;
+  }
+
+  .learn-more-btn:hover svg {
+    transform: translateX(5px);
+  }
+  </style>
 </body>
 
 </html>
