@@ -61,8 +61,8 @@
                                     <input type="text" id="stream" name="stream" class="form-control">
                                 </div>
                                 <div class="form-group">
-                                    <label for="year">Year</label>
-                                    <input type="text" id="year" name="year" class="form-control">
+                                    <label for="year">Year<span style="color: red;">*</span></label>
+                                    <input type="text" id="year" name="year" class="form-control" required>
                                 </div>
                                 <div class="form-group">
                                     <label for="dept">Department</label>
