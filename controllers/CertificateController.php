@@ -744,17 +744,16 @@ class CertificateController {
 
     public function checkProgress($generationId) {
         try {
-            // Clear any existing output buffers
+            // Clear any existing output buffers and ensure clean output
             while (ob_get_level()) {
                 ob_end_clean();
             }
             
-            // Set JSON header
+            // Set JSON header early
             header('Content-Type: application/json');
             
             // Check if user is logged in
             if (!isset($_SESSION['admin'])) {
-                http_response_code(401);
                 echo json_encode([
                     'error' => 'Unauthorized',
                     'redirect' => '/'
@@ -768,27 +767,30 @@ class CertificateController {
             $data = $stmt->fetch(\PDO::FETCH_ASSOC);
             
             if (!$data) {
-                http_response_code(404);
                 echo json_encode([
-                    'error' => 'Generation not found'
+                    'error' => 'Generation not found',
+                    'status' => 'failed'
                 ]);
                 exit;
             }
             
             error_log("[Progress Check] Status for ID $generationId: " . json_encode($data));
             
-            echo json_encode([
+            // Ensure all values are properly typed
+            $response = [
                 'status' => $data['status'],
                 'progress' => (float)$data['progress'],
                 'generated_count' => (int)$data['generated_count'],
                 'total_count' => (int)$data['total_count']
-            ]);
+            ];
+
+            echo json_encode($response);
             
         } catch (\Exception $e) {
             error_log("[Progress Check] Error: " . $e->getMessage());
-            http_response_code(500);
             echo json_encode([
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
+                'status' => 'failed'
             ]);
         }
         exit;
