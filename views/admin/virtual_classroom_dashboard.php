@@ -85,6 +85,33 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 <head>
     <title>Admin Virtual Classroom Dashboard</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
+        }
+        .col-topic { width: 25%; }
+        .col-start-date { width: 15%; }
+        .col-start-time { width: 15%; }
+        .col-end-time { width: 15%; }
+        .col-join-url { width: 30%; }
+        @media (max-width: 768px) {
+            .col-topic, .col-start-date, .col-start-time, .col-end-time, .col-join-url {
+                width: auto;
+            }
+        }
+    </style>
+    <script>
+        function toggleAction(action) {
+            if (action === 'create') {
+                document.getElementById('joinUrlGroup').style.display = 'none';
+                document.getElementById('classroomIdGroup').style.display = 'none';
+            } else {
+                document.getElementById('joinUrlGroup').style.display = 'block';
+                document.getElementById('classroomIdGroup').style.display = 'block';
+            }
+        }
+    </script>
 </head>
 <body>
     <div class="container-fluid">
@@ -125,7 +152,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                             <input type="url" class="form-control" name="join_url" placeholder="Join URL">
                                         </div>
                                         <div class="form-group" id="classroomIdGroup" style="display: none;">
-                                            <input type="text" class="form-control" name="classroom_id" placeholder="Zoom Classroom ID">
+                                            <input type="text" class="form-control" name="classroom_id" placeholder="Classroom ID">
                                         </div>
                                         <div class="form-group">
                                             <label for="courses">Select Courses</label>
