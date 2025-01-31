@@ -114,7 +114,7 @@ if ($userData) {
                             <i class="ti-user text-primary"></i>
                             Profile
                         </a>
-                        <a class="dropdown-item" href="logout">
+                        <a class="dropdown-item" href="/logout">
                             <i class="ti-power-off text-primary"></i>
                             Logout
                         </a>
