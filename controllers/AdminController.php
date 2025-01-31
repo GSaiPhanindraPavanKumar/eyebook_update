@@ -1038,10 +1038,10 @@ class AdminController {
             $university_id = $_POST['university_id'];
             $name = $_POST['name'];
             $email = $_POST['email'];
-            $phone = $_POST['phone'];
-            $section = $_POST['section'];
-            $stream = $_POST['stream'];
-            $department = $_POST['department'];
+            $phone = $_POST['phone']?? null;
+            $section = $_POST['section']?? null;
+            $stream = $_POST['stream']?? null;
+            $department = $_POST['department']?? null;
             $passwordPlain = $_POST['password']; // Store the unhashed password
             $password = password_hash($passwordPlain, PASSWORD_BCRYPT);
     
