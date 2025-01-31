@@ -66,7 +66,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     </div>
                     <div class="card-body">
                         <form action="/reset_password" method="POST">
-                            <input type="hidden" name="token" value="<?php echo htmlspecialchars($_GET['token']); ?>">
+                            <input type="hidden" name="token" value="<?php echo htmlspecialchars($_GET['token'] ?? ''); ?>">
                             <div class="form-group">
                                 <label for="new_password">New Password:</label>
                                 <input type="password" class="form-control" id="new_password" name="new_password" required>
