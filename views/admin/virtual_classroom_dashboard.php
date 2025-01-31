@@ -152,7 +152,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                             <input type="url" class="form-control" name="join_url" placeholder="Join URL">
                                         </div>
                                         <div class="form-group" id="classroomIdGroup" style="display: none;">
-                                            <input type="text" class="form-control" name="Zoom classroom_id" placeholder="Classroom ID">
+                                            <input type="text" class="form-control" name="classroom_id" placeholder="Classroom ID">
                                         </div>
                                         <div class="form-group">
                                             <label for="courses">Select Courses</label>
