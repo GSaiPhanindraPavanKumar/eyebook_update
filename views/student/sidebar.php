@@ -462,6 +462,7 @@ if ($userData) {
                     <p class="mb-0 font-weight-normal float-left dropdown-header">Notifications</p>
                     <a class="dropdown-item preview-item">
                         <div class="preview-item-content">
+                            <img src="https://i.ibb.co/0SpmPCg/empty-box.png" alt="Empty Box" style="height: 50px; padding-left: 5vh; margin-bottom: 5vh;" class="empty-box-image">
                             <h6 class="preview-subject font-weight-normal">No new notifications</h6>
                         </div>
                     </a>
