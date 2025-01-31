@@ -3,32 +3,17 @@ include("sidebar.php");
 use Models\Database;
 $conn = Database::getConnection();
 
-// Pagination settings
-$records_per_page = 10;
-$page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
-$offset = ($page - 1) * $records_per_page;
+// Get all courses for search and filtering
+$all_sql = "SELECT courses.*, courses.university_id AS university_ids, 
+            courses.name, courses.status FROM courses 
+            ORDER BY courses.id ASC";
+$all_stmt = $conn->prepare($all_sql);
+$all_stmt->execute();
+$all_courses = $all_stmt->fetchAll(PDO::FETCH_ASSOC);
 
-// Get total number of records for pagination
-$count_sql = "SELECT COUNT(*) FROM courses";
-$total_records = $conn->query($count_sql)->fetchColumn();
-$total_pages = ceil($total_records / $records_per_page);
-
-// Modified SQL query with pagination
-$sql = "SELECT courses.*, courses.university_id AS university_ids 
-        FROM courses 
-        ORDER BY courses.id ASC 
-        LIMIT :offset, :records_per_page";
-$stmt = $conn->prepare($sql);
-$stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
-$stmt->bindValue(':records_per_page', $records_per_page, PDO::PARAM_INT);
-$stmt->execute();
-$courses = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-// Debug log to check courses array
-error_log("Courses before processing: " . print_r($courses, true));
-
+// Process all courses
 $processed_courses = array();
-foreach ($courses as $course) {
+foreach ($all_courses as $course) {
     // Skip if we've already processed this course ID
     if (isset($processed_courses[$course['id']])) {
         continue;
@@ -49,11 +34,16 @@ foreach ($courses as $course) {
     $processed_courses[$course['id']] = $course;
 }
 
-// Debug log to check processed courses
-error_log("Processed courses: " . print_r($processed_courses, true));
-
-// Convert back to indexed array
+// Convert to indexed array and JSON for JavaScript
 $courses = array_values($processed_courses);
+$courses_json = json_encode($courses, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP);
+
+// Calculate initial pagination values
+$records_per_page = 10;
+$total_records = count($courses);
+$total_pages = ceil($total_records / $records_per_page);
+$page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+$page = max(1, min($page, $total_pages)); // Ensure page is within valid range
 ?>
 
 <!-- HTML Content -->
@@ -80,7 +70,7 @@ $courses = array_values($processed_courses);
                     <div class="card-body">
                         <p class="card-title mb-0" style="font-size:larger">Courses</p><br>
                         <div class="table-responsive">
-                            <!-- Enhanced Search Filters -->
+                            <!-- Search Filters -->
                             <div class="row mb-3">
                                 <div class="col-md-4">
                                     <input class="form-control" id="nameSearch" type="text" placeholder="🔍 Search by Course Name">
@@ -101,79 +91,43 @@ $courses = array_values($processed_courses);
                             <table class="table table-hover table-borderless table-striped">
                                 <thead class="thead-light">
                                     <tr>
-                                        <th class="col-serial-number" data-sort="serialNumber">S.no <i class="fas fa-sort"></i></th>
-                                        <th class="col-course-name" data-sort="courseName">Course Name <i class="fas fa-sort"></i></th>
-                                        <th class="col-university" data-sort="university">University <i class="fas fa-sort"></i></th>
+                                        <th class="col-serial-number">S.no</th>
+                                        <th class="col-course-name">Course Name</th>
+                                        <th class="col-university">University</th>
                                         <th class="col-actions">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody id="courseTable">
-                                    <?php 
-                                    $serialNumber = 1;
-                                    foreach ($courses as $course): 
-                                    ?>
-                                        <tr data-status="<?= htmlspecialchars($course['status'] ?? 'active') ?>">
-                                            <td class="col-serial-number"><?= $serialNumber++ ?></td>
-                                            <td class="col-course-name"><?= htmlspecialchars($course['name']) ?></td>
-                                            <td class="col-university"><?= htmlspecialchars($course['university'] ?? 'N/A') ?></td>
-                                            <td class="col-actions">
-                                                <a href="/admin/view_course/<?= $course['id'] ?>" class="btn btn-outline-info btn-sm"><i class="fas fa-eye"></i> View</a>
-                                                <a href="/admin/edit_course/<?= $course['id'] ?>" class="btn btn-outline-warning btn-sm"><i class="fas fa-edit"></i> Edit</a>
-                                                <?php if ($course['status'] === 'archived'): ?>
-                                                    <form method="POST" action="/admin/unarchive_course" style="display:inline;" onsubmit="return confirmUnarchive()">
-                                                        <input type="hidden" name="archive_course_id" value="<?= $course['id'] ?>">
-                                                        <button type="submit" class="btn btn-outline-secondary btn-sm"><i class="fas fa-archive"></i> Unarchive</button>
-                                                    </form>
-                                                <?php else: ?>
-                                                    <form method="POST" action="/admin/archive_course" style="display:inline;" onsubmit="return confirmArchive()">
-                                                        <input type="hidden" name="archive_course_id" value="<?= $course['id'] ?>">
-                                                        <button type="submit" class="btn btn-outline-secondary btn-sm"><i class="fas fa-archive"></i> Archive</button>
-                                                    </form>
-                                                <?php endif; ?>
-                                                <a href="/admin/delete_course/<?= $course['id'] ?>" class="btn btn-outline-danger btn-sm" onclick="return confirm('Are you sure you want to delete this course?');"><i class="fas fa-trash"></i> Delete</a>
-                                            </td>
-                                        </tr>
-                                    <?php endforeach; ?>
+                                    <!-- Table content will be dynamically populated -->
                                 </tbody>
                             </table>
 
                             <!-- Pagination Controls -->
-                            <div class="row mt-3 align-items-center">
+                            <div class="row mt-3">
                                 <div class="col-md-3">
-                                    <div class="d-flex align-items-center">
-                                        <label class="mb-0 mr-2">Show</label>
-                                        <select class="form-control form-control-sm w-auto" id="recordsPerPage">
-                                            <option value="10" <?= $records_per_page == 10 ? 'selected' : '' ?>>10</option>
-                                            <option value="25" <?= $records_per_page == 25 ? 'selected' : '' ?>>25</option>
-                                            <option value="50" <?= $records_per_page == 50 ? 'selected' : '' ?>>50</option>
-                                            <option value="100" <?= $records_per_page == 100 ? 'selected' : '' ?>>100</option>
-                                        </select>
-                                        <label class="mb-0 ml-2">entries</label>
-                                    </div>
+                                    <select class="form-control" id="recordsPerPage">
+                                        <option value="10">10 records</option>
+                                        <option value="25">25 records</option>
+                                        <option value="50">50 records</option>
+                                        <option value="100">100 records</option>
+                                    </select>
                                 </div>
                                 <div class="col-md-4">
-                                    <p class="mb-0">Showing <?= $offset + 1 ?> to <?= min($offset + $records_per_page, $total_records) ?> of <?= $total_records ?> entries</p>
+                                    <p class="records-info mb-0"></p>
                                 </div>
                                 <div class="col-md-5">
-                                    <nav aria-label="Page navigation">
+                                    <nav aria-label="Page navigation" class="pagination-container">
                                         <ul class="pagination justify-content-end mb-0">
-                                            <li class="page-item <?= ($page <= 1) ? 'disabled' : '' ?>">
-                                                <a class="page-link" href="?page=<?= $page-1 ?>&limit=<?= $records_per_page ?>" <?= ($page <= 1) ? 'tabindex="-1"' : '' ?>>Previous</a>
-                                            </li>
-                                            <?php for($i = 1; $i <= $total_pages; $i++): ?>
-                                                <li class="page-item <?= ($page == $i) ? 'active' : '' ?>">
-                                                    <a class="page-link" href="?page=<?= $i ?>&limit=<?= $records_per_page ?>"><?= $i ?></a>
-                                                </li>
-                                            <?php endfor; ?>
-                                            <li class="page-item <?= ($page >= $total_pages) ? 'disabled' : '' ?>">
-                                                <a class="page-link" href="?page=<?= $page+1 ?>&limit=<?= $records_per_page ?>" <?= ($page >= $total_pages) ? 'tabindex="-1"' : '' ?>>Next</a>
-                                            </li>
+                                            <!-- Pagination will be dynamically populated -->
                                         </ul>
                                     </nav>
                                 </div>
                             </div>
 
-                            <div id="noRecords" style="display: none;" class="text-center">No records found</div>
+                            <div id="noRecords" style="display: none;" class="text-center mt-4">
+                                <img src="https://i.ibb.co/0SpmPCg/empty-box.png" alt="No records found" style="max-width: 150px; margin-bottom: 15px;">
+                                <p class="text-muted">No matching courses found</p>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -195,64 +149,209 @@ $courses = array_values($processed_courses);
 <!-- Updated JavaScript -->
 <script>
 $(document).ready(function() {
-    // Initialize dropdowns
-    $('.dropdown-toggle').dropdown();
+    // Parse courses data from PHP
+    let allCourses = <?php echo $courses_json; ?>;
+    console.log('Total courses loaded:', allCourses.length); // Debug line
     
-    // Combined search function
-    function filterTable() {
-        var nameValue = $('#nameSearch').val().toLowerCase();
-        var universityValue = $('#universitySearch').val().toLowerCase();
-        var statusValue = $('#statusFilter').val().toLowerCase();
-        var visibleRows = 0;
-        
-        $('#courseTable tr').each(function() {
-            var row = $(this);
-            var name = row.find('td.col-course-name').text().toLowerCase();
-            var university = row.find('td.col-university').text().toLowerCase();
-            var status = row.data('status').toLowerCase();
-            
-            var nameMatch = name.indexOf(nameValue) > -1;
-            var universityMatch = university.indexOf(universityValue) > -1;
-            var statusMatch = statusValue === '' || status === statusValue;
-            
-            var isVisible = nameMatch && universityMatch && statusMatch;
-            row.toggle(isVisible);
-            if (isVisible) visibleRows++;
-        });
-        
-        $('#noRecords').toggle(visibleRows === 0);
-    }
-    
-    // Attach event listeners to all search inputs
-    $('#nameSearch, #universitySearch, #statusFilter').on('keyup change', filterTable);
-    
-    // Records per page change handler
-    $('#recordsPerPage').on('change', function() {
-        var newLimit = $(this).val();
-        window.location.href = updateQueryStringParameter(window.location.href, 'limit', newLimit);
-    });
-    
-    // Table sorting
-    $('th[data-sort]').on('click', function() {
-        var table = $(this).parents('table').eq(0);
-        var rows = table.find('tbody tr').toArray().sort(comparer($(this).index()));
-        this.asc = !this.asc;
-        if (!this.asc) { rows = rows.reverse(); }
-        for (var i = 0; i < rows.length; i++) { table.append(rows[i]); }
-    });
-});
+    let currentPage = 1;
+    let recordsPerPage = parseInt($('#recordsPerPage').val() || 10);
 
-// Helper function to update URL parameters
-function updateQueryStringParameter(uri, key, value) {
-    var re = new RegExp("([?&])" + key + "=.*?(&|$)", "i");
-    var separator = uri.indexOf('?') !== -1 ? "&" : "?";
-    if (uri.match(re)) {
-        return uri.replace(re, '$1' + key + "=" + value + '$2');
+    function filterCourses() {
+        const nameValue = $('#nameSearch').val().toLowerCase().trim();
+        const universityValue = $('#universitySearch').val().toLowerCase().trim();
+        const statusValue = $('#statusFilter').val().toLowerCase();
+
+        return allCourses.filter(course => {
+            const name = (course.name || '').toLowerCase();
+            const university = (course.university || '').toLowerCase();
+            const status = (course.status || 'active').toLowerCase();
+
+            return (!nameValue || name.includes(nameValue)) &&
+                   (!universityValue || university.includes(universityValue)) &&
+                   (!statusValue || status === statusValue);
+        });
     }
-    else {
-        return uri + separator + key + "=" + value;
+
+    function displayCourses() {
+        const filteredCourses = filterCourses();
+        const totalRecords = filteredCourses.length;
+        const totalPages = Math.ceil(totalRecords / recordsPerPage);
+        
+        // Ensure current page is within valid range
+        if (currentPage > totalPages) {
+            currentPage = totalPages || 1;
+        }
+        
+        const startIndex = (currentPage - 1) * recordsPerPage;
+        const endIndex = Math.min(startIndex + recordsPerPage, totalRecords);
+        const displayedCourses = filteredCourses.slice(startIndex, endIndex);
+
+        const tbody = $('#courseTable');
+        tbody.empty();
+
+        if (displayedCourses.length === 0) {
+            $('#noRecords').show();
+            $('.pagination-container').hide();
+            $('.records-info').text('No matching records found');
+        } else {
+            $('#noRecords').hide();
+
+            displayedCourses.forEach((course, index) => {
+                const row = `
+                    <tr data-status="${course.status || 'active'}">
+                        <td class="col-serial-number">${startIndex + index + 1}</td>
+                        <td class="col-course-name">${escapeHtml(course.name || '')}</td>
+                        <td class="col-university">${escapeHtml(course.university || 'N/A')}</td>
+                        <td class="col-actions">
+                            <a href="/admin/view_course/${course.id}" class="btn btn-outline-info btn-sm">
+                                <i class="fas fa-eye"></i> View
+                            </a>
+                            <a href="/admin/edit_course/${course.id}" class="btn btn-outline-warning btn-sm">
+                                <i class="fas fa-edit"></i> Edit
+                            </a>
+                            ${getArchiveButton(course)}
+                            <a href="/admin/delete_course/${course.id}" class="btn btn-outline-danger btn-sm" 
+                               onclick="return confirm('Are you sure you want to delete this course?');">
+                                <i class="fas fa-trash"></i> Delete
+                            </a>
+                        </td>
+                    </tr>
+                `;
+                tbody.append(row);
+            });
+
+            // Update pagination info
+            updatePaginationInfo(startIndex + 1, endIndex, totalRecords);
+            updatePaginationControls(totalPages);
+        }
     }
-}
+
+    function updatePaginationInfo(start, end, total) {
+        $('.records-info').html(
+            `Showing ${start} to ${end} of ${total} entries`
+        );
+    }
+
+    function updatePaginationControls(totalPages) {
+        const pagination = $('.pagination');
+        pagination.empty();
+
+        if (totalPages <= 1) {
+            $('.pagination-container').hide();
+            return;
+        }
+
+        $('.pagination-container').show();
+
+        // Previous button
+        pagination.append(`
+            <li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
+                <a class="page-link" href="#" data-page="${currentPage - 1}">&laquo; Previous</a>
+            </li>
+        `);
+
+        // Calculate visible page range
+        let startPage = Math.max(1, currentPage - 2);
+        let endPage = Math.min(totalPages, startPage + 4);
+        
+        if (endPage - startPage < 4) {
+            startPage = Math.max(1, endPage - 4);
+        }
+
+        // First page and ellipsis
+        if (startPage > 1) {
+            pagination.append('<li class="page-item"><a class="page-link" href="#" data-page="1">1</a></li>');
+            if (startPage > 2) {
+                pagination.append('<li class="page-item disabled"><span class="page-link">...</span></li>');
+            }
+        }
+
+        // Page numbers
+        for (let i = startPage; i <= endPage; i++) {
+            pagination.append(`
+                <li class="page-item ${currentPage === i ? 'active' : ''}">
+                    <a class="page-link" href="#" data-page="${i}">${i}</a>
+                </li>
+            `);
+        }
+
+        // Last page and ellipsis
+        if (endPage < totalPages) {
+            if (endPage < totalPages - 1) {
+                pagination.append('<li class="page-item disabled"><span class="page-link">...</span></li>');
+            }
+            pagination.append(`
+                <li class="page-item">
+                    <a class="page-link" href="#" data-page="${totalPages}">${totalPages}</a>
+                </li>
+            `);
+        }
+
+        // Next button
+        pagination.append(`
+            <li class="page-item ${currentPage === totalPages ? 'disabled' : ''}">
+                <a class="page-link" href="#" data-page="${currentPage + 1}">Next &raquo;</a>
+            </li>
+        `);
+    }
+
+    function getArchiveButton(course) {
+        if (course.status === 'archived') {
+            return `
+                <form method="POST" action="/admin/unarchive_course" style="display:inline;" onsubmit="return confirmUnarchive()">
+                    <input type="hidden" name="archive_course_id" value="${course.id}">
+                    <button type="submit" class="btn btn-outline-secondary btn-sm">
+                        <i class="fas fa-archive"></i> Unarchive
+                    </button>
+                </form>
+            `;
+        } else {
+            return `
+                <form method="POST" action="/admin/archive_course" style="display:inline;" onsubmit="return confirmArchive()">
+                    <input type="hidden" name="archive_course_id" value="${course.id}">
+                    <button type="submit" class="btn btn-outline-secondary btn-sm">
+                        <i class="fas fa-archive"></i> Archive
+                    </button>
+                </form>
+            `;
+        }
+    }
+    
+    function escapeHtml(unsafe) {
+        return unsafe
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    }
+
+    // Event Listeners
+    $('#nameSearch, #universitySearch, #statusFilter').on('input change', function() {
+        currentPage = 1; // Reset to first page when searching
+        displayCourses();
+    });
+
+    $('#recordsPerPage').on('change', function() {
+        recordsPerPage = parseInt($(this).val());
+        currentPage = 1; // Reset to first page when changing records per page
+        displayCourses();
+    });
+
+    $(document).on('click', '.page-link', function(e) {
+        e.preventDefault();
+        const newPage = parseInt($(this).data('page'));
+        if (!isNaN(newPage) && newPage > 0) {
+            currentPage = newPage;
+            displayCourses();
+            // Scroll to top of table
+            $('.table-responsive').get(0).scrollIntoView({ behavior: 'smooth' });
+        }
+    });
+
+    // Initial display
+    displayCourses();
+});
 </script>
 
 <style>

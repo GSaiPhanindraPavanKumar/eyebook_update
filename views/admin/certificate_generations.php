@@ -208,7 +208,7 @@
             </div>
         </div>
     </div>
-    <?php include 'footer.html'; ?>
+    <?php include("footer.html"); ?>
 </div>
 
 <script>
