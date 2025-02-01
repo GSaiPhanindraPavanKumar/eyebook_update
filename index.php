@@ -558,4 +558,38 @@ $router->get('/student/login', function() {
     require 'views/session_timeout.php';
 });
 
+// Student ticket routes
+$router->get('/student/tickets', 'StudentController@tickets');
+$router->post('/student/create_ticket', 'StudentController@createTicket');
+$router->get('/student/get_ticket_details/(\d+)', 'StudentController@getTicketDetails');
+$router->post('/student/add_ticket_reply', 'StudentController@addTicketReply');
+
+// Faculty ticket routes
+$router->get('/faculty/tickets', 'FacultyController@tickets');
+$router->get('/faculty/view_ticket/(\d+)', 'FacultyController@viewTicket');
+$router->post('/faculty/add_ticket_reply', 'FacultyController@addTicketReply');
+$router->post('/faculty/close_ticket', 'FacultyController@closeTicket');
+
+// SPOC ticket routes
+$router->get('/spoc/tickets', 'SpocController@tickets');
+$router->get('/spoc/get_ticket_details/(\d+)', 'SpocController@getTicketDetails');
+$router->post('/spoc/add_ticket_reply', 'SpocController@addTicketReply');
+$router->post('/spoc/close_ticket', 'SpocController@closeTicket');
+$router->get('/spoc/view_ticket/(\d+)', 'SpocController@viewTicket');
+
+// Admin ticket routes
+$router->get('/admin/tickets', 'AdminController@tickets');
+$router->get('/admin/view_ticket/(\d+)', 'AdminController@viewTicket');
+$router->get('/admin/get_ticket_details/(\d+)', 'AdminController@getTicketDetails');
+$router->post('/admin/add_ticket_reply', 'AdminController@addTicketReply');
+$router->post('/admin/close_ticket', 'AdminController@closeTicket');
+$router->get('/admin/export_tickets', 'AdminController@exportTickets');
+$router->get('/admin/ticket_analytics', 'AdminController@ticketAnalytics');
+
+// Add this with other student routes
+$router->get('/student/view_ticket/(\d+)', 'StudentController@viewTicket');
+
+// Add with other student ticket routes
+$router->post('/student/close_ticket', 'StudentController@closeTicket');
+
 $router->run();
