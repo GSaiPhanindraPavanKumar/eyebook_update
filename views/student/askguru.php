@@ -1,8 +1,12 @@
 <?php
 // Function to handle predefined queries
 function handlePredefinedQuery($query) {
+    // Sanitize input more aggressively
     $query = strtolower(trim($query));
-    
+    // $query = preg_replace('/[^\w\s]/', '', $query); // Remove punctuation
+    // $query = preg_replace('/\s+/', ' ', $query);    // Collapse multiple spaces
+    // print_r($query);
+    error_log(print_r($query, true));
     // Greetings that should match exactly
     $exactMatches = [
         'hi' => "<div class='response-text'><p>Hello! How can I assist you today?</p></div>",
@@ -162,16 +166,30 @@ function askGemini($prompt) {
     if ($result === FALSE) {
         return "Sorry, I couldn't process your request.";
     }
+    error_log(print_r($result, true));
 
     $response = json_decode($result, true);
-    return $response['candidates'][0]['content']['parts'][0]['text'];
+    error_log(print_r($response, true));
+    $text = $response['candidates'][0]['content']['parts'][0]['text'];
+        
+    return $text;
 }
 
 // Handle user input
 if (php_sapi_name() !== 'cli' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     $user_input = $_POST['user_input'];
-    $response = askGemini("Provide a concise educational answer to this question: " . $user_input . "\n\n" .
+    
+    // First check for predefined responses
+    $predefinedResponse = handlePredefinedQuery($user_input);
+    if ($predefinedResponse !== null) {
+        echo $predefinedResponse; // Return the HTML directly
+        exit;
+    }
+    
+    // If no predefined response, proceed with Gemini API
+    $response = askGemini("Provide a concise educational answer without repeating the question: " . $user_input . "\n\n" .
                      "Guidelines:\n" .
+                     "- Start with the answer directly, do not repeat the question\n" .
                      "- Use HTML <ul> and <li> tags for any lists\n" .
                      "- Use <b> tags for main headings\n" .
                      "- Use <code> tags for code snippets\n" .
@@ -179,7 +197,10 @@ if (php_sapi_name() !== 'cli' && $_SERVER['REQUEST_METHOD'] === 'POST') {
                      "- Keep formatting simple and clean\n" .
                      "- Focus on educational context\n" .
                      "- Maintain professional tone\n" .
-                     "- Provide plain text if no formatting is needed" . "Ensure none of the guidelines are violated temperature:0.2" );
+                     "- Provide plain text if no formatting is needed\n" .
+                     "Ensure none of the guidelines are violated. The response should be in HTML format.");
+    
+    // Return the formatted response
     echo json_encode(['response' => $response]);
     exit;
 }
@@ -376,17 +397,34 @@ if (php_sapi_name() !== 'cli' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     function sendPredefinedQuery(query) {
+        // Add user message to chat
         $('#chat-container').append('<div class="message user-message"><strong>You:</strong> ' + query + '</div>');
         
         // Add thinking message with loader
         $('#chat-container').append('<div class="thinking"><div class="loader"></div>Guru is thinking...</div>');
         $('#chat-container').scrollTop($('#chat-container')[0].scrollHeight);
 
-        $.post('askguru', {user_input: query}, function(data) {
-            $('.thinking').remove();
-            var response = JSON.parse(data);
-            $('#chat-container').append('<div class="message guru-message"><strong>AskGuru:</strong> ' + response.response + '</div>');
-            $('#chat-container').scrollTop($('#chat-container')[0].scrollHeight);
+        // Send the request
+        $.ajax({
+            url: 'askguru',
+            method: 'POST',
+            data: { user_input: query },
+            success: function(data) {
+                $('.thinking').remove();
+                try {
+                    var response = JSON.parse(data);
+                    $('#chat-container').append('<div class="message guru-message"><strong>AskGuru:</strong> ' + response.response + '</div>');
+                } catch(e) {
+                    // If response is already HTML
+                    $('#chat-container').append('<div class="message guru-message"><strong>AskGuru:</strong> ' + data + '</div>');
+                }
+                $('#chat-container').scrollTop($('#chat-container')[0].scrollHeight);
+            },
+            error: function() {
+                $('.thinking').remove();
+                $('#chat-container').append('<div class="message guru-message"><strong>AskGuru:</strong> Sorry, there was an error processing your request.</div>');
+                $('#chat-container').scrollTop($('#chat-container')[0].scrollHeight);
+            }
         });
     }
 
@@ -394,6 +432,7 @@ if (php_sapi_name() !== 'cli' && $_SERVER['REQUEST_METHOD'] === 'POST') {
         var userInput = $('#user-input').val();
         if (userInput.trim() === '') return;
 
+        // Add user message to chat
         $('#chat-container').append('<div class="message user-message"><strong>You:</strong> ' + userInput + '</div>');
         $('#user-input').val('');
         
@@ -401,11 +440,26 @@ if (php_sapi_name() !== 'cli' && $_SERVER['REQUEST_METHOD'] === 'POST') {
         $('#chat-container').append('<div class="thinking"><div class="loader"></div>Guru is thinking...</div>');
         $('#chat-container').scrollTop($('#chat-container')[0].scrollHeight);
 
-        $.post('askguru', {user_input: userInput}, function(data) {
-            $('.thinking').remove();
-            var response = JSON.parse(data);
-            $('#chat-container').append('<div class="message guru-message"><strong>AskGuru:</strong> ' + response.response + '</div>');
-            $('#chat-container').scrollTop($('#chat-container')[0].scrollHeight);
+        $.ajax({
+            url: 'askguru',
+            method: 'POST',
+            data: { user_input: userInput },
+            success: function(data) {
+                $('.thinking').remove();
+                try {
+                    var response = JSON.parse(data);
+                    $('#chat-container').append('<div class="message guru-message"><strong>AskGuru:</strong> ' + response.response + '</div>');
+                } catch(e) {
+                    // If response is already HTML
+                    $('#chat-container').append('<div class="message guru-message"><strong>AskGuru:</strong> ' + data + '</div>');
+                }
+                $('#chat-container').scrollTop($('#chat-container')[0].scrollHeight);
+            },
+            error: function() {
+                $('.thinking').remove();
+                $('#chat-container').append('<div class="message guru-message"><strong>AskGuru:</strong> Sorry, there was an error processing your request.</div>');
+                $('#chat-container').scrollTop($('#chat-container')[0].scrollHeight);
+            }
         });
     }
 
