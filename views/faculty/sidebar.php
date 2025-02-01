@@ -1,7 +1,7 @@
 <?php
 // Start the session
 // session_start();
-
+ob_start();
 // Include the database connection
 // include '../../config/connection.php';
 use Models\Database;
