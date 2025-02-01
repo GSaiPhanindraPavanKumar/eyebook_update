@@ -10,43 +10,59 @@ if (!isset($_SESSION['faculty_id'])) {
     die('Faculty ID not set in session.');
 }
 
-$facultyId = $_SESSION['faculty_id']; // Assuming faculty ID is stored in session
+$facultyId = $_SESSION['faculty_id'];
 
 // Fetch the assigned courses for the faculty
 $assignedCourses = Faculty::getAssignedCourses($conn, $facultyId);
 
-// Fetch students from the database
+// Initialize arrays
 $students = [];
 $courseNames = [];
+$assignedStudents = [];
+
+// Fetch students from assigned courses
 if (!empty($assignedCourses)) {
-    $assignedStudents = [];
+    // First get all student IDs and course names
     foreach ($assignedCourses as $courseId) {
         $sql = "SELECT id, assigned_students, name as course_name FROM courses WHERE id = ?";
         $stmt = $conn->prepare($sql);
         $stmt->execute([$courseId]);
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
-        if ($row) {
-            $courseName = $row['course_name'];
-            $studentIds = $row['assigned_students'] ? json_decode($row['assigned_students'], true) : [];
-            if (json_last_error() === JSON_ERROR_NONE && is_array($studentIds)) {
+        
+        if ($row && $row['assigned_students']) {
+            $studentIds = json_decode($row['assigned_students'], true);
+            if (is_array($studentIds)) {
                 foreach ($studentIds as $studentId) {
                     $assignedStudents[] = $studentId;
                     if (!isset($courseNames[$studentId])) {
                         $courseNames[$studentId] = [];
                     }
-                    $courseNames[$studentId][] = $courseName;
+                    $courseNames[$studentId][] = $row['course_name'];
                 }
             }
         }
     }
+    
+    // Remove duplicates
     $assignedStudents = array_unique($assignedStudents);
-
+    
+    // If we have students, fetch their details
     if (!empty($assignedStudents)) {
-        $placeholders = implode(',', array_fill(0, count($assignedStudents), '?'));
-        $sql = "SELECT * FROM students WHERE id IN ($placeholders)";
-        $stmt = $conn->prepare($sql);
-        $stmt->execute($assignedStudents);
-        $students = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        try {
+            $placeholders = str_repeat('?,', count($assignedStudents) - 1) . '?';
+            $sql = "SELECT * FROM students WHERE id IN ($placeholders)";
+            $stmt = $conn->prepare($sql);
+            
+            // Convert to array of values and execute
+            $params = array_values($assignedStudents);
+            $stmt->execute($params);
+            
+            $students = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            
+        } catch (PDOException $e) {
+            error_log("Database error in manage_students.php: " . $e->getMessage());
+            echo "<div class='alert alert-danger'>Error fetching student data. Please try again later.</div>";
+        }
     }
 }
 ?>
