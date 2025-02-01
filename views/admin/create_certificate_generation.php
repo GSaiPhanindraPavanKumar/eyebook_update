@@ -130,10 +130,11 @@ document.querySelector('input[name="template"]').addEventListener('change', func
             // Show the image
             img.style.display = 'block';
             
-            // Get the actual image dimensions
+            // Set container dimensions maintaining aspect ratio
             var container = document.getElementById('template-container');
-            container.style.width = '100%';
-            container.style.height = img.offsetHeight + 'px';
+            const aspectRatio = img.naturalHeight / img.naturalWidth;
+            const containerWidth = container.offsetWidth;
+            container.style.height = (containerWidth * aspectRatio) + 'px';
             
             // Reset draggable positions
             document.querySelectorAll('.draggable').forEach(el => {
@@ -189,22 +190,32 @@ function updatePositions() {
     var img = document.getElementById('template-preview');
     var positions = {};
     
-    // Get the preview container width (standardized to 1000px)
-    const PREVIEW_WIDTH = 1000;
+    // Use actual image dimensions for the grid
+    const imageWidth = img.naturalWidth;
+    const imageHeight = img.naturalHeight;
     
     document.querySelectorAll('.draggable').forEach(el => {
         var x = parseFloat(el.getAttribute('data-x')) || 0;
         var y = parseFloat(el.getAttribute('data-y')) || 0;
         
-        // Calculate positions relative to the preview width
+        // Get the element's dimensions
+        const boxWidth = el.offsetWidth;
+        const boxHeight = el.offsetHeight;
+        
+        // Add half the box dimensions to get the center point
+        const centerX = x + (boxWidth / 2);
+        const centerY = y + (boxHeight / 2);
+        
+        // Calculate positions based on actual image dimensions, using the center point
         positions[el.dataset.field] = {
-            x: Math.round((x / container.offsetWidth) * PREVIEW_WIDTH),
-            y: Math.round((y / container.offsetHeight) * PREVIEW_WIDTH)
+            x: Math.round((centerX / container.offsetWidth) * imageWidth),
+            y: Math.round((centerY / container.offsetHeight) * imageHeight)
         };
     });
     
     document.getElementById('positions').value = JSON.stringify(positions);
     console.log('Updated positions:', positions);
+    console.log('Image dimensions:', { width: imageWidth, height: imageHeight });
 }
 
 // Add resize observer to handle window resizing
