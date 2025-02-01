@@ -25,7 +25,7 @@ class Mailer {
             $this->mail->Host = 'smtp.gmail.com'; // Set the SMTP server to send through
             $this->mail->SMTPAuth = true;
             $this->mail->Username = 'eyebook.contact1234@gmail.com'; // SMTP username
-            $this->mail->Password = 'nxsopdrffjidxvle'; // SMTP password
+            $this->mail->Password = 'wips rktp dhiy nyla'; // SMTP password
             $this->mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
             $this->mail->Port = 587;
             $this->mail->setFrom('eyebook.contact1234@gmail.com', 'EyeBook');
