@@ -4,6 +4,10 @@ namespace Models;
 use PDO;
 
 class Ticket {
+    private static function getConnection() {
+        return Database::getConnection();
+    }
+
     public static function generateTicketNumber() {
         return 'TKT-' . date('Y') . rand(100000, 999999);
     }
@@ -107,57 +111,141 @@ class Ticket {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public static function getAllTickets($conn) {
-        $sql = "SELECT t.*, 
-                       s.name as student_name,
-                       u.name as university_name,
-                       COUNT(tr.id) as reply_count 
-                FROM tickets t 
-                JOIN students s ON t.student_id = s.id 
-                JOIN universities u ON t.university_id = u.id 
-                LEFT JOIN ticket_replies tr ON t.id = tr.ticket_id 
-                GROUP BY t.id 
-                ORDER BY t.created_at DESC";
+    public static function getAllTickets() {
+        $db = self::getConnection();
         
-        $stmt = $conn->prepare($sql);
-        $stmt->execute();
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        // Query for active tickets
+        $activeQuery = "
+            SELECT 
+                t.id,
+                t.ticket_number,
+                t.student_id,
+                t.subject,
+                t.description,
+                t.status,
+                t.created_at,
+                t.closed_at,
+                t.closed_by_id,
+                t.closed_by_role,
+                s.name as student_name,
+                u.long_name as university_name,
+                COALESCE(MAX(tr.created_at), t.created_at) as updated_at,
+                COUNT(DISTINCT tr.id) as reply_count
+            FROM tickets t
+            INNER JOIN students s ON t.student_id = s.id
+            INNER JOIN universities u ON t.university_id = u.id
+            LEFT JOIN ticket_replies tr ON t.id = tr.ticket_id
+            WHERE t.status = 'active'
+            GROUP BY t.id, t.ticket_number, t.student_id, t.subject, t.description,
+                     t.status, t.created_at, t.closed_at, t.closed_by_id, t.closed_by_role,
+                     s.name, u.long_name
+            ORDER BY updated_at DESC
+        ";
+
+        // Query for closed tickets
+        $closedQuery = "
+            SELECT 
+                t.id,
+                t.ticket_number,
+                t.student_id,
+                t.subject,
+                t.description,
+                t.status,
+                t.created_at,
+                t.closed_at,
+                t.closed_by_id,
+                t.closed_by_role,
+                s.name as student_name,
+                u.long_name as university_name,
+                COUNT(DISTINCT tr.id) as reply_count
+            FROM tickets t
+            INNER JOIN students s ON t.student_id = s.id
+            INNER JOIN universities u ON t.university_id = u.id
+            LEFT JOIN ticket_replies tr ON t.id = tr.ticket_id
+            WHERE t.status = 'closed'
+            GROUP BY t.id, t.ticket_number, t.student_id, t.subject, t.description,
+                     t.status, t.created_at, t.closed_at, t.closed_by_id, t.closed_by_role,
+                     s.name, u.long_name
+            ORDER BY t.closed_at DESC
+        ";
+
+        try {
+            $activeStmt = $db->prepare($activeQuery);
+            $activeStmt->execute();
+            $activeTickets = $activeStmt->fetchAll(PDO::FETCH_ASSOC);
+
+            $closedStmt = $db->prepare($closedQuery);
+            $closedStmt->execute();
+            $closedTickets = $closedStmt->fetchAll(PDO::FETCH_ASSOC);
+
+            return [
+                'activeTickets' => $activeTickets ?: [],
+                'closedTickets' => $closedTickets ?: []
+            ];
+        } catch (\PDOException $e) {
+            error_log("Error fetching tickets: " . $e->getMessage());
+            return [
+                'activeTickets' => [],
+                'closedTickets' => []
+            ];
+        }
     }
 
-    public static function getTicketDetails($conn, $ticketId) {
-        // Get ticket info
-        $stmt = $conn->prepare("SELECT t.*, 
-                                      s.name as student_name
-                               FROM tickets t 
-                               JOIN students s ON t.student_id = s.id 
-                               WHERE t.id = :ticket_id");
-        $stmt->execute(['ticket_id' => $ticketId]);
-        $ticket = $stmt->fetch(PDO::FETCH_ASSOC);
+    public static function getTicketDetails($ticketId) {
+        $db = self::getConnection();
+        
+        $query = "
+            SELECT 
+                t.*,
+                s.name as student_name,
+                u.university_name
+            FROM tickets t
+            LEFT JOIN students s ON t.student_id = s.id
+            LEFT JOIN universities u ON s.university_id = u.id
+            WHERE t.id = :ticket_id
+        ";
 
-        if (!$ticket) {
+        try {
+            $stmt = $db->prepare($query);
+            $stmt->bindParam(':ticket_id', $ticketId, PDO::PARAM_INT);
+            $stmt->execute();
+            return $stmt->fetch(PDO::FETCH_ASSOC);
+        } catch (\PDOException $e) {
+            error_log("Error fetching ticket details: " . $e->getMessage());
             return null;
         }
+    }
 
-        // Get replies with user names
-        $stmt = $conn->prepare("SELECT tr.*, 
-                                      CASE 
-                                          WHEN tr.user_role = 'student' THEN s.name 
-                                          WHEN tr.user_role = 'faculty' THEN f.name 
-                                          WHEN tr.user_role = 'spoc' THEN sp.name 
-                                          ELSE 'Admin' 
-                                      END as user_name,
-                                      tr.user_role,
-                                      tr.created_at
-                               FROM ticket_replies tr 
-                               LEFT JOIN students s ON tr.user_id = s.id AND tr.user_role = 'student' 
-                               LEFT JOIN faculty f ON tr.user_id = f.id AND tr.user_role = 'faculty' 
-                               LEFT JOIN spocs sp ON tr.user_id = sp.id AND tr.user_role = 'spoc' 
-                               WHERE tr.ticket_id = :ticket_id 
-                               ORDER BY tr.created_at ASC");
-        $stmt->execute(['ticket_id' => $ticketId]);
-        $replies = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    public static function getTicketReplies($ticketId) {
+        $db = self::getConnection();
+        
+        $query = "
+            SELECT 
+                tr.*,
+                CASE 
+                    WHEN tr.user_role = 'student' THEN s.name
+                    WHEN tr.user_role = 'admin' THEN a.name
+                    WHEN tr.user_role = 'faculty' THEN f.name
+                    WHEN tr.user_role = 'spoc' THEN sp.name
+                END as user_name
+            FROM ticket_replies tr
+            LEFT JOIN students s ON tr.user_id = s.id AND tr.user_role = 'student'
+            LEFT JOIN admins a ON tr.user_id = a.id AND tr.user_role = 'admin'
+            LEFT JOIN faculty f ON tr.user_id = f.id AND tr.user_role = 'faculty'
+            LEFT JOIN spocs sp ON tr.user_id = sp.id AND tr.user_role = 'spoc'
+            WHERE tr.ticket_id = :ticket_id
+            ORDER BY tr.created_at ASC
+        ";
 
-        return ['ticket' => $ticket, 'replies' => $replies];
+        try {
+            $stmt = $db->prepare($query);
+            $stmt->bindParam(':ticket_id', $ticketId, PDO::PARAM_INT);
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (\PDOException $e) {
+            error_log("Error fetching ticket replies: " . $e->getMessage());
+            return [];
+        }
     }
 
     public static function getCount($conn, $status = null) {

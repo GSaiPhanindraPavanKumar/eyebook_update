@@ -64,19 +64,19 @@
                                         </td>
                                     </tr>
                                     <?php else: ?>
-                                        <?php foreach ($activeTickets as $ticket): ?>
+                                        <?php for ($i = 0; $i < count($activeTickets); $i++): ?>
                                         <tr>
-                                            <td><?php echo htmlspecialchars($ticket['ticket_number']); ?></td>
-                                            <td><?php echo htmlspecialchars($ticket['subject']); ?></td>
-                                            <td><?php echo date('M d, Y H:i', strtotime($ticket['created_at'])); ?></td>
-                                            <td><?php echo $ticket['reply_count']; ?></td>
+                                            <td><?php echo htmlspecialchars($activeTickets[$i]['ticket_number']); ?></td>
+                                            <td><?php echo htmlspecialchars($activeTickets[$i]['subject']); ?></td>
+                                            <td><?php echo date('M d, Y H:i', strtotime($activeTickets[$i]['created_at'])); ?></td>
+                                            <td><?php echo $activeTickets[$i]['reply_count']; ?></td>
                                             <td>
-                                                <a href="/student/view_ticket/<?php echo $ticket['id']; ?>" class="btn btn-info btn-sm">
+                                                <a href="/student/view_ticket/<?php echo $activeTickets[$i]['id']; ?>" class="btn btn-info btn-sm">
                                                     View
                                                 </a>
                                             </td>
                                         </tr>
-                                        <?php endforeach; ?>
+                                        <?php endfor; ?>
                                     <?php endif; ?>
                                 </tbody>
                             </table>
