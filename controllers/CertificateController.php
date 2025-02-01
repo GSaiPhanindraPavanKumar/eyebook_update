@@ -390,15 +390,18 @@ class CertificateController {
                 ]);
             }
 
-            // Create image
+            // Get image dimensions first
             $imageInfo = getimagesize($localTemplatePath);
             if (!$imageInfo) {
-                throw new \Exception("Failed to get image info");
+                throw new \Exception("Invalid template image");
             }
             
-            error_log("[Certificate Generation] Image dimensions: {$imageInfo[0]}x{$imageInfo[1]}");
+            $imageWidth = $imageInfo[0];
+            $imageHeight = $imageInfo[1];
             
-            $image = null;
+            error_log("[Certificate Generation] Image dimensions: {$imageWidth}x{$imageHeight}");
+            
+            // Create image based on type
             switch ($imageInfo['mime']) {
                 case 'image/jpeg':
                     $image = imagecreatefromjpeg($localTemplatePath);
@@ -414,10 +417,6 @@ class CertificateController {
                 throw new \Exception("Failed to create image resource");
             }
 
-            // Get image dimensions
-            $imageWidth = $imageInfo[0];
-            $imageHeight = $imageInfo[1];
-
             // Configure image
             imagesavealpha($image, true);
             imagealphablending($image, true);
@@ -425,66 +424,68 @@ class CertificateController {
             // Create text color (black)
             $textColor = imagecolorallocate($image, 0, 0, 0);
             
-            // Use Poppins-Bold font
+            // Use font
             $fontPath = __DIR__ . '/../assets/fonts/Poppins-Bold.ttf';
             if (!file_exists($fontPath)) {
                 throw new \Exception("Font file not found: $fontPath");
             }
 
-            // Standard preview width used in frontend
-            $PREVIEW_WIDTH = 1000;
-            
-            // Calculate scaling factors based on actual image dimensions
-            $scaleX = $imageWidth / $PREVIEW_WIDTH;
-            $scaleY = $imageHeight / $PREVIEW_WIDTH;
-
-            // Add text to image
+            // Add text to image using actual image dimensions
             foreach ($positions as $field => $pos) {
                 $text = '';
+                $fontSize = 0;
+                
                 switch ($field) {
-                    case 'registration_number': 
-                        $text = $data[0]; 
-                        $fontSize = round(24 * min($scaleX, $scaleY)); // Scale font proportionally
+                    case 'registration_number':
+                        $text = $data[0] ?? '';
+                        $fontSize = round($imageHeight * 0.02);
                         break;
-                    case 'name': 
-                        $text = $data[1]; 
-                        $fontSize = round(32 * min($scaleX, $scaleY)); // Scale font proportionally
+                    case 'name':
+                        $text = $data[1] ?? '';
+                        $fontSize = round($imageHeight * 0.035);
                         break;
-                    case 'grade': 
-                        $text = $data[2]; 
-                        $fontSize = round(24 * min($scaleX, $scaleY)); // Scale font proportionally
+                    case 'grade':
+                        $text = $data[2] ?? '';
+                        $fontSize = round($imageHeight * 0.02);
                         break;
-                    default: 
+                    default:
                         continue 2;
                 }
 
-                // Calculate actual coordinates based on image dimensions
-                // Scale both X and Y coordinates using their respective scaling factors
-                $x = round($pos['x'] * $scaleX);
-                $y = round($pos['y'] * $scaleY);
+                if (empty($text)) continue;
 
-                // Calculate text dimensions for precise positioning
+                // Convert position coordinates to actual image dimensions
+                $posX = $pos['x'];
+                $posY = $pos['y'];
+
+                error_log("[Certificate Generation] Original position for '$text': x=$posX, y=$posY");
+
+                // Get text dimensions to center it properly
                 $bbox = imagettfbbox($fontSize, 0, $fontPath, $text);
                 if ($bbox === false) {
-                    throw new \Exception("Failed to calculate text dimensions for: $text");
+                    throw new \Exception("Failed to calculate text dimensions");
                 }
 
-                // Adjust Y position to account for text baseline
-                $y = $y + abs($bbox[7]); 
+                // Calculate text width and height
+                $textWidth = $bbox[2] - $bbox[0];
+                $textHeight = $bbox[1] - $bbox[7];
+                $baselineOffset = abs($bbox[7]);
 
-                error_log("[Certificate Generation] Text: '$text'");
-                error_log("[Certificate Generation] Original position: x={$pos['x']}, y={$pos['y']}");
-                error_log("[Certificate Generation] Scaled position: x=$x, y=$y");
-                error_log("[Certificate Generation] Font size: $fontSize");
-                error_log("[Certificate Generation] Scale factors: scaleX=$scaleX, scaleY=$scaleY");
+                // Calculate position to center the text at the specified point
+                // Important: Use the original position coordinates directly
+                $x = $posX - ($textWidth / 2);
+                $y = $posY + ($textHeight / 2);
 
-                // Add text with error checking
+                error_log("[Certificate Generation] Text '$text': width=$textWidth, height=$textHeight");
+                error_log("[Certificate Generation] Final position: x=$x, y=$y");
+
+                // Add text to image
                 $result = imagettftext(
                     $image,
                     $fontSize,
                     0,
-                    $x,
-                    $y,
+                    round($x),
+                    round($y),
                     $textColor,
                     $fontPath,
                     $text
@@ -502,7 +503,7 @@ class CertificateController {
             
             error_log("[Certificate Generation] Saving certificate to: $localOutputPath");
             
-            if (!imagejpeg($image, $localOutputPath, 100)) {
+            if (!imagejpeg($image, $localOutputPath, 90)) {
                 throw new \Exception("Failed to save certificate image");
             }
 
@@ -905,15 +906,16 @@ class CertificateController {
         try {
             error_log("[Preview Generation] Starting with template: $templatePath");
             
-            // Create image from template
+            // Get image dimensions first
             $imageInfo = getimagesize($templatePath);
             if (!$imageInfo) {
                 throw new \Exception("Invalid template image");
             }
             
-            // Get original image dimensions
             $imageWidth = $imageInfo[0];
             $imageHeight = $imageInfo[1];
+            
+            error_log("[Preview Generation] Image dimensions: {$imageWidth}x{$imageHeight}");
             
             // Create image based on type
             switch ($imageInfo['mime']) {
@@ -944,7 +946,7 @@ class CertificateController {
                 throw new \Exception("Font file not found: $fontPath");
             }
 
-            // Add text to image
+            // Add text to image using actual image dimensions
             foreach ($positions as $field => $pos) {
                 $text = '';
                 $fontSize = 0;
@@ -952,28 +954,44 @@ class CertificateController {
                 switch ($field) {
                     case 'registration_number':
                         $text = $data[0] ?? '';
-                        $fontSize = 24;
+                        $fontSize = round($imageHeight * 0.02);
                         break;
                     case 'name':
                         $text = $data[1] ?? '';
-                        $fontSize = 32;
+                        $fontSize = round($imageHeight * 0.035);
                         break;
                     case 'grade':
                         $text = $data[2] ?? '';
-                        $fontSize = 24;
+                        $fontSize = round($imageHeight * 0.02);
                         break;
                     default:
-                        continue 2; // Continue the outer foreach loop
+                        continue 2;
                 }
 
                 if (empty($text)) continue;
 
-                // Calculate text position
-                $x = $pos['x'];
-                $y = $pos['y'];
+                // Get text dimensions to center it properly
+                $bbox = imagettfbbox($fontSize, 0, $fontPath, $text);
+                if ($bbox === false) {
+                    throw new \Exception("Failed to calculate text dimensions");
+                }
+
+                // Calculate text width and height
+                $textWidth = $bbox[2] - $bbox[0];
+                $textHeight = $bbox[1] - $bbox[7];
+
+                // Calculate baseline offset and center position
+                $baselineOffset = abs($bbox[7]);
+
+                // Calculate position to center the text at the specified point
+                $x = round($pos['x'] - ($textWidth / 2));
+                $y = round($pos['y'] + $baselineOffset);
+
+                error_log("[Preview Generation] Text dimensions for '$text': width=$textWidth, height=$textHeight, baseline=$baselineOffset");
+                error_log("[Preview Generation] Adding text '$text' centered at ($x, $y) with font size $fontSize");
 
                 // Add text to image
-                imagettftext(
+                $result = imagettftext(
                     $image,
                     $fontSize,
                     0,
@@ -983,6 +1001,11 @@ class CertificateController {
                     $fontPath,
                     $text
                 );
+
+                if ($result === false) {
+                    error_log("[Preview Generation] Failed to add text: $text");
+                    throw new \Exception("Failed to add text: $text");
+                }
             }
 
             // Save preview
@@ -990,7 +1013,6 @@ class CertificateController {
             imagejpeg($image, $previewPath, 90);
             imagedestroy($image);
 
-            error_log("[Preview Generation] Preview saved to: $previewPath");
             return $previewPath;
 
         } catch (\Exception $e) {
