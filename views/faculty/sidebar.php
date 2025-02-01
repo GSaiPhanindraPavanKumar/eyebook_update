@@ -271,6 +271,12 @@ if ($userData) {
 
                 <li class="nav-item"><hr></li>
                 <li class="nav-item">
+                    <a class="nav-link" href="/faculty/tickets">
+                        <i class="icon-paper menu-icon"></i>
+                        <span class="menu-title">Support Tickets</span>
+                    </a>
+                </li>
+                <li class="nav-item">
                     <a class="nav-link" href="/faculty/profile">
                         <i class="ti-user menu-icon"></i>
                         <span class="menu-title">Profile</span>
