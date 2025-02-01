@@ -17,6 +17,12 @@ function handlePredefinedQuery($query) {
         'good evening' => "<div class='response-text'><p>Good evening! How can I be of assistance?</p></div>",
         'howdy' => "<div class='response-text'><p>Howdy! What brings you here today?</p></div>",
         'greetings' => "<div class='response-text'><p>Greetings! How may I help you?</p></div>",
+        "what's up" => "<div class='response-text'><p>What's up? How can I help you today?</p></div>",
+        'yo' => "<div class='response-text'><p>Hello! What do you need help with?</p></div>",
+        'sup' => "<div class='response-text'><p>Hello! How can I assist you?</p></div>",
+        'hiya' => "<div class='response-text'><p>Hiya! What can I do for you?</p></div>",
+        'hey there' => "<div class='response-text'><p>Hey there! How's it going?</p></div>",
+        
     ];
 
     // Check for exact matches first (greetings)
