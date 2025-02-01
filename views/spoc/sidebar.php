@@ -270,6 +270,12 @@ if ($userData) {
 
                 <li class="nav-item"><hr></li>
                 <li class="nav-item">
+                    <a class="nav-link" href="/spoc/tickets">
+                        <i class="icon-paper menu-icon"></i>
+                        <span class="menu-title">Support Tickets</span>
+                    </a>
+                </li>
+                <li class="nav-item">
                     <a class="nav-link" href="/spoc/profile">
                         <i class="ti-user menu-icon"></i>
                         <span class="menu-title">Profile</span>
@@ -287,6 +293,7 @@ if ($userData) {
                         <span class="menu-title">Logout</span>
                 </a>
             </li>
+ 
             </ul>
 
         </nav>

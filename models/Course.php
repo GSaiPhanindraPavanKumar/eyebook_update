@@ -786,27 +786,39 @@ class Course {
     }
 
     public static function getspocVirtualClassIdsByCourseIds($conn, $courseIds) {
+        // Check if courseIds is empty
+        if (empty($courseIds)) {
+            return [];
+        }
+
+        // Create placeholders for the SQL query
         $placeholders = implode(',', array_fill(0, count($courseIds), '?'));
         $sql = "SELECT virtual_class_id FROM courses WHERE id IN ($placeholders)";
         $stmt = $conn->prepare($sql);
         $stmt->execute($courseIds);
+        
         $virtualClassIds = [];
         while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-            if (!empty($row['virtual_class_id'])){
+            if (!empty($row['virtual_class_id'])) {
                 $ids = json_decode($row['virtual_class_id'], true);
                 if (is_array($ids)) {
                     $virtualClassIds = array_merge($virtualClassIds, $ids);
                 }
             }
-            
         }
         return array_unique($virtualClassIds);
     }
     public static function getspocAssignmentIdsByCourseIds($conn, $courseIds) {
+        // Check if courseIds is empty
+        if (empty($courseIds)) {
+            return [];
+        }
+
         $placeholders = implode(',', array_fill(0, count($courseIds), '?'));
         $sql = "SELECT assignments FROM courses WHERE id IN ($placeholders)";
         $stmt = $conn->prepare($sql);
         $stmt->execute($courseIds);
+        
         $assignmentIds = [];
         while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
             if (!empty($row['assignments'])) {

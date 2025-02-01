@@ -11,6 +11,7 @@ use Models\feedback;
 use Models\Lab;
 use Models\Notification;
 use Models\Contest;
+use Models\Ticket;
 use PDO;
 use PDOException;
 
@@ -973,6 +974,190 @@ class StudentController {
         ]);
 
         echo json_encode(['status' => 'success']);
+    }
+
+    public function tickets() {
+        if (!isset($_SESSION['email'])) {
+            header('Location: /session-timeout');
+            exit;
+        }
+        $this->ensureUniversityIdInSession();
+        
+        $conn = Database::getConnection();
+        $studentId = $_SESSION['student_id'];
+        
+        // Get active and closed tickets
+        $activeTickets = Ticket::getTicketsByStudent($conn, $studentId, 'active');
+        $closedTickets = Ticket::getTicketsByStudent($conn, $studentId, 'closed');
+        
+        require 'views/student/tickets.php';
+    }
+
+    public function createTicket() {
+        if (!isset($_SESSION['email'])) {
+            header('Location: /session-timeout');
+            exit;
+        }
+        
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            http_response_code(405);
+            exit('Method not allowed');
+        }
+        
+        $conn = Database::getConnection();
+        $studentId = $_SESSION['student_id'];
+        $universityId = $_SESSION['university_id'];
+        
+        // Use htmlspecialchars instead of FILTER_SANITIZE_STRING
+        $subject = htmlspecialchars(trim($_POST['subject'] ?? ''), ENT_QUOTES, 'UTF-8');
+        $description = htmlspecialchars(trim($_POST['description'] ?? ''), ENT_QUOTES, 'UTF-8');
+        
+        if (empty($subject) || empty($description)) {
+            header('Content-Type: application/json');
+            echo json_encode(['success' => false, 'message' => 'Subject and description are required']);
+            exit;
+        }
+        
+        $success = Ticket::create($conn, $studentId, $universityId, $subject, $description);
+        header('Content-Type: application/json');
+        echo json_encode(['success' => $success]);
+        exit;
+    }
+
+    public function getTicketDetails($ticketId) {
+        if (!isset($_SESSION['email'])) {
+            header('Location: /session-timeout');
+            exit;
+        }
+        
+        $conn = Database::getConnection();
+        $studentId = $_SESSION['student_id'];
+        
+        // Get ticket details
+        $ticket = Ticket::getTicketDetails($conn, $ticketId);
+        
+        // Check if ticket exists
+        if (!$ticket) {
+            header('Content-Type: application/json');
+            echo json_encode(['error' => 'Ticket not found']);
+            exit;
+        }
+        
+        // Verify ticket belongs to student
+        if ($ticket['ticket']['student_id'] != $studentId) {
+            http_response_code(403);
+            echo json_encode(['error' => 'Unauthorized']);
+            exit;
+        }
+        
+        header('Content-Type: application/json');
+        echo json_encode($ticket);
+        exit;
+    }
+
+    public function addTicketReply() {
+        if (!isset($_SESSION['email'])) {
+            header('Location: /session-timeout');
+            exit;
+        }
+        
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            header('Location: /student/tickets');
+            exit;
+        }
+        
+        $conn = Database::getConnection();
+        $studentId = $_SESSION['student_id'];
+        
+        $ticketId = filter_input(INPUT_POST, 'ticket_id', FILTER_VALIDATE_INT);
+        $message = htmlspecialchars(trim($_POST['message'] ?? ''), ENT_QUOTES, 'UTF-8');
+        
+        if (!$ticketId || empty($message)) {
+            $_SESSION['error'] = 'Invalid input';
+            header('Location: /student/view_ticket/' . $ticketId);
+            exit;
+        }
+        
+        // Verify ticket belongs to student and is active
+        $ticket = Ticket::getTicketDetails($conn, $ticketId);
+        if ($ticket['ticket']['student_id'] != $studentId || $ticket['ticket']['status'] !== 'active') {
+            header('Location: /student/tickets');
+            exit;
+        }
+        
+        $success = Ticket::addReply($conn, $ticketId, $studentId, 'student', $message);
+        
+        if ($success) {
+            $_SESSION['success'] = 'Reply added successfully';
+        } else {
+            $_SESSION['error'] = 'Failed to add reply';
+        }
+        
+        header('Location: /student/view_ticket/' . $ticketId);
+        exit;
+    }
+
+    public function viewTicket($ticketId) {
+        if (!isset($_SESSION['email'])) {
+            header('Location: /session-timeout');
+            exit;
+        }
+        
+        $conn = Database::getConnection();
+        $studentId = $_SESSION['student_id'];
+        
+        // Get ticket details
+        $data = Ticket::getTicketDetails($conn, $ticketId);
+        
+        // Check if ticket exists
+        if (!$data) {
+            header('Location: /student/tickets');
+            exit;
+        }
+        
+        // Verify ticket belongs to student
+        if ($data['ticket']['student_id'] != $studentId) {
+            header('Location: /student/tickets');
+            exit;
+        }
+        
+        $ticket = $data['ticket'];
+        $replies = $data['replies'];
+        
+        require 'views/student/view_ticket.php';
+    }
+
+    public function closeTicket() {
+        if (!isset($_SESSION['email'])) {
+            header('Location: /session-timeout');
+            exit;
+        }
+        
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            header('Location: /student/tickets');
+            exit;
+        }
+        
+        $conn = Database::getConnection();
+        $studentId = $_SESSION['student_id'];
+        
+        $ticketId = filter_input(INPUT_POST, 'ticket_id', FILTER_VALIDATE_INT);
+        
+        if (!$ticketId) {
+            echo json_encode(['success' => false, 'message' => 'Invalid ticket ID']);
+            exit;
+        }
+        
+        // Verify ticket belongs to student and is active
+        $ticket = Ticket::getTicketDetails($conn, $ticketId);
+        if (!$ticket || $ticket['ticket']['student_id'] != $studentId || $ticket['ticket']['status'] !== 'active') {
+            echo json_encode(['success' => false, 'message' => 'Unauthorized or ticket already closed']);
+            exit;
+        }
+        
+        $success = Ticket::closeTicket($conn, $ticketId, $studentId, 'student');
+        echo json_encode(['success' => $success]);
+        exit;
     }
 }
 ?>

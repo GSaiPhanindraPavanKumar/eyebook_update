@@ -18,6 +18,7 @@ use PDO;
 
 use Aws\S3\S3Client;
 use Aws\Exception\AwsException;
+use Models\Ticket;
 require 'vendor/autoload.php';
 require_once __DIR__ . '/../aws_config.php';
 
@@ -671,5 +672,195 @@ class SpocController {
             header('Location: /spoc/discussion_forum');
             exit();
         }
+    }
+
+    public function login() {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $email = filter_input(INPUT_POST, 'email', FILTER_SANITIZE_EMAIL);
+            $password = $_POST['password'];
+
+            $conn = Database::getConnection();
+            
+            // Get SPOC data with university info
+            $stmt = $conn->prepare("SELECT s.*, u.id as university_id, u.name as university_name 
+                                   FROM spocs s 
+                                   JOIN universities u ON s.university_id = u.id 
+                                   WHERE s.email = :email");
+            $stmt->execute(['email' => $email]);
+            $spoc = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if ($spoc && password_verify($password, $spoc['password'])) {
+                // Set all necessary session variables
+                $_SESSION['email'] = $spoc['email'];
+                $_SESSION['spoc_id'] = $spoc['id'];
+                $_SESSION['university_id'] = $spoc['university_id'];
+                $_SESSION['university_name'] = $spoc['university_name'];
+                $_SESSION['name'] = $spoc['name'];
+                $_SESSION['role'] = 'spoc';
+
+                header('Location: /spoc/dashboard');
+                exit;
+            } else {
+                $_SESSION['error'] = 'Invalid email or password';
+                header('Location: /spoc/login');
+                exit;
+            }
+        }
+        require 'views/spoc/login.php';
+    }
+
+    public function tickets() {
+        // if (!isset($_SESSION['email'])) {
+        //     header('Location: /session-timeout');
+        //     exit;
+        // }
+
+        $conn = Database::getConnection();
+        
+        // Get SPOC data since session variables might not be set
+        $stmt = $conn->prepare("SELECT s.*, u.id as university_id 
+                               FROM spocs s 
+                               JOIN universities u ON s.university_id = u.id 
+                               WHERE s.email = :email");
+        $stmt->execute(['email' => $_SESSION['email']]);
+        $spoc = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        if (!$spoc) {
+            header('Location: /login');
+            exit;
+        }
+        
+        // Set session variables if not already set
+        $_SESSION['spoc_id'] = $spoc['id'];
+        $_SESSION['university_id'] = $spoc['university_id'];
+        
+        // Get active and closed tickets for the SPOC's university
+        $activeTickets = Ticket::getTicketsByUniversity($conn, $spoc['university_id'], 'active');
+        $closedTickets = Ticket::getTicketsByUniversity($conn, $spoc['university_id'], 'closed');
+        
+        require 'views/spoc/tickets.php';
+    }
+
+    public function viewTicket($ticketId) {
+        if (!isset($_SESSION['email'])) {
+            header('Location: /session-timeout');
+            exit;
+        }
+        
+        $conn = Database::getConnection();
+        
+        // Get SPOC data since session variables might not be set
+        $stmt = $conn->prepare("SELECT s.*, u.id as university_id 
+                               FROM spocs s 
+                               JOIN universities u ON s.university_id = u.id 
+                               WHERE s.email = :email");
+        $stmt->execute(['email' => $_SESSION['email']]);
+        $spoc = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        if (!$spoc) {
+            header('Location: /spoc/login');
+            exit;
+        }
+        
+        // Set session variables if not already set
+        $_SESSION['spoc_id'] = $spoc['id'];
+        $_SESSION['university_id'] = $spoc['university_id'];
+        
+        // Get ticket details
+        $data = Ticket::getTicketDetails($conn, $ticketId);
+        
+        // Check if ticket exists
+        if (!$data) {
+            header('Location: /spoc/tickets');
+            exit;
+        }
+        
+        // Verify ticket belongs to SPOC's university
+        if ($data['ticket']['university_id'] != $spoc['university_id']) {
+            header('Location: /spoc/tickets');
+            exit;
+        }
+        
+        $ticket = $data['ticket'];
+        $replies = $data['replies'];
+        
+        require 'views/spoc/view_ticket.php';
+    }
+
+    public function addTicketReply() {
+        if (!isset($_SESSION['email'])) {
+            header('Location: /session-timeout');
+            exit;
+        }
+        
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            header('Location: /spoc/tickets');
+            exit;
+        }
+        
+        $conn = Database::getConnection();
+        $spocId = $_SESSION['spoc_id'];
+        $universityId = $_SESSION['university_id'];
+        
+        $ticketId = filter_input(INPUT_POST, 'ticket_id', FILTER_VALIDATE_INT);
+        $message = htmlspecialchars(trim($_POST['message'] ?? ''), ENT_QUOTES, 'UTF-8');
+        
+        if (!$ticketId || empty($message)) {
+            $_SESSION['error'] = 'Invalid input';
+            header('Location: /spoc/view_ticket/' . $ticketId);
+            exit;
+        }
+        
+        // Verify ticket belongs to SPOC's university and is active
+        $ticket = Ticket::getTicketDetails($conn, $ticketId);
+        if ($ticket['ticket']['university_id'] != $universityId || $ticket['ticket']['status'] !== 'active') {
+            header('Location: /spoc/tickets');
+            exit;
+        }
+        
+        $success = Ticket::addReply($conn, $ticketId, $spocId, 'spoc', $message);
+        
+        if ($success) {
+            $_SESSION['success'] = 'Reply added successfully';
+        } else {
+            $_SESSION['error'] = 'Failed to add reply';
+        }
+        
+        header('Location: /spoc/view_ticket/' . $ticketId);
+        exit;
+    }
+
+    public function closeTicket() {
+        if (!isset($_SESSION['email'])) {
+            header('Location: /session-timeout');
+            exit;
+        }
+        
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            header('Location: /spoc/tickets');
+            exit;
+        }
+        
+        $conn = Database::getConnection();
+        $spocId = $_SESSION['spoc_id'];
+        $universityId = $_SESSION['university_id'];
+        
+        $ticketId = filter_input(INPUT_POST, 'ticket_id', FILTER_VALIDATE_INT);
+        
+        if (!$ticketId) {
+            echo json_encode(['success' => false, 'message' => 'Invalid ticket ID']);
+            exit;
+        }
+        
+        // Verify ticket belongs to SPOC's university and is active
+        $ticket = Ticket::getTicketDetails($conn, $ticketId);
+        if (!$ticket || $ticket['ticket']['university_id'] != $universityId || $ticket['ticket']['status'] !== 'active') {
+            echo json_encode(['success' => false, 'message' => 'Unauthorized or ticket already closed']);
+            exit;
+        }
+        
+        $success = Ticket::closeTicket($conn, $ticketId, $spocId, 'spoc');
+        echo json_encode(['success' => $success, 'redirect' => '/spoc/tickets']);
+        exit;
     }
 }

@@ -656,6 +656,12 @@ if ($userData) {
                     </a>
                 </li>
                 <li class="nav-item">
+                    <a class="nav-link" href="/student/tickets">
+                        <i class="icon-paper menu-icon"></i>
+                        <span class="menu-title">Support Tickets</span>
+                    </a>
+                </li>
+                <li class="nav-item">
                     <a class="nav-link" href="/student/logout">
                         <i class="ti-power-off menu-icon"></i>
                         <span class="menu-title">Logout</span>

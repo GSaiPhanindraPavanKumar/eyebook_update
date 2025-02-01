@@ -34,6 +34,8 @@ use Exception;
 use PDOException;
 use ZoomAPI;
 
+use Models\Ticket;
+
 require_once __DIR__ . '/../models/config.php';
 require_once __DIR__ . '/../models/Database.php';
 
@@ -2969,6 +2971,188 @@ class AdminController {
         $existing_student_ids = $student_ids;
     
         require 'views/admin/view_cohort.php';
+    }
+
+    // Add these methods to the existing AdminController class
+
+    public function tickets() {
+        if (!isset($_SESSION['admin'])) {
+            header('Location: /login');
+            exit();
+        }
+        
+        $conn = Database::getConnection();
+        
+        // Get all active and closed tickets across all universities
+        $activeTickets = Ticket::getAllTickets($conn, 'active');
+        $closedTickets = Ticket::getAllTickets($conn, 'closed');
+        
+        require 'views/admin/tickets.php';
+    }
+
+    public function getTicketDetails($ticketId) {
+        if (!isset($_SESSION['admin'])) {
+            header('Location: /login');
+            exit();
+        }
+        
+        $conn = Database::getConnection();
+        
+        // Get ticket details
+        $ticket = Ticket::getTicketDetails($conn, $ticketId);
+        
+        // Admin can always close tickets
+        $ticket['canClose'] = true;
+        
+        echo json_encode($ticket);
+    }
+
+    public function addTicketReply() {
+        if (!isset($_SESSION['admin'])) {
+            header('Location: /login');
+            exit();
+        }
+        
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            http_response_code(405);
+            exit('Method not allowed');
+        }
+        
+        $conn = Database::getConnection();
+        $adminId = $_SESSION['admin_id'];
+        
+        $ticketId = filter_input(INPUT_POST, 'ticket_id', FILTER_VALIDATE_INT);
+        $message = filter_input(INPUT_POST, 'message', FILTER_SANITIZE_STRING);
+        
+        if (!$ticketId || empty($message)) {
+            echo json_encode(['success' => false, 'message' => 'Invalid input']);
+            exit;
+        }
+        
+        // Verify ticket is active
+        $ticket = Ticket::getTicketDetails($conn, $ticketId);
+        if ($ticket['ticket']['status'] !== 'active') {
+            echo json_encode(['success' => false, 'message' => 'Ticket is closed']);
+            exit;
+        }
+        
+        $success = Ticket::addReply($conn, $ticketId, $adminId, 'admin', $message);
+        echo json_encode(['success' => $success]);
+    }
+
+    public function closeTicket() {
+        if (!isset($_SESSION['admin'])) {
+            header('Location: /login');
+            exit();
+        }
+        
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            http_response_code(405);
+            exit('Method not allowed');
+        }
+        
+        $conn = Database::getConnection();
+        $adminId = $_SESSION['admin_id'];
+        
+        $ticketId = filter_input(INPUT_POST, 'ticket_id', FILTER_VALIDATE_INT);
+        
+        if (!$ticketId) {
+            echo json_encode(['success' => false, 'message' => 'Invalid ticket ID']);
+            exit;
+        }
+        
+        // Admin can close any ticket without needing to reply first
+        $success = Ticket::closeTicket($conn, $ticketId, $adminId, 'admin');
+        echo json_encode(['success' => $success]);
+    }
+
+    public function exportTickets() {
+        if (!isset($_SESSION['admin'])) {
+            header('Location: /login');
+            exit();
+        }
+        
+        $conn = Database::getConnection();
+        $status = $_GET['status'] ?? 'all';
+        
+        // Get tickets based on status
+        if ($status === 'active') {
+            $tickets = Ticket::getAllTickets($conn, 'active');
+        } elseif ($status === 'closed') {
+            $tickets = Ticket::getAllTickets($conn, 'closed');
+        } else {
+            $tickets = array_merge(
+                Ticket::getAllTickets($conn, 'active'),
+                Ticket::getAllTickets($conn, 'closed')
+            );
+        }
+        
+        // Create Excel file
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        
+        // Set headers
+        $sheet->setCellValue('A1', 'Ticket #');
+        $sheet->setCellValue('B1', 'Student');
+        $sheet->setCellValue('C1', 'University');
+        $sheet->setCellValue('D1', 'Subject');
+        $sheet->setCellValue('E1', 'Status');
+        $sheet->setCellValue('F1', 'Created');
+        $sheet->setCellValue('G1', 'Closed');
+        $sheet->setCellValue('H1', 'Replies');
+        
+        // Add data
+        $row = 2;
+        foreach ($tickets as $ticket) {
+            $sheet->setCellValue('A' . $row, $ticket['ticket_number']);
+            $sheet->setCellValue('B' . $row, $ticket['student_name']);
+            $sheet->setCellValue('C' . $row, $ticket['university_name']);
+            $sheet->setCellValue('D' . $row, $ticket['subject']);
+            $sheet->setCellValue('E' . $row, $ticket['status']);
+            $sheet->setCellValue('F' . $row, date('Y-m-d H:i', strtotime($ticket['created_at'])));
+            $sheet->setCellValue('G' . $row, $ticket['closed_at'] ? date('Y-m-d H:i', strtotime($ticket['closed_at'])) : 'N/A');
+            $sheet->setCellValue('H' . $row, $ticket['reply_count']);
+            $row++;
+        }
+        
+        // Auto-size columns
+        foreach (range('A', 'H') as $col) {
+            $sheet->getColumnDimension($col)->setAutoSize(true);
+        }
+        
+        // Create Excel file
+        $writer = new Xlsx($spreadsheet);
+        
+        // Set headers for download
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment;filename="tickets_report.xlsx"');
+        header('Cache-Control: max-age=0');
+        
+        // Save to output
+        $writer->save('php://output');
+        exit;
+    }
+
+    public function ticketAnalytics() {
+        if (!isset($_SESSION['admin'])) {
+            header('Location: /login');
+            exit();
+        }
+        
+        $conn = Database::getConnection();
+        
+        // Get ticket statistics
+        $stats = [
+            'total' => Ticket::getCount($conn),
+            'active' => Ticket::getCount($conn, 'active'),
+            'closed' => Ticket::getCount($conn, 'closed'),
+            'response_time' => Ticket::getAverageResponseTime($conn),
+            'resolution_time' => Ticket::getAverageResolutionTime($conn),
+            'by_university' => Ticket::getCountByUniversity($conn),
+            'by_month' => Ticket::getCountByMonth($conn, 6), // Last 6 months
+        ];
+        
+        require 'views/admin/ticket_analytics.php';
     }
 }
 ?>

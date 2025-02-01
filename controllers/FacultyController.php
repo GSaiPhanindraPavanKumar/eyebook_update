@@ -12,6 +12,7 @@ use Models\VirtualClassroom;
 use Models\Discussion;
 use Models\Lab;
 use Models\Contest;
+use Models\Ticket;
 use PDO;
 use \PDOException;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
@@ -857,6 +858,121 @@ class FacultyController {
         $conn = Database::getConnection();
         $question = Contest::getQuestionById($conn, $questionId);
         require 'views/faculty/view_question.php';
+    }
+
+    public function tickets() {
+        if (!isset($_SESSION['faculty_id'])) {
+            header('Location: /session-timeout');
+            exit;
+        }
+        $this->ensureUniversityIdInSession();
+        
+        $conn = Database::getConnection();
+        $universityId = $_SESSION['university_id'];
+        
+        // Get active and closed tickets
+        $activeTickets = Ticket::getTicketsByUniversity($conn, $universityId, 'active');
+        $closedTickets = Ticket::getTicketsByUniversity($conn, $universityId, 'closed');
+        
+        require 'views/faculty/tickets.php';
+    }
+
+    public function getTicketDetails($ticketId) {
+        if (!isset($_SESSION['faculty_id'])) {
+            header('Location: /session-timeout');
+            exit;
+        }
+        
+        $conn = Database::getConnection();
+        $facultyId = $_SESSION['faculty_id'];
+        $universityId = $_SESSION['university_id'];
+        
+        // Get ticket details
+        $ticket = Ticket::getTicketDetails($conn, $ticketId);
+        
+        // Verify ticket belongs to faculty's university
+        if ($ticket['ticket']['university_id'] != $universityId) {
+            http_response_code(403);
+            exit('Unauthorized');
+        }
+        
+        // Check if faculty can close the ticket
+        $canClose = Ticket::canClose($conn, $ticketId, $facultyId, 'faculty');
+        $ticket['canClose'] = $canClose;
+        
+        echo json_encode($ticket);
+    }
+
+    public function addTicketReply() {
+        if (!isset($_SESSION['faculty_id'])) {
+            header('Location: /session-timeout');
+            exit;
+        }
+        
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            http_response_code(405);
+            exit('Method not allowed');
+        }
+        
+        $conn = Database::getConnection();
+        $facultyId = $_SESSION['faculty_id'];
+        $universityId = $_SESSION['university_id'];
+        
+        $ticketId = filter_input(INPUT_POST, 'ticket_id', FILTER_VALIDATE_INT);
+        $message = filter_input(INPUT_POST, 'message', FILTER_SANITIZE_STRING);
+        
+        if (!$ticketId || empty($message)) {
+            echo json_encode(['success' => false, 'message' => 'Invalid input']);
+            exit;
+        }
+        
+        // Verify ticket belongs to faculty's university and is active
+        $ticket = Ticket::getTicketDetails($conn, $ticketId);
+        if ($ticket['ticket']['university_id'] != $universityId || $ticket['ticket']['status'] !== 'active') {
+            echo json_encode(['success' => false, 'message' => 'Unauthorized or ticket closed']);
+            exit;
+        }
+        
+        $success = Ticket::addReply($conn, $ticketId, $facultyId, 'faculty', $message);
+        echo json_encode(['success' => $success]);
+    }
+
+    public function closeTicket() {
+        if (!isset($_SESSION['faculty_id'])) {
+            header('Location: /session-timeout');
+            exit;
+        }
+        
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            http_response_code(405);
+            exit('Method not allowed');
+        }
+        
+        $conn = Database::getConnection();
+        $facultyId = $_SESSION['faculty_id'];
+        $universityId = $_SESSION['university_id'];
+        
+        $ticketId = filter_input(INPUT_POST, 'ticket_id', FILTER_VALIDATE_INT);
+        
+        if (!$ticketId) {
+            echo json_encode(['success' => false, 'message' => 'Invalid ticket ID']);
+            exit;
+        }
+        
+        // Verify ticket belongs to faculty's university and faculty can close it
+        $ticket = Ticket::getTicketDetails($conn, $ticketId);
+        if ($ticket['ticket']['university_id'] != $universityId) {
+            echo json_encode(['success' => false, 'message' => 'Unauthorized']);
+            exit;
+        }
+        
+        if (!Ticket::canClose($conn, $ticketId, $facultyId, 'faculty')) {
+            echo json_encode(['success' => false, 'message' => 'Must reply before closing']);
+            exit;
+        }
+        
+        $success = Ticket::closeTicket($conn, $ticketId, $facultyId, 'faculty');
+        echo json_encode(['success' => $success]);
     }
 }
     
