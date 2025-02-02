@@ -2076,11 +2076,14 @@ class AdminController {
                 $stmt = $conn->prepare("INSERT INTO virtual_classrooms (classroom_id, topic, start_time, duration, join_url, course_id) VALUES (?, ?, ?, ?, ?, ?)");
                 $stmt->execute([$classroom_id, $topic, $start_time->format('Y-m-d H:i:s'), $duration, $join_url, json_encode($selectedCourses)]);
 
+                // Get the ID of the newly inserted entry
+                $virtualClassId = $conn->lastInsertId();
+
                 // Update the courses with the virtual class ID
                 foreach ($selectedCourses as $courseId) {
                     $course = Course::getById($conn, $courseId);
                     $virtualClassIds = !empty($course['virtual_class_id']) ? json_decode($course['virtual_class_id'], true) : [];
-                    $virtualClassIds[] = $classroom['id'] ?? null;
+                    $virtualClassIds[] = $virtualClassId;
                     $stmt = $conn->prepare("UPDATE courses SET virtual_class_id = ? WHERE id = ?");
                     $stmt->execute([json_encode($virtualClassIds), $courseId]);
                 }
