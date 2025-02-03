@@ -149,10 +149,24 @@ class DiscussionController {
             $parent_post_id = $_POST['parent_post_id'];
             $studentId = $_SESSION['student_id'];
             
-            // Get student name from database
+            // Get student name from database with error handling
             $stmt = $conn->prepare("SELECT name FROM students WHERE id = ?");
             $stmt->execute([$studentId]);
-            $student = $stmt->fetch();
+            $student = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+            if (!$student) {
+                $response['status'] = 'error';
+                $response['message'] = 'Student not found';
+                if (!empty($_SERVER['HTTP_X_REQUESTED_WITH'])) {
+                    header('Content-Type: application/json');
+                    echo json_encode($response);
+                    exit;
+                }
+                $_SESSION['error'] = 'Student not found';
+                header('Location: ' . $_SERVER['HTTP_REFERER']);
+                exit;
+            }
+            
             $username = $student['name'];
             
             // Calculate XP for the reply
