@@ -12,7 +12,7 @@ class Discussion {
                     LEFT JOIN students s ON d.name = s.name 
                     WHERE d.university_id = :university_id 
                     AND (d.parent_post_id = '0' OR d.parent_post_id IS NULL) 
-                    ORDER BY d.created DESC";
+                    ORDER BY d.id DESC";
             $stmt = $conn->prepare($sql);
             $stmt->execute([':university_id' => $university_id]);
             
@@ -93,7 +93,7 @@ class Discussion {
                     FROM discussion d 
                     LEFT JOIN students s ON d.name = s.name 
                     WHERE d.parent_post_id = :parent_post_id 
-                    ORDER BY d.created ASC";
+                    ORDER BY d.id ASC";
             $stmt = $conn->prepare($sql);
             $stmt->execute([':parent_post_id' => $parent_post_id]);
             
