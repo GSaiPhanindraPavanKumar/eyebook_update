@@ -608,7 +608,7 @@ function containsProfanity(text) {
 // Load profane words list when document loads
 document.addEventListener('DOMContentLoaded', async function() {
     try {
-        const response = await fetch('https://raw.githubusercontent.com/zacanger/profane-words/refs/heads/master/words.json');
+        const response = await fetch('https://raw.githubusercontent.com/solstxce/profane-words/refs/heads/master/words.json');
         const words = await response.json();
         profaneWords.push(...words);
     } catch (error) {
