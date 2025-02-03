@@ -1159,5 +1159,17 @@ class StudentController {
         echo json_encode(['success' => $success]);
         exit;
     }
+
+    public function xpStatus() {
+        $conn = Database::getConnection();
+        $studentId = $_SESSION['student_id'];
+        
+        // Fetch student data including XP and level
+        $stmt = $conn->prepare("SELECT * FROM students WHERE id = ?");
+        $stmt->execute([$studentId]);
+        $userData = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        require 'views/student/xp_status.php';
+    }
 }
 ?>
