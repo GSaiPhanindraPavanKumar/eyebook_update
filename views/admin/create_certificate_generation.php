@@ -185,6 +185,66 @@ function dragMoveListener(event) {
     target.setAttribute('data-y', y);
 }
 
+// Store the last successful preview positions
+let lastPreviewPositions = null;
+
+async function showPreview(event) {
+    event.preventDefault();
+    
+    const form = document.getElementById('certificate-form');
+    const formData = new FormData(form);
+    
+    try {
+        const response = await fetch('/admin/certificate_generations/preview', {
+            method: 'POST',
+            body: formData
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            // Store the successful preview positions
+            lastPreviewPositions = data.positions;
+            console.log('Stored preview positions:', lastPreviewPositions);
+            
+            // Show preview
+            document.getElementById('preview-image').src = data.previewUrl;
+            document.getElementById('preview-reg').textContent = data.data.registration_number;
+            document.getElementById('preview-name').textContent = data.data.name;
+            document.getElementById('preview-grade').textContent = data.data.grade;
+            
+            // Show preview section, hide form
+            document.getElementById('preview-section').style.display = 'block';
+            form.style.display = 'none';
+        } else {
+            alert('Failed to generate preview: ' + data.error);
+        }
+    } catch (error) {
+        console.error('Preview error:', error);
+        alert('Error generating preview: ' + error.message);
+    }
+}
+
+function cancelGeneration() {
+    document.getElementById('preview-section').style.display = 'none';
+    document.getElementById('certificate-form').style.display = 'block';
+}
+
+function proceedGeneration() {
+    // Use the stored preview positions
+    if (!lastPreviewPositions) {
+        alert('Error: Preview positions not found. Please try again.');
+        return;
+    }
+    
+    // Set the positions from the preview
+    document.getElementById('positions').value = JSON.stringify(lastPreviewPositions);
+    console.log('Submitting with positions:', lastPreviewPositions);
+    
+    // Submit the form
+    document.getElementById('certificate-form').submit();
+}
+
 function updatePositions() {
     var container = document.getElementById('template-container');
     var img = document.getElementById('template-preview');
@@ -215,7 +275,6 @@ function updatePositions() {
     
     document.getElementById('positions').value = JSON.stringify(positions);
     console.log('Updated positions:', positions);
-    console.log('Image dimensions:', { width: imageWidth, height: imageHeight });
 }
 
 // Add resize observer to handle window resizing
@@ -228,100 +287,4 @@ const resizeObserver = new ResizeObserver(entries => {
 });
 
 resizeObserver.observe(document.getElementById('template-container'));
-
-async function showPreview(event) {
-    event.preventDefault();
-    
-    const form = document.getElementById('certificate-form');
-    const formData = new FormData(form);
-    
-    try {
-        const response = await fetch('/admin/certificate_generations/preview', {
-            method: 'POST',
-            body: formData
-        });
-        
-        const data = await response.json();
-        
-        if (data.success) {
-            // Show preview
-            document.getElementById('preview-image').src = data.previewUrl;
-            document.getElementById('preview-reg').textContent = data.data.registration_number;
-            document.getElementById('preview-name').textContent = data.data.name;
-            document.getElementById('preview-grade').textContent = data.data.grade;
-            
-            // Show preview section, hide form
-            document.getElementById('preview-section').style.display = 'block';
-            form.style.display = 'none';
-        } else {
-            alert('Failed to generate preview: ' + data.error);
-        }
-    } catch (error) {
-        alert('Error generating preview: ' + error.message);
-    }
-}
-
-function cancelGeneration() {
-    document.getElementById('preview-section').style.display = 'none';
-    document.getElementById('certificate-form').style.display = 'block';
-}
-
-function proceedGeneration() {
-    document.getElementById('certificate-form').submit();
-}
-
-// Update the preview function
-function generatePreview() {
-    const formData = new FormData(document.getElementById('generationForm'));
-    formData.append('positions', JSON.stringify(textPositions));
-
-    fetch('/admin/certificate_generations/preview', {
-        method: 'POST',
-        body: formData
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            document.getElementById('previewImage').src = data.previewUrl;
-            document.getElementById('previewContainer').style.display = 'block';
-            
-            // Update preview text positions
-            Object.keys(data.data).forEach(field => {
-                const text = data.data[field];
-                updatePreviewText(field, text);
-            });
-        } else {
-            alert('Error generating preview: ' + data.error);
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('Error generating preview');
-    });
-}
-
-// Update form submission
-document.getElementById('generationForm').addEventListener('submit', function(e) {
-    e.preventDefault();
-    
-    const formData = new FormData(this);
-    formData.append('positions', JSON.stringify(textPositions));
-
-    fetch('/admin/certificate_generations/store', {
-        method: 'POST',
-        body: formData
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            window.location.href = `/admin/certificate_generations/progress/${data.generationId}`;
-        } else {
-            alert('Error: ' + data.error);
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('Error submitting form');
-    });
-});
 </script> 
