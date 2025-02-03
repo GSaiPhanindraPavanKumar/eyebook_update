@@ -212,19 +212,24 @@ class DiscussionController {
         $studentId = $_SESSION['student_id'];
 
         try {
-            // Get the post author's ID
+            // Get the post author's name
             $stmt = $conn->prepare("SELECT name FROM discussion WHERE id = ?");
             $stmt->execute([$discussionId]);
-            $post = $stmt->fetch();
+            $post = $stmt->fetch(PDO::FETCH_ASSOC);
             
             if (!$post) {
                 throw new Exception("Post not found");
             }
 
-            // Get the author's student ID
+            // Get the author's student ID with error handling
             $stmt = $conn->prepare("SELECT id FROM students WHERE name = ?");
             $stmt->execute([$post['name']]);
-            $author = $stmt->fetch();
+            $author = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+            if (!$author) {
+                throw new Exception("Post author not found");
+            }
+            
             $authorId = $author['id'];
 
             // Toggle like and get result
@@ -251,9 +256,15 @@ class DiscussionController {
 
             header('Content-Type: application/json');
             echo json_encode($result);
+            
         } catch (Exception $e) {
+            error_log('Error in toggleLike: ' . $e->getMessage());
             header('Content-Type: application/json');
-            echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
+            echo json_encode([
+                'status' => 'error', 
+                'message' => $e->getMessage()
+            ]);
         }
+        exit;
     }
 }
