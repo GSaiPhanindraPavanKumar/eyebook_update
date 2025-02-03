@@ -12,7 +12,7 @@ use Models\Lab;
 use Models\Notification;
 use Models\Contest;
 use Models\Ticket;
-use Models\publicCourse;
+use Models\PublicCourse;
 use PDO;
 use Razorpay\Api\Api;
 use PDOException;
