@@ -104,6 +104,11 @@ class VirtualClassroom {
         return $stmt->fetchColumn();
     }
 
+    public function getCount(){
+        $stmt = $this->conn->query("SELECT COUNT(*) FROM virtual_classrooms");
+        return $stmt->fetchColumn();
+    }
+
     public function getVirtualClassesForStudent($studentId, $date) {
         $stmt = $this->conn->prepare("
             SELECT vc.* 

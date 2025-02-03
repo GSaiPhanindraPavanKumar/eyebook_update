@@ -6,6 +6,7 @@ use Models\Spoc;
 use Models\Faculty;
 use Models\Student;
 use Models\Database;
+use Models\University;
 
 class AuthController {
     private $adminModel;
@@ -37,6 +38,58 @@ class AuthController {
             }
         }
         return null;
+    }
+
+    public function showStudentRegisterForm() {
+        $conn = Database::getConnection();
+        $universities = University::getAll($conn);
+        require 'views/studentRegisterView.php';
+    }
+
+    public function registerStudent() {
+        $conn = Database::getConnection();
+        $universities = University::getAll($conn);
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $conn = Database::getConnection();
+    
+            if ($_POST['university_id'] === 'other') {
+                // Create new university
+                $universityData = [
+                    'long_name' => $_POST['long_name'],
+                    'short_name' => $_POST['short_name'],
+                    'location' => $_POST['location'],
+                    'country' => $_POST['country']
+                ];
+                $result = University::addUniversity($conn, $universityData['long_name'], $universityData['short_name'], $universityData['location'], $universityData['country'], null, null, null, null, null);
+                if ($result['message_type'] === 'error') {
+                    // Handle error (e.g., show error message to the user)
+                    echo $result['message'];
+                    return;
+                }
+                $university_id = $result['university_id'];
+            } else {
+                $university_id = $_POST['university_id'];
+            }
+    
+            $data = [
+                'regd_no' => $_POST['regd_no'],
+                'name' => $_POST['name'],
+                'email' => $_POST['email'],
+                'phone' => $_POST['phone'],
+                'section' => $_POST['section'],
+                'stream' => $_POST['stream'],
+                'year' => $_POST['year'],
+                'dept' => $_POST['dept'],
+                'university_id' => $university_id,
+                'password' => $_POST['password']
+            ];
+    
+            Student::create($conn, $data);
+    
+            header('Location: /login');
+            exit();
+        }
+        require 'views/studentRegisterView.php';
     }
 
     private function clearSession() {

@@ -537,6 +537,7 @@ if ($userData) {
                     <div class="collapse" id="courses">
                         <ul class="nav flex-column sub-menu">
                             <li class="nav-item"><a class="nav-link" href="/student/my_courses">My Courses</a></li>
+                            <li class="nav-item"><a class="nav-link" href="/student/manage_public_courses">Paid Courses</a></li>
                             <li class="nav-item"><a class="nav-link" href="/student/virtual_classroom">Virtual Classroom</a></li>
                             <!-- <li class="nav-item"><a class="nav-link" href="/student/manage_assignments">Assignments</a></li> -->
                             <!-- <li class="nav-item"><a class="nav-link" href="#">Meetings</a></li>  -->

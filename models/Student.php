@@ -113,6 +113,45 @@ class Student {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    public static function create($conn, $data) {
+        $sql = "SELECT * FROM students WHERE regd_no = :regd_no OR email = :email";
+        $stmt = $conn->prepare($sql);
+        $stmt->execute([
+            ':regd_no' => $data['regd_no'],
+            ':email' => $data['email']
+        ]);
+        $existing = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if ($existing) {
+            // Return the duplicate record
+            return [
+                'duplicate' => true,
+                'data' => $data
+            ];
+        } else {
+            // Insert the new record
+            $sql = "INSERT INTO students (regd_no, name, email, phone, section, stream, year, dept, university_id, password) 
+                    VALUES (:regd_no, :name, :email, :phone, :section, :stream, :year, :dept, :university_id, :password)";
+            $stmt = $conn->prepare($sql);
+            $stmt->execute([
+                ':regd_no' => $data['regd_no'],
+                ':name' => $data['name'],
+                ':email' => $data['email'],
+                ':phone' => $data['phone'],
+                ':section' => $data['section'],
+                ':stream' => $data['stream'],
+                ':year' => $data['year'],
+                ':dept' => $data['dept'],
+                ':university_id' => $data['university_id'],
+                ':password' => password_hash($data['password'], PASSWORD_BCRYPT)
+            ]);
+
+            return [
+                'duplicate' => false
+            ];
+        }
+    }
+
     public static function uploadStudents($conn, $data, $university_id) {
         // Check for duplicates
         $sql = "SELECT * FROM students WHERE regd_no = :regd_no OR email = :email";

@@ -12,7 +12,6 @@ use Models\Todo;
 use Models\Mailer;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use Models\Discussion;
-use Models\Meetings;
 use Models\Notification;
 use Models\Assignment;
 use Models\feedback;
@@ -20,6 +19,7 @@ use Models\Cohort;
 use Models\Company;
 use Models\Lab;
 use Models\Contest;
+use Models\PublicCourse;
 use PDO;
 use ZipArchive;
 use Models\VirtualClassroom;
@@ -95,7 +95,6 @@ class AdminController {
         $student_count = Student::getCount($conn);
         $spoc_count = Spoc::getCount($conn);
         $course_count = Course::getCount($conn);
-        $meeting_count = Meetings::getCount($conn);
     
         $spocs = Spoc::getAll($conn);
         $universities = University::getAll($conn);
@@ -109,6 +108,7 @@ class AdminController {
 
         // Fetch all virtual classes
         $virtualClassroomModel = new VirtualClassroom($conn);
+        $meeting_count = $virtualClassroomModel->getCount();
         $virtualClasses = $virtualClassroomModel->getAll();
         $upcomingClasses = array_filter($virtualClasses, function($class) {
             return strtotime($class['start_time']) > time();
@@ -838,18 +838,22 @@ class AdminController {
     
     public function addCourse() {
         $conn = Database::getConnection();
-        $message = '';
-        $message_type = '';
+
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $name = $_POST['name'];
             $description = $_POST['description'];
-            $message = Course::create($conn, $name, $description);
-            if ($message === "Course created successfully!") {
-                $message_type = 'success';
+            $is_public_course = isset($_POST['public_course']) ? true : false;
+            $price = $is_public_course ? $_POST['price'] : null;
+
+            if ($is_public_course) {
+                $message = PublicCourse::create($conn, $name, $description, $price);
             } else {
-                $message_type = 'error';
+                $message = Course::create($conn, $name, $description);
             }
+
+            $message_type = strpos($message, 'successfully') !== false ? 'success' : 'error';
         }
+
         require 'views/admin/add_courses.php';
     }
 
@@ -857,6 +861,12 @@ class AdminController {
         $conn = Database::getConnection();
         $courses = Course::getAllWithUniversity($conn);
         require 'views/admin/manage_courses.php';
+    }
+
+    public function managepublicCourse() {
+        $conn = Database::getConnection();
+        $courses = publicCourse::getAll($conn);
+        require 'views/admin/manage_public_courses.php';
     }
 
     public function downloadFeedback($courseId) {
@@ -978,6 +988,183 @@ class AdminController {
         });
 
         require 'views/admin/view_course.php';
+    }
+
+    public function viewPublicCourse($course_id) {
+        $conn = Database::getConnection();
+        $course = PublicCourse::getById($conn, $course_id);
+
+
+        $assignmentIds = !empty($course['assignments']) ? json_decode($course['assignments'], true) : [];
+        $assignments = [];
+        if (!empty($assignmentIds)) {
+            $assignments = Assignment::getByIds($conn, $assignmentIds);
+        }
+
+        foreach ($assignments as &$assignment) {
+            $assignment['submission_count'] = Assignment::getSubmissionCount($conn, $assignment['id']);
+        }
+
+        usort($assignments, function($a, $b) {
+            return strtotime($b['due_date']) - strtotime($a['due_date']);
+        });
+        require 'views/admin/view_public_course.php';
+    }
+
+    public function uploadpublicEcContent() {
+        $conn = Database::getConnection();
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            $course_id = $_POST['course_id'];
+            $title = $_POST['ec_content_title'];
+            $file = $_FILES['ec_content_file'];
+            if (!$title || !$file) {
+                echo json_encode(['message' => 'Unit name and EC Content file are required']);
+                exit;
+            }
+            $result = PublicCourse::addEcContent($conn, $course_id, $title, $file);
+            if (isset($result['indexPath'])) {
+                header("Location: /admin/view_public_course/$course_id");
+                exit;
+            } else {
+                echo json_encode(['message' => $result['message']]);
+                exit;
+            }
+        }
+    }
+    
+    public function uploadpublicCourseBook() {
+        $conn = Database::getConnection();
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            $course_id = $_POST['course_id'];
+            $unit_name = $_POST['unit_name'];
+            $scorm_file = $_FILES['scorm_file'];
+
+            if (!$unit_name || !$scorm_file) {
+                echo json_encode(['message' => 'Unit name and SCORM package file are required']);
+                exit;
+            }
+
+            // Fetch the course
+            $sql = "SELECT * FROM public_courses WHERE id = :id";
+            $stmt = $conn->prepare($sql);
+            $stmt->execute(['id' => $course_id]);
+            $course = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$course) {
+                echo json_encode(['message' => 'Course not found']);
+                exit;
+            }
+
+            // Validate SCORM package
+            $zip = new ZipArchive();
+            if ($zip->open($scorm_file['tmp_name']) === TRUE) {
+                $scormVersion = 'Unknown';
+                if ($zip->locateName('imsmanifest.xml') !== false) {
+                    $manifest = $zip->getFromName('imsmanifest.xml');
+                    if (strpos($manifest, 'ADL SCORM') !== false) {
+                        if (strpos($manifest, '2004') !== false) {
+                            $scormVersion = 'SCORM 2004';
+                        } elseif (strpos($manifest, '1.2') !== false) {
+                            $scormVersion = 'SCORM 1.2';
+                        } else {
+                            $scormVersion = 'Other SCORM Version';
+                        }
+                    } else {
+                        $scormVersion = 'Non-SCORM Package';
+                    }
+                }
+                $zip->close();
+
+                if ($scormVersion === 'Unknown' || $scormVersion === 'Non-SCORM Package') {
+                    echo json_encode(['message' => 'Invalid SCORM package']);
+                    exit;
+                }
+            } else {
+                echo json_encode(['message' => 'Failed to open SCORM package']);
+                exit;
+            }
+
+            // Define the upload path
+            $uploadPath = __DIR__ . '/../uploads/public_courses/' . $course_id . '/' . $unit_name;
+            if (!is_dir($uploadPath)) {
+                mkdir($uploadPath, 0777, true);
+            }
+
+            // Extract and save SCORM package locally
+            if ($zip->open($scorm_file['tmp_name']) === TRUE) {
+                $zip->extractTo($uploadPath);
+                $zip->close();
+            } else {
+                echo json_encode(['message' => 'Failed to extract SCORM package']);
+                exit;
+            }
+
+            // Get the base URL of the uploaded SCORM package
+            $baseUrl = '/uploads/public_courses/' . $course_id . '/' . $unit_name . '/';
+
+            // Update the SCORM details in the courses table
+            $existingCourseBook = json_decode($course['course_book'], true);
+            if (!is_array($existingCourseBook)) {
+                $existingCourseBook = [];
+            }
+            $existingCourseBook[] = [
+                'unit_name' => $unit_name,
+                'scorm_url' => $baseUrl,
+                'scorm_version' => $scormVersion
+            ];
+            $updatedCourseBook = json_encode($existingCourseBook);
+
+            $sql = "UPDATE public_courses SET course_book = :course_book, scorm_version = :scorm_version WHERE id = :id";
+            $stmt = $conn->prepare($sql);
+            $stmt->execute([
+                'course_book' => $updatedCourseBook,
+                'scorm_version' => $scormVersion,
+                'id' => $course_id,
+            ]);
+
+            echo '<script>
+                    alert("Unit added successfully!");
+                    window.location.href = "/admin/manage_public_courses";
+                </script>';
+            exit;
+        }
+    }
+    
+    public function uploadpublicAdditionalContent() {
+        $conn = Database::getConnection();
+    
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            $course_id = $_POST['course_id'];
+            $title = $_POST['content_title'];
+            $content_type = $_POST['content_type'];
+    
+            if ($content_type == 'link') {
+                $link = $_POST['content_link'];
+            } else {
+                $file = $_FILES['content_file'];
+                $upload_dir = 'uploads/public_additional_content/';
+                $file_path = $upload_dir . basename($file['name']);
+                $link = $this->uploadFileToS3($file);
+            }
+    
+            $course = PublicCourse::getById($conn, $course_id);
+            $additional_content = !empty($course['additional_content']) ? json_decode($course['additional_content'], true) : [];
+    
+            $new_content = [
+                'title' => $title,
+                'link' => $link
+            ];
+    
+            $additional_content[] = $new_content;
+    
+            PublicCourse::updateAdditionalContent($conn, $course_id, $additional_content);
+    
+            $_SESSION['message'] = 'Additional content added successfully.';
+            $_SESSION['message_type'] = 'success';
+    
+            header('Location: /admin/view_public_course/' . $course_id);
+            exit();
+        }
     }
 
     public function viewBook($hashedId) {
@@ -1325,50 +1512,99 @@ class AdminController {
     }
 
     public function addUnit() {
-        set_time_limit(600); // Allow enough time for large uploads.
-
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $course_id = $_POST['course_id'] ?? null;
-            $unit_name = $_POST['unit_name'] ?? null;
-            $scorm_file = $_FILES['scorm_file'] ?? null;
+        $conn = Database::getConnection();
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            $course_id = $_POST['course_id'];
+            $unit_name = $_POST['unit_name'];
+            $scorm_file = $_FILES['scorm_file'];
 
             if (!$unit_name || !$scorm_file) {
                 echo json_encode(['message' => 'Unit name and SCORM package file are required']);
                 exit;
             }
 
-            // AWS S3 Configuration
-            $bucketName = AWS_BUCKET_NAME;
-            $region = AWS_REGION;
-            $accessKey = AWS_ACCESS_KEY_ID;
-            $secretKey = AWS_SECRET_ACCESS_KEY;
+            // Fetch the course
+            $sql = "SELECT * FROM courses WHERE id = :id";
+            $stmt = $conn->prepare($sql);
+            $stmt->execute(['id' => $course_id]);
+            $course = $stmt->fetch(PDO::FETCH_ASSOC);
 
-            // Initialize AWS S3 Client
-            $s3Client = new S3Client([
-                'region' => $region,
-                'version' => 'latest',
-                'credentials' => [
-                    'key' => $accessKey,
-                    'secret' => $secretKey,
-                ],
-            ]);
-
-            $zipFilePath = $scorm_file['tmp_name'];
-            $timestamp = time();
-            $uploadPrefix = "scorm_courses/{$course_id}/{$timestamp}/";
-
-            // Process and Upload SCORM Package
-            $uploadResult = $this->processScormPackage($s3Client, $bucketName, $zipFilePath, $uploadPrefix, $region);
-
-            if (!$uploadResult['success']) {
-                echo json_encode(['message' => $uploadResult['message']]);
+            if (!$course) {
+                echo json_encode(['message' => 'Course not found']);
                 exit;
             }
 
-            echo json_encode([
-                'message' => 'SCORM package uploaded successfully',
-                'scorm_url' => $uploadResult['index_url']
+            // Validate SCORM package
+            $zip = new ZipArchive();
+            if ($zip->open($scorm_file['tmp_name']) === TRUE) {
+                $scormVersion = 'Unknown';
+                if ($zip->locateName('imsmanifest.xml') !== false) {
+                    $manifest = $zip->getFromName('imsmanifest.xml');
+                    if (strpos($manifest, 'ADL SCORM') !== false) {
+                        if (strpos($manifest, '2004') !== false) {
+                            $scormVersion = 'SCORM 2004';
+                        } elseif (strpos($manifest, '1.2') !== false) {
+                            $scormVersion = 'SCORM 1.2';
+                        } else {
+                            $scormVersion = 'Other SCORM Version';
+                        }
+                    } else {
+                        $scormVersion = 'Non-SCORM Package';
+                    }
+                }
+                $zip->close();
+
+                if ($scormVersion === 'Unknown' || $scormVersion === 'Non-SCORM Package') {
+                    echo json_encode(['message' => 'Invalid SCORM package']);
+                    exit;
+                }
+            } else {
+                echo json_encode(['message' => 'Failed to open SCORM package']);
+                exit;
+            }
+
+            // Define the upload path
+            $uploadPath = __DIR__ . '/../uploads/courses/' . $course_id . '/' . $unit_name;
+            if (!is_dir($uploadPath)) {
+                mkdir($uploadPath, 0777, true);
+            }
+
+            // Extract and save SCORM package locally
+            if ($zip->open($scorm_file['tmp_name']) === TRUE) {
+                $zip->extractTo($uploadPath);
+                $zip->close();
+            } else {
+                echo json_encode(['message' => 'Failed to extract SCORM package']);
+                exit;
+            }
+
+            // Get the base URL of the uploaded SCORM package
+            $baseUrl = '/uploads/courses/' . $course_id . '/' . $unit_name . '/';
+
+            // Update the SCORM details in the courses table
+            $existingCourseBook = json_decode($course['course_book'], true);
+            if (!is_array($existingCourseBook)) {
+                $existingCourseBook = [];
+            }
+            $existingCourseBook[] = [
+                'unit_name' => $unit_name,
+                'scorm_url' => $baseUrl,
+                'scorm_version' => $scormVersion
+            ];
+            $updatedCourseBook = json_encode($existingCourseBook);
+
+            $sql = "UPDATE courses SET course_book = :course_book, scorm_version = :scorm_version WHERE id = :id";
+            $stmt = $conn->prepare($sql);
+            $stmt->execute([
+                'course_book' => $updatedCourseBook,
+                'scorm_version' => $scormVersion,
+                'id' => $course_id,
             ]);
+
+            echo '<script>
+                    alert("Unit added successfully!");
+                    window.location.href = "/admin/manage_courses";
+                </script>';
             exit;
         }
     }
@@ -2168,6 +2404,25 @@ class AdminController {
         $course = Course::getById($conn, $course_id);
         require 'views/admin/edit_course.php';
     }
+    public function editPublicCourse($course_id) {
+        $conn = Database::getConnection();
+        $message = '';
+    
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            $name = $_POST['name'];
+            $description = $_POST['description'];
+            $price = $_POST['price'];
+    
+            $sql = "UPDATE public_courses SET name = ?, description = ?, price = ? WHERE id = ?";
+            $stmt = $conn->prepare($sql);
+            $stmt->execute([$name, $description, $price, $course_id]);
+    
+            $message = "Public course updated successfully!";
+        }
+    
+        $course = PublicCourse::getById($conn, $course_id);
+        require 'views/admin/edit_public_course.php';
+    }
 
     public function deleteCourse($course_id) {
         $conn = Database::getConnection();
@@ -2177,6 +2432,17 @@ class AdminController {
         $stmt->execute([$course_id]);
 
         header('Location: /admin/manage_courses');
+        exit();
+    }
+
+    public function deletePublicCourse($course_id) {
+        $conn = Database::getConnection();
+
+        $sql = "DELETE FROM public_courses WHERE id = ?";
+        $stmt = $conn->prepare($sql);
+        $stmt->execute([$course_id]);
+
+        header('Location: /admin/manage_public_courses');
         exit();
     }
 
@@ -2221,6 +2487,28 @@ class AdminController {
         require 'views/admin/edit_assignment.php';
     }
     
+    public function editPublicAssignment($id) {
+        $conn = Database::getConnection();
+        $assignment = Assignment::getById($conn, $id);
+        $courses = PublicCourse::getAll($conn);
+    
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $title = $_POST['title'];
+            $description = $_POST['description'];
+            $start_time = $_POST['start_time'];
+            $due_date = $_POST['due_date'];
+            $course_ids = $_POST['course_id'];
+            $file_content = !empty($_FILES['file_content']['tmp_name']) ? file_get_contents($_FILES['file_content']['tmp_name']) : $assignment['file_content'];
+    
+            Assignment::update($conn, $id, $title, $description, $start_time, $due_date, $course_ids, $file_content);
+    
+            header('Location: /admin/manage_assignments');
+            exit;
+        }
+    
+        require 'views/admin/edit_public_assignment.php';
+    }
+
     public function deleteAssignment($assignmentId) {
         $conn = Database::getConnection();
 
@@ -2262,12 +2550,48 @@ class AdminController {
                 $file_content = file_get_contents($_FILES['assignment_file']['tmp_name']);
             }
 
-            Assignment::create($conn, $title, $description, $start_date, $due_date, $course_ids, $file_content);
+            $assignment_id = Assignment::create($conn, $title, $description, $start_date, $due_date, $course_ids, $file_content);
+
+            foreach ($course_ids as $course_id) {
+                Course::addAssignmentToCourse($conn, $course_id, $assignment_id);
+            }
 
             $_SESSION['message'] = 'Assignment created successfully.';
             $_SESSION['message_type'] = 'success';
 
-            header('Location: /admin/manage_assignments');
+            header('Location: /admin/view_course/'.$course_ids[0]);
+            exit();
+        }
+
+        require 'views/admin/assignment_create.php';
+    }
+
+    public function createPublicAssignment() {
+        $conn = Database::getConnection();
+        $courses = Course::getAll($conn);
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $title = $_POST['assignment_title'];
+            $description = $_POST['assignment_description'];
+            $start_date = $_POST['start_date'];
+            $due_date = $_POST['due_date'];
+            $course_ids = $_POST['course_id'];
+            $file_content = null;
+
+            if (isset($_FILES['assignment_file']) && $_FILES['assignment_file']['error'] == 0) {
+                $file_content = file_get_contents($_FILES['assignment_file']['tmp_name']);
+            }
+
+            $assignment_id = Assignment::createpublic($conn, $title, $description, $start_date, $due_date, $course_ids, $file_content);
+
+            foreach ($course_ids as $course_id) {
+                PublicCourse::addAssignmentToCourse($conn, $course_id, $assignment_id);
+            }
+
+            $_SESSION['message'] = 'Assignment created successfully.';
+            $_SESSION['message_type'] = 'success';
+
+            header('Location: /admin/view_public_course/'.$course_ids[0]);
             exit();
         }
 
@@ -2300,6 +2624,34 @@ class AdminController {
         }
     }
 
+    public function archivePublicCourse() {
+        $conn = Database::getConnection();
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            $course_id = $_POST['archive_course_id'];
+            PublicCourse::archiveCourse($conn, $course_id);
+
+            $_SESSION['message'] = 'Public course archived successfully.';
+            $_SESSION['message_type'] = 'success';
+
+            header('Location: /admin/manage_public_courses');
+            exit();
+        }
+    }
+
+    public function unarchivePublicCourse() {
+        $conn = Database::getConnection();
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            $course_id = $_POST['archive_course_id'];
+            PublicCourse::unarchiveCourse($conn, $course_id);
+
+            $_SESSION['message'] = 'Public course unarchived successfully.';
+            $_SESSION['message_type'] = 'success';
+
+            header('Location: /admin/manage_public_courses');
+            exit();
+        }
+    }
+
     public function toggleFeedback() {
         $conn = Database::getConnection();
         $course_id = $_POST['course_id'];
@@ -2311,6 +2663,17 @@ class AdminController {
         exit();
     }
 
+    public function togglePublicFeedback() {
+        $conn = Database::getConnection();
+        $course_id = $_POST['course_id'];
+        $feedback_enabled = $_POST['enabled'] === 'true' ? 1 : 0;
+
+        PublicCourse::updateFeedbackStatus($conn, $course_id, $feedback_enabled);
+
+        header('Location: /admin/view_public_course/' . $course_id);
+        exit();
+    }
+
     public function viewAssignment($assignment_id) {
         $conn = Database::getConnection();
         $assignment = Assignment::getById($conn, $assignment_id);
@@ -2319,6 +2682,16 @@ class AdminController {
         $course_id = json_decode($assignment['course_id'], true)[0];
 
         require 'views/admin/view_assignment.php';
+    }
+
+    public function viewPublicAssignment($assignment_id) {
+        $conn = Database::getConnection();
+        $assignment = Assignment::getById($conn, $assignment_id);
+        $submissions = Assignment::getSubmissions($conn, $assignment_id);
+
+        $course_id = json_decode($assignment['course_id'], true)[0];
+
+        require 'views/admin/view_public_assignment.php';
     }
 
     public function gradeSubmissionPage($assignment_id, $student_id) {
@@ -2672,6 +3045,52 @@ class AdminController {
 
         // Update the course data
         $sql = "UPDATE courses SET $type = :content WHERE id = :course_id";
+        $stmt = $conn->prepare($sql);
+        $stmt->bindValue(':content', $jsonContent, PDO::PARAM_STR);
+        $stmt->bindValue(':course_id', $course_id, PDO::PARAM_INT);
+
+        if ($stmt->execute()) {
+            echo json_encode(['success' => true, 'message' => 'Content removed successfully']);
+        } else {
+            echo json_encode(['success' => false, 'message' => 'Failed to remove content']);
+        }
+    }
+
+    public function removePublicContent() {
+        $conn = Database::getConnection();
+        $type = $_POST['type'];
+        $index = $_POST['index'];
+        $course_id = $_POST['course_id'];
+
+        // Fetch the course data
+        $sql = "SELECT * FROM public_courses WHERE id = :course_id";
+        $stmt = $conn->prepare($sql);
+        $stmt->bindValue(':course_id', $course_id, PDO::PARAM_INT);
+        $stmt->execute();
+        $course = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$course) {
+            echo json_encode(['success' => false, 'message' => 'Course not found']);
+            return;
+        }
+
+        // Decode the JSON column
+        $content = json_decode($course[$type], true);
+
+        // Remove the specific content based on the index
+        if (isset($content[$index])) {
+            unset($content[$index]);
+        } else {
+            echo json_encode(['success' => false, 'message' => 'Content not found']);
+            return;
+        }
+
+        // Re-index the array and encode it back to JSON
+        $content = array_values($content);
+        $jsonContent = json_encode($content);
+
+        // Update the course data
+        $sql = "UPDATE public_courses SET $type = :content WHERE id = :course_id";
         $stmt = $conn->prepare($sql);
         $stmt->bindValue(':content', $jsonContent, PDO::PARAM_STR);
         $stmt->bindValue(':course_id', $course_id, PDO::PARAM_INT);

@@ -146,6 +146,7 @@ $adminModel = new \Models\Admin();
                         <ul class="nav flex-column sub-menu">
                             <li class="nav-item"><a class="nav-link" href="/admin/add_courses" style="font-size: 12px;">Add Courses</a></li>
                             <li class="nav-item"><a class="nav-link" href="/admin/manage_courses" style="font-size: 12px;">Manage Courses</a></li>
+                            <li class="nav-item"><a class="nav-link" href="/admin/manage_public_courses" style="font-size: 12px;">Manage Public Courses</a></li>
                             <li class="nav-item"><a class="nav-link" href="/admin/virtual_classroom" style="font-size: 12px;">Virtual Classroom</a></li>
                             <!-- <li class="nav-item"><a class="nav-link" href="courses">Submission</a></li> -->
                         </ul>

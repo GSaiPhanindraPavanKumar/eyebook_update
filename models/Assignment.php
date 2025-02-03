@@ -413,6 +413,25 @@ class Assignment {
         ]);
         return $conn->lastInsertId();
     }
+
+    public static function createpublic($conn, $title, $description, $start_date, $due_date, $course_ids, $file_content) {
+        $course_ids = array_map(function($id) {
+            return 'public:' . $id;
+        }, $course_ids);
+        
+        $course_ids_json = json_encode($course_ids);
+        $sql = "INSERT INTO assignments (title, description, start_time, due_date, course_id, file_content) VALUES (:title, :description, :start_time, :due_date, :course_id, :file_content)";
+        $stmt = $conn->prepare($sql);
+        $stmt->execute([
+            ':title' => $title,
+            ':description' => $description,
+            ':start_time' => $start_date,
+            ':due_date' => $due_date,
+            ':course_id' => $course_ids_json,
+            ':file_content' => $file_content
+        ]);
+        return $conn->lastInsertId();
+    }
     public static function update($conn, $id, $title, $description, $start_date, $due_date, $course_ids, $file_content) {
         $sql = "UPDATE assignments SET title = :title, description = :description, start_time = :start_time, due_date = :due_date, course_id = :course_id, file_content = :file_content WHERE id = :id";
         $stmt = $conn->prepare($sql);

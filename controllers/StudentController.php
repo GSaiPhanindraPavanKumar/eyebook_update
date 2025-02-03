@@ -12,7 +12,9 @@ use Models\Lab;
 use Models\Notification;
 use Models\Contest;
 use Models\Ticket;
+use Models\publicCourse;
 use PDO;
+use Razorpay\Api\Api;
 use PDOException;
 
 use Aws\S3\S3Client;
@@ -402,6 +404,136 @@ class StudentController {
     
         require 'views/student/book_view.php';
     }
+
+    public function managePublicCourses() {
+        $conn = Database::getConnection();
+        $studentId = $_SESSION['student_id']; // Assuming student_id is stored in session
+
+        // Fetch enrolled courses
+        $enrolledCourses = PublicCourse::getEnrolledCourses($conn, $studentId);
+
+        // Fetch featured courses
+        $featuredCourses = PublicCourse::getFeaturedCourses($conn);
+
+        require 'views/student/manage_public_courses.php';
+    }
+
+    public function enrollInCourse() {
+        $conn = Database::getConnection();
+        $studentId = $_SESSION['student_id']; // Assuming student_id is stored in session
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $courseId = $_POST['course_id'];
+            PublicCourse::enrollStudent($conn, $courseId, $studentId);
+
+            header('Location: /student/manage_public_courses');
+            exit();
+        }
+    }
+
+    public function viewPublicCourse($hashedId) {
+        if (!isset($_SESSION['email'])) {
+            header('Location: /session-timeout');
+            exit;
+        }
+        $conn = Database::getConnection();
+        $courseId = str_replace(['-', '_'], ['+', '/'], $hashedId);
+        $courseId = base64_decode($courseId);
+        if (!is_numeric($courseId)) {
+            die('Invalid course ID');
+        }
+        $course = PublicCourse::getById($conn, $courseId);
+
+        // Fetch assignments for the course
+        $assignments = Assignment::getByCourseId($conn, $courseId);
+
+        foreach ($assignments as &$assignment) {
+            $assignment['submission_count'] = Assignment::getSubmissionCount($conn, $assignment['id']);
+        }
+
+        usort($assignments, function($a, $b) {
+            return strtotime($b['due_date']) - strtotime($a['due_date']);
+        });
+
+        require 'views/student/view_public_course.php';
+    }
+
+    public function payForCourse() {
+        $conn = Database::getConnection();
+        $studentId = $_SESSION['student_id']; // Assuming student_id is stored in session
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $courseId = $_POST['course_id'];
+            $amount = $_POST['amount'];
+
+            // Create Razorpay order
+            $api = new Api('rzp_test_ILKXehI3hPXJdo', 'ILKXehI3hPXJdo');
+            $order = $api->order->create([
+                'receipt' => 'order_rcptid_' . $courseId,
+                'amount' => $amount * 100, // Amount in paise
+                'currency' => 'INR'
+            ]);
+
+            // Store order details in session
+            $_SESSION['razorpay_order_id'] = $order['id'];
+            $_SESSION['course_id'] = $courseId;
+            $_SESSION['amount'] = $amount;
+
+            // Redirect to Razorpay payment page
+            header('Location: /student/razorpay_payment');
+            exit();
+        }
+    }
+
+    public function razorpayPayment() {
+        require 'views/student/razorpay_payment.php';
+    }
+
+    public function razorpayCallback() {
+        $conn = Database::getConnection();
+        $studentId = $_SESSION['student_id']; // Assuming student_id is stored in session
+
+        $api = new Api('rzp_test_ILKXehI3hPXJdo', 'your_secret_key');
+
+        $attributes = [
+            'razorpay_order_id' => $_POST['razorpay_order_id'],
+            'razorpay_payment_id' => $_POST['razorpay_payment_id'],
+            'razorpay_signature' => $_POST['razorpay_signature']
+        ];
+
+        try {
+            $api->utility->verifyPaymentSignature($attributes);
+
+            // Payment successful, enroll student in course
+            $courseId = $_SESSION['course_id'];
+            $amount = $_SESSION['amount'];
+            PublicCourse::enrollStudent($conn, $courseId, $studentId);
+
+            // Store transaction details
+            $stmt = $conn->prepare("INSERT INTO transactions (student_id, course_id, transaction_id, amount, status) VALUES (?, ?, ?, ?, ?)");
+            $stmt->execute([$studentId, $courseId, $_POST['razorpay_payment_id'], $amount, 'success']);
+
+            // Clear session variables
+            unset($_SESSION['razorpay_order_id']);
+            unset($_SESSION['course_id']);
+            unset($_SESSION['amount']);
+
+            header('Location: /student/manage_public_courses');
+            exit();
+        } catch (\Exception $e) {
+            // Payment failed, store transaction details
+            $stmt = $conn->prepare("INSERT INTO transactions (student_id, course_id, transaction_id, amount, status) VALUES (?, ?, ?, ?, ?)");
+            $stmt->execute([$studentId, $_SESSION['course_id'], $_POST['razorpay_payment_id'], $_SESSION['amount'], 'failed']);
+
+            // Clear session variables
+            unset($_SESSION['razorpay_order_id']);
+            unset($_SESSION['course_id']);
+            unset($_SESSION['amount']);
+
+            echo 'Payment failed: ' . $e->getMessage();
+        }
+    }
+
     public function updatePassword() {
         if (!isset($_SESSION['email'])) {
             header('Location: /session-timeout');

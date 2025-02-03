@@ -40,6 +40,14 @@ include "sidebar.php";
                                 <label for="description">Course Description</label>
                                 <textarea class="form-control" id="description" name="description" required></textarea>
                             </div>
+                            <div class="form-group">
+                                <label for="public_course">Public Course</label>
+                                <input type="checkbox" id="public_course" name="public_course" onchange="togglePriceField()">
+                            </div>
+                            <div class="form-group" id="price_field" style="display: none;">
+                                <label for="price">Course Price</label>
+                                <input type="number" class="form-control" id="price" name="price" step="0.01">
+                            </div>
                             <button type="submit" class="btn btn-primary">Add Course</button>
                         </form>
                     </div>
@@ -56,6 +64,16 @@ include "sidebar.php";
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
 <script>
+    function togglePriceField() {
+        var checkBox = document.getElementById("public_course");
+        var priceField = document.getElementById("price_field");
+        if (checkBox.checked == true){
+            priceField.style.display = "block";
+        } else {
+            priceField.style.display = "none";
+        }
+    }
+
     <?php if (isset($message)): ?>
         toastr.<?php echo $message_type; ?>("<?php echo htmlspecialchars($message); ?>");
         <?php if ($message_type == 'success'): ?>

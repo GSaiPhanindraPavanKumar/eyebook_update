@@ -115,6 +115,16 @@ $router->get('/', 'HomeController@index');
 $router->get('/login', 'AuthController@login');
 $router->post('/login', 'AuthController@login');
 $router->get('/logout', 'AuthController@logout');
+// $router->get('/register_student', 'AuthController@showStudentRegisterForm');
+$router->post('/register_student', 'AuthController@registerStudent');
+$router->get('/register_student', 'AuthController@registerStudent');
+
+// $router->get('/register_student', function() {
+//     $conn = Database::getConnection();
+//     $universities = University::getAll($conn);
+//     require 'views/studentRegisterView.php';
+// });
+$router->post('/register_student', 'AuthController@registerStudent');
 
 $router->get('/forgot_password', function() {
     require 'views/forgot_password.php';
@@ -145,11 +155,12 @@ $router->post('/admin/deleteUniversity', 'AdminController@deleteUniversity');
 $router->get('/admin/add_courses', 'AdminController@addCourse');
 $router->post('/admin/add_courses', 'AdminController@addCourse');
 $router->get('/admin/manage_courses', 'AdminController@manageCourse');
+$router->get('/admin/manage_public_courses', 'AdminController@managepublicCourse');
 $router->get('/admin/view_course/(\d+)', 'AdminController@courseView');
-//$router->post('/admin/add_unit', 'AdminController@addUnit');
-$router->post('/admin/add_unit', function(){
-    require 'views/admin/add_unit.php';
-});
+$router->post('/admin/add_unit', 'AdminController@addUnit');
+// $router->post('/admin/add_unit', function(){
+//     require 'views/admin/add_unit.php';
+// });
 $router->post('/admin/assign_course', 'AdminController@assignCourse');
 $router->post('/admin/unassign_course', 'AdminController@unassignCourse');
 $router->get('/admin/manage_students', 'AdminController@manageStudents');
@@ -161,6 +172,21 @@ $router->get('/admin/download_usage_report', 'AdminController@downloadUsageRepor
 $router->get('/admin/view_university/(\d+)', 'AdminController@viewUniversity');
 $router->get('/admin/create_virtual_classroom', 'AdminController@createVirtualClassroom');
 $router->post('/admin/create_virtual_classroom', 'AdminController@createVirtualClassroom');
+$router->get('/admin/create_public_assignment', 'AdminController@createPublicAssignment');
+$router->post('/admin/create_public_assignment', 'AdminController@createPublicAssignment');
+$router->get('/admin/view_public_assignment/(\d+)', 'AdminController@viewPublicAssignment');
+$router->post('/admin/view_public_assignment/(\d+)', 'AdminController@viewPublicAssignment');
+$router->post('/admin/edit_public_assignment/(\d+)', 'AdminController@editPublicAssignment');
+$router->get('/admin/edit_public_assignment/(\d+)', 'AdminController@editPublicAssignment');
+
+
+
+$router->get('/admin/edit_public_course/(\d+)', 'AdminController@editPublicCourse');
+$router->post('/admin/edit_public_course/(\d+)', 'AdminController@editPublicCourse');
+$router->post('/admin/archive_public_course', 'AdminController@archivePublicCourse');
+$router->post('/admin/unarchive_public_course', 'AdminController@unarchivePublicCourse');
+$router->get('/admin/delete_public_course/(\d+)', 'AdminController@deletePublicCourse');
+$router->get('/admin/view_public_course/(\d+)', 'AdminController@viewPublicCourse');
 
 $router->get('/admin/virtual_classroom_dashboard', 'AdminController@virtual_classroom_dashboard');
 $router->post('/admin/virtual_classroom_dashboard', 'AdminController@virtual_classroom_dashboard');
@@ -173,6 +199,14 @@ $router->post('/admin/unassign_students', 'AdminController@unassignStudents');
 $router->get('/admin/edit_assignment/(\d+)', 'AdminController@editAssignment');
 $router->post('/admin/edit_assignment/(\d+)', 'AdminController@editAssignment');
 $router->get('/admin/delete_assignment/(\d+)', 'AdminController@deleteAssignment');
+
+$router->get('/admin/upload_public_ec_content', 'AdminController@uploadpublicEcContent');
+$router->post('/admin/upload_public_ec_content', 'AdminController@uploadpublicEcContent');
+$router->get('/admin/upload_public_course_book', 'AdminController@uploadpublicCourseBook');
+$router->post('/admin/upload_public_course_book', 'AdminController@uploadpublicCourseBook');
+$router->get('/admin/upload_public_additional_content', 'AdminController@uploadpublicAdditionalContent');
+$router->post('/admin/upload_public_additional_content', 'AdminController@uploadpublicAdditionalContent');
+
 
 $router->get('/admin/edit_university/(\d+)', 'AdminController@editUniversity');
 $router->post('/admin/edit_university/(\d+)', 'AdminController@editUniversity');
@@ -211,6 +245,8 @@ $router->post('/admin/grade_submission/(\d+)/(\d+)', 'AdminController@gradeSubmi
 $router->post('/admin/archive_course', 'adminController@archiveCourse');
 $router->post('/admin/unarchive_course', 'adminController@unarchiveCourse');
 $router->post('/admin/toggle_feedback', 'AdminController@toggleFeedback');
+$router->post('/admin/toggle_public_feedback', 'AdminController@togglePublicFeedback');
+
 $router->post('/admin/reset_student_password/(\d+)', 'AdminController@resetStudentPassword');
 $router->post('/admin/bulk_reset_student_password', 'AdminController@bulkResetStudentPassword');
 $router->post('/admin/bulk_reset_faculty_password', 'AdminController@bulkResetFacultyPassword');
@@ -229,6 +265,7 @@ $router->get('/admin/unassign_course_from_cohort/(\d+)/(\d+)', 'AdminController@
 $router->get('/admin/add_students_to_cohort/(\d+)', 'AdminController@addStudentsToCohort');
 $router->post('/admin/add_students_to_cohort/(\d+)', 'AdminController@addStudentsToCohort');
 $router->post('/admin/remove_content', 'AdminController@removeContent');
+$router->post('/admin/remove_public_content', 'AdminController@removePublicContent');
 $router->get('/admin/addCompany', 'AdminController@addCompany');
 $router->post('/admin/addCompany', 'AdminController@addCompany');
 $router->get('/admin/manage_company', 'AdminController@manageCompany');
@@ -401,6 +438,14 @@ $router->get('/faculty/download_report/(\d+)', 'FacultyController@downloadReport
 $router->get('/faculty/manage_contests', 'FacultyController@manageContests');
 $router->get('/faculty/view_contest/([0-9]+)', 'FacultyController@viewContest');
 $router->get('/faculty/view_question/([0-9]+)', 'FacultyController@viewQuestion');
+
+$router->get('/student/manage_public_courses', 'StudentController@managePublicCourses');
+$router->post('/student/enroll_in_course', 'StudentController@enrollInCourse');
+$router->post('/student/pay_for_course', 'StudentController@payForCourse');
+$router->get('/student/razorpay_payment', 'StudentController@razorpayPayment');
+$router->post('/student/razorpay_callback', 'StudentController@razorpayCallback');
+$router->post('/student/enroll_in_course', 'StudentController@enrollInCourse');
+$router->get('/student/view_public_course/([a-zA-Z0-9]+)', 'StudentController@viewPublicCourse');
 
 $router->get('/student/manage_assignments', 'StudentController@manageAssignments');
 $router->get('/student/view_assignment/(\d+)', 'StudentController@viewAssignment');

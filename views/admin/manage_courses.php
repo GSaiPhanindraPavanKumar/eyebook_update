@@ -51,7 +51,7 @@ $page = max(1, min($page, $total_pages)); // Ensure page is within valid range
                                 <div class="col-md-4">
                                     <select class="form-control" id="statusFilter">
                                         <option value="">All Statuses</option>
-                                        <option value="active">Active</option>
+                                        <option value="ongoing">Active</option>
                                         <option value="archived">Archived</option>
                                     </select>
                                 </div>

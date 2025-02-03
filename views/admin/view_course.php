@@ -584,7 +584,42 @@ if ($assignedCohorts === null) {
                             </div>
 
                             <div class="tab-pane fade" id="assignment" role="tabpanel" aria-labelledby="assignment-tab">
-                                <h5 class="mt-3">Assignment</h5>
+                                <div class="d-flex justify-content-between align-items-center mt-4">
+                                    <h5 class="d-flex justify-content-between align-items-center">
+                                        Assignments
+                                    </h5>
+                                    <button type="button" class="btn btn-primary" onclick="toggleAssignmentForm()">Create Assignment</button>
+
+                                </div>
+                                <!-- Assignment Creation Form -->
+                                <div id="assignmentForm" style="display: none; margin-top: 20px;">
+                                    <h5 class="card-title">Create Assignment</h5>
+                                    <form action="/admin/create_assignment" method="post" enctype="multipart/form-data">
+                                        <div class="form-group">
+                                            <label for="assignment_title">Assignment Title:</label>
+                                            <input type="text" class="form-control" id="assignment_title" name="assignment_title" required>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="assignment_description">Assignment Description:</label>
+                                            <textarea class="form-control" id="assignment_description" name="assignment_description" required></textarea>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="start_date">Start Date:</label>
+                                            <input type="datetime-local" class="form-control" id="start_date" name="start_date" required>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="due_date">Due Date:</label>
+                                            <input type="datetime-local" class="form-control" id="due_date" name="due_date" required>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="assignment_file">Upload Assignment File:</label>
+                                            <input type="file" class="form-control" id="assignment_file" name="assignment_file" accept=".pdf">
+                                            <small class="form-text text-muted">Allowed file format: .pdf</small>
+                                        </div>
+                                        <input type="hidden" name="course_id[]" value="<?php echo $course['id']; ?>">
+                                        <button type="submit" class="btn btn-primary">Create Assignment</button>
+                                    </form>
+                                </div>
                                 <!-- Add your assignment content here -->
                                  <table class="table table-hover mt-2">
                                     <thead class="thead-dark">
@@ -968,4 +1003,60 @@ function removeContent(type, index) {
         });
     }
 }
+</script>
+<script>
+function removeContent(type, index) {
+    if (confirm('Are you sure you want to remove this content?')) {
+        $.ajax({
+            url: '/admin/remove_content',
+            type: 'POST',
+            data: {
+                type: type,
+                index: index,
+                course_id: <?php echo json_encode($course['id']); ?>
+            },
+            success: function(response) {
+                var result = JSON.parse(response);
+                if (result.success) {
+                    alert(result.message);
+                    location.reload(); // Refresh the page upon success
+                } else {
+                    alert(result.message);
+                }
+            },
+            error: function(xhr, status, error) {
+                alert('An error occurred: ' + error);
+            }
+        });
+    }
+}
+</script>
+<script>
+function toggleAssignmentForm() {
+    var form = document.getElementById('assignmentForm');
+    form.style.display = form.style.display === 'none' ? 'block' : 'none';
+}
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('assignmentForm');
+    const startDateInput = document.getElementById('start_date');
+    const dueDateInput = document.getElementById('due_date');
+
+    form.addEventListener('submit', function(event) {
+        const now = new Date();
+        const startDate = new Date(startDateInput.value);
+        const dueDate = new Date(dueDateInput.value);
+
+        if (startDate < now) {
+            alert('Start date and time cannot be in the past.');
+            event.preventDefault();
+            return;
+        }
+
+        if (dueDate <= startDate) {
+            alert('Due date and time must be after the start date and time.');
+            event.preventDefault();
+            return;
+        }
+    });
+});
 </script>
