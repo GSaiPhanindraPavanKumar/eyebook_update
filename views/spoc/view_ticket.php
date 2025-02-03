@@ -2,155 +2,86 @@
 
 <div class="main-panel">
     <div class="content-wrapper">
-        <!-- Header Section -->
         <div class="row">
             <div class="col-md-12 grid-margin">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <h4 class="font-weight-bold mb-0">Ticket #<?php echo htmlspecialchars($ticket['ticket_number']); ?></h4>
-                    </div>
-                    <div>
-                        <?php if ($ticket['status'] === 'active'): ?>
-                            <button onclick="closeTicket(<?php echo $ticket['id']; ?>)" class="btn btn-warning mr-2">
-                                <i class="ti-close"></i> Close Ticket
-                            </button>
-                        <?php endif; ?>
-                        <a href="/spoc/tickets" class="btn btn-secondary">
-                            <i class="ti-arrow-left"></i> Back to Tickets
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Ticket Details -->
-        <div class="row">
-            <div class="col-12">
                 <div class="card">
                     <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h4 class="card-title mb-0">Ticket #<?php echo htmlspecialchars($ticket['ticket_number'] ?? 'N/A'); ?></h4>
                             <div>
-                                <span class="badge <?php echo $ticket['status'] === 'active' ? 'badge-success' : 'badge-secondary'; ?> mb-2">
-                                    <?php echo strtoupper($ticket['status']); ?>
+                                <?php 
+                                $statusClass = ($ticket['status'] ?? '') === 'active' ? 'badge-success' : 'badge-secondary';
+                                ?>
+                                <span class="badge <?php echo $statusClass; ?> mb-2">
+                                    <?php echo strtoupper($ticket['status'] ?? 'N/A'); ?>
                                 </span>
-                                <p class="text-muted mb-0">Created on <?php echo date('M d, Y H:i', strtotime($ticket['created_at'])); ?></p>
-                                <p class="text-muted mb-0">By <?php echo htmlspecialchars($ticket['student_name']); ?></p>
                             </div>
-                            <?php if ($ticket['status'] === 'closed'): ?>
-                                <div class="text-muted">
-                                    <small>Closed on <?php echo date('M d, Y H:i', strtotime($ticket['closed_at'])); ?></small>
+                        </div>
+
+                        <div class="ticket-info mb-4">
+                            <p class="text-muted mb-1">
+                                Created on <?php echo date('M d, Y H:i', strtotime($ticket['created_at'] ?? 'now')); ?>
+                            </p>
+                            <p class="text-muted">
+                                By <?php echo htmlspecialchars($ticket['student_name'] ?? 'Unknown Student'); ?>
+                            </p>
+                        </div>
+
+                        <div class="ticket-content mb-4">
+                            <h5><?php echo htmlspecialchars($ticket['subject'] ?? 'No Subject'); ?></h5>
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <?php echo nl2br(htmlspecialchars($ticket['description'] ?? 'No Description')); ?>
                                 </div>
+                            </div>
+                        </div>
+
+                        <!-- Replies Section -->
+                        <div class="ticket-replies mb-4">
+                            <h5 class="mb-3">Replies</h5>
+                            <?php if (empty($replies)): ?>
+                                <div class="text-center text-muted p-3">
+                                    <i class="ti-comments mb-2" style="font-size: 2em;"></i>
+                                    <p>No replies yet</p>
+                                </div>
+                            <?php else: ?>
+                                <?php foreach ($replies as $reply): ?>
+                                    <div class="reply <?php echo $reply['user_role'] === 'student' ? 'student-reply' : 'staff-reply'; ?> mb-3">
+                                        <div class="reply-header">
+                                            <strong><?php echo htmlspecialchars($reply['user_name'] ?? 'Unknown User'); ?></strong>
+                                            <span class="badge badge-light"><?php echo ucfirst($reply['user_role'] ?? 'unknown'); ?></span>
+                                            <small class="text-muted"><?php echo date('M d, Y H:i', strtotime($reply['created_at'])); ?></small>
+                                        </div>
+                                        <div class="reply-content">
+                                            <?php echo nl2br(htmlspecialchars($reply['message'] ?? '')); ?>
+                                        </div>
+                                    </div>
+                                <?php endforeach; ?>
                             <?php endif; ?>
                         </div>
 
-                        <!-- Subject and Description -->
-                        <div class="ticket-content bg-light p-4 rounded">
-                            <div class="subject-section mb-4">
-                                <label class="text-muted mb-2">Subject:</label>
-                                <h5 class="font-weight-bold"><?php echo htmlspecialchars($ticket['subject']); ?></h5>
-                            </div>
-                            <div class="description-section">
-                                <label class="text-muted mb-2">Description:</label>
-                                <div class="description-content bg-white p-3 rounded">
-                                    <?php echo nl2br(htmlspecialchars($ticket['description'])); ?>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Add this near the top of the card-body where replies are shown -->
-                        <?php if (isset($_SESSION['success'])): ?>
-                            <div class="alert alert-success alert-dismissible fade show" role="alert">
-                                <?php 
-                                echo $_SESSION['success'];
-                                unset($_SESSION['success']);
-                                ?>
-                                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                                    <span aria-hidden="true">&times;</span>
-                                </button>
-                            </div>
-                        <?php endif; ?>
-
-                        <?php if (isset($_SESSION['error'])): ?>
-                            <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                                <?php 
-                                echo $_SESSION['error'];
-                                unset($_SESSION['error']);
-                                ?>
-                                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                                    <span aria-hidden="true">&times;</span>
-                                </button>
-                            </div>
-                        <?php endif; ?>
-
-                        <!-- Replies Section -->
-                        <div class="row mt-4">
-                            <div class="col-12">
-                                <div class="card">
-                                    <div class="card-body">
-                                        <h5 class="mb-4">Conversation History</h5>
-                                        <div class="ticket-replies">
-                                            <?php if (empty($replies)): ?>
-                                                <div class="text-center text-muted p-3">
-                                                    <i class="ti-comments" style="font-size: 2em;"></i>
-                                                    <p class="mt-2">No replies yet</p>
-                                                </div>
-                                            <?php else: ?>
-                                                <div class="conversation-container">
-                                                    <?php foreach ($replies as $reply): ?>
-                                                        <?php 
-                                                        $isStudent = $reply['user_role'] === 'student';
-                                                        $alignClass = $isStudent ? 'student-reply' : 'staff-reply';
-                                                        $roleClass = $isStudent ? 'text-primary' : 'text-success';
-                                                        ?>
-                                                        <div class="reply-wrapper <?php echo $isStudent ? 'justify-content-start' : 'justify-content-end'; ?>">
-                                                            <div class="reply <?php echo $alignClass; ?>">
-                                                                <div class="reply-header">
-                                                                    <strong><?php echo htmlspecialchars($reply['user_name']); ?></strong>
-                                                                    <span class="badge badge-light <?php echo $roleClass; ?>">
-                                                                        <?php echo ucfirst($reply['user_role']); ?>
-                                                                    </span>
-                                                                    <small class="text-muted">
-                                                                        <?php echo date('M d, Y H:i', strtotime($reply['created_at'])); ?>
-                                                                    </small>
-                                                                </div>
-                                                                <div class="reply-content">
-                                                                    <?php echo nl2br(htmlspecialchars($reply['message'])); ?>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    <?php endforeach; ?>
-                                                </div>
-                                            <?php endif; ?>
-                                        </div>
-
-                                        <!-- Update the reply form to use proper method and action -->
-                                        <?php if ($ticket['status'] === 'active'): ?>
-                                            <div class="reply-form mt-4">
-                                                <form method="POST" action="/spoc/add_ticket_reply">
-                                                    <input type="hidden" name="ticket_id" value="<?php echo $ticket['id']; ?>">
-                                                    <div class="form-group">
-                                                        <label>Your Reply</label>
-                                                        <textarea class="form-control" name="message" rows="3" required></textarea>
-                                                    </div>
-                                                    <button type="submit" class="btn btn-primary">Send Reply</button>
-                                                </form>
-                                            </div>
-                                        <?php else: ?>
-                                            <div class="alert alert-info mt-4">
-                                                <i class="ti-info-circle mr-2"></i>
-                                                This ticket is closed.
-                                            </div>
-                                        <?php endif; ?>
+                        <!-- Reply Form for Active Tickets -->
+                        <?php if (($ticket['status'] ?? '') === 'active'): ?>
+                            <div class="reply-form">
+                                <h5 class="mb-3">Add Reply</h5>
+                                <form action="/spoc/add_ticket_reply" method="POST">
+                                    <input type="hidden" name="ticket_id" value="<?php echo $ticket['id']; ?>">
+                                    <div class="form-group">
+                                        <textarea class="form-control" name="message" rows="4" required></textarea>
                                     </div>
-                                </div>
+                                    <button type="submit" class="btn btn-primary">Send Reply</button>
+                                    <button type="button" class="btn btn-warning" onclick="closeTicket(<?php echo $ticket['id']; ?>)">
+                                        Close Ticket
+                                    </button>
+                                </form>
                             </div>
-                        </div>
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    <?php include 'footer.html'; ?>
+    <?php include ('footer.html'); ?>
 </div>
 
 <script>
@@ -158,14 +89,18 @@ function closeTicket(ticketId) {
     if (confirm('Are you sure you want to close this ticket?')) {
         $.ajax({
             url: '/spoc/close_ticket',
-            method: 'POST',
+            type: 'POST',
             data: { ticket_id: ticketId },
             success: function(response) {
-                const data = typeof response === 'string' ? JSON.parse(response) : response;
-                if (data.success) {
-                    window.location.href = '/spoc/tickets';
-                } else {
-                    alert(data.message || 'Error closing ticket');
+                try {
+                    var result = JSON.parse(response);
+                    if (result.success) {
+                        window.location.href = '/spoc/tickets';
+                    } else {
+                        alert(result.message || 'Error closing ticket');
+                    }
+                } catch (e) {
+                    alert('Error processing response');
                 }
             },
             error: function() {

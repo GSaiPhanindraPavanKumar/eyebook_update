@@ -1097,34 +1097,51 @@ class StudentController {
         exit;
     }
 
-    public function viewTicket($ticketId) {
+    public function viewTicket($ticket_id) {
         if (!isset($_SESSION['email'])) {
+            error_log('Session email not set');
             header('Location: /session-timeout');
             exit;
         }
-        
+
         $conn = Database::getConnection();
         $studentId = $_SESSION['student_id'];
         
-        // Get ticket details
-        $data = Ticket::getTicketDetails($conn, $ticketId);
+        error_log('Viewing ticket: ' . $ticket_id . ' for student: ' . $studentId);
         
-        // Check if ticket exists
-        if (!$data) {
+        try {
+            // Get ticket details
+            $ticketData = Ticket::getTicketDetails($conn, $ticket_id);
+            
+            error_log('Ticket data: ' . print_r($ticketData, true));
+            
+            // Check if ticket exists
+            if (!$ticketData || !isset($ticketData['ticket'])) {
+                error_log('Ticket not found or invalid structure');
+                $_SESSION['error'] = 'Ticket not found';
+                header('Location: /student/tickets');
+                exit;
+            }
+            
+            // Verify ticket belongs to student
+            if ($ticketData['ticket']['student_id'] != $studentId) {
+                error_log('Unauthorized access - Ticket student_id: ' . $ticketData['ticket']['student_id'] . ' vs Session student_id: ' . $studentId);
+                $_SESSION['error'] = 'Unauthorized access';
+                header('Location: /student/tickets');
+                exit;
+            }
+            
+            // Set variables for the view
+            $ticket = $ticketData['ticket'];
+            $replies = $ticketData['replies'];
+            
+            require 'views/student/view_ticket.php';
+        } catch (Exception $e) {
+            error_log('Error in viewTicket: ' . $e->getMessage());
+            $_SESSION['error'] = 'An error occurred while retrieving the ticket';
             header('Location: /student/tickets');
             exit;
         }
-        
-        // Verify ticket belongs to student
-        if ($data['ticket']['student_id'] != $studentId) {
-            header('Location: /student/tickets');
-            exit;
-        }
-        
-        $ticket = $data['ticket'];
-        $replies = $data['replies'];
-        
-        require 'views/student/view_ticket.php';
     }
 
     public function closeTicket() {

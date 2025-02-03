@@ -64,7 +64,7 @@
                                             <td><?php echo $ticket['reply_count']; ?></td>
                                             <td>
                                                 <a href="/spoc/view_ticket/<?php echo $ticket['id']; ?>" class="btn btn-info btn-sm">
-                                                    View
+                                                    View Ticket
                                                 </a>
                                             </td>
                                         </tr>
@@ -113,7 +113,7 @@
                                             <td><?php echo date('M d, Y H:i', strtotime($ticket['closed_at'])); ?></td>
                                             <td>
                                                 <a href="/spoc/view_ticket/<?php echo $ticket['id']; ?>" class="btn btn-info btn-sm">
-                                                    View History
+                                                    View Ticket
                                                 </a>
                                             </td>
                                         </tr>

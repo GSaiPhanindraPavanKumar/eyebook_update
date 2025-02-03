@@ -85,10 +85,11 @@ class Ticket {
     }
 
     public static function getTicketsByUniversity($conn, $universityId, $status = null) {
-        $sql = "SELECT t.*, s.name as student_name, 
+        $sql = "SELECT t.*, s.name as student_name, u.long_name as university_name, 
                 (SELECT COUNT(*) FROM ticket_replies WHERE ticket_id = t.id) as reply_count 
                 FROM tickets t 
                 JOIN students s ON t.student_id = s.id 
+                JOIN universities u ON t.university_id = u.id 
                 WHERE t.university_id = :university_id";
         
         if ($status) {
@@ -191,27 +192,49 @@ class Ticket {
         }
     }
 
-    public static function getTicketDetails($ticketId) {
-        $db = self::getConnection();
-        
-        $query = "
-            SELECT 
-                t.*,
-                s.name as student_name,
-                u.university_name
-            FROM tickets t
-            LEFT JOIN students s ON t.student_id = s.id
-            LEFT JOIN universities u ON s.university_id = u.id
-            WHERE t.id = :ticket_id
-        ";
-
+    public static function getTicketDetails($conn, $ticketId) {
         try {
-            $stmt = $db->prepare($query);
-            $stmt->bindParam(':ticket_id', $ticketId, PDO::PARAM_INT);
-            $stmt->execute();
-            return $stmt->fetch(PDO::FETCH_ASSOC);
-        } catch (\PDOException $e) {
-            error_log("Error fetching ticket details: " . $e->getMessage());
+            // Get ticket information
+            $sql = "SELECT t.*, s.name as student_name, u.long_name as university_name 
+                    FROM tickets t 
+                    JOIN students s ON t.student_id = s.id 
+                    JOIN universities u ON t.university_id = u.id 
+                    WHERE t.id = :ticket_id";
+            
+            $stmt = $conn->prepare($sql);
+            $stmt->execute([':ticket_id' => $ticketId]);
+            $ticket = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+            if (!$ticket) {
+                return null;
+            }
+            
+            // Get replies
+            $sql = "SELECT r.*, 
+                    CASE 
+                        WHEN r.user_role = 'student' THEN s.name
+                        WHEN r.user_role = 'faculty' THEN f.name
+                        WHEN r.user_role = 'spoc' THEN sp.name
+                        ELSE 'Unknown'
+                    END as user_name,
+                    r.created_at, r.message, r.user_role
+                    FROM ticket_replies r
+                    LEFT JOIN students s ON r.user_id = s.id AND r.user_role = 'student'
+                    LEFT JOIN faculty f ON r.user_id = f.id AND r.user_role = 'faculty'
+                    LEFT JOIN spocs sp ON r.user_id = sp.id AND r.user_role = 'spoc'
+                    WHERE r.ticket_id = :ticket_id
+                    ORDER BY r.created_at ASC";
+                    
+            $stmt = $conn->prepare($sql);
+            $stmt->execute([':ticket_id' => $ticketId]);
+            $replies = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            
+            return [
+                'ticket' => $ticket,
+                'replies' => $replies
+            ];
+        } catch (PDOException $e) {
+            error_log('Error in getTicketDetails: ' . $e->getMessage());
             return null;
         }
     }
@@ -291,10 +314,10 @@ class Ticket {
     }
 
     public static function getCountByUniversity($conn) {
-        $sql = "SELECT u.name as university_name, COUNT(*) as count
+        $sql = "SELECT u.long_name as university_name, COUNT(*) as count
                 FROM tickets t
                 JOIN universities u ON t.university_id = u.id
-                GROUP BY t.university_id";
+                GROUP BY t.university_id, u.long_name";
         
         $stmt = $conn->prepare($sql);
         $stmt->execute();

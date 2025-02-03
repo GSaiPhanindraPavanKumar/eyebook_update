@@ -64,7 +64,7 @@
                                                 <td><?php echo $ticket['reply_count']; ?></td>
                                                 <td>
                                                     <a href="/faculty/view_ticket/<?php echo $ticket['id']; ?>" class="btn btn-info btn-sm">
-                                                        View
+                                                        View Ticket
                                                     </a>
                                                 </td>
                                             </tr>

@@ -549,22 +549,25 @@ $router->get('/student/login', function() {
 
 // Student ticket routes
 $router->get('/student/tickets', 'StudentController@tickets');
+$router->get('/student/view_ticket/(\d+)', 'StudentController@viewTicket');
 $router->post('/student/create_ticket', 'StudentController@createTicket');
 $router->get('/student/get_ticket_details/(\d+)', 'StudentController@getTicketDetails');
 $router->post('/student/add_ticket_reply', 'StudentController@addTicketReply');
+$router->post('/student/close_ticket', 'StudentController@closeTicket');
 
 // Faculty ticket routes
 $router->get('/faculty/tickets', 'FacultyController@tickets');
 $router->get('/faculty/view_ticket/(\d+)', 'FacultyController@viewTicket');
+$router->get('/faculty/get_ticket_details/(\d+)', 'FacultyController@getTicketDetails');
 $router->post('/faculty/add_ticket_reply', 'FacultyController@addTicketReply');
 $router->post('/faculty/close_ticket', 'FacultyController@closeTicket');
 
 // SPOC ticket routes
 $router->get('/spoc/tickets', 'SpocController@tickets');
+$router->get('/spoc/view_ticket/(\d+)', 'SpocController@viewTicket');
 $router->get('/spoc/get_ticket_details/(\d+)', 'SpocController@getTicketDetails');
 $router->post('/spoc/add_ticket_reply', 'SpocController@addTicketReply');
 $router->post('/spoc/close_ticket', 'SpocController@closeTicket');
-$router->get('/spoc/view_ticket/(\d+)', 'SpocController@viewTicket');
 
 // Admin ticket routes
 $router->get('/admin/tickets', 'AdminController@tickets');

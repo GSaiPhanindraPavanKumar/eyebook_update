@@ -741,48 +741,28 @@ class SpocController {
         require 'views/spoc/tickets.php';
     }
 
-    public function viewTicket($ticketId) {
+    public function viewTicket($ticket_id) {
         if (!isset($_SESSION['email'])) {
             header('Location: /session-timeout');
             exit;
         }
-        
+
         $conn = Database::getConnection();
-        
-        // Get SPOC data since session variables might not be set
-        $stmt = $conn->prepare("SELECT s.*, u.id as university_id 
-                               FROM spocs s 
-                               JOIN universities u ON s.university_id = u.id 
-                               WHERE s.email = :email");
-        $stmt->execute(['email' => $_SESSION['email']]);
-        $spoc = $stmt->fetch(PDO::FETCH_ASSOC);
-        
-        if (!$spoc) {
-            header('Location: /spoc/login');
-            exit;
-        }
-        
-        // Set session variables if not already set
-        $_SESSION['spoc_id'] = $spoc['id'];
-        $_SESSION['university_id'] = $spoc['university_id'];
+        $universityId = $_SESSION['university_id'];
         
         // Get ticket details
-        $data = Ticket::getTicketDetails($conn, $ticketId);
+        $ticketData = Ticket::getTicketDetails($conn, $ticket_id);
         
-        // Check if ticket exists
-        if (!$data) {
+        // Check if ticket exists and belongs to SPOC's university
+        if (!$ticketData || !isset($ticketData['ticket']) || $ticketData['ticket']['university_id'] != $universityId) {
+            $_SESSION['error'] = 'Ticket not found or unauthorized access';
             header('Location: /spoc/tickets');
             exit;
         }
         
-        // Verify ticket belongs to SPOC's university
-        if ($data['ticket']['university_id'] != $spoc['university_id']) {
-            header('Location: /spoc/tickets');
-            exit;
-        }
-        
-        $ticket = $data['ticket'];
-        $replies = $data['replies'];
+        // Set variables for the view
+        $ticket = $ticketData['ticket'];
+        $replies = $ticketData['replies'];
         
         require 'views/spoc/view_ticket.php';
     }
