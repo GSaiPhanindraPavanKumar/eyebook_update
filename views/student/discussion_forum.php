@@ -6,26 +6,19 @@ use Models\Discussion;
 
 $conn = Database::getConnection();
 
-$username = $_SESSION['email'];
-$student_id = $_SESSION['student_id']; // Assuming student_id is stored in session
+// Get student info from database
+$student_id = $_SESSION['student_id']; 
+$stmt = $conn->prepare("SELECT name, university_id FROM students WHERE id = ?");
+$stmt->execute([$student_id]);
+$student = $stmt->fetch(PDO::FETCH_ASSOC);
 
-// Ensure university_id and name are set in session
-if (!isset($_SESSION['university_id']) || !isset($_SESSION['name'])) {
-    $sql = "SELECT university_id, name FROM students WHERE id = :student_id";
-    $stmt = $conn->prepare($sql);
-    $stmt->execute([':student_id' => $student_id]);
-    $student = $stmt->fetch(PDO::FETCH_ASSOC);
-
-    if (!$student) {
-        die("Student not found.");
-    }
-
-    $_SESSION['university_id'] = $student['university_id'];
-    $_SESSION['name'] = $student['name'];
+if (!$student) {
+    die("Student not found.");
 }
 
-$university_id = $_SESSION['university_id'];
-$name = $_SESSION['name'];
+// Set session variables
+$name = $student['name'];
+$university_id = $student['university_id'];
 
 // At the top of the file, after getting the connection
 error_reporting(E_ALL);
@@ -49,9 +42,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['save'])) {
 
     if (!empty($msg)) {
         try {
-            // Insert data into the discussion table with type parameter
+            // Use the fetched name directly
             Discussion::addDiscussion($conn, $name, $msg, $university_id, $type, $parent_post_id);
-            echo "Discussion added successfully";
+            header('Location: ' . $_SERVER['PHP_SELF']); // Redirect to prevent resubmission
+            exit;
         } catch (Exception $e) {
             echo "Error adding discussion: " . $e->getMessage();
         }

@@ -4,6 +4,8 @@ namespace Controllers;
 use Models\Discussion;
 use Models\Database;
 use Models\Student;
+use \PDO;
+use \Exception;
 
 class DiscussionController {
     private function calculateXP($type, $message) {
@@ -23,7 +25,7 @@ class DiscussionController {
     private function updateStudentXP($conn, $studentId, $xpGained) {
         $stmt = $conn->prepare("SELECT xp, level FROM students WHERE id = ?");
         $stmt->execute([$studentId]);
-        $student = $stmt->fetch();
+        $student = $stmt->fetch(PDO::FETCH_ASSOC);
         
         $currentXP = ($student['xp'] ?? 0) + $xpGained;
         $currentLevel = $student['level'] ?? 0;
@@ -59,12 +61,19 @@ class DiscussionController {
         
         // Get student info
         $studentId = $_SESSION['student_id'];
-        $username = $_SESSION['name'];
         
-        // Get university_id from student
-        $stmt = $conn->prepare("SELECT university_id FROM students WHERE id = ?");
+        // Get student data in one query
+        $stmt = $conn->prepare("SELECT name, university_id FROM students WHERE id = ?");
         $stmt->execute([$studentId]);
-        $student = $stmt->fetch();
+        $student = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        if (!$student) {
+            $_SESSION['error'] = 'Student not found';
+            header('Location: /student/dashboard');
+            exit;
+        }
+        
+        $username = $student['name'];
         $universityId = $student['university_id'];
         
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
@@ -82,7 +91,7 @@ class DiscussionController {
 
             if (!empty($msg)) {
                 try {
-                    // Add discussion post
+                    // Add discussion post using fetched username
                     Discussion::addDiscussion($conn, $username, $msg, $universityId, $type, $parent_post_id);
                     
                     // Calculate XP for the post
@@ -138,13 +147,18 @@ class DiscussionController {
             $msg = $_POST['msg'];
             $type = 'answer'; // Replies are always answers
             $parent_post_id = $_POST['parent_post_id'];
-            $username = $_SESSION['name'];
             $studentId = $_SESSION['student_id'];
+            
+            // Get student name from database
+            $stmt = $conn->prepare("SELECT name FROM students WHERE id = ?");
+            $stmt->execute([$studentId]);
+            $student = $stmt->fetch();
+            $username = $student['name'];
             
             // Calculate XP for the reply
             $xpGained = $this->calculateXP($type, $msg);
             
-            // Add the reply
+            // Add the reply using fetched username
             Discussion::addReply($conn, $username, $msg, $parent_post_id);
             
             // Update student's XP and check for level up
