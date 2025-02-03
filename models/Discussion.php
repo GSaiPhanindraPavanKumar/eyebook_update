@@ -7,7 +7,8 @@ use PDOException;
 class Discussion {
     public static function getDiscussionsByUniversity($conn, $university_id) {
         try {
-            $sql = "SELECT d.*, s.level, s.xp 
+            $sql = "SELECT d.*, s.level, s.xp, 
+                    CASE WHEN s.level IS NOT NULL THEN 1 ELSE 0 END as can_like
                     FROM discussion d 
                     LEFT JOIN students s ON d.name = s.name 
                     WHERE d.university_id = :university_id 
@@ -89,7 +90,8 @@ class Discussion {
 
     public static function getReplies($conn, $parent_post_id) {
         try {
-            $sql = "SELECT d.*, s.level, s.xp 
+            $sql = "SELECT d.*, s.level, s.xp,
+                    CASE WHEN s.level IS NOT NULL THEN 1 ELSE 0 END as can_like
                     FROM discussion d 
                     LEFT JOIN students s ON d.name = s.name 
                     WHERE d.parent_post_id = :parent_post_id 

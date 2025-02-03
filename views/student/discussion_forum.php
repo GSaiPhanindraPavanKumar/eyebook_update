@@ -372,18 +372,20 @@ $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
                                                 <i class="fas fa-comments"></i> View Replies 
                                                 <span class="badge badge-pill badge-secondary"><?php echo $replyCount; ?></span>
                                             </button>
-                                            <button class="btn <?php echo $hasLiked ? 'btn-primary' : 'btn-outline-primary'; ?> btn-sm like-button" 
-                                                    onclick="toggleLike(<?php echo $discussion['id']; ?>)" 
-                                                    id="like-btn-<?php echo $discussion['id']; ?>">
-                                                <span class="button-content">
-                                                    <i class="fas fa-thumbs-up"></i> 
-                                                    <span id="like-count-<?php echo $discussion['id']; ?>"><?php echo $likeCount; ?></span>
-                                                </span>
-                                                <span class="loading-content" style="display: none;">
-                                                    <span class="loading-spinner"></span>
-                                                    <span>Loading...</span>
-                                                </span>
-                                            </button>
+                                            <?php if ($discussion['can_like']): ?>
+                                                <button class="btn <?php echo $hasLiked ? 'btn-primary' : 'btn-outline-primary'; ?> btn-sm like-button" 
+                                                        onclick="toggleLike(<?php echo $discussion['id']; ?>)" 
+                                                        id="like-btn-<?php echo $discussion['id']; ?>">
+                                                    <span class="button-content">
+                                                        <i class="fas fa-thumbs-up"></i> 
+                                                        <span id="like-count-<?php echo $discussion['id']; ?>"><?php echo $likeCount; ?></span>
+                                                    </span>
+                                                    <span class="loading-content" style="display: none;">
+                                                        <span class="loading-spinner"></span>
+                                                        <span>Loading...</span>
+                                                    </span>
+                                                </button>
+                                            <?php endif; ?>
                                         </div>
                                     </div>
                                 </div>
