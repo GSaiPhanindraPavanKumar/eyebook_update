@@ -32,7 +32,7 @@ $email = $_SESSION['email'] ?? 'email@example.com'; // Default to a placeholder 
 
     <script>
         var options = {
-            "key": "rzp_test_ILKXehI3hPXJdo",
+            "key": "rzp_test_CVbypqu6YtbzvT",
             "amount": "<?php echo $amount * 100; ?>", // Amount in paise
             "currency": "INR",
             "name": "Your Company Name",
@@ -49,6 +49,11 @@ $email = $_SESSION['email'] ?? 'email@example.com'; // Default to a placeholder 
             },
             "theme": {
                 "color": "#F37254"
+            },
+            "modal": {
+                "ondismiss": function(){
+                    window.location.href = "/student/manage_public_courses";
+                }
             }
         };
         var rzp1 = new Razorpay(options);

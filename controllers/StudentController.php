@@ -459,7 +459,6 @@ class StudentController {
     }
 
     public function payForCourse() {
-        session_start();
         $conn = Database::getConnection();
         $studentId = $_SESSION['student_id']; // Assuming student_id is stored in session
 
@@ -480,6 +479,17 @@ class StudentController {
             $_SESSION['course_id'] = $courseId;
             $_SESSION['amount'] = $amount;
 
+            // Ensure student_name and email are set
+            if (!isset($_SESSION['student_name']) || !isset($_SESSION['email'])) {
+                // Fetch student details from the database
+                $stmt = $conn->prepare("SELECT name, email FROM students WHERE id = ?");
+                $stmt->execute([$studentId]);
+                $student = $stmt->fetch(PDO::FETCH_ASSOC);
+
+                $_SESSION['student_name'] = $student['name'];
+                $_SESSION['email'] = $student['email'];
+            }
+
             // Redirect to Razorpay payment page
             header('Location: /student/razorpay_payment');
             exit();
@@ -491,7 +501,6 @@ class StudentController {
     }
 
     public function razorpayCallback() {
-        session_start();
         $conn = Database::getConnection();
         $studentId = $_SESSION['student_id']; // Assuming student_id is stored in session
 
