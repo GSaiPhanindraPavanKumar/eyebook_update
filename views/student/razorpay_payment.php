@@ -1,8 +1,18 @@
 <?php
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
+
+if (!isset($_SESSION['razorpay_order_id']) || !isset($_SESSION['amount']) || !isset($_SESSION['student_id']) || !isset($_SESSION['course_id'])) {
+    die('Required session variables are not set.');
+}
+
 $razorpayOrderId = $_SESSION['razorpay_order_id'];
 $amount = $_SESSION['amount'];
 $studentId = $_SESSION['student_id'];
 $courseId = $_SESSION['course_id'];
+$studentName = $_SESSION['student_name'] ?? 'Student'; // Default to 'Student' if not set
+$email = $_SESSION['email'] ?? 'email@example.com'; // Default to a placeholder email if not set
 ?>
 
 <!DOCTYPE html>
@@ -34,8 +44,8 @@ $courseId = $_SESSION['course_id'];
                 document.getElementById('razorpay-form').submit();
             },
             "prefill": {
-                "name": "<?php echo $_SESSION['student_name']; ?>",
-                "email": "<?php echo $_SESSION['email']; ?>"
+                "name": "<?php echo htmlspecialchars($studentName); ?>",
+                "email": "<?php echo htmlspecialchars($email); ?>"
             },
             "theme": {
                 "color": "#F37254"

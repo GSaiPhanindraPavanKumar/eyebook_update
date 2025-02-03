@@ -459,6 +459,7 @@ class StudentController {
     }
 
     public function payForCourse() {
+        session_start();
         $conn = Database::getConnection();
         $studentId = $_SESSION['student_id']; // Assuming student_id is stored in session
 
@@ -467,7 +468,7 @@ class StudentController {
             $amount = $_POST['amount'];
 
             // Create Razorpay order
-            $api = new Api('rzp_test_ILKXehI3hPXJdo', 'ILKXehI3hPXJdo');
+            $api = new Api('rzp_test_CVbypqu6YtbzvT', 'Qi0jllHSrENWlNxGl0QXbJC5');
             $order = $api->order->create([
                 'receipt' => 'order_rcptid_' . $courseId,
                 'amount' => $amount * 100, // Amount in paise
@@ -490,10 +491,11 @@ class StudentController {
     }
 
     public function razorpayCallback() {
+        session_start();
         $conn = Database::getConnection();
         $studentId = $_SESSION['student_id']; // Assuming student_id is stored in session
 
-        $api = new Api('rzp_test_ILKXehI3hPXJdo', 'your_secret_key');
+        $api = new Api('rzp_test_CVbypqu6YtbzvT', 'Qi0jllHSrENWlNxGl0QXbJC5');
 
         $attributes = [
             'razorpay_order_id' => $_POST['razorpay_order_id'],
