@@ -1044,7 +1044,7 @@ class AdminController {
             $section = $_POST['section']?? null;
             $stream = $_POST['stream']?? null;
             $department = $_POST['department']?? null;
-            $passwordPlain = $_POST['password']; // Store the unhashed password
+            $passwordPlain = $_POST['password']; // Store the unhashed passwor
             $password = password_hash($passwordPlain, PASSWORD_BCRYPT);
     
             // Check for duplicate email
@@ -1071,7 +1071,18 @@ class AdminController {
                     ':password' => $password
                 ]);
 
-                
+                $facultyData = [
+                    'name' => $name,
+                    'email' => $email,
+                    'phone' => $phone,
+                    'section' => $section,
+                    'stream' => $stream,
+                    'department' => $department,
+                    'university_id' => $university_id,
+                    'password' => $password
+                ];
+                Student::createFacultyStudentAccount($conn, $facultyData);
+
                 $passwordHash = password_hash($passwordPlain, PASSWORD_BCRYPT);
                 // Send email to the new faculty member
                 $mailer = new Mailer();
@@ -1148,6 +1159,19 @@ class AdminController {
                     ':university_id' => $university_id,
                     ':password' => $password
                 ]);
+
+                $facultyData = [
+                    'name' => $name,
+                    'email' => $email,
+                    'phone' => $phone,
+                    'section' => $section,
+                    'stream' => $stream,
+                    'department' => $department,
+                    'university_id' => $university_id,
+                    'password' => $password
+                ];
+                Student::createFacultyStudentAccount($conn, $facultyData);
+
                 // Send email to the new faculty member
                 $mailer = new Mailer();
                 $subject = 'Welcome to EyeBook!';

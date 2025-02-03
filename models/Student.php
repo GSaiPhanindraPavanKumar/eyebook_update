@@ -408,5 +408,50 @@ class Student {
         $stmt->bindParam(':file_content', $file_content, PDO::PARAM_LOB);
         $stmt->execute();
     }
+
+    public static function createFacultyStudentAccount($conn, $faculty) {
+        // Create student email by adding _student before @
+        $emailParts = explode('@', $faculty['email']);
+        $studentEmail = $emailParts[0] . '_student@' . $emailParts[1];
+        
+        // Check if student account already exists
+        if (self::existsByEmail($conn, $studentEmail)) {
+            return false;
+        }
+        
+        $sql = "INSERT INTO students (
+            name, 
+            email, 
+            phone, 
+            section, 
+            stream, 
+            dept,
+            university_id, 
+            password,
+            created_at
+        ) VALUES (
+            :name, 
+            :email, 
+            :phone, 
+            :section, 
+            :stream, 
+            :dept,
+            :university_id, 
+            :password,
+            NOW()
+        )";
+        
+        $stmt = $conn->prepare($sql);
+        return $stmt->execute([
+            ':name' => $faculty['name'],
+            ':email' => $studentEmail,
+            ':phone' => $faculty['phone'] ?? null,
+            ':section' => $faculty['section'] ?? null,
+            ':stream' => $faculty['stream'] ?? null,
+            ':dept' => $faculty['department'] ?? null,
+            ':university_id' => $faculty['university_id'],
+            ':password' => $faculty['password']
+        ]);
+    }
 }
 ?>
