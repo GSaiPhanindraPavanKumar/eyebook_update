@@ -418,8 +418,21 @@ class Student {
         if (self::existsByEmail($conn, $studentEmail)) {
             return false;
         }
+
+        // Generate a registration number for faculty student account
+        // Format: FS + current year + random 4 digits
+        $year = date('Y');
+        $random = str_pad(mt_rand(0, 9999), 4, '0', STR_PAD_LEFT);
+        $regd_no = "FS{$year}{$random}";
+
+        // Make sure the generated regd_no is unique
+        while (self::existsByRegdNo($conn, $regd_no)) {
+            $random = str_pad(mt_rand(0, 9999), 4, '0', STR_PAD_LEFT);
+            $regd_no = "FS{$year}{$random}";
+        }
         
         $sql = "INSERT INTO students (
+            regd_no,
             name, 
             email, 
             phone, 
@@ -430,6 +443,7 @@ class Student {
             password,
             created_at
         ) VALUES (
+            :regd_no,
             :name, 
             :email, 
             :phone, 
@@ -443,6 +457,7 @@ class Student {
         
         $stmt = $conn->prepare($sql);
         return $stmt->execute([
+            ':regd_no' => $regd_no,
             ':name' => $faculty['name'],
             ':email' => $studentEmail,
             ':phone' => $faculty['phone'] ?? null,
