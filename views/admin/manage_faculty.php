@@ -33,7 +33,7 @@ function daysAgo($date) {
                         <h3 class="font-weight-bold">Manage Faculty</h3>
                     </div>
                     <div class="col-12 col-xl-4 text-right">
-                        <a href="uploadfaculty" class="btn btn-primary">
+                        <a href="uploadFaculty" class="btn btn-primary">
                             <i class="fas fa-plus-circle"></i> Add Faculty
                         </a>
                     </div>

@@ -800,7 +800,7 @@ class AdminController {
                 // Send email to the new student
                 $mailer = new Mailer();
                 $subject = 'Welcome to EyeBook!';
-                $body = "Dear $name,<br><br>Your account has been created successfully.<br><br>Username: $email <br>Password: $password<br><br>You can log in at <a href='https://eyebook.phemesoft.com/'>https://eyebook.phemesoft.com/</a><br><br>Best Regards,<br>EyeBook Team";
+                $body = "Dear $name,<br><br>Your account has been created successfully.<br><br>Username: $email <br>Password: $password<br><br> You can log in at <a href='https://eyebook.phemesoft.com/'>https://eyebook.phemesoft.com/</a><br><br>Best Regards,<br>EyeBook Team";
                 $mailer->sendMail($email, $subject, $body);
     
                 $successCount++;
@@ -1231,7 +1231,7 @@ class AdminController {
             $section = $_POST['section']?? null;
             $stream = $_POST['stream']?? null;
             $department = $_POST['department']?? null;
-            $passwordPlain = $_POST['password']; // Store the unhashed password
+            $passwordPlain = $_POST['password']; // Store the unhashed passwor
             $password = password_hash($passwordPlain, PASSWORD_BCRYPT);
     
             // Check for duplicate email
@@ -1258,12 +1258,24 @@ class AdminController {
                     ':password' => $password
                 ]);
 
-                
+                $facultyData = [
+                    'name' => $name,
+                    'email' => $email,
+                    'phone' => $phone,
+                    'section' => $section,
+                    'stream' => $stream,
+                    'department' => $department,
+                    'university_id' => $university_id,
+                    'password' => $password
+                ];
+                Student::createFacultyStudentAccount($conn, $facultyData);
+
                 $passwordHash = password_hash($passwordPlain, PASSWORD_BCRYPT);
                 // Send email to the new faculty member
                 $mailer = new Mailer();
+                $email_student = str_replace('@', '_student@', $email);
                 $subject = 'Welcome to EyeBook!';
-                $body = "Dear $name,<br><br>Your account has been created successfully.<br><br>Username: $email <br>Password: $passwordPlain<br><br>You can log in at <a href='https://eyebook.phemesoft.com/'>https://eyebook.phemesoft.com/</a><br><br>Best Regards,<br>EyeBook Team";
+                $body = "Dear $name,<br><br>Your account has been created successfully.<br><br>Username: $email <br>Password: $passwordPlain<br><br> Student account created with email: $email_student <br> and password: $passwordPlain <br> You can log in at <a href='https://eyebook.phemesoft.com/'>https://eyebook.phemesoft.com/</a><br><br>Best Regards,<br>EyeBook Team";
                 $mailer->sendMail($email, $subject, $body);
 
     
@@ -1335,10 +1347,23 @@ class AdminController {
                     ':university_id' => $university_id,
                     ':password' => $password
                 ]);
+
+                $facultyData = [
+                    'name' => $name,
+                    'email' => $email,
+                    'phone' => $phone,
+                    'section' => $section,
+                    'stream' => $stream,
+                    'department' => $department,
+                    'university_id' => $university_id,
+                    'password' => $password
+                ];
+                Student::createFacultyStudentAccount($conn, $facultyData);
+
                 // Send email to the new faculty member
                 $mailer = new Mailer();
                 $subject = 'Welcome to EyeBook!';
-                $body = "Dear $name,<br><br>Your account has been created successfully.<br><br>Username: $email <br>Password: $passwordPlain<br><br>You can log in at <a href='https://eyebook.phemesoft.com/'>https://eyebook.phemesoft.com/</a><br><br>Best Regards,<br>EyeBook Team";
+                $body = "Dear $name,<br><br>Your account has been created successfully.<br><br>Username: $email <br>Password: $passwordPlain<br><br> Student account created with email: $email_student <br> and password: $passwordPlain <br> You can log in at <a href='https://eyebook.phemesoft.com/'>https://eyebook.phemesoft.com/</a><br><br>Best Regards,<br>EyeBook Team";
                 $mailer->sendMail($email, $subject, $body);
 
                 $successCount++;

@@ -447,5 +447,65 @@ class Student {
         $stmt->bindParam(':file_content', $file_content, PDO::PARAM_LOB);
         $stmt->execute();
     }
+
+    public static function createFacultyStudentAccount($conn, $faculty) {
+        // Create student email by adding _student before @
+        $emailParts = explode('@', $faculty['email']);
+        $studentEmail = $emailParts[0] . '_student@' . $emailParts[1];
+        
+        // Check if student account already exists
+        if (self::existsByEmail($conn, $studentEmail)) {
+            return false;
+        }
+
+        // Generate a registration number for faculty student account
+        // Format: FS + current year + random 4 digits
+        $year = date('Y');
+        $random = str_pad(mt_rand(0, 9999), 4, '0', STR_PAD_LEFT);
+        $regd_no = "FS{$year}{$random}";
+
+        // Make sure the generated regd_no is unique
+        while (self::existsByRegdNo($conn, $regd_no)) {
+            $random = str_pad(mt_rand(0, 9999), 4, '0', STR_PAD_LEFT);
+            $regd_no = "FS{$year}{$random}";
+        }
+        
+        $sql = "INSERT INTO students (
+            regd_no,
+            name, 
+            email, 
+            phone, 
+            section, 
+            stream, 
+            dept,
+            university_id, 
+            password,
+            created_at
+        ) VALUES (
+            :regd_no,
+            :name, 
+            :email, 
+            :phone, 
+            :section, 
+            :stream, 
+            :dept,
+            :university_id, 
+            :password,
+            NOW()
+        )";
+        
+        $stmt = $conn->prepare($sql);
+        return $stmt->execute([
+            ':regd_no' => $regd_no,
+            ':name' => $faculty['name'],
+            ':email' => $studentEmail,
+            ':phone' => $faculty['phone'] ?? null,
+            ':section' => $faculty['section'] ?? null,
+            ':stream' => $faculty['stream'] ?? null,
+            ':dept' => $faculty['department'] ?? null,
+            ':university_id' => $faculty['university_id'],
+            ':password' => $faculty['password']
+        ]);
+    }
 }
 ?>

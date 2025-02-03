@@ -469,12 +469,10 @@ $router->post('/student/updatePassword', function(){
 $router->get('/student/profile', 'StudentController@profile');
 $router->post('/student/profile', 'StudentController@profile');
 
-$router->get('/student/discussion_forum/(\d+)', function(){
-    require 'views/student/discussion_forum.php';
-});
-$router->post('/student/discussion_forum/(\d+)', function(){
-    require 'views/student/discussion_forum.php';
-});
+$router->get('/student/discussion_forum', 'DiscussionController@studentForum');
+$router->post('/student/discussion_forum', 'DiscussionController@studentForum');
+$router->post('/student/reply_discussion', 'DiscussionController@studentReply');
+
 $router->get('/student/view_lab/([a-zA-Z0-9]+)', 'StudentController@viewLab');
 $router->get('/student/view_lab_detail/(\d+)', 'StudentController@viewLabDetail');
 $router->post('/student/submit_lab/(\d+)', 'StudentController@submitLab');
@@ -491,15 +489,6 @@ $router->get('/student/view_material/(\w+)', 'StudentController@viewMaterial');
 $router->get('/student/view_book/(\w+)', 'StudentController@viewBook');
 $router->post('/student/submit_feedback', 'StudentController@submitFeedback');
 $router->get('/student/submit_assignment/(\d+)', function($assignment_id){
-    $_GET['assignment_id'] = $assignment_id;
-    require 'views/student/assignment_submit.php';
-});
-
-$router->get('/student/discussion_forum', 'StudentController@viewDiscussions');
-$router->post('/student/discussion_forum', 'StudentController@createDiscussion');
-$router->post('/student/reply_discussion', 'StudentController@replyDiscussion');
-
-$router->post('/student/submit_assignment/(\d+)', function($assignment_id){
     $_GET['assignment_id'] = $assignment_id;
     require 'views/student/assignment_submit.php';
 });
@@ -605,22 +594,25 @@ $router->get('/student/login', function() {
 
 // Student ticket routes
 $router->get('/student/tickets', 'StudentController@tickets');
+$router->get('/student/view_ticket/(\d+)', 'StudentController@viewTicket');
 $router->post('/student/create_ticket', 'StudentController@createTicket');
 $router->get('/student/get_ticket_details/(\d+)', 'StudentController@getTicketDetails');
 $router->post('/student/add_ticket_reply', 'StudentController@addTicketReply');
+$router->post('/student/close_ticket', 'StudentController@closeTicket');
 
 // Faculty ticket routes
 $router->get('/faculty/tickets', 'FacultyController@tickets');
 $router->get('/faculty/view_ticket/(\d+)', 'FacultyController@viewTicket');
+$router->get('/faculty/get_ticket_details/(\d+)', 'FacultyController@getTicketDetails');
 $router->post('/faculty/add_ticket_reply', 'FacultyController@addTicketReply');
 $router->post('/faculty/close_ticket', 'FacultyController@closeTicket');
 
 // SPOC ticket routes
 $router->get('/spoc/tickets', 'SpocController@tickets');
+$router->get('/spoc/view_ticket/(\d+)', 'SpocController@viewTicket');
 $router->get('/spoc/get_ticket_details/(\d+)', 'SpocController@getTicketDetails');
 $router->post('/spoc/add_ticket_reply', 'SpocController@addTicketReply');
 $router->post('/spoc/close_ticket', 'SpocController@closeTicket');
-$router->get('/spoc/view_ticket/(\d+)', 'SpocController@viewTicket');
 
 // Admin ticket routes
 $router->get('/admin/tickets', 'AdminController@tickets');
@@ -636,5 +628,10 @@ $router->get('/student/view_ticket/(\d+)', 'StudentController@viewTicket');
 
 // Add with other student ticket routes
 $router->post('/student/close_ticket', 'StudentController@closeTicket');
+
+// XP Status page route
+$router->get('/student/xp_status', 'StudentController@xpStatus');
+
+$router->post('/student/toggle_like', 'DiscussionController@toggleLike');
 
 $router->run();

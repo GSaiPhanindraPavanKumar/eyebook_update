@@ -122,22 +122,49 @@ class CertificateController {
             $templateUrl = $result['ObjectURL'];
             error_log("[Certificate Generation] Template uploaded to S3: $templateUrl");
             
-            // Log positions data
-            error_log("[Certificate Generation] Positions data: " . $_POST['positions']);
-            $positions = json_decode($_POST['positions'], true);
-            if ($positions === null) {
-                error_log("[Certificate Generation] Failed to decode positions JSON");
-                throw new \Exception("Invalid positions data");
+            // Validate positions data
+            if (!isset($_POST['positions'])) {
+                throw new \Exception("Text positions data is required");
             }
-            error_log("[Certificate Generation] Decoded positions: " . print_r($positions, true));
+
+            error_log("[Certificate Generation] Raw positions data: " . print_r($_POST['positions'], true));
             
-            // Insert generation record with excel_file_path
+            // Decode positions
+            $positions = is_string($_POST['positions']) ? 
+                json_decode($_POST['positions'], true) : 
+                $_POST['positions'];
+
+            if (!is_array($positions)) {
+                throw new \Exception("Invalid positions format. Expected JSON object.");
+            }
+
+            // Validate required fields
+            $requiredFields = ['registration_number', 'name', 'grade'];
+            foreach ($requiredFields as $field) {
+                if (!isset($positions[$field]) || 
+                    !isset($positions[$field]['x']) || 
+                    !isset($positions[$field]['y'])) {
+                    error_log("[Certificate Generation] Missing coordinates for field: " . $field);
+                    error_log("[Certificate Generation] Available positions: " . json_encode($positions));
+                    throw new \Exception("Missing coordinates for {$field}. Please set all text positions.");
+                }
+            }
+
+            // Normalize coordinates
+            foreach ($positions as $field => &$pos) {
+                $pos['x'] = (float)$pos['x'];
+                $pos['y'] = (float)$pos['y'];
+            }
+
+            error_log("[Certificate Generation] Normalized positions: " . json_encode($positions));
+
+            // Store the normalized positions
             $stmt = $conn->prepare("INSERT INTO certificate_generations (subject, template_path, template_type, text_positions, status, generated_count, total_count, excel_file_path) VALUES (?, ?, ?, ?, 'processing', 0, 0, ?)");
             $stmt->execute([
                 $_POST['subject'],
                 $templateUrl,
                 $_FILES['template']['type'],
-                $_POST['positions'],
+                json_encode($positions),
                 $excelTempPath
             ]);
             
@@ -390,133 +417,28 @@ class CertificateController {
                 ]);
             }
 
-            // Get image dimensions first
-            $imageInfo = getimagesize($localTemplatePath);
-            if (!$imageInfo) {
-                throw new \Exception("Invalid template image");
-            }
-            
-            $imageWidth = $imageInfo[0];
-            $imageHeight = $imageInfo[1];
-            
-            error_log("[Certificate Generation] Image dimensions: {$imageWidth}x{$imageHeight}");
-            
-            // Create image based on type
-            switch ($imageInfo['mime']) {
-                case 'image/jpeg':
-                    $image = imagecreatefromjpeg($localTemplatePath);
-                    break;
-                case 'image/png':
-                    $image = imagecreatefrompng($localTemplatePath);
-                    break;
-                default:
-                    throw new \Exception('Unsupported image type: ' . $imageInfo['mime']);
-            }
-
-            if (!$image) {
-                throw new \Exception("Failed to create image resource");
-            }
-
-            // Configure image
-            imagesavealpha($image, true);
-            imagealphablending($image, true);
-
-            // Create text color (black)
-            $textColor = imagecolorallocate($image, 0, 0, 0);
-            
-            // Use font
-            $fontPath = __DIR__ . '/../assets/fonts/Poppins-Bold.ttf';
-            if (!file_exists($fontPath)) {
-                throw new \Exception("Font file not found: $fontPath");
-            }
-
-            // Add text to image using actual image dimensions
-            foreach ($positions as $field => $pos) {
-                $text = '';
-                $fontSize = 0;
-                
-                switch ($field) {
-                    case 'registration_number':
-                        $text = $data[0] ?? '';
-                        $fontSize = round($imageHeight * 0.02);
-                        break;
-                    case 'name':
-                        $text = $data[1] ?? '';
-                        $fontSize = round($imageHeight * 0.035);
-                        break;
-                    case 'grade':
-                        $text = $data[2] ?? '';
-                        $fontSize = round($imageHeight * 0.02);
-                        break;
-                    default:
-                        continue 2;
-                }
-
-                if (empty($text)) continue;
-
-                // Convert position coordinates to actual image dimensions
-                $posX = $pos['x'];
-                $posY = $pos['y'];
-
-                error_log("[Certificate Generation] Original position for '$text': x=$posX, y=$posY");
-
-                // Get text dimensions to center it properly
-                $bbox = imagettfbbox($fontSize, 0, $fontPath, $text);
-                if ($bbox === false) {
-                    throw new \Exception("Failed to calculate text dimensions");
-                }
-
-                // Calculate text width and height
-                $textWidth = $bbox[2] - $bbox[0];
-                $textHeight = $bbox[1] - $bbox[7];
-                $baselineOffset = abs($bbox[7]);
-
-                // Calculate position to center the text at the specified point
-                // Important: Use the original position coordinates directly
-                $x = $posX - ($textWidth / 2);
-                $y = $posY + ($textHeight / 2);
-
-                error_log("[Certificate Generation] Text '$text': width=$textWidth, height=$textHeight");
-                error_log("[Certificate Generation] Final position: x=$x, y=$y");
-
-                // Add text to image
-                $result = imagettftext(
-                    $image,
-                    $fontSize,
-                    0,
-                    round($x),
-                    round($y),
-                    $textColor,
-                    $fontPath,
-                    $text
-                );
-
-                if ($result === false) {
-                    error_log("[Certificate Generation] Failed to add text: $text");
-                    throw new \Exception("Failed to add text: $text");
-                }
-            }
-
-            // Save certificate
+            // Generate the certificate using the preview function
             $outputFileName = uniqid('cert_') . '_' . preg_replace('/[^a-zA-Z0-9]/', '_', $data[0]) . '.jpg';
             $localOutputPath = $localCertDir . $outputFileName;
             
-            error_log("[Certificate Generation] Saving certificate to: $localOutputPath");
-            
-            if (!imagejpeg($image, $localOutputPath, 90)) {
-                throw new \Exception("Failed to save certificate image");
+            // Use generatePreviewCertificate to create the certificate
+            $generatedPath = $this->generatePreviewCertificate(
+                $data,
+                $localTemplatePath,
+                $positions,
+                $localCertDir // Use certificate directory instead of temp
+            );
+
+            // Move the generated file to its final location if needed
+            if ($generatedPath !== $localOutputPath && file_exists($generatedPath)) {
+                rename($generatedPath, $localOutputPath);
             }
 
-            imagedestroy($image);
             error_log("[Certificate Generation] Successfully generated certificate: $localOutputPath");
-            
             return $localOutputPath;
             
         } catch (\Exception $e) {
             error_log("[Certificate Generation] Error: " . $e->getMessage());
-            if (isset($image) && is_resource($image)) {
-                imagedestroy($image);
-            }
             return false;
         }
     }
@@ -864,22 +786,49 @@ class CertificateController {
                 throw new \Exception("No data found in Excel file");
             }
 
-            // Get positions from POST data
-            $positions = json_decode($_POST['positions'], true);
-            if (!$positions) {
-                throw new \Exception("Invalid text positions data");
+            // Get and validate positions data
+            $positions = isset($_POST['positions']) ? $_POST['positions'] : null;
+            error_log("[Certificate Preview] Raw positions data: " . print_r($positions, true));
+
+            // If positions is a string (JSON), decode it
+            if (is_string($positions)) {
+                $positions = json_decode($positions, true);
             }
 
-            error_log("[Certificate Preview] Generating preview with positions: " . json_encode($positions));
+            // Validate positions structure
+            if (!is_array($positions)) {
+                error_log("[Certificate Preview] Invalid positions format: " . gettype($positions));
+                throw new \Exception("Invalid positions format. Expected JSON object.");
+            }
 
-            // Pass tempDir to generatePreviewCertificate
+            // Ensure all required fields exist with coordinates
+            $requiredFields = ['registration_number', 'name', 'grade'];
+            foreach ($requiredFields as $field) {
+                if (!isset($positions[$field]) || 
+                    !isset($positions[$field]['x']) || 
+                    !isset($positions[$field]['y'])) {
+                    error_log("[Certificate Preview] Missing coordinates for field: " . $field);
+                    error_log("[Certificate Preview] Available positions: " . json_encode($positions));
+                    throw new \Exception("Missing coordinates for {$field}. Please set all text positions.");
+                }
+            }
+
+            // Normalize coordinates to numbers
+            foreach ($positions as $field => &$pos) {
+                $pos['x'] = (float)$pos['x'];
+                $pos['y'] = (float)$pos['y'];
+            }
+
+            error_log("[Certificate Preview] Normalized positions: " . json_encode($positions));
+
+            // Generate preview with validated positions
             $previewPath = $this->generatePreviewCertificate($firstRow, $tempTemplatePath, $positions, $tempDir);
 
             // Clean up temp files
             unlink($tempExcelPath);
             unlink($tempTemplatePath);
 
-            // Return preview path and data
+            // Return preview path and the exact positions used
             header('Content-Type: application/json');
             echo json_encode([
                 'success' => true,
@@ -888,7 +837,8 @@ class CertificateController {
                     'registration_number' => $firstRow[0] ?? '',
                     'name' => $firstRow[1] ?? '',
                     'grade' => $firstRow[2] ?? ''
-                ]
+                ],
+                'positions' => $positions // Return the exact positions used
             ]);
 
         } catch (\Exception $e) {
@@ -897,16 +847,20 @@ class CertificateController {
             http_response_code(500);
             echo json_encode([
                 'success' => false,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
+                'debug' => [
+                    'received_positions' => $_POST['positions'] ?? 'not set',
+                    'decoded_positions' => $positions ?? null
+                ]
             ]);
         }
     }
 
     private function generatePreviewCertificate($data, $templatePath, $positions, $tempDir) {
         try {
-            error_log("[Preview Generation] Starting with template: $templatePath");
+            error_log("[Preview Generation] Starting with positions: " . json_encode($positions));
             
-            // Get image dimensions first
+            // Get image dimensions
             $imageInfo = getimagesize($templatePath);
             if (!$imageInfo) {
                 throw new \Exception("Invalid template image");
@@ -914,8 +868,6 @@ class CertificateController {
             
             $imageWidth = $imageInfo[0];
             $imageHeight = $imageInfo[1];
-            
-            error_log("[Preview Generation] Image dimensions: {$imageWidth}x{$imageHeight}");
             
             // Create image based on type
             switch ($imageInfo['mime']) {
@@ -946,7 +898,7 @@ class CertificateController {
                 throw new \Exception("Font file not found: $fontPath");
             }
 
-            // Add text to image using actual image dimensions
+            // Add text to image using exact pixel coordinates
             foreach ($positions as $field => $pos) {
                 $text = '';
                 $fontSize = 0;
@@ -970,25 +922,22 @@ class CertificateController {
 
                 if (empty($text)) continue;
 
-                // Get text dimensions to center it properly
+                // Get text dimensions
                 $bbox = imagettfbbox($fontSize, 0, $fontPath, $text);
                 if ($bbox === false) {
                     throw new \Exception("Failed to calculate text dimensions");
                 }
 
-                // Calculate text width and height
+                // Calculate text dimensions and position
                 $textWidth = $bbox[2] - $bbox[0];
                 $textHeight = $bbox[1] - $bbox[7];
-
-                // Calculate baseline offset and center position
                 $baselineOffset = abs($bbox[7]);
 
-                // Calculate position to center the text at the specified point
+                // Use exact pixel coordinates from positions
                 $x = round($pos['x'] - ($textWidth / 2));
                 $y = round($pos['y'] + $baselineOffset);
 
-                error_log("[Preview Generation] Text dimensions for '$text': width=$textWidth, height=$textHeight, baseline=$baselineOffset");
-                error_log("[Preview Generation] Adding text '$text' centered at ($x, $y) with font size $fontSize");
+                error_log("[Preview Generation] Placing '$text' at x=$x, y=$y (original pos: x={$pos['x']}, y={$pos['y']})");
 
                 // Add text to image
                 $result = imagettftext(
@@ -1003,7 +952,6 @@ class CertificateController {
                 );
 
                 if ($result === false) {
-                    error_log("[Preview Generation] Failed to add text: $text");
                     throw new \Exception("Failed to add text: $text");
                 }
             }

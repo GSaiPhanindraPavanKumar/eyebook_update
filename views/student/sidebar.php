@@ -663,6 +663,12 @@ if ($userData) {
                     </a>
                 </li>
                 <li class="nav-item">
+                    <a class="nav-link" href="/student/xp_status">
+                        <i class="ti-star menu-icon"></i>
+                        <span class="menu-title">XP & Levels</span>
+                    </a>
+                </li>
+                <li class="nav-item">
                     <a class="nav-link" href="/student/logout">
                         <i class="ti-power-off menu-icon"></i>
                         <span class="menu-title">Logout</span>

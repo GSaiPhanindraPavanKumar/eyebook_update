@@ -892,69 +892,37 @@ class FacultyController {
         require 'views/faculty/tickets.php';
     }
 
-    public function viewTicket($ticketId) {
+    public function viewTicket($ticket_id) {
         if (!isset($_SESSION['email'])) {
             header('Location: /session-timeout');
             exit;
         }
-        
+
         $conn = Database::getConnection();
+        $universityId = $_SESSION['university_id'];
         
-        // Get Faculty data since session variables might not be set
-        $stmt = $conn->prepare("SELECT f.*, u.id as university_id 
-                               FROM faculty f 
-                               JOIN universities u ON f.university_id = u.id 
-                               WHERE f.email = :email");
-        $stmt->execute(['email' => $_SESSION['email']]);
-        $faculty = $stmt->fetch(PDO::FETCH_ASSOC);
-        
-        if (!$faculty) {
-            header('Location: /faculty/login');
-            exit;
-        }
-        
-        // Set session variables if not already set
-        $_SESSION['faculty_id'] = $faculty['id'];
-        $_SESSION['university_id'] = $faculty['university_id'];
-        
-        // Get ticket details
-        $data = Ticket::getTicketDetails($conn, $ticketId);
-        
-        // Check if ticket exists
-        if (!$data) {
-            header('Location: /faculty/tickets');
-            exit;
-        }
-        
-        // Verify ticket belongs to faculty's university
-        if ($data['ticket']['university_id'] != $faculty['university_id']) {
-            header('Location: /faculty/tickets');
-            exit;
-        }
-        
-        $ticket = $data['ticket'];
-        $replies = $data['replies'];
-        
-        // Check if faculty can close the ticket
-        // Faculty can close if ticket is active and has at least one reply from faculty
-        $canClose = false;
-        if ($ticket['status'] === 'active') {
-            foreach ($replies as $reply) {
-                if ($reply['user_role'] === 'faculty') {
-                    $canClose = true;
-                    break;
-                }
+        try {
+            // Get ticket details
+            $ticketData = Ticket::getTicketDetails($conn, $ticket_id);
+            
+            // Check if ticket exists and belongs to faculty's university
+            if (!$ticketData || !isset($ticketData['ticket']) || $ticketData['ticket']['university_id'] != $universityId) {
+                $_SESSION['error'] = 'Ticket not found or unauthorized access';
+                header('Location: /faculty/tickets');
+                exit;
             }
+            
+            // Set variables for the view
+            $ticket = $ticketData['ticket'];
+            $replies = $ticketData['replies'];
+            
+            require 'views/faculty/view_ticket.php';
+        } catch (Exception $e) {
+            error_log('Error in viewTicket: ' . $e->getMessage());
+            $_SESSION['error'] = 'An error occurred while retrieving the ticket';
+            header('Location: /faculty/tickets');
+            exit;
         }
-        
-        // Pass data to view
-        $data = [
-            'ticket' => $ticket,
-            'replies' => $replies,
-            'canClose' => $canClose
-        ];
-        
-        require 'views/faculty/view_ticket.php';
     }
 
     public function addTicketReply() {
