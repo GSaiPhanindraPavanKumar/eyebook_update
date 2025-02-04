@@ -49,9 +49,9 @@ include "sidebar.php";
                                 <input type="text" class="form-control" id="country" name="country" required>
                             </div>
                             <div class="form-group">
-                                <label for="company_id">Select Company <span class="text-danger">*</span></label>
+                                <label for="company_id">Select University <span class="text-danger">*</span></label>
                                 <select class="form-control" id="company_id" name="company_id" required>
-                                    <option value="">Select Company</option>
+                                    <option value="">Select University</option>
                                     <?php foreach ($companies as $company): ?>
                                         <option value="<?php echo $company['id']; ?>"><?php echo htmlspecialchars($company['name']); ?></option>
                                     <?php endforeach; ?>
