@@ -23,7 +23,7 @@
                         <p class="card-title mb-0" style="font-size:larger">Universities</p><br>
                         <div class="table-responsive">
                             <div class="d-flex justify-content-between align-items-center mb-3">
-                                <input class="form-control w-50" id="searchInput" type="text" placeholder="🔍 Search Universities...">
+                                <input class="form-control w-75" id="searchInput" type="text" placeholder="🔍 Search Universities...">
                                 <div>
                                     <select id="entriesPerPage" class="form-control">
                                         <option value="10">10 entries</option>
