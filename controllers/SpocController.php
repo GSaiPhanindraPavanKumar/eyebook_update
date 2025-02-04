@@ -425,16 +425,42 @@ class SpocController {
             header('Location: /session-timeout');
             exit;
         }
+        
         $conn = Database::getConnection();
-
+        $spocModel = new Spoc($conn);
+        $message = '';
+        $message_type = '';
+        
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-            $spoc_id = $_SESSION['spoc']['id'];
-            $new_password = password_hash($_POST['newPassword'], PASSWORD_BCRYPT);
-
-            Spoc::updatePassword($conn, $spoc_id, $new_password);
-
-            $message = "Password updated successfully.";
-            $message_type = "success";
+            // Get SPOC data since session variables might not be set
+            $userData = $spocModel->getUserData($_SESSION['email']);
+            if (!$userData) {
+                header('Location: /session-timeout');
+                exit;
+            }
+            
+            $spoc_id = $userData['id']; // Get ID from database instead of session
+            $currentPassword = $_POST['currentPassword'];
+            $newPassword = $_POST['newPassword'];
+            $confirmPassword = $_POST['confirmPassword'];
+            
+            // Verify current password
+            if (!password_verify($currentPassword, $userData['password'])) {
+                $message = "Current password is incorrect";
+                $message_type = "danger";
+            }
+            // Verify new password matches confirmation
+            else if ($newPassword !== $confirmPassword) {
+                $message = "New password and confirmation do not match";
+                $message_type = "danger";
+            }
+            else {
+                $new_password_hash = password_hash($newPassword, PASSWORD_BCRYPT);
+                Spoc::updatePassword($conn, $spoc_id, $new_password_hash);
+                
+                $message = "Password updated successfully";
+                $message_type = "success";
+            }
         }
 
         require 'views/spoc/updatePassword.php';
