@@ -31,11 +31,11 @@ include 'sidebar.php';
                                     <div class="modal-body">
                                         <p id="error-message"></p>
                                         <hr>
-                                        <p>Please raise a ticket to report this issue.</p>
+                                        <p>Please inform the concerned faculty to update the course book.</p>
                                     </div>
                                     <div class="modal-footer">
                                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                                        <a href="/spoc/tickets" class="btn btn-primary">Raise Ticket</a>
+                                        <!-- <a href="/spoc/tickets" class="btn btn-primary">Raise Ticket</a> -->
                                     </div>
                                 </div>
                             </div>
@@ -91,7 +91,7 @@ $(document).ready(function() {
                 if (xhr.responseText && xhr.responseText.includes('NoSuchKey')) {
                     $('#error-message').text('The course content appears to have been deleted from the server. Please raise a ticket to escalate this issue to higher officials.');
                 } else {
-                    $('#error-message').text('Unable to access the course content. Please raise a ticket to report this issue.');
+                    $('#error-message').text('Unable to access the course content.');
                 }
                 $('#errorModal').modal('show');
                 $('#content-container').html(`
