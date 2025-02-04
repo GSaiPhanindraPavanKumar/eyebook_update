@@ -134,7 +134,7 @@
                 success: function(response) {
                     var res = JSON.parse(response);
                     var msg = res.message;
-                    msg = msg.replace('company', 'university');
+                    msg = msg.replace('company', <?php echo $company['name']; ?>);
                     alert(msg);
                     location.reload();
                 },
