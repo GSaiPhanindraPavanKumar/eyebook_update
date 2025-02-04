@@ -241,20 +241,21 @@ class SpocController {
             die('Invalid course ID');
         }
         $course = Course::getById($conn, $course_id);
-    
+
         if (!$course || empty($course['course_book'])) {
-            echo 'SCORM content not found.';
+            $error_message = 'Course book content not found.';
+            require 'views/spoc/book_view.php';
             exit;
         }
-    
+
         // Ensure course_book is an array
         if (!is_array($course['course_book'])) {
             $course['course_book'] = json_decode($course['course_book'], true) ?? [];
         }
-    
+
         // Get the index_path from the query parameter
         $index_path = $_GET['index_path'] ?? $course['course_book'][0]['scorm_url'];
-    
+        
         require 'views/spoc/book_view.php';
     }
 
