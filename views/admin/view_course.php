@@ -123,13 +123,15 @@ if ($assignedCohorts === null) {
                                             $ECContent = !empty($course['EC_content']) ? json_decode($course['EC_content'], true) : [];
                                             if (!empty($ECContent)) {
                                                 $serialNumber = 1;
+                                                $hashedId = base64_encode($course['id']);
+                                                $hashedId = str_replace(['+', '/', '='], ['-', '_', ''], $hashedId);
                                                 foreach ($ECContent as $content) {
                                                     echo "<tr>";
                                                     echo "<td>" . $serialNumber++ . "</td>";
                                                     echo "<td>" . htmlspecialchars($content['unitTitle'] ?? 'N/A') . "</td>";
                                                     $full_url = $content['indexPath'] ?? '#';
                                                     echo "<td>
-                                                            <a href='/" . htmlspecialchars($full_url) . "' target='_blank' class='btn btn-primary'>View EC</a>
+                                                            <a href='/admin/viewECbook/" . urlencode($hashedId) . "?index_path=" . urlencode($full_url) . "' class='btn btn-primary'>View EC</a>
                                                             <button class='btn btn-danger' onclick='removeContent(\"EC_content\", " . ($serialNumber - 2) . ")'>Remove</button>
                                                         </td>";
                                                     echo "</tr>";

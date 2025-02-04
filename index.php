@@ -246,6 +246,8 @@ $router->post('/admin/archive_course', 'adminController@archiveCourse');
 $router->post('/admin/unarchive_course', 'adminController@unarchiveCourse');
 $router->post('/admin/toggle_feedback', 'AdminController@toggleFeedback');
 $router->post('/admin/toggle_public_feedback', 'AdminController@togglePublicFeedback');
+$router->get('/admin/view_ec_content/([a-zA-Z0-9]+)', 'AdminController@viewECBook');
+
 
 $router->post('/admin/reset_student_password/(\d+)', 'AdminController@resetStudentPassword');
 $router->post('/admin/bulk_reset_student_password', 'AdminController@bulkResetStudentPassword');
@@ -308,6 +310,17 @@ $router->post('/admin/update_question/([0-9]+)', 'AdminController@updateQuestion
 $router->get('/admin/delete_question/([0-9]+)', 'AdminController@deleteQuestion');
 $router->get('/admin/download_feedback/(\d+)', 'AdminController@downloadFeedback');
 $router->post('/admin/bulk_add_students_to_cohort/(\d+)', 'AdminController@bulkAddStudentsToCohort');
+
+$router->get('/admin/create_public_lab', 'AdminController@createPublicLab');
+$router->post('/admin/create_public_lab', 'AdminController@createPublicLab');
+$router->get('/admin/manage_public_labs', 'AdminController@managePublicLabs');
+$router->get('/admin/view_labs_by_public_course/(\d+)', 'AdminController@viewLabsByPublicCourse');
+$router->get('/admin/view_public_lab_detail/([0-9]+)', 'AdminController@viewPublicLabDetail');
+$router->get('/admin/edit_public_lab/(\d+)', 'AdminController@editPublicLab');
+$router->post('/admin/edit_public_lab/(\d+)', 'AdminController@editPublicLab');
+$router->get('/admin/delete_public_lab/(\d+)', 'AdminController@deletePublicLab');
+$router->get('/admin/download_public_lab_report/([0-9]+)', 'AdminController@downloadPublicLabReport');
+
 
 $router->get('/spoc', 'SpocController@dashboard');
 $router->get('/spoc/dashboard', 'SpocController@dashboard');
@@ -477,6 +490,13 @@ $router->get('/student/view_lab/([a-zA-Z0-9]+)', 'StudentController@viewLab');
 $router->get('/student/view_lab_detail/(\d+)', 'StudentController@viewLabDetail');
 $router->post('/student/submit_lab/(\d+)', 'StudentController@submitLab');
 $router->post('/student/update_lab_submission', 'StudentController@updateLabSubmission');
+
+$router->get('/student/view_public_lab/([a-zA-Z0-9]+)', 'StudentController@viewPublicLab');
+$router->get('/student/view_public_lab_detail/(\d+)', 'StudentController@viewPublicLabDetail');
+$router->post('/student/submit_public_lab/(\d+)', 'StudentController@submitPublicLab');
+$router->post('/student/update_public_lab_submission', 'StudentController@updatePublicLabSubmission');
+
+
 $router->get('/student/my_courses', function(){
     require 'views/student/my_courses.php';
 });

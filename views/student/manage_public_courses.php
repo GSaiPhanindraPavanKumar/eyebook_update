@@ -54,6 +54,7 @@ function custom_base64_encode($data) {
                                         $hashedId = custom_base64_encode($course['id']);
                                         ?>
                                         <a href="/student/view_public_course/<?php echo $hashedId; ?>" class="btn btn-primary">View Course</a>
+                                        <a href="/student/view_public_lab/<?php echo $hashedId; ?>" class="btn btn-secondary ml-2">View Lab</a>
                                     </div>
                                 </div>
                             </div>
