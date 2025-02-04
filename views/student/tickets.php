@@ -213,12 +213,6 @@ $(document).ready(function() {
         keyboard: false
     });
 
-    // Handle form submission
-    $('#newTicketForm').on('submit', function(e) {
-        e.preventDefault();
-        createTicket(e);
-    });
-
     // Handle view ticket button clicks
     $(document).on('click', '.btn-info[onclick*="viewTicket"]', function(e) {
         e.preventDefault();
@@ -235,10 +229,16 @@ $(document).ready(function() {
 
 // Update the createTicket function
 function createTicket(event) {
+    // Add a flag to prevent double submission
+    if ($('#newTicketForm').data('submitting')) {
+        return;
+    }
+    
     if (event) {
         event.preventDefault();
         event.stopPropagation();
     }
+
     const subject = $('#ticketSubject').val().trim();
     const description = $('#ticketDescription').val().trim();
     
@@ -246,6 +246,9 @@ function createTicket(event) {
         alert('Please fill in all fields');
         return;
     }
+    
+    // Set the submitting flag
+    $('#newTicketForm').data('submitting', true);
     
     $.ajax({
         url: '/student/create_ticket',
@@ -275,6 +278,10 @@ function createTicket(event) {
         error: function(xhr, status, error) {
             console.error('AJAX Error:', error);
             alert('An error occurred while creating the ticket');
+        },
+        complete: function() {
+            // Reset the submitting flag
+            $('#newTicketForm').data('submitting', false);
         }
     });
 }
