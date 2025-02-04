@@ -30,35 +30,44 @@
                         <div class="d-flex justify-content-between align-items-center mb-3">
                             <h5 class="card-title mb-0">Universities</h5>
                             <div>
-                                <button class="btn btn-danger btn-sm" id="removeUniversityBtn"><i class="fas fa-trash"></i> Remove University</button>
+                                <button class="btn btn-danger btn-sm" id="removeUniversityBtn">
+                                    <span class="button-text"><i class="fas fa-trash"></i> Remove University</span>
+                                    <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                                </button>
                             </div>
                         </div>
                         <div class="table-responsive">
-                            <table class="table table-hover table-borderless table-striped">
-                                <thead class="thead-light">
-                                    <tr>
-                                        <th>Select</th>
-                                        <th>Name</th>
-                                        <th>Short Name</th>
-                                        <th>No of Faculties</th>
-                                        <th>No of Students</th>
-                                        <th>View</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <?php foreach ($universities as $university): ?>
+                            <?php if (empty($universities)): ?>
+                                <div class="text-center py-5">
+                                    <img src="/views/landing/assets/img/empty-box.png" alt="No Universities" style="width: 150px; opacity: 0.5;">
+                                    <p class="text-muted mt-3">No universities found</p>
+                                </div>
+                            <?php else: ?>
+                                <table class="table table-hover table-borderless table-striped">
+                                    <thead class="thead-light">
                                         <tr>
-                                            <td><input type="checkbox" name="select_university" value="<?php echo $university['id']; ?>"></td>
-                                            <td><?php echo htmlspecialchars($university['long_name']); ?></td>
-                                            <td><?php echo htmlspecialchars($university['short_name']); ?></td>
-                                            <td><?php echo University::getCountfacultyByUniversityId($conn, $university['id']); ?></td>
-                                            <td><?php echo University::getCountByUniversityId($conn, $university['id']); ?></td>
-                                            <td><a href="/admin/view_university/<?php echo $university['id']; ?>" class="btn btn-outline-info btn-sm"><i class="fas fa-eye"></i> View</a></td>
+                                            <th>Select</th>
+                                            <th>Name</th>
+                                            <th>Short Name</th>
+                                            <th>No of Faculties</th>
+                                            <th>No of Students</th>
+                                            <th>View</th>
                                         </tr>
-                                    <?php endforeach; ?>
-                                </tbody>
-                            </table>
-                            <div id="noRecords" style="display: none;" class="text-center">No records found</div>
+                                    </thead>
+                                    <tbody>
+                                        <?php foreach ($universities as $university): ?>
+                                            <tr>
+                                                <td><input type="checkbox" name="select_university" value="<?php echo $university['id']; ?>"></td>
+                                                <td><?php echo htmlspecialchars($university['long_name']); ?></td>
+                                                <td><?php echo htmlspecialchars($university['short_name']); ?></td>
+                                                <td><?php echo University::getCountfacultyByUniversityId($conn, $university['id']); ?></td>
+                                                <td><?php echo University::getCountByUniversityId($conn, $university['id']); ?></td>
+                                                <td><a href="/admin/view_university/<?php echo $university['id']; ?>" class="btn btn-outline-info btn-sm"><i class="fas fa-eye"></i> View</a></td>
+                                            </tr>
+                                        <?php endforeach; ?>
+                                    </tbody>
+                                </table>
+                            <?php endif; ?>
                         </div>
                     </div>
                 </div>
@@ -72,29 +81,45 @@
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center mb-3">
                             <h5 class="card-title mb-0">Add University</h5>
-                            <button type="submit" class="btn btn-primary mb-2 ml-2" id="submitAddUniversity">Submit</button>
+                            <button type="submit" class="btn btn-primary mb-2 ml-2" id="submitAddUniversity">
+                                <span class="button-text">Submit</span>
+                                <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                            </button>
                         </div>
                         <div class="table-responsive">
-                            <table class="table table-hover table-borderless table-striped">
-                                <thead class="thead-light">
-                                    <tr>
-                                        <th>Select</th>
-                                        <th>Name</th>
-                                        <th>Short Name</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <?php foreach ($allUniversities as $university): ?>
-                                        <?php if (empty($university['company_id'])): ?>
-                                            <tr>
-                                                <td><input type="checkbox" name="select_university_add" value="<?php echo htmlspecialchars($university['id']); ?>"></td>
-                                                <td><?php echo htmlspecialchars($university['long_name']); ?></td>
-                                                <td><?php echo htmlspecialchars($university['short_name']); ?></td>
-                                            </tr>
-                                        <?php endif; ?>
-                                    <?php endforeach; ?>
-                                </tbody>
-                            </table>
+                            <?php 
+                            $availableUniversities = array_filter($allUniversities, function($university) {
+                                return empty($university['company_id']);
+                            });
+                            ?>
+                            
+                            <?php if (empty($availableUniversities)): ?>
+                                <div class="text-center py-5">
+                                    <img src="/views/landing/assets/img/empty-box.png" alt="No Universities Available" style="width: 150px; opacity: 0.5;">
+                                    <p class="text-muted mt-3">No universities available to add</p>
+                                </div>
+                            <?php else: ?>
+                                <table class="table table-hover table-borderless table-striped">
+                                    <thead class="thead-light">
+                                        <tr>
+                                            <th>Select</th>
+                                            <th>Name</th>
+                                            <th>Short Name</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <?php foreach ($allUniversities as $university): ?>
+                                            <?php if (empty($university['company_id'])): ?>
+                                                <tr>
+                                                    <td><input type="checkbox" name="select_university_add" value="<?php echo htmlspecialchars($university['id']); ?>"></td>
+                                                    <td><?php echo htmlspecialchars($university['long_name']); ?></td>
+                                                    <td><?php echo htmlspecialchars($university['short_name']); ?></td>
+                                                </tr>
+                                            <?php endif; ?>
+                                        <?php endforeach; ?>
+                                    </tbody>
+                                </table>
+                            <?php endif; ?>
                         </div>
                     </div>
                 </div>
@@ -115,6 +140,10 @@
     $(document).ready(function() {
         $('#submitAddUniversity').on('click', function(event) {
             event.preventDefault();
+            const $button = $(this);
+            const $buttonText = $button.find('.button-text');
+            const $spinner = $button.find('.spinner-border');
+            
             var selectedUniversities = [];
             $('input[name="select_university_add"]:checked').each(function() {
                 selectedUniversities.push($(this).val());
@@ -125,6 +154,11 @@
                 return;
             }
 
+            // Disable button and show loading state
+            $button.prop('disabled', true);
+            $buttonText.text('Submitting...');
+            $spinner.removeClass('d-none');
+
             var companyId = <?php echo $company['id']; ?>;
 
             $.ajax({
@@ -133,16 +167,27 @@
                 data: { university_ids: selectedUniversities, company_id: companyId },
                 success: function(response) {
                     var res = JSON.parse(response);
-                    alert(res.message);
+                    var msg = res.message;
+                    msg = msg.replace('Universities', 'Sub-Universities');
+                    msg = msg.replace('company', 'university');
+                    alert(msg);
                     location.reload();
                 },
                 error: function(xhr, status, error) {
                     alert('An error occurred: ' + error);
+                    // Reset button state on error
+                    $button.prop('disabled', false);
+                    $buttonText.text('Submit');
+                    $spinner.addClass('d-none');
                 }
             });
         });
 
         $('#removeUniversityBtn').on('click', function() {
+            const $button = $(this);
+            const $buttonText = $button.find('.button-text');
+            const $spinner = $button.find('.spinner-border');
+            
             var selectedUniversities = [];
             $('input[name="select_university"]:checked').each(function() {
                 selectedUniversities.push($(this).val());
@@ -154,6 +199,11 @@
             }
 
             if (confirm('Are you sure you want to remove the selected universities?')) {
+                // Disable button and show loading state
+                $button.prop('disabled', true);
+                $buttonText.html('<i class="fas fa-trash"></i> Removing...');
+                $spinner.removeClass('d-none');
+
                 $.ajax({
                     url: '/admin/remove_universities',
                     type: 'POST',
@@ -165,9 +215,55 @@
                     },
                     error: function(xhr, status, error) {
                         alert('An error occurred: ' + error);
+                        // Reset button state on error
+                        $button.prop('disabled', false);
+                        $buttonText.html('<i class="fas fa-trash"></i> Remove University');
+                        $spinner.addClass('d-none');
                     }
                 });
             }
         });
     });
 </script>
+
+<style>
+/* Add some spacing between spinner and text */
+.spinner-border {
+    margin-left: 8px;
+}
+
+/* Ensure button maintains its width during state changes */
+#submitAddUniversity {
+    min-width: 100px;
+}
+
+/* Optional: Add transition for smooth state changes */
+.btn {
+    transition: all 0.3s ease;
+}
+
+/* Add styles for empty state */
+.py-5 {
+    padding-top: 3rem !important;
+    padding-bottom: 3rem !important;
+}
+
+.text-muted {
+    color: #6c757d !important;
+}
+
+.mt-3 {
+    margin-top: 1rem !important;
+}
+
+/* Add specific styles for remove button */
+#removeUniversityBtn {
+    min-width: 140px;
+}
+
+/* Ensure consistent spacing for both buttons */
+#removeUniversityBtn .spinner-border,
+#submitAddUniversity .spinner-border {
+    margin-left: 8px;
+}
+</style>

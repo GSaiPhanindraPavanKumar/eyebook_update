@@ -116,7 +116,8 @@ class StudentController {
         $course = Course::getById($conn, $course_id);
     
         if (!$course || empty($course['course_book'])) {
-            echo 'SCORM content not found.';
+            $error_message = 'Course book content not found.';
+            require 'views/student/book_view.php';
             exit;
         }
     

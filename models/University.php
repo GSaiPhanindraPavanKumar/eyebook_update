@@ -87,7 +87,54 @@ class University {
     }
 
     public static function delete($conn, $id) {
-        $stmt = $conn->prepare("DELETE FROM universities WHERE id = :id");
+        try {
+            // Begin transaction
+            $conn->beginTransaction();
+
+            // First, get the company_id for this university
+            $stmt = $conn->prepare("SELECT company_id FROM universities WHERE id = :id");
+            $stmt->execute([':id' => $id]);
+            $university = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+            if ($university && $university['company_id']) {
+                // Get the company's current university_ids
+                $stmt = $conn->prepare("SELECT university_ids FROM company WHERE id = :company_id");
+                $stmt->execute([':company_id' => $university['company_id']]);
+                $company = $stmt->fetch(PDO::FETCH_ASSOC);
+                
+                if ($company && $company['university_ids']) {
+                    // Decode the JSON array
+                    $universityIds = json_decode($company['university_ids'], true);
+                    
+                    // Remove the university ID from the array
+                    $universityIds = array_filter($universityIds, function($uniId) use ($id) {
+                        return $uniId != $id;
+                    });
+                    
+                    // Update the company with the new university_ids array
+                    $stmt = $conn->prepare("UPDATE company SET university_ids = :university_ids WHERE id = :company_id");
+                    $stmt->execute([
+                        ':university_ids' => json_encode(array_values($universityIds)),
+                        ':company_id' => $university['company_id']
+                    ]);
+                }
+
+            }
+            error_log(print_r("Deleted university: " . $university['id'] . " from company: " . $university['company_id'], true));
+            // Delete the university
+            $stmt = $conn->prepare("DELETE FROM universities WHERE id = :id");
+            $stmt->execute([':id' => $id]);
+
+            // Commit transaction
+            $conn->commit();
+            return true;
+
+        } catch (Exception $e) {
+            // Rollback transaction on error
+            $conn->rollBack();
+            throw new Exception('Failed to delete university: ' . $e->getMessage());
+        }
+        $stmt = $conn->prepare("DELETE FROM spocs WHERE university_id = :id");
         $stmt->execute([':id' => $id]);
     }
 
