@@ -72,7 +72,10 @@
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center mb-3">
                             <h5 class="card-title mb-0">Add University</h5>
-                            <button type="submit" class="btn btn-primary mb-2 ml-2" id="submitAddUniversity">Submit</button>
+                            <button type="submit" class="btn btn-primary mb-2 ml-2" id="submitAddUniversity">
+                                <span class="button-text">Submit</span>
+                                <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                            </button>
                         </div>
                         <div class="table-responsive">
                             <table class="table table-hover table-borderless table-striped">
@@ -115,6 +118,10 @@
     $(document).ready(function() {
         $('#submitAddUniversity').on('click', function(event) {
             event.preventDefault();
+            const $button = $(this);
+            const $buttonText = $button.find('.button-text');
+            const $spinner = $button.find('.spinner-border');
+            
             var selectedUniversities = [];
             $('input[name="select_university_add"]:checked').each(function() {
                 selectedUniversities.push($(this).val());
@@ -124,6 +131,11 @@
                 alert('Please select at least one university to add.');
                 return;
             }
+
+            // Disable button and show loading state
+            $button.prop('disabled', true);
+            $buttonText.text('Submitting...');
+            $spinner.removeClass('d-none');
 
             var companyId = <?php echo $company['id']; ?>;
 
@@ -141,6 +153,10 @@
                 },
                 error: function(xhr, status, error) {
                     alert('An error occurred: ' + error);
+                    // Reset button state on error
+                    $button.prop('disabled', false);
+                    $buttonText.text('Submit');
+                    $spinner.addClass('d-none');
                 }
             });
         });
@@ -174,3 +190,20 @@
         });
     });
 </script>
+
+<style>
+/* Add some spacing between spinner and text */
+.spinner-border {
+    margin-left: 8px;
+}
+
+/* Ensure button maintains its width during state changes */
+#submitAddUniversity {
+    min-width: 100px;
+}
+
+/* Optional: Add transition for smooth state changes */
+.btn {
+    transition: all 0.3s ease;
+}
+</style>
