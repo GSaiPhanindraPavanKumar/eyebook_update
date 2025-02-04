@@ -440,6 +440,8 @@ class StudentController {
             exit;
         }
         $conn = Database::getConnection();
+        $student = Student::getByEmail($conn, $_SESSION['email']);
+
         $courseId = str_replace(['-', '_'], ['+', '/'], $hashedId);
         $courseId = base64_decode($courseId);
         if (!is_numeric($courseId)) {
@@ -671,6 +673,36 @@ class StudentController {
         }
     }
     
+    public function submitPublicFeedback() {
+        if (!isset($_SESSION['email'])) {
+            header('Location: /session-timeout');
+            exit;
+        }
+        $conn = Database::getConnection();
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            $course_id = $_POST['course_id'];
+            $student_id = $_SESSION['student_id'];
+            $feedback = [
+                'depth_of_coverage' => $_POST['depth_of_coverage'],
+                'emphasis_on_fundamentals' => $_POST['emphasis_on_fundamentals'],
+                'coverage_of_modern_topics' => $_POST['coverage_of_modern_topics'],
+                'overall_rating' => $_POST['overall_rating'],
+                'benefits' => $_POST['benefits'],
+                'instructor_assistance' => $_POST['instructor_assistance'],
+                'instructor_feedback' => $_POST['instructor_feedback'],
+                'motivation' => $_POST['motivation'],
+                'sme_help' => $_POST['sme_help'],
+                'overall_very_good' => $_POST['overall_very_good']
+            ];
+
+            PublicFeedback::saveFeedback($conn, $course_id, $student_id, $feedback);
+
+            $_SESSION['feedback_submitted'] = true;
+
+            header('Location: /student/view_public_course/' . str_replace(['+', '/', '='], ['-', '_', ''], base64_encode($course_id)));
+            exit();
+        }
+    }
 
     public function submitAssignment($assignment_id) {
         if (!isset($_SESSION['email'])) {

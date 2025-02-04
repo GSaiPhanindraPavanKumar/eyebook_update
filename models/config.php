@@ -1,6 +1,6 @@
 <?php
-define('ZOOM_CLIENT_ID', '2JBqiaJ1TQOd_DWA4D_4jQ');
-define('ZOOM_CLIENT_SECRET', 'kVyrbnbVF5WkhrY8uKBfy6C9o2pM5WJG');
-define('ZOOM_ACCOUNT_ID', '79oZ9J6iSSSBTOYg_5MFmA');
+define('ZOOM_CLIENT_ID', 'q_9D0o_IQbuniJviwvINnQ');
+define('ZOOM_CLIENT_SECRET', 'F8k1AgoDtWYejwEQ6TTRipmCoR3CQoia');
+define('ZOOM_ACCOUNT_ID', '3slVDRGDRJyfUyVhhmFdlw');
 
 ?>

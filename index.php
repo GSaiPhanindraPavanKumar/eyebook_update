@@ -508,6 +508,8 @@ $router->get('/student/view_course_plan/(\w+)', 'StudentController@viewCoursePla
 $router->get('/student/view_material/(\w+)', 'StudentController@viewMaterial');
 $router->get('/student/view_book/(\w+)', 'StudentController@viewBook');
 $router->post('/student/submit_feedback', 'StudentController@submitFeedback');
+$router->post('/student/submit_public_feedback', 'StudentController@submitPublicFeedback');
+
 $router->get('/student/submit_assignment/(\d+)', function($assignment_id){
     $_GET['assignment_id'] = $assignment_id;
     require 'views/student/assignment_submit.php';

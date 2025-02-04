@@ -156,6 +156,115 @@ usort($assignments, function($a, $b) {
                                 ?>
                             </tbody>
                         </table>
+                        <!-- Feedback Section for Archived Courses -->
+                        <?php if ($course['feedback_enabled'] == 1): ?>
+                            <div class="mt-4">
+                                <h5>Feedback</h5>
+                                <?php if (isset($_SESSION['feedback_submitted']) && $_SESSION['feedback_submitted']): ?>
+                                    <p>Thank you for providing the feedback. Your feedback has been recorded.</p>
+                                    <?php unset($_SESSION['feedback_submitted']); ?>
+                                <?php elseif (feedback::hasFeedback($conn, $course['id'], $student['id'])): ?>
+                                    <p>Thank you for providing the feedback. Your feedback is already recorded.</p>
+                                <?php else: ?>
+                                    <form method="post" action="/student/submit_public_feedback">
+                                        <input type="hidden" name="course_id" value="<?php echo htmlspecialchars($course['id']); ?>">
+                                        <div class="form-group">
+                                            <label for="depth_of_coverage">Depth of Coverage</label>
+                                            <select class="form-control" id="depth_of_coverage" name="depth_of_coverage">
+                                                <option>Basic Level</option>
+                                                <option>Intermediate Level</option>
+                                                <option>Advance Level</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="emphasis_on_fundamentals">Emphasis on fundamentals</label>
+                                            <select class="form-control" id="emphasis_on_fundamentals" name="emphasis_on_fundamentals">
+                                                <option>Poor</option>
+                                                <option>Satisfactory</option>
+                                                <option>Good</option>
+                                                <option>Very Good</option>
+                                                <option>Excellent</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="coverage_of_modern_topics">Coverage of modern/advanced topics</label>
+                                            <select class="form-control" id="coverage_of_modern_topics" name="coverage_of_modern_topics">
+                                                <option>Poor</option>
+                                                <option>Satisfactory</option>
+                                                <option>Good</option>
+                                                <option>Very Good</option>
+                                                <option>Excellent</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="overall_rating">Overall Rating of the Course</label>
+                                            <select class="form-control" id="overall_rating" name="overall_rating">
+                                                <option>Poor</option>
+                                                <option>Satisfactory</option>
+                                                <option>Good</option>
+                                                <option>Very Good</option>
+                                                <option>Excellent</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="benefits">What benefits you derived from the course? What areas would you like to see improved?</label>
+                                            <textarea class="form-control" id="benefits" name="benefits" rows="3"></textarea>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>The instructor demonstrated willingness to assist students with course content/Lab exercises when needed.</label>
+                                            <select class="form-control" name="instructor_assistance">
+                                                <option>Strongly Agree</option>
+                                                <option>Agree</option>
+                                                <option>Neutral</option>
+                                                <option>Disagree</option>
+                                                <option>Strongly disagree</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>The instructor provided adequate and timely feedback when I had a question.</label>
+                                            <select class="form-control" name="instructor_feedback">
+                                                <option>Strongly Agree</option>
+                                                <option>Agree</option>
+                                                <option>Neutral</option>
+                                                <option>Disagree</option>
+                                                <option>Strongly disagree</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Motivated me to learn the subject.</label>
+                                            <select class="form-control" name="motivation">
+                                                <option>Strongly Agree</option>
+                                                <option>Agree</option>
+                                                <option>Neutral</option>
+                                                <option>Disagree</option>
+                                                <option>Strongly disagree</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>SME Helped me a lot.</label>
+                                            <select class="form-control" name="sme_help">
+                                                <option>Strongly Agree</option>
+                                                <option>Agree</option>
+                                                <option>Neutral</option>
+                                                <option>Disagree</option>
+                                                <option>Strongly disagree</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Overall Very Good</label>
+                                            <select class="form-control" name="overall_very_good">
+                                                <option>Strongly Agree</option>
+                                                <option>Agree</option>
+                                                <option>Neutral</option>
+                                                <option>Disagree</option>
+                                                <option>Strongly disagree</option>
+                                            </select>
+                                        </div>
+                                        <button type="submit" class="btn btn-primary mt-2">Submit Feedback</button>
+                                    </form>
+                                <?php endif; ?>
+                            </div>
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>
