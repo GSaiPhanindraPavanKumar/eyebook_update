@@ -553,7 +553,7 @@ if ($userData) {
                     </a>
                     <div class="collapse" id="discussion">
                         <ul class="nav flex-column sub-menu">
-                            <li class="nav-item"> <a class="nav-link" href="discussion_forum">Discussion Forum</a></li>
+                            <li class="nav-item"> <a class="nav-link" href="/student/discussion_forum">Discussion Forum</a></li>
                         </ul>
                     </div>
                 </li>
