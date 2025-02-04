@@ -118,8 +118,9 @@ class University {
                         ':company_id' => $university['company_id']
                     ]);
                 }
-            }
 
+            }
+            error_log(print_r("Deleted university: " . $university['id'] . " from company: " . $university['company_id'], true));
             // Delete the university
             $stmt = $conn->prepare("DELETE FROM universities WHERE id = :id");
             $stmt->execute([':id' => $id]);
