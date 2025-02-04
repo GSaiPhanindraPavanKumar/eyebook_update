@@ -133,7 +133,9 @@
                 data: { university_ids: selectedUniversities, company_id: companyId },
                 success: function(response) {
                     var res = JSON.parse(response);
-                    alert(res.message);
+                    var msg = res.message;
+                    msg = msg.replace('company', 'university');
+                    alert(msg);
                     location.reload();
                 },
                 error: function(xhr, status, error) {
