@@ -133,6 +133,8 @@ class University {
             $conn->rollBack();
             throw new Exception('Failed to delete university: ' . $e->getMessage());
         }
+        $stmt = $conn->prepare("DELETE FROM spocs WHERE university_id = :id");
+        $stmt->execute([':id' => $id]);
     }
 
     public static function getById($conn, $id) {
