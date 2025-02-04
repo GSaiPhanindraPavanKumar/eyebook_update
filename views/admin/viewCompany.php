@@ -30,7 +30,10 @@
                         <div class="d-flex justify-content-between align-items-center mb-3">
                             <h5 class="card-title mb-0">Universities</h5>
                             <div>
-                                <button class="btn btn-danger btn-sm" id="removeUniversityBtn"><i class="fas fa-trash"></i> Remove University</button>
+                                <button class="btn btn-danger btn-sm" id="removeUniversityBtn">
+                                    <span class="button-text"><i class="fas fa-trash"></i> Remove University</span>
+                                    <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                                </button>
                             </div>
                         </div>
                         <div class="table-responsive">
@@ -181,6 +184,10 @@
         });
 
         $('#removeUniversityBtn').on('click', function() {
+            const $button = $(this);
+            const $buttonText = $button.find('.button-text');
+            const $spinner = $button.find('.spinner-border');
+            
             var selectedUniversities = [];
             $('input[name="select_university"]:checked').each(function() {
                 selectedUniversities.push($(this).val());
@@ -192,6 +199,11 @@
             }
 
             if (confirm('Are you sure you want to remove the selected universities?')) {
+                // Disable button and show loading state
+                $button.prop('disabled', true);
+                $buttonText.html('<i class="fas fa-trash"></i> Removing...');
+                $spinner.removeClass('d-none');
+
                 $.ajax({
                     url: '/admin/remove_universities',
                     type: 'POST',
@@ -203,6 +215,10 @@
                     },
                     error: function(xhr, status, error) {
                         alert('An error occurred: ' + error);
+                        // Reset button state on error
+                        $button.prop('disabled', false);
+                        $buttonText.html('<i class="fas fa-trash"></i> Remove University');
+                        $spinner.addClass('d-none');
                     }
                 });
             }
@@ -238,5 +254,16 @@
 
 .mt-3 {
     margin-top: 1rem !important;
+}
+
+/* Add specific styles for remove button */
+#removeUniversityBtn {
+    min-width: 140px;
+}
+
+/* Ensure consistent spacing for both buttons */
+#removeUniversityBtn .spinner-border,
+#submitAddUniversity .spinner-border {
+    margin-left: 8px;
 }
 </style>
