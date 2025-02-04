@@ -16,69 +16,9 @@
             <div class="col-md-12 grid-margin stretch-card">
                 <div class="card">
                     <div class="card-body">
-                        <h4 class="card-title">Company Details</h4>
-                        <div class="table-responsive">
-                            <table class="table table-hover">
-                                <tbody>
-                                    <?php if (isset($company['name']) && !empty($company['name'])): ?>
-                                    <tr>
-                                        <td><strong>Company Name:</strong></td>
-                                        <td><?php echo htmlspecialchars($company['name'] ?? ''); ?></td>
-                                    </tr>
-                                    <?php endif; ?>
-
-                                    <?php if (isset($company['email']) && !empty($company['email'])): ?>
-                                    <tr>
-                                        <td><strong>Email:</strong></td>
-                                        <td><?php echo htmlspecialchars($company['email'] ?? ''); ?></td>
-                                    </tr>
-                                    <?php endif; ?>
-
-                                    <?php if (isset($company['phone']) && !empty($company['phone'])): ?>
-                                    <tr>
-                                        <td><strong>Phone:</strong></td>
-                                        <td><?php echo htmlspecialchars($company['phone'] ?? ''); ?></td>
-                                    </tr>
-                                    <?php endif; ?>
-
-                                    <?php if (isset($company['address']) && !empty($company['address'])): ?>
-                                    <tr>
-                                        <td><strong>Address:</strong></td>
-                                        <td><?php echo htmlspecialchars($company['address'] ?? ''); ?></td>
-                                    </tr>
-                                    <?php endif; ?>
-
-                                    <?php if (isset($company['website']) && !empty($company['website'])): ?>
-                                    <tr>
-                                        <td><strong>Website:</strong></td>
-                                        <td><?php echo htmlspecialchars($company['website'] ?? ''); ?></td>
-                                    </tr>
-                                    <?php endif; ?>
-
-                                    <?php if (isset($company['created_at']) && !empty($company['created_at'])): ?>
-                                    <tr>
-                                        <td><strong>Created At:</strong></td>
-                                        <td><?php echo htmlspecialchars(date('Y-m-d H:i:s', strtotime($company['created_at']))); ?></td>
-                                    </tr>
-                                    <?php endif; ?>
-                                </tbody>
-                            </table>
-                        </div>
-
-                        <?php if (isset($_SESSION['message'])): ?>
-                        <div class="alert alert-<?php echo $_SESSION['message_type']; ?> mt-3">
-                            <?php 
-                            echo $_SESSION['message'];
-                            unset($_SESSION['message']);
-                            unset($_SESSION['message_type']);
-                            ?>
-                        </div>
-                        <?php endif; ?>
-
-                        <div class="mt-3">
-                            <a href="/admin/edit_company/<?php echo htmlspecialchars($company['id'] ?? ''); ?>" class="btn btn-primary">Edit Company</a>
-                            <a href="/admin/companies" class="btn btn-secondary">Back to Companies</a>
-                        </div>
+                        <h5 class="card-title">University Details</h5>
+                        <p><strong>Name:</strong> <?php echo htmlspecialchars($company['name']); ?></p>
+                        <p><strong>Description:</strong> <?php echo htmlspecialchars($company['description']); ?></p>
                     </div>
                 </div>
             </div>
