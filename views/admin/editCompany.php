@@ -6,7 +6,7 @@
             <div class="col-md-12 grid-margin">
                 <div class="row">
                     <div class="col-12 col-xl-8 mb-4 mb-xl-0">
-                        <h3 class="font-weight-bold">Edit Company</h3>
+                        <h3 class="font-weight-bold">Edit University</h3>
                     </div>
                 </div>
             </div>
@@ -15,7 +15,7 @@
             <div class="col-md-12 grid-margin stretch-card">
                 <div class="card">
                     <div class="card-body">
-                        <h5 class="card-title">Edit Company</h5>
+                        <h5 class="card-title">Edit University</h5>
                         <form action="/admin/edit_company/<?php echo $company['id']; ?>" method="post">
                             <div class="form-group">
                                 <label for="name">Name <span class="text-danger">*</span></label>

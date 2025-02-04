@@ -20,9 +20,9 @@
             <div class="col-md-12 grid-margin stretch-card">
                 <div class="card shadow">
                     <div class="card-body">
-                        <p class="card-title mb-0" style="font-size:larger">Companies</p><br>
+                        <p class="card-title mb-0" style="font-size:larger">Universities</p><br>
                         <div class="table-responsive">
-                            <input class="form-control mb-3" id="searchInput" type="text" placeholder="🔍 Search Companies...">
+                            <input class="form-control mb-3" id="searchInput" type="text" placeholder="🔍 Search Universities...">
                             <form id="companyForm" method="post" action="/admin/view_company">
                                 <table class="table table-hover table-borderless table-striped">
                                     <thead class="thead-light">
@@ -53,7 +53,7 @@
                                                     <a href="/admin/edit_company/<?= $company['id'] ?>" class="btn btn-outline-warning btn-sm"><i class="fas fa-edit"></i> Edit</a>
                                                     <form action="/admin/deleteCompany" method="post" style="display:inline;">
                                                         <input type="hidden" name="id" value="<?= $company['id'] ?>">
-                                                        <button type="submit" class="btn btn-outline-danger btn-sm" onclick="return confirm('Are you sure you want to delete this company?');"><i class="fas fa-trash"></i> Delete</button>
+                                                        <button type="submit" class="btn btn-outline-danger btn-sm" onclick="return confirm('Are you sure you want to delete this university?');"><i class="fas fa-trash"></i> Delete</button>
                                                     </form>
                                                 </td>
                                             </tr>
@@ -86,7 +86,7 @@
         <div class="modal-content">
             <form id="editForm" method="post" action="updateCompany.php">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="editModalLabel">Edit Company</h5>
+                    <h5 class="modal-title" id="editModalLabel">Edit University</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
