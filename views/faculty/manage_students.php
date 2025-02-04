@@ -117,7 +117,7 @@ if (!empty($assignedCourses)) {
                                             <td><?= htmlspecialchars($student['email']) ?></td>
                                             <td><?= htmlspecialchars($student['section']) ?></td>
                                             <td><?= htmlspecialchars($student['stream']) ?></td>
-                                            <td><?= htmlspecialchars($student['year']) ?></td>
+                                            <td><?= htmlspecialchars($student['year']) ?? 'N/A' ?></td>
                                             <td><?= htmlspecialchars(implode(', ', $courseNames[$student['id']] ?? ['N/A'])) ?></td>
                                         </tr>
                                     <?php endforeach; ?>
