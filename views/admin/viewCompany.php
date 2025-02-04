@@ -34,31 +34,37 @@
                             </div>
                         </div>
                         <div class="table-responsive">
-                            <table class="table table-hover table-borderless table-striped">
-                                <thead class="thead-light">
-                                    <tr>
-                                        <th>Select</th>
-                                        <th>Name</th>
-                                        <th>Short Name</th>
-                                        <th>No of Faculties</th>
-                                        <th>No of Students</th>
-                                        <th>View</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <?php foreach ($universities as $university): ?>
+                            <?php if (empty($universities)): ?>
+                                <div class="text-center py-5">
+                                    <img src="/views/landing/assets/img/empty-box.png" alt="No Universities" style="width: 150px; opacity: 0.5;">
+                                    <p class="text-muted mt-3">No universities found</p>
+                                </div>
+                            <?php else: ?>
+                                <table class="table table-hover table-borderless table-striped">
+                                    <thead class="thead-light">
                                         <tr>
-                                            <td><input type="checkbox" name="select_university" value="<?php echo $university['id']; ?>"></td>
-                                            <td><?php echo htmlspecialchars($university['long_name']); ?></td>
-                                            <td><?php echo htmlspecialchars($university['short_name']); ?></td>
-                                            <td><?php echo University::getCountfacultyByUniversityId($conn, $university['id']); ?></td>
-                                            <td><?php echo University::getCountByUniversityId($conn, $university['id']); ?></td>
-                                            <td><a href="/admin/view_university/<?php echo $university['id']; ?>" class="btn btn-outline-info btn-sm"><i class="fas fa-eye"></i> View</a></td>
+                                            <th>Select</th>
+                                            <th>Name</th>
+                                            <th>Short Name</th>
+                                            <th>No of Faculties</th>
+                                            <th>No of Students</th>
+                                            <th>View</th>
                                         </tr>
-                                    <?php endforeach; ?>
-                                </tbody>
-                            </table>
-                            <div id="noRecords" style="display: none;" class="text-center">No records found</div>
+                                    </thead>
+                                    <tbody>
+                                        <?php foreach ($universities as $university): ?>
+                                            <tr>
+                                                <td><input type="checkbox" name="select_university" value="<?php echo $university['id']; ?>"></td>
+                                                <td><?php echo htmlspecialchars($university['long_name']); ?></td>
+                                                <td><?php echo htmlspecialchars($university['short_name']); ?></td>
+                                                <td><?php echo University::getCountfacultyByUniversityId($conn, $university['id']); ?></td>
+                                                <td><?php echo University::getCountByUniversityId($conn, $university['id']); ?></td>
+                                                <td><a href="/admin/view_university/<?php echo $university['id']; ?>" class="btn btn-outline-info btn-sm"><i class="fas fa-eye"></i> View</a></td>
+                                            </tr>
+                                        <?php endforeach; ?>
+                                    </tbody>
+                                </table>
+                            <?php endif; ?>
                         </div>
                     </div>
                 </div>
@@ -78,26 +84,39 @@
                             </button>
                         </div>
                         <div class="table-responsive">
-                            <table class="table table-hover table-borderless table-striped">
-                                <thead class="thead-light">
-                                    <tr>
-                                        <th>Select</th>
-                                        <th>Name</th>
-                                        <th>Short Name</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <?php foreach ($allUniversities as $university): ?>
-                                        <?php if (empty($university['company_id'])): ?>
-                                            <tr>
-                                                <td><input type="checkbox" name="select_university_add" value="<?php echo htmlspecialchars($university['id']); ?>"></td>
-                                                <td><?php echo htmlspecialchars($university['long_name']); ?></td>
-                                                <td><?php echo htmlspecialchars($university['short_name']); ?></td>
-                                            </tr>
-                                        <?php endif; ?>
-                                    <?php endforeach; ?>
-                                </tbody>
-                            </table>
+                            <?php 
+                            $availableUniversities = array_filter($allUniversities, function($university) {
+                                return empty($university['company_id']);
+                            });
+                            ?>
+                            
+                            <?php if (empty($availableUniversities)): ?>
+                                <div class="text-center py-5">
+                                    <img src="/views/landing/assets/img/empty-box.png" alt="No Universities Available" style="width: 150px; opacity: 0.5;">
+                                    <p class="text-muted mt-3">No universities available to add</p>
+                                </div>
+                            <?php else: ?>
+                                <table class="table table-hover table-borderless table-striped">
+                                    <thead class="thead-light">
+                                        <tr>
+                                            <th>Select</th>
+                                            <th>Name</th>
+                                            <th>Short Name</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <?php foreach ($allUniversities as $university): ?>
+                                            <?php if (empty($university['company_id'])): ?>
+                                                <tr>
+                                                    <td><input type="checkbox" name="select_university_add" value="<?php echo htmlspecialchars($university['id']); ?>"></td>
+                                                    <td><?php echo htmlspecialchars($university['long_name']); ?></td>
+                                                    <td><?php echo htmlspecialchars($university['short_name']); ?></td>
+                                                </tr>
+                                            <?php endif; ?>
+                                        <?php endforeach; ?>
+                                    </tbody>
+                                </table>
+                            <?php endif; ?>
                         </div>
                     </div>
                 </div>
@@ -205,5 +224,19 @@
 /* Optional: Add transition for smooth state changes */
 .btn {
     transition: all 0.3s ease;
+}
+
+/* Add styles for empty state */
+.py-5 {
+    padding-top: 3rem !important;
+    padding-bottom: 3rem !important;
+}
+
+.text-muted {
+    color: #6c757d !important;
+}
+
+.mt-3 {
+    margin-top: 1rem !important;
 }
 </style>
