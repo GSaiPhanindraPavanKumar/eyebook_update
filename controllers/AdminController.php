@@ -1168,23 +1168,28 @@ class AdminController {
     }
 
     public function viewBook($hashedId) {
+        if (!isset($_SESSION['admin'])) {
+            header('Location: /session-timeout');
+            exit;
+        }
         $conn = Database::getConnection();
         $course_id = base64_decode($hashedId);
         if (!is_numeric($course_id)) {
             die('Invalid course ID');
         }
         $course = Course::getById($conn, $course_id);
-    
+
         if (!$course || empty($course['course_book'])) {
-            echo 'SCORM content not found.';
+            $error_message = 'Course book content not found.';
+            require 'views/admin/book_view.php';
             exit;
         }
-    
+
         // Ensure course_book is an array
         if (!is_array($course['course_book'])) {
             $course['course_book'] = json_decode($course['course_book'], true) ?? [];
         }
-    
+
         // Get the index_path from the query parameter
         $index_path = $_GET['index_path'] ?? $course['course_book'][0]['scorm_url'];
     
