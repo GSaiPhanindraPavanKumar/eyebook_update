@@ -5,6 +5,28 @@ use Models\feedback;
 use Models\Student;
 
 $feedbackEnabled = $course['feedback_enabled'];
+
+
+
+// Fetch enrolled students
+$enrolledStudentIds = !empty($course['enrolled_students']) ? json_decode($course['enrolled_students'], true) : [];
+$enrolledStudents = [];
+$transactions = [];
+if (!empty($enrolledStudentIds)) {
+    foreach ($enrolledStudentIds as $studentId) {
+        $student = Student::getById($conn, $studentId);
+        if ($student) {
+            $enrolledStudents[] = $student;
+            // Fetch transaction details for the student
+            $stmt = $conn->prepare("SELECT * FROM transactions WHERE student_id = ? AND course_id = ?");
+            $stmt->execute([$studentId, $course['id']]);
+            $studentTransactions = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            if (!empty($studentTransactions)) {
+                $transactions[$studentId] = $studentTransactions;
+            }
+        }
+    }
+}
 ?>
 
 <div class="main-panel">
@@ -34,6 +56,9 @@ $feedbackEnabled = $course['feedback_enabled'];
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link" id="feedback-tab" data-toggle="tab" href="#feedback" role="tab" aria-controls="feedback" aria-selected="false">Feedback</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id="students-tab" data-toggle="tab" href="#students" role="tab" aria-controls="students" aria-selected="false">Enrolled Students</a>
                             </li>
                         </ul>
                         <div class="tab-content" id="myTabContent">
@@ -65,7 +90,14 @@ $feedbackEnabled = $course['feedback_enabled'];
                                     </thead>
                                     <tbody>
                                         <?php
-                                        $ECContent = !empty($course['EC_content']) ? json_decode($course['EC_content'], true) : [];
+                                        $ECContent = [];
+                                        if (!empty($course['EC_content'])) {
+                                            if (is_string($course['EC_content'])) {
+                                                $ECContent = json_decode($course['EC_content'], true);
+                                            } elseif (is_array($course['EC_content'])) {
+                                                $ECContent = $course['EC_content'];
+                                            }
+                                        }
                                         if (!empty($ECContent)) {
                                             $serialNumber = 1;
                                             foreach ($ECContent as $content) {
@@ -121,6 +153,7 @@ $feedbackEnabled = $course['feedback_enabled'];
                                 </table>
 
                                 <!-- Additional Content Table -->
+                                <!-- Additional Content Table -->
                                 <h4 class="card-title mt-5">Additional Content</h4>
                                 <table class="table table-hover mt-2">
                                     <thead class="thead-dark">
@@ -132,7 +165,14 @@ $feedbackEnabled = $course['feedback_enabled'];
                                     </thead>
                                     <tbody>
                                         <?php
-                                        $additionalContent = !empty($course['additional_content']) ? json_decode($course['additional_content'], true) : [];
+                                        $additionalContent = [];
+                                        if (!empty($course['additional_content'])) {
+                                            if (is_string($course['additional_content'])) {
+                                                $additionalContent = json_decode($course['additional_content'], true);
+                                            } elseif (is_array($course['additional_content'])) {
+                                                $additionalContent = $course['additional_content'];
+                                            }
+                                        }
                                         if (!empty($additionalContent)) {
                                             $serialNumber = 1;
                                             foreach ($additionalContent as $content) {
@@ -333,6 +373,61 @@ $feedbackEnabled = $course['feedback_enabled'];
                                     </div>
                                 </div>
                             </div>
+                            <div class="tab-pane fade" id="students" role="tabpanel" aria-labelledby="students-tab">
+                                <h4 class="card-title mt-3">Enrolled Students</h4>
+                                <div class="input-group mb-3">
+                                    <input type="text" class="form-control" id="searchInput" placeholder="Search students...">
+                                </div>
+                                <table class="table table-hover mt-2" id="studentsTable">
+                                    <thead class="thead-dark">
+                                        <tr>
+                                            <th scope="col">S. No.</th>
+                                            <th scope="col">Name</th>
+                                            <th scope="col">Email</th>
+                                            <th scope="col">Transaction ID</th>
+                                            <th scope="col">Amount</th>
+                                            <th scope="col">Status</th>
+                                            <th scope="col">Date of Transaction</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <?php if (!empty($enrolledStudents)): ?>
+                                            <?php $serialNumber = 1; ?>
+                                            <?php foreach ($enrolledStudents as $student): ?>
+                                                <?php
+                                                $studentTransactions = $transactions[$student['id']] ?? [];
+                                                if (!empty($studentTransactions)):
+                                                    foreach ($studentTransactions as $transaction):
+                                                ?>
+                                                        <tr>
+                                                            <td><?php echo htmlspecialchars($serialNumber++); ?></td>
+                                                            <td><?php echo htmlspecialchars($student['name']); ?></td>
+                                                            <td><?php echo htmlspecialchars($student['email']); ?></td>
+                                                            <td><?php echo htmlspecialchars($transaction['transaction_id']); ?></td>
+                                                            <td><?php echo htmlspecialchars($transaction['amount']); ?></td>
+                                                            <td><?php echo htmlspecialchars($transaction['status']); ?></td>
+                                                            <td><?php echo htmlspecialchars($transaction['created_at']); ?></td>
+                                                        </tr>
+                                                <?php
+                                                    endforeach;
+                                                else:
+                                                ?>
+                                                    <tr>
+                                                        <td><?php echo htmlspecialchars($student['id']); ?></td>
+                                                        <td><?php echo htmlspecialchars($student['name']); ?></td>
+                                                        <td><?php echo htmlspecialchars($student['email']); ?></td>
+                                                        <td colspan="3">No transactions found.</td>
+                                                    </tr>
+                                                <?php endif; ?>
+                                            <?php endforeach; ?>
+                                        <?php else: ?>
+                                            <tr>
+                                                <td colspan="6">No students enrolled.</td>
+                                            </tr>
+                                        <?php endif; ?>
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -414,6 +509,22 @@ document.addEventListener('DOMContentLoaded', function() {
             event.preventDefault();
             return;
         }
+    });
+});
+</script>
+<script>
+document.getElementById('searchInput').addEventListener('input', function() {
+    var searchValue = this.value.toLowerCase();
+    var rows = document.querySelectorAll('#studentsTable tbody tr');
+    rows.forEach(function(row) {
+        var cells = row.querySelectorAll('td');
+        var match = false;
+        cells.forEach(function(cell) {
+            if (cell.textContent.toLowerCase().includes(searchValue)) {
+                match = true;
+            }
+        });
+        row.style.display = match ? '' : 'none';
     });
 });
 </script>

@@ -20,6 +20,7 @@ use Models\Company;
 use Models\Lab;
 use Models\Contest;
 use Models\PublicCourse;
+use Models\PublicLab;
 use PDO;
 use ZipArchive;
 use Models\VirtualClassroom;
@@ -1204,18 +1205,67 @@ class AdminController {
             exit;
         }
     
-        // Ensure EC_content is an array
-        $ec_content = json_decode($course['EC_content'], true);
-        if (!is_array($ec_content)) {
-            echo 'Invalid EC content format.';
-            exit;
+        // Ensure course_book is an array
+        if (!is_array($course['EC_content'])) {
+            $course['EC_content'] = json_decode($course['EC_content'], true) ?? [];
         }
     
         // Get the index_path from the query parameter
-        $index_path = $_GET['index_path'] ?? $ec_content[0]['indexPath'];
+        $index_path = $_GET['index_path'] ?? $course['EC_content'][0]['indexPath'];
     
         require 'views/admin/book_view.php';
     }
+
+    public function viewECContent($hashedId) {
+        $conn = Database::getConnection();
+        $course_id = base64_decode($hashedId);
+        if (!is_numeric($course_id)) {
+            die('Invalid course ID');
+        }
+        $course = Course::getById($conn, $course_id);
+    
+        if (!$course || empty($course['EC_content'])) {
+            echo 'EC content not found.';
+            exit;
+        }
+    
+        // Ensure EC_content is an array
+        if (!is_array($course['EC_content'])) {
+            $course['EC_content'] = json_decode($course['EC_content'], true) ?? [];
+        }
+    
+        // Get the index_path from the query parameter
+        $index_path = $_GET['index_path'] ?? $course['EC_content'][0]['indexPath'];
+    
+        require 'views/admin/book_view.php';
+    }
+
+
+    // public function viewECBook($hashedId) {
+    //     $conn = Database::getConnection();
+    //     $course_id = base64_decode($hashedId);
+    //     if (!is_numeric($course_id)) {
+    //         die('Invalid course ID');
+    //     }
+    //     $course = Course::getById($conn, $course_id);
+    
+    //     if (!$course || empty($course['EC_content'])) {
+    //         echo 'EC content not found.';
+    //         exit;
+    //     }
+    
+    //     // Ensure EC_content is an array
+    //     $ec_content = json_decode($course['EC_content'], true);
+    //     if (!is_array($ec_content)) {
+    //         echo 'Invalid EC content format.';
+    //         exit;
+    //     }
+    
+    //     // Get the index_path from the query parameter
+    //     $index_path = $_GET['index_path'] ?? $ec_content[0]['indexPath'];
+    
+    //     require 'views/admin/book_view.php';
+    // }
 
     public function uploadSingleFaculty() {
         $conn = Database::getConnection();
@@ -3150,10 +3200,35 @@ class AdminController {
         require 'views/admin/lab_create.php';
     }
 
+    public function createPublicLab() {
+        $conn = Database::getConnection();
+        $courses = PublicCourse::getAll($conn);
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $title = $_POST['lab_title'];
+            $description = $_POST['lab_description'];
+            $course_ids = $_POST['course_id'];
+            $input = $_POST['input'];
+            $output = $_POST['output'];
+            $submissions = []; // Initialize submissions as an empty array
+
+            PublicLab::create($conn, $title, $description, $course_ids, $input, $output, $submissions);
+            header('Location: /admin/manage_public_labs');
+            exit;
+        }
+
+        require 'views/admin/lab_public_create.php';
+    }
+
     public function manageLabs() {
         $conn = Database::getConnection();
         $courses = Course::getAllWithUniversity($conn); // Fetch all courses with university details
         require 'views/admin/manage_labs.php';
+    }
+    public function managePublicLabs() {
+        $conn = Database::getConnection();
+        $courses = PublicCourse::getAll($conn); // Fetch all courses with university details
+        require 'views/admin/manage_public_labs.php';
     }
 
     public function viewLabsByCourse($course_id) {
@@ -3161,6 +3236,13 @@ class AdminController {
         $labs = Lab::getByCourseId($conn, $course_id);
         $course = Course::getById($conn, $course_id);
         require 'views/admin/view_labs_by_course.php';
+    }
+
+    public function viewLabsByPublicCourse($course_id) {
+        $conn = Database::getConnection();
+        $labs = PublicLab::getByCourseId($conn, $course_id);
+        $course = PublicCourse::getById($conn, $course_id);
+        require 'views/admin/view_public_labs_by_course.php';
     }
 
     public function editLab($lab_id) {
@@ -3199,6 +3281,41 @@ class AdminController {
     
         require 'views/admin/edit_lab.php';
     }
+
+    public function editPublicLab($lab_id) {
+        $conn = Database::getConnection();
+    
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $title = $_POST['title'];
+            $description = $_POST['description'];
+            $course_ids = $_POST['course_id'];
+            $input = $_POST['input'];
+            $output = $_POST['output'];
+    
+            $sql = "UPDATE public_labs SET title = :title, description = :description, course_id = :course_id, input = :input, output = :output WHERE id = :id";
+            $stmt = $conn->prepare($sql);
+            $stmt->execute([
+                ':title' => $title,
+                ':description' => $description,
+                ':course_id' => json_encode($course_ids),
+                ':input' => $input,
+                ':output' => $output,
+                ':id' => $lab_id
+            ]);
+    
+            $_SESSION['message'] = 'Lab updated successfully.';
+            $_SESSION['message_type'] = 'success';
+    
+            header('Location: /admin/view_public_labs_by_course/' . $course_ids[0]);
+            exit();
+        }
+    
+        $lab = PublicLab::getById($conn, $lab_id);
+        $courses = PublicCourse::getAll($conn);
+        $course_ids = json_decode($lab['course_id'], true);
+    
+        require 'views/admin/edit_public_lab.php';
+    }
     
     public function deleteLab($lab_id) {
         $conn = Database::getConnection();
@@ -3215,6 +3332,21 @@ class AdminController {
         header('Location: /admin/view_labs_by_course/' . $course_ids[0]);
         exit();
     }
+    public function deletePublicLab($lab_id) {
+        $conn = Database::getConnection();
+        $lab = PublicLab::getById($conn, $lab_id);
+        $course_ids = json_decode($lab['course_id'], true);
+    
+        $sql = "DELETE FROM public_labs WHERE id = :id";
+        $stmt = $conn->prepare($sql);
+        $stmt->execute([':id' => $lab_id]);
+    
+        $_SESSION['message'] = 'Lab deleted successfully.';
+        $_SESSION['message_type'] = 'success';
+    
+        header('Location: /admin/view_labs_by_public_course/' . $course_ids[0]);
+        exit();
+    }
 
     public function viewLabDetail($labId) {
         $conn = Database::getConnection();
@@ -3227,9 +3359,53 @@ class AdminController {
 
         require 'views/admin/view_lab_detail.php';
     }
+
+    public function viewPublicLabDetail($labId) {
+        $conn = Database::getConnection();
+        if (!is_numeric($labId)) {
+            die('Invalid lab ID');
+        }
+
+        $lab = PublicLab::getById($conn, $labId);
+        $lab['submissions'] = PublicLab::getSubmissions($conn, $labId);
+
+        require 'views/admin/view_public_lab_detail.php';
+    }
     public function downloadLabReport($labId) {
         $conn = Database::getConnection();
         $submissions = Lab::getSubmissions($conn, $labId);
+
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setCellValue('A1', 'Student Name');
+        $sheet->setCellValue('B1', 'Runtime');
+        $sheet->setCellValue('C1', 'Submission Date');
+
+        foreach ($submissions as $index => $submission) {
+            $sheet->setCellValue('A' . ($index + 2), $submission['student_name']);
+            $sheet->setCellValue('B' . ($index + 2), $submission['runtime']);
+            $sheet->setCellValue('C' . ($index + 2), (new \DateTime($submission['submission_date']))->format('Y-m-d H:i:s'));
+        }
+
+        $writer = new Xlsx($spreadsheet);
+        $filename = 'lab_report_' . $labId . '.xlsx';
+
+        // Clear the output buffer
+        if (ob_get_contents()) ob_end_clean();
+
+        // Set headers to force download
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment; filename="' . $filename . '"');
+        header('Cache-Control: max-age=0');
+
+        // Save the file to the output
+        $writer->save('php://output');
+        exit;
+    }
+
+    public function downloadPublicLabReport($labId) {
+        $conn = Database::getConnection();
+        $submissions = publicLab::getSubmissions($conn, $labId);
 
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();

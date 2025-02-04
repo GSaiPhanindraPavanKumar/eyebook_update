@@ -214,6 +214,8 @@ $adminModel = new \Models\Admin();
                         <ul class="nav flex-column sub-menu">
                             <li class="nav-item"> <a class="nav-link" href="/admin/create_lab" style="font-size: 12px;">Create Lab</a></li>
                             <li class="nav-item"> <a class="nav-link" href="/admin/manage_labs" style="font-size: 12px;">Manage Labs</a></li>
+                            <li class="nav-item"> <a class="nav-link" href="/admin/create_public_lab" style="font-size: 12px;">Create Public Lab</a></li>
+                            <li class="nav-item"> <a class="nav-link" href="/admin/manage_public_labs" style="font-size: 12px;">Manage Public Labs</a></li>
                             <li class="nav-item"> <a class="nav-link" href="/admin/create_contest" style="font-size: 12px;">Create Contest</a></li>
                             <li class="nav-item"> <a class="nav-link" href="/admin/manage_contest" style="font-size: 12px;">Manage Contest</a></li>
                         </ul>
