@@ -78,8 +78,16 @@ $archivedCourses = array_filter($courses, function($course) {
                                     <div class="card-body">
                                         <h5 class="card-title" style="font-family:cursive"><?php echo htmlspecialchars($course['name']); ?></h5>
                                         <p class="card-text"><?php echo htmlspecialchars($course['description']); ?></p>
-                                        <div class="progress">
-                                            <div class="progress-bar" role="progressbar" style="width: <?php echo $progressData[$course['id']]; ?>%;" aria-valuenow="<?php echo $progressData[$course['id']]; ?>" aria-valuemin="0" aria-valuemax="100"><?php echo round($progressData[$course['id']], 2); ?>%</div>
+                                        <div class="d-flex align-items-center">
+                                            <div class="progress flex-grow-1" style="height: 20px;">
+                                                <div class="progress-bar" role="progressbar" 
+                                                    style="width: <?php echo $progressData[$course['id']]; ?>%;" 
+                                                    aria-valuenow="<?php echo $progressData[$course['id']]; ?>" 
+                                                    aria-valuemin="0" 
+                                                    aria-valuemax="100">
+                                                </div>
+                                            </div>
+                                            <span class="ml-2"><?php echo round($progressData[$course['id']], 2); ?>%</span>
                                         </div>
                                     </div>
                                     <div class="card-body">
@@ -109,8 +117,16 @@ $archivedCourses = array_filter($courses, function($course) {
                                     <div class="card-body">
                                         <h5 class="card-title" style="font-family:cursive"><?php echo htmlspecialchars($course['name']); ?></h5>
                                         <p class="card-text"><?php echo htmlspecialchars($course['description']); ?></p>
-                                        <div class="progress">
-                                            <div class="progress-bar" role="progressbar" style="width: <?php echo $progressData[$course['id']]; ?>%;" aria-valuenow="<?php echo $progressData[$course['id']]; ?>" aria-valuemin="0" aria-valuemax="100"><?php echo round($progressData[$course['id']], 2); ?>%</div>
+                                        <div class="d-flex align-items-center">
+                                            <div class="progress flex-grow-1" style="height: 20px;">
+                                                <div class="progress-bar" role="progressbar" 
+                                                    style="width: <?php echo $progressData[$course['id']]; ?>%;" 
+                                                    aria-valuenow="<?php echo $progressData[$course['id']]; ?>" 
+                                                    aria-valuemin="0" 
+                                                    aria-valuemax="100">
+                                                </div>
+                                            </div>
+                                            <span class="ml-2"><?php echo round($progressData[$course['id']], 2); ?>%</span>
                                         </div>
                                     </div>
                                     <div class="card-body">

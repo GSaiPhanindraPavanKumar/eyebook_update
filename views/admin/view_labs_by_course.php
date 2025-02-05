@@ -24,17 +24,17 @@
                             </thead>
                             <tbody>
                                 <?php if (!empty($labs)): ?>
-                                    <?php foreach ($labs as $lab): ?>
+                                    <?php for($i = 0; $i < count($labs); $i++): ?>
                                         <tr>
-                                            <td><?php echo htmlspecialchars($lab['title']); ?></td>
-                                            <td><?php echo htmlspecialchars($lab['due_date']); ?></td>
+                                            <td><?php echo htmlspecialchars($labs[$i]['title']); ?></td>
+                                            <td><?php echo htmlspecialchars($labs[$i]['due_date']); ?></td>
                                             <td>
-                                                <a href="/admin/view_lab_detail/<?php echo $lab['id']; ?>" class="btn btn-info">View</a>
-                                                <a href="/admin/edit_lab/<?php echo $lab['id']; ?>" class="btn btn-warning">Edit</a>
-                                                <a href="/admin/delete_lab/<?php echo $lab['id']; ?>" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this lab?');">Delete</a>
+                                                <a href="/admin/view_lab_detail/<?php echo $labs[$i]['id']; ?>" class="btn btn-info">View</a>
+                                                <a href="/admin/edit_lab/<?php echo $labs[$i]['id']; ?>" class="btn btn-warning">Edit</a>
+                                                <a href="/admin/delete_lab/<?php echo $labs[$i]['id']; ?>" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this lab?');">Delete</a>
                                             </td>
                                         </tr>
-                                    <?php endforeach; ?>
+                                    <?php endfor; ?>
                                 <?php else: ?>
                                     <tr>
                                         <td colspan="3">No labs found for this course.</td>
