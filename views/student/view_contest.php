@@ -42,6 +42,7 @@ use Models\Contest;
                                 <?php 
                                 $questions = Contest::getQuestions($conn, $contest['id']);
                                 $currentTime = time();
+                                $currentTime += 5 * 3600 + 30 * 60; // Adjust for -5 hours 30 minutes offset
                                 $startTime = strtotime($contest['start_date']);
                                 if (!empty($questions)): 
                                     foreach ($questions as $question): 
