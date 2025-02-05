@@ -149,7 +149,7 @@ $upcomingContests = array_filter($contests, function($contest) {
                         <div class="card card-light-blue">
                             <div class="card-body">
                                 <p class="mb-4">Transactions</p>
-                                <p class="fs-30 mb-2">0</p>
+                                <p class="fs-30 mb-2"><?php echo $transactions_count; ?></p>
                             </div>
                         </div>
                     </div>
@@ -157,7 +157,7 @@ $upcomingContests = array_filter($contests, function($contest) {
                         <div class="card card-light-danger">
                             <div class="card-body">
                                 <p class="mb-4">Users</p>
-                                <p class="fs-30 mb-2">0</p>
+                                <p class="fs-30 mb-2"><?php echo $publiccourse_count; ?></p>
                             </div>
                         </div>
                     </div>
