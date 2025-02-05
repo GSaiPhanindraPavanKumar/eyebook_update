@@ -131,7 +131,7 @@ if ($assignedCohorts === null) {
                                                     echo "<td>" . htmlspecialchars($content['unitTitle'] ?? 'N/A') . "</td>";
                                                     $full_url = $content['indexPath'] ?? '#';
                                                     echo "<td>
-                                                            <a href='/admin/viewECbook/" . urlencode($hashedId) . "?index_path=" . urlencode($full_url) . "' class='btn btn-primary'>View EC</a>
+                                                            <a href='/" . htmlspecialchars($full_url) . " class='btn btn-primary'>View EC</a>
                                                             <button class='btn btn-danger' onclick='removeContent(\"EC_content\", " . ($serialNumber - 2) . ")'>Remove</button>
                                                         </td>";
                                                     echo "</tr>";
