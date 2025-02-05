@@ -355,7 +355,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     'title' => $class['topic'],
                     'start' => $class['start_time'],
                     'end' => date('Y-m-d\TH:i:s', strtotime($class['start_time'] . ' + ' . $class['duration'] . ' minutes')),
-                    'url' => $class['join_url']
+                    'url' => $class['join_url'],
+                    'type' => 'virtual_classroom'
                 ];
             }, $virtualClasses),
             array_map(function($assignment) {
@@ -378,6 +379,14 @@ document.addEventListener('DOMContentLoaded', function() {
             }, $contests)
         )); ?>,
         eventDisplay: 'block' // Ensure event titles are always visible
+        eventClick: function(info) {
+            if (info.event.extendedProps.type === 'virtual_classroom') {
+                window.open(info.event.url, '_blank');
+            } else {
+                window.location.href = info.event.url;
+            }
+            info.jsEvent.preventDefault(); // Prevent the default action
+        }
     });
     calendar.render();
 });
