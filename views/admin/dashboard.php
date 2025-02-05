@@ -156,7 +156,7 @@ $upcomingContests = array_filter($contests, function($contest) {
                     <div class="col-md-6 stretch-card transparent">
                         <div class="card card-light-danger">
                             <div class="card-body">
-                                <p class="mb-4">Users</p>
+                                <p class="mb-4">Public Course</p>
                                 <p class="fs-30 mb-2"><?php echo $publiccourse_count; ?></p>
                             </div>
                         </div>
