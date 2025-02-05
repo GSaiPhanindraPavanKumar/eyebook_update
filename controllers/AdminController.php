@@ -96,6 +96,8 @@ class AdminController {
         $student_count = Student::getCount($conn);
         $spoc_count = Spoc::getCount($conn);
         $course_count = Course::getCount($conn);
+        $publiccourse_count = PublicCourse::getCount($conn);
+        $transactions_count = PublicCourse::getTransactionsCount($conn);
     
         $spocs = Spoc::getAll($conn);
         $universities = University::getAll($conn);

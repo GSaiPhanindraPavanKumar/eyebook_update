@@ -52,6 +52,21 @@ class PublicCourse {
         return $course;
     }
 
+    
+
+    public static function getCount($conn) {
+        $sql = "SELECT COUNT(*) as course_count FROM public_courses";
+        $stmt = $conn->query($sql);
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $result['course_count'] ?? 0;
+    }
+
+    public static function getTransactionsCount($conn) {
+        $sql = "SELECT COUNT(*) as course_count FROM public_courses";
+        $stmt = $conn->query($sql);
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $result['course_count'] ?? 0;
+    }
     public static function getAssignments($conn, $courseId) {
         $courseIdStr = "public:$courseId";
         $sql = "SELECT * FROM assignments WHERE JSON_CONTAINS(course_id, :course_id, '$')";
