@@ -20,6 +20,7 @@
 
                         <?php
                         $current_time = new DateTime();
+                        $current_time->modify('+5 hours +30 minutes'); // Adjust for -5 hours 30 minutes offset
                         $start_time = new DateTime($assignment['start_time']);
                         if ($current_time < $start_time): ?>
                             <p><strong>Status:</strong> The assignment has not yet started.</p>
