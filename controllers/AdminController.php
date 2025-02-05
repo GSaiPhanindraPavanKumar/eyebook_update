@@ -2791,6 +2791,17 @@ class AdminController {
         require 'views/admin/grade_submission.php';
     }
 
+    public function gradeSubmission($assignment_id, $student_id) {
+        $conn = Database::getConnection();
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $grade = $_POST['grade'];
+            $feedback = $_POST['feedback'];
+            Assignment::grade($conn, $assignment_id, $student_id, $grade, $feedback);
+            header('Location: /admin/view_assignment/' . $assignment_id);
+            exit;
+        }
+    }
+
     public function downloadReport($assignmentId) {
         $conn = Database::getConnection();
         $submissions = Assignment::getSubmissions($conn, $assignmentId);
