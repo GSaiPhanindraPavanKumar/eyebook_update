@@ -365,7 +365,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     'start' => $assignment['start_time'],
                     'end' => $assignment['due_date'],
                     'color' => 'red',
-                    'url' => '/admin/view_assignment/' . $assignment['id'], // URL to view the assignment
+                    'url' => '/admin/view_assignment/' . $assignment['id'],
                     'type' => 'assignment'
                 ];
             }, $assignments),
@@ -375,12 +375,12 @@ document.addEventListener('DOMContentLoaded', function() {
                     'start' => $contest['start_date'],
                     'end' => $contest['end_date'],
                     'color' => 'green',
-                    'url' => '/admin/view_contest/' . $contest['id'], // URL to view the contest
+                    'url' => '/admin/view_contest/' . $contest['id'],
                     'type' => 'contest'
                 ];
             }, $contests)
         )); ?>,
-        eventDisplay: 'block' // Ensure event titles are always visible
+        eventDisplay: 'block',
         eventClick: function(info) {
             if (info.event.extendedProps.type === 'virtual_classroom') {
                 window.open(info.event.url, '_blank');
