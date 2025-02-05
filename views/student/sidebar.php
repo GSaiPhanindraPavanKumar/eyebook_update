@@ -797,5 +797,3 @@ if ($userData) {
             }
         }
         </style>
-    </div>
-</div>
