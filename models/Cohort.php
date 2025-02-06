@@ -79,10 +79,20 @@ class Cohort {
         }
     }
     public static function updateStudentIds($conn, $cohort_id, $student_ids) {
+        // If $student_ids is an array, convert it to JSON
+        if (is_array($student_ids)) {
+            // Convert all IDs to strings
+            $student_ids = array_map('strval', $student_ids);
+            // Sort the array to maintain consistent order
+            sort($student_ids);
+            // Encode as JSON array without numeric keys
+            $student_ids = json_encode(array_values($student_ids));
+        }
+
         $sql = "UPDATE cohorts SET student_ids = :student_ids WHERE id = :id";
         $stmt = $conn->prepare($sql);
         $stmt->execute([
-            ':student_ids' => json_encode($student_ids),
+            ':student_ids' => $student_ids,
             ':id' => $cohort_id
         ]);
     }

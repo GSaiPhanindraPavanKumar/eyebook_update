@@ -2919,17 +2919,25 @@ class AdminController {
         exit();
     }
 
-    public function viewCohort($id) {
+    public function viewCohort($cohort_id) {
         $conn = Database::getConnection();
-        $cohort = Cohort::getById($conn, $id);
+    
+        // Get cohort details
+        $cohort = Cohort::getById($conn, $cohort_id);
+    
+        // Get student IDs from cohort
         $student_ids = json_decode($cohort['student_ids'], true) ?? [];
-        $students = Student::getByIds($conn, $student_ids);
+    
+        // Get student details
+        $students = !empty($student_ids) ? Student::getByIds($conn, $student_ids) : [];
+    
+        // Get other necessary data
+        $universities = University::getAll($conn);
         $courses = Course::getAll($conn);
         $allCourses = Course::getAll($conn);
         $allStudents = Student::getAll($conn);
-        $universities = University::getAll($conn); // Fetch all universities
-        $existing_student_ids = $student_ids; // Initialize existing student IDs
-    
+        $existing_student_ids = $student_ids;
+
         require 'views/admin/view_cohort.php';
     }
 
@@ -3562,56 +3570,78 @@ class AdminController {
             $sheet = $spreadsheet->getActiveSheet();
             $rows = $sheet->toArray();
     
-            $emailColumnIndex = 0; // Assuming email IDs are in the first column
-            $emailIds = array_column($rows, $emailColumnIndex);
-    
-            $placeholders = implode(',', array_fill(0, count($emailIds), '?'));
-            $sql = "SELECT id, email FROM students WHERE email IN ($placeholders)";
-            $stmt = $conn->prepare($sql);
-            $stmt->execute($emailIds);
-            $students = $stmt->fetchAll(PDO::FETCH_ASSOC);
-    
-            $foundEmails = array_column($students, 'email');
-            $notFoundEmails = array_diff($emailIds, $foundEmails);
-            $course_ids = json_decode($cohort['course_ids'], true) ?? [];
+            // Skip header row
+            array_shift($rows);
 
-    
-            $studentIdsToAdd = array_column($students, 'id');
-            $studentIdsToAdd = array_map('strval', $studentIdsToAdd); // Convert IDs to strings
-            $existing_student_ids = array_map('strval', $existing_student_ids); // Convert existing IDs to strings
-            $newStudentIds = array_unique(array_merge($existing_student_ids, $studentIdsToAdd));
-    
-            Cohort::updateStudentIds($conn, $cohort_id, $newStudentIds);
+            // Get all email addresses from the sheet
+            $sheetEmails = array_map(function($row) {
+                return trim($row[0] ?? '');
+            }, $rows);
+            $sheetEmails = array_filter($sheetEmails); // Remove empty values
 
-            Student::assignCoursesToStudents($conn, $newStudentIds, $course_ids);
+            // Find duplicates within the sheet
+            $duplicatesInSheet = array_diff_assoc($sheetEmails, array_unique($sheetEmails));
+            
+            // Get valid emails (excluding duplicates from sheet)
+            $validEmails = array_unique($sheetEmails);
+            
+            // Query database for these emails
+            if (!empty($validEmails)) {
+                $placeholders = str_repeat('?,', count($validEmails) - 1) . '?';
+                $sql = "SELECT id, email FROM students WHERE email IN ($placeholders)";
+                $stmt = $conn->prepare($sql);
+                $stmt->execute($validEmails);
+                $students = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-            // Update courses with new student IDs
-            foreach ($course_ids as $course_id) {
-                Course::assigncohortstudents($conn, $course_id, $newStudentIds);
+                $foundEmails = array_column($students, 'email');
+                $notFoundEmails = array_diff($validEmails, $foundEmails);
+                
+                // Get emails of students already in cohort
+                $existingEmails = [];
+                if (!empty($existing_student_ids)) {
+                    $existingStudentsSql = "SELECT id, email FROM students WHERE id IN (" . implode(',', array_map('intval', $existing_student_ids)) . ")";
+                    $existingStmt = $conn->prepare($existingStudentsSql);
+                    $existingStmt->execute();
+                    $existingStudents = $existingStmt->fetchAll(PDO::FETCH_ASSOC);
+                    $existingEmails = array_column($existingStudents, 'email');
+                    $existingIds = array_column($existingStudents, 'id');
+                }
+                
+                $studentIdsToAdd = array_column($students, 'id');
+                // Count only new students (not already in cohort)
+                $newStudents = array_diff($studentIdsToAdd, $existingIds ?? []);
+                $actuallyAdded = count($newStudents);
+
+                $studentIdsToAdd = array_map('strval', $studentIdsToAdd);
+                $existing_student_ids = array_map('strval', $existing_student_ids);
+                $newStudentIds = array_values(array_unique(array_merge($existing_student_ids, $studentIdsToAdd)));
+                sort($newStudentIds);
+
+                Cohort::updateStudentIds($conn, $cohort_id, $newStudentIds);
+
+                $course_ids = json_decode($cohort['course_ids'], true) ?? [];
+                Student::assignCoursesToStudents($conn, $newStudentIds, $course_ids);
+
+                foreach ($course_ids as $course_id) {
+                    Course::assigncohortstudents($conn, $course_id, $newStudentIds);
+                }
+
+                $_SESSION['bulk_add_result'] = [
+                    'success' => true,
+                    'added_count' => $actuallyAdded,
+                    'total_processed' => count($validEmails),
+                    'duplicates_in_sheet' => array_values($duplicatesInSheet),
+                    'duplicates_count' => count($duplicatesInSheet),
+                    'not_found_emails' => array_values($notFoundEmails),
+                    'not_found_count' => count($notFoundEmails),
+                    'existing_emails' => array_values($existingEmails),
+                    'existing_count' => count($existingEmails)
+                ];
             }
-            $message = "Students added successfully.";
-            if (!empty($notFoundEmails)) {
-                $message .= " The following email IDs were not found: " . implode(', ', $notFoundEmails);
-            }
-    
-            $_SESSION['message'] = $message;
-            $_SESSION['message_type'] = "success";
-    
-            // Redirect to the view cohort page
+
             header("Location: /admin/view_cohort/$cohort_id");
             exit();
         }
-    
-        // Fetch necessary data for the view
-        //$students = Student::getByIds($conn, $newStudentIds);
-        $allStudents = Student::getAll($conn);
-        $universities = University::getAll($conn);
-        $courses = Course::getAll($conn);
-        $allCourses = Course::getAll($conn);
-        $student_ids = json_decode($cohort['student_ids'], true) ?? [];
-        $existing_student_ids = $student_ids;
-    
-        require 'views/admin/view_cohort.php';
     }
 
     // Add these methods to the existing AdminController class
