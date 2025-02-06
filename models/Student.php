@@ -215,15 +215,41 @@ class Student {
         return false;
     }
 
-    public static function getByIds($conn, $studentIds) {
-        if (empty($studentIds)) {
+    public static function getByIds($conn, $student_ids) {
+        // If input is a JSON string, decode it
+        if (is_string($student_ids)) {
+            $student_ids = json_decode($student_ids, true);
+        }
+
+        if (empty($student_ids)) {
             return [];
         }
-    
-        $placeholders = implode(',', array_fill(0, count($studentIds), '?'));
-        $sql = "SELECT * FROM students WHERE id IN ($placeholders)";
+
+        // Convert all IDs to strings and create placeholders
+        $student_ids = array_map('strval', $student_ids);
+        
+        // Create named parameters for each ID
+        $placeholders = [];
+        $params = [];
+        foreach ($student_ids as $i => $id) {
+            $param = ":id" . $i;
+            $placeholders[] = $param;
+            $params[$param] = $id;
+        }
+        
+        $sql = "SELECT s.*, u.short_name as university_short_name, u.long_name as university_name 
+                FROM students s 
+                LEFT JOIN universities u ON s.university_id = u.id 
+                WHERE s.id IN (" . implode(',', $placeholders) . ")";
+        
         $stmt = $conn->prepare($sql);
-        $stmt->execute($studentIds);
+        
+        // Bind each parameter
+        foreach ($params as $param => $value) {
+            $stmt->bindValue($param, $value);
+        }
+        
+        $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 

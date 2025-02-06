@@ -184,6 +184,103 @@
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
+<!-- Bulk Add Result Modal -->
+<div class="modal fade" id="bulkAddResultModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Bulk Add Results</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <?php if (isset($_SESSION['bulk_add_result'])): ?>
+                    <?php $result = $_SESSION['bulk_add_result']; ?>
+                    <div class="alert alert-info">
+                        <strong>Processing Summary:</strong><br>
+                        Total emails processed: <?php echo $result['total_processed']; ?><br>
+                        New students added: <?php echo $result['added_count']; ?>
+                    </div>
+
+                    <?php if ($result['added_count'] > 0): ?>
+                        <div class="alert alert-success">
+                            Successfully added <?php echo $result['added_count']; ?> new students to the cohort.
+                        </div>
+                    <?php else: ?>
+                        <div class="alert alert-warning">
+                            No new students were added. All valid emails were already in the cohort.
+                        </div>
+                    <?php endif; ?>
+
+                    <?php if (!empty($result['duplicates_in_sheet'])): ?>
+                        <div class="alert alert-warning">
+                            <a href="#" class="btn btn-warning btn-sm mb-2 w-100 text-left" 
+                               data-toggle="collapse" 
+                               data-target="#duplicatesCollapse" 
+                               role="button" 
+                               aria-expanded="false">
+                                <span>Duplicates Found in Sheet (<?php echo $result['duplicates_count']; ?>)</span>
+                                <i class="fas fa-chevron-down float-right"></i>
+                            </a>
+                            <div class="collapse" id="duplicatesCollapse">
+                                <ul class="list-group">
+                                    <?php foreach ($result['duplicates_in_sheet'] as $email): ?>
+                                        <li class="list-group-item"><?php echo htmlspecialchars($email); ?></li>
+                                    <?php endforeach; ?>
+                                </ul>
+                            </div>
+                        </div>
+                    <?php endif; ?>
+
+                    <?php if (!empty($result['not_found_emails'])): ?>
+                        <div class="alert alert-danger">
+                            <a href="#" class="btn btn-danger btn-sm mb-2 w-100 text-left" 
+                               data-toggle="collapse" 
+                               data-target="#notFoundCollapse" 
+                               role="button" 
+                               aria-expanded="false">
+                                <span>Emails Not Found (<?php echo $result['not_found_count']; ?>)</span>
+                                <i class="fas fa-chevron-down float-right"></i>
+                            </a>
+                            <div class="collapse" id="notFoundCollapse">
+                                <ul class="list-group">
+                                    <?php foreach ($result['not_found_emails'] as $email): ?>
+                                        <li class="list-group-item"><?php echo htmlspecialchars($email); ?></li>
+                                    <?php endforeach; ?>
+                                </ul>
+                            </div>
+                        </div>
+                    <?php endif; ?>
+
+                    <?php if (!empty($result['existing_emails'])): ?>
+                        <div class="alert alert-info">
+                            <a href="#" class="btn btn-info btn-sm mb-2 w-100 text-left" 
+                               data-toggle="collapse" 
+                               data-target="#existingCollapse" 
+                               role="button" 
+                               aria-expanded="false">
+                                <span>Already in Cohort (<?php echo $result['existing_count']; ?>)</span>
+                                <i class="fas fa-chevron-down float-right"></i>
+                            </a>
+                            <div class="collapse" id="existingCollapse">
+                                <ul class="list-group">
+                                    <?php foreach ($result['existing_emails'] as $email): ?>
+                                        <li class="list-group-item"><?php echo htmlspecialchars($email); ?></li>
+                                    <?php endforeach; ?>
+                                </ul>
+                            </div>
+                        </div>
+                    <?php endif; ?>
+                <?php endif; ?>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
     $(document).ready(function () {
         $('#addCourseButton').on('click', function () {
@@ -233,5 +330,52 @@
             var isChecked = $(this).prop('checked');
             $('#addStudentsTable tbody input[type="checkbox"]').prop('checked', isChecked);
         });
+
+        // Simple collapse handler for icon rotation
+        $('[data-toggle="collapse"]').on('click', function(e) {
+            e.preventDefault();
+            var icon = $(this).find('i');
+            icon.toggleClass('fa-chevron-down fa-chevron-up');
+        });
+
+        <?php if (isset($_SESSION['bulk_add_result'])): ?>
+            $('#bulkAddResultModal').modal('show');
+        <?php 
+            unset($_SESSION['bulk_add_result']);
+        endif; ?>
     });
 </script>
+
+<!-- Update the CSS -->
+<style>
+.btn[data-toggle="collapse"] {
+    position: relative;
+}
+
+.btn[data-toggle="collapse"] i {
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    transition: transform 0.3s ease;
+}
+
+.collapse {
+    display: none;
+}
+
+.collapse.show {
+    display: block;
+}
+
+.collapsing {
+    position: relative;
+    height: 0;
+    overflow: hidden;
+    transition: height 0.35s ease;
+}
+
+.list-group {
+    margin-top: 10px;
+}
+</style>
