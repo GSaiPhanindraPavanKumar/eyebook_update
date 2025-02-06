@@ -149,7 +149,7 @@ foreach ($allClassrooms as $classroom) {
                                         echo "<td>" . $serialNumber++ . "</td>";
                                         echo "<td>" . htmlspecialchars($content['unitTitle'] ?? 'N/A') . "</td>";
                                         $full_url = $content['indexPath'] ?? '#';
-                                        echo "<td><a href='/student/view_ec_content/" . $hashedId . "?index_path=" . urlencode($full_url) . "' class='btn btn-primary'>View EC</a></td>";
+                                        echo "<td><a href='/" . htmlspecialchars($full_url) . "' target='_blank' class='btn btn-primary'>View EC</a></td>";
                                         echo "</tr>";
                                     }
                                 } else {
