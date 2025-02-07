@@ -355,7 +355,7 @@ class AdminController {
                 // Update the company's university_ids field
                 if ($result['message_type'] == 'success') {
                     $company = Company::getById($conn, $company_id);
-                    $university_ids = json_decode($company['university_ids'], true) ?? [];
+                    $university_ids = json_decode($company['university_ids'] ?? '[]', true);
                     $university_ids[] = $result['university_id'];
                     Company::updateUniversityIds($conn, $company_id, json_encode($university_ids));
                 }
