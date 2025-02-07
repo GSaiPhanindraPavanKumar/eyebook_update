@@ -407,14 +407,16 @@ class AdminController {
 
     public function deleteCompany() {
         $id = $_POST['id'];
-
+    
         $conn = Database::getConnection();
         $sql = "DELETE FROM company WHERE id = :id";
         $stmt = $conn->prepare($sql);
         $stmt->bindValue(':id', $id);
-
+    
         if ($stmt->execute()) {
             echo json_encode(['success' => true, 'message' => 'Company deleted successfully']);
+            header('Location: /admin/manage_company');
+            exit(); // Ensure no further code is executed
         } else {
             echo json_encode(['success' => false, 'message' => 'Failed to delete company']);
         }
