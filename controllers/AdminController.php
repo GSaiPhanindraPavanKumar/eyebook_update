@@ -3561,17 +3561,18 @@ class AdminController {
         header('Location: ' . $_SERVER['HTTP_REFERER']);
         exit();
     }
+
     public function bulkAddStudentsToCohort($cohort_id) {
         $conn = Database::getConnection();
         $cohort = Cohort::getById($conn, $cohort_id);
         $existing_student_ids = json_decode($cohort['student_ids'], true) ?? [];
-    
+
         if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['bulk_student_file'])) {
             $file = $_FILES['bulk_student_file']['tmp_name'];
             $spreadsheet = IOFactory::load($file);
             $sheet = $spreadsheet->getActiveSheet();
             $rows = $sheet->toArray();
-    
+
             // Skip header row
             array_shift($rows);
 
@@ -3606,12 +3607,14 @@ class AdminController {
                     $existingStmt->execute();
                     $existingStudents = $existingStmt->fetchAll(PDO::FETCH_ASSOC);
                     $existingEmails = array_column($existingStudents, 'email');
-                    $existingIds = array_column($existingStudents, 'id');
                 }
+
+                // Check for existing emails in the sheet
+                $existingEmailsInSheet = array_intersect($validEmails, $existingEmails);
                 
                 $studentIdsToAdd = array_column($students, 'id');
                 // Count only new students (not already in cohort)
-                $newStudents = array_diff($studentIdsToAdd, $existingIds ?? []);
+                $newStudents = array_diff($studentIdsToAdd, $existing_student_ids);
                 $actuallyAdded = count($newStudents);
 
                 $studentIdsToAdd = array_map('strval', $studentIdsToAdd);
@@ -3636,8 +3639,8 @@ class AdminController {
                     'duplicates_count' => count($duplicatesInSheet),
                     'not_found_emails' => array_values($notFoundEmails),
                     'not_found_count' => count($notFoundEmails),
-                    'existing_emails' => array_values($existingEmails),
-                    'existing_count' => count($existingEmails)
+                    'existing_emails' => array_values($existingEmailsInSheet),
+                    'existing_count' => count($existingEmailsInSheet)
                 ];
             }
 

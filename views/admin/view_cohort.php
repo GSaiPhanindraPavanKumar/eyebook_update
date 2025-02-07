@@ -185,6 +185,7 @@
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
 <!-- Bulk Add Result Modal -->
+<!-- Bulk Add Result Modal -->
 <div class="modal fade" id="bulkAddResultModal" tabindex="-1" role="dialog">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
