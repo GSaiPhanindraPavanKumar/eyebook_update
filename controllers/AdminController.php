@@ -3642,6 +3642,11 @@ class AdminController {
                     'existing_emails' => array_values($existingEmailsInSheet),
                     'existing_count' => count($existingEmailsInSheet)
                 ];
+            } else {
+                $_SESSION['bulk_add_result'] = [
+                    'success' => false,
+                    'message' => 'No valid emails found in the sheet.'
+                ];
             }
 
             header("Location: /admin/view_cohort/$cohort_id");
