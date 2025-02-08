@@ -18,9 +18,10 @@
                         <div class="card-body">
                             <img id="preview-image" class="img-fluid" alt="Certificate Preview">
                             <div class="mt-3">
-                                <p><strong>Registration Number:</strong> <span id="preview-reg"></span></p>
+                                <p><strong>SME:</strong> <span id="preview-reg"></span></p>
                                 <p><strong>Name:</strong> <span id="preview-name"></span></p>
-                                <p><strong>Grade:</strong> <span id="preview-grade"></span></p>
+                                <p><strong>Project Title:</strong> <span id="preview-grade"></span></p>
+                                <p><strong>Date Range:</strong> <span id="preview-date"></span></p>
                             </div>
                             <div class="mt-3">
                                 <button type="button" class="btn btn-secondary" onclick="cancelGeneration()">Cancel</button>
@@ -34,6 +35,13 @@
                     <div class="form-group">
                         <label>Subject</label>
                         <input type="text" name="subject" class="form-control" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Date Range</label>
+                        <input type="text" name="date_range" class="form-control" required 
+                               placeholder="e.g., 28th May 2024 - 3rd June 2024">
+                        <small class="form-text text-muted">Format: 28th May 2024 - 3rd June 2024</small>
                     </div>
                     
                     <div class="form-group">
@@ -55,9 +63,10 @@
                             <div id="template-container" style="position: relative; min-height: 300px;">
                                 <img id="template-preview" class="w-100" style="display: none; position: absolute; top: 0; left: 0;">
                                 <div class="draggables-container" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;">
-                                    <div class="draggable" data-field="registration_number">Registration Number</div>
+                                    <div class="draggable" data-field="registration_number">SME</div>
                                     <div class="draggable" data-field="name">Name</div>
-                                    <div class="draggable" data-field="grade">Grade</div>
+                                    <div class="draggable" data-field="grade">Project Title</div>
+                                    <div class="draggable" data-field="date">Date Range</div>
                                 </div>
                             </div>
                         </div>

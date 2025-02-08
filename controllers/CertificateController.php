@@ -159,13 +159,14 @@ class CertificateController {
             error_log("[Certificate Generation] Normalized positions: " . json_encode($positions));
 
             // Store the normalized positions
-            $stmt = $conn->prepare("INSERT INTO certificate_generations (subject, template_path, template_type, text_positions, status, generated_count, total_count, excel_file_path) VALUES (?, ?, ?, ?, 'processing', 0, 0, ?)");
+            $stmt = $conn->prepare("INSERT INTO certificate_generations (subject, template_path, template_type, text_positions, status, generated_count, total_count, excel_file_path, date_range) VALUES (?, ?, ?, ?, 'processing', 0, 0, ?, ?)");
             $stmt->execute([
                 $_POST['subject'],
                 $templateUrl,
                 $_FILES['template']['type'],
                 json_encode($positions),
-                $excelTempPath
+                $excelTempPath,
+                $_POST['date_range']
             ]);
             
             $generationId = $conn->lastInsertId();
@@ -269,7 +270,7 @@ class CertificateController {
         $worksheet = $spreadsheet->getActiveSheet();
         $headers = $worksheet->getRowIterator(1)->current();
         
-        $requiredHeaders = ['Registration Number', 'Name', 'Grade in %'];
+        $requiredHeaders = ['SME', 'Name', 'Project Title'];
         $actualHeaders = [];
         
         foreach ($headers->getCellIterator() as $cell) {
@@ -421,12 +422,17 @@ class CertificateController {
             $outputFileName = uniqid('cert_') . '_' . preg_replace('/[^a-zA-Z0-9]/', '_', $data[0]) . '.jpg';
             $localOutputPath = $localCertDir . $outputFileName;
             
+            // Add date to the data array for certificate generation
+            $dataWithDate = $data;
+            $dataWithDate[] = $generation['date_range']; // Add date_range as the fourth element
+            
             // Use generatePreviewCertificate to create the certificate
             $generatedPath = $this->generatePreviewCertificate(
-                $data,
+                $dataWithDate,
                 $localTemplatePath,
                 $positions,
-                $localCertDir // Use certificate directory instead of temp
+                $localCertDir, // Use certificate directory instead of temp
+                $generation['date_range'] // Pass date_range explicitly
             );
 
             // Move the generated file to its final location if needed
@@ -836,7 +842,8 @@ class CertificateController {
                 'data' => [
                     'registration_number' => $firstRow[0] ?? '',
                     'name' => $firstRow[1] ?? '',
-                    'grade' => $firstRow[2] ?? ''
+                    'grade' => $firstRow[2] ?? '',
+                    'date' => $_POST['date_range'] ?? ''
                 ],
                 'positions' => $positions // Return the exact positions used
             ]);
@@ -856,7 +863,7 @@ class CertificateController {
         }
     }
 
-    private function generatePreviewCertificate($data, $templatePath, $positions, $tempDir) {
+    private function generatePreviewCertificate($data, $templatePath, $positions, $tempDir, $dateRange = null) {
         try {
             error_log("[Preview Generation] Starting with positions: " . json_encode($positions));
             
@@ -906,7 +913,7 @@ class CertificateController {
                 switch ($field) {
                     case 'registration_number':
                         $text = $data[0] ?? '';
-                        $fontSize = round($imageHeight * 0.02);
+                        $fontSize = round($imageHeight * 0.03);
                         break;
                     case 'name':
                         $text = $data[1] ?? '';
@@ -914,7 +921,12 @@ class CertificateController {
                         break;
                     case 'grade':
                         $text = $data[2] ?? '';
-                        $fontSize = round($imageHeight * 0.02);
+                        $fontSize = round($imageHeight * 0.03);
+                        break;
+                    case 'date':
+                        // Use either passed date_range or POST data
+                        $text = $dateRange ?? $_POST['date_range'] ?? '';
+                        $fontSize = round($imageHeight * 0.015);
                         break;
                     default:
                         continue 2;
