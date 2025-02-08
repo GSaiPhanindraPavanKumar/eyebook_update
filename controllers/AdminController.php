@@ -3593,7 +3593,7 @@ class AdminController {
                 $placeholders = str_repeat('?,', count($validEmails) - 1) . '?';
                 $sql = "SELECT id, email FROM students WHERE email IN ($placeholders)";
                 $stmt = $conn->prepare($sql);
-                $stmt->execute($validEmails);
+                $stmt->execute(array_values($validEmails)); // Ensure the array is indexed correctly
                 $students = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
                 $foundEmails = array_column($students, 'email');
