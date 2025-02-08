@@ -422,12 +422,17 @@ class CertificateController {
             $outputFileName = uniqid('cert_') . '_' . preg_replace('/[^a-zA-Z0-9]/', '_', $data[0]) . '.jpg';
             $localOutputPath = $localCertDir . $outputFileName;
             
+            // Add date to the data array for certificate generation
+            $dataWithDate = $data;
+            $dataWithDate[] = $generation['date_range']; // Add date_range as the fourth element
+            
             // Use generatePreviewCertificate to create the certificate
             $generatedPath = $this->generatePreviewCertificate(
-                $data,
+                $dataWithDate,
                 $localTemplatePath,
                 $positions,
-                $localCertDir // Use certificate directory instead of temp
+                $localCertDir, // Use certificate directory instead of temp
+                $generation['date_range'] // Pass date_range explicitly
             );
 
             // Move the generated file to its final location if needed
@@ -858,7 +863,7 @@ class CertificateController {
         }
     }
 
-    private function generatePreviewCertificate($data, $templatePath, $positions, $tempDir) {
+    private function generatePreviewCertificate($data, $templatePath, $positions, $tempDir, $dateRange = null) {
         try {
             error_log("[Preview Generation] Starting with positions: " . json_encode($positions));
             
@@ -908,7 +913,7 @@ class CertificateController {
                 switch ($field) {
                     case 'registration_number':
                         $text = $data[0] ?? '';
-                        $fontSize = round($imageHeight * 0.02);
+                        $fontSize = round($imageHeight * 0.03);
                         break;
                     case 'name':
                         $text = $data[1] ?? '';
@@ -916,10 +921,11 @@ class CertificateController {
                         break;
                     case 'grade':
                         $text = $data[2] ?? '';
-                        $fontSize = round($imageHeight * 0.02);
+                        $fontSize = round($imageHeight * 0.03);
                         break;
                     case 'date':
-                        $text = $_POST['date_range'] ?? '';
+                        // Use either passed date_range or POST data
+                        $text = $dateRange ?? $_POST['date_range'] ?? '';
                         $fontSize = round($imageHeight * 0.015);
                         break;
                     default:
