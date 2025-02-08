@@ -159,13 +159,14 @@ class CertificateController {
             error_log("[Certificate Generation] Normalized positions: " . json_encode($positions));
 
             // Store the normalized positions
-            $stmt = $conn->prepare("INSERT INTO certificate_generations (subject, template_path, template_type, text_positions, status, generated_count, total_count, excel_file_path) VALUES (?, ?, ?, ?, 'processing', 0, 0, ?)");
+            $stmt = $conn->prepare("INSERT INTO certificate_generations (subject, template_path, template_type, text_positions, status, generated_count, total_count, excel_file_path, date_range) VALUES (?, ?, ?, ?, 'processing', 0, 0, ?, ?)");
             $stmt->execute([
                 $_POST['subject'],
                 $templateUrl,
                 $_FILES['template']['type'],
                 json_encode($positions),
-                $excelTempPath
+                $excelTempPath,
+                $_POST['date_range']
             ]);
             
             $generationId = $conn->lastInsertId();
@@ -269,7 +270,7 @@ class CertificateController {
         $worksheet = $spreadsheet->getActiveSheet();
         $headers = $worksheet->getRowIterator(1)->current();
         
-        $requiredHeaders = ['Registration Number', 'Name', 'Grade in %'];
+        $requiredHeaders = ['SME', 'Name', 'Project Title'];
         $actualHeaders = [];
         
         foreach ($headers->getCellIterator() as $cell) {
@@ -836,7 +837,8 @@ class CertificateController {
                 'data' => [
                     'registration_number' => $firstRow[0] ?? '',
                     'name' => $firstRow[1] ?? '',
-                    'grade' => $firstRow[2] ?? ''
+                    'grade' => $firstRow[2] ?? '',
+                    'date' => $_POST['date_range'] ?? ''
                 ],
                 'positions' => $positions // Return the exact positions used
             ]);
@@ -915,6 +917,10 @@ class CertificateController {
                     case 'grade':
                         $text = $data[2] ?? '';
                         $fontSize = round($imageHeight * 0.02);
+                        break;
+                    case 'date':
+                        $text = $_POST['date_range'] ?? '';
+                        $fontSize = round($imageHeight * 0.015);
                         break;
                     default:
                         continue 2;

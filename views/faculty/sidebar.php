@@ -81,7 +81,7 @@ if ($userData) {
                             <i class="ti-user text-primary"></i>
                             Profile
                         </a>
-                        <a class="dropdown-item" href="logout">
+                        <a class="dropdown-item" href="/logout">
                             <i class="ti-power-off text-primary"></i>
                             Logout
                         </a>
@@ -289,7 +289,7 @@ if ($userData) {
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="/faculty/logout">
+                    <a class="nav-link" href="/logout">
                         <i class="ti-power-off menu-icon"></i>
                         <span class="menu-title">Logout</span>
                 </a>
