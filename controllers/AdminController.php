@@ -758,7 +758,7 @@ class AdminController {
                 $phone = $row[3] ?? 'NA';
                 $section = $row[4] ?? 'NA';
                 $stream = $row[5] ?? 'NA';
-                $year = $row[6] ?? 'NA';
+                $year = $row[6] ?? '0';
                 $dept = $row[7] ?? 'NA';
                 $password = $row[8] ?? null;
     
