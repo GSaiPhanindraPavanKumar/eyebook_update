@@ -755,11 +755,11 @@ class AdminController {
                 $regd_no = $row[0];
                 $name = $row[1];
                 $email = $row[2];
-                $phone = $row[3] ?? null;
-                $section = $row[4] ?? null;
-                $stream = $row[5] ?? null;
-                $year = $row[6] ?? null;
-                $dept = $row[7] ?? null;
+                $phone = $row[3] ?? 'NA';
+                $section = $row[4] ?? 'NA';
+                $stream = $row[5] ?? 'NA';
+                $year = $row[6] ?? '0';
+                $dept = $row[7] ?? 'NA';
                 $password = $row[8] ?? null;
     
                 // Validate required fields
@@ -1372,10 +1372,10 @@ class AdminController {
     
                 $name = $row[0];
                 $email = $row[1];
-                $phone = $row[2] ?? null;
-                $section = $row[3] ?? null;
-                $stream = $row[4] ?? null;
-                $department = $row[5] ?? null;
+                $phone = $row[2] ?? 'NA';
+                $section = $row[3] ?? 'NA';
+                $stream = $row[4] ?? 'NA';
+                $department = $row[5] ?? 'NA';
                 $passwordPlain = $row[6];
                 $password = password_hash($passwordPlain, PASSWORD_BCRYPT);
     
