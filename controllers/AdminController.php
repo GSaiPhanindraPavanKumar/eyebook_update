@@ -3566,22 +3566,22 @@ class AdminController {
         $conn = Database::getConnection();
         $cohort = Cohort::getById($conn, $cohort_id);
         $existing_student_ids = json_decode($cohort['student_ids'], true) ?? [];
-
+    
         if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['bulk_student_file'])) {
             $file = $_FILES['bulk_student_file']['tmp_name'];
             $spreadsheet = IOFactory::load($file);
             $sheet = $spreadsheet->getActiveSheet();
             $rows = $sheet->toArray();
-
+    
             // Skip header row
             array_shift($rows);
-
+    
             // Get all email addresses from the sheet
             $sheetEmails = array_map(function($row) {
                 return trim($row[0] ?? '');
             }, $rows);
             $sheetEmails = array_filter($sheetEmails); // Remove empty values
-
+    
             // Find duplicates within the sheet
             $duplicatesInSheet = array_diff_assoc($sheetEmails, array_unique($sheetEmails));
             
@@ -3593,9 +3593,9 @@ class AdminController {
                 $placeholders = str_repeat('?,', count($validEmails) - 1) . '?';
                 $sql = "SELECT id, email FROM students WHERE email IN ($placeholders)";
                 $stmt = $conn->prepare($sql);
-                $stmt->execute($validEmails);
+                $stmt->execute(array_values($validEmails)); // Ensure the array is indexed correctly
                 $students = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
+    
                 $foundEmails = array_column($students, 'email');
                 $notFoundEmails = array_diff($validEmails, $foundEmails);
                 
@@ -3608,7 +3608,7 @@ class AdminController {
                     $existingStudents = $existingStmt->fetchAll(PDO::FETCH_ASSOC);
                     $existingEmails = array_column($existingStudents, 'email');
                 }
-
+    
                 // Check for existing emails in the sheet
                 $existingEmailsInSheet = array_intersect($validEmails, $existingEmails);
                 
@@ -3616,21 +3616,21 @@ class AdminController {
                 // Count only new students (not already in cohort)
                 $newStudents = array_diff($studentIdsToAdd, $existing_student_ids);
                 $actuallyAdded = count($newStudents);
-
+    
                 $studentIdsToAdd = array_map('strval', $studentIdsToAdd);
                 $existing_student_ids = array_map('strval', $existing_student_ids);
                 $newStudentIds = array_values(array_unique(array_merge($existing_student_ids, $studentIdsToAdd)));
                 sort($newStudentIds);
-
+    
                 Cohort::updateStudentIds($conn, $cohort_id, $newStudentIds);
-
+    
                 $course_ids = json_decode($cohort['course_ids'], true) ?? [];
                 Student::assignCoursesToStudents($conn, $newStudentIds, $course_ids);
-
+    
                 foreach ($course_ids as $course_id) {
                     Course::assigncohortstudents($conn, $course_id, $newStudentIds);
                 }
-
+    
                 $_SESSION['bulk_add_result'] = [
                     'success' => true,
                     'added_count' => $actuallyAdded,
@@ -3648,7 +3648,7 @@ class AdminController {
                     'message' => 'No valid emails found in the sheet.'
                 ];
             }
-
+    
             header("Location: /admin/view_cohort/$cohort_id");
             exit();
         }
