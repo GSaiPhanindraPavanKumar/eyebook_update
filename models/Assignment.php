@@ -30,6 +30,7 @@ class Assignment {
     
     public static function getAssignmentsByFaculty($conn, $faculty_id) {
         // Step 1: Fetch assigned courses for the faculty
+        ini_set('memory_limit', '256M');
         $sql = "SELECT assigned_courses FROM faculty WHERE id = :faculty_id";
         $stmt = $conn->prepare($sql);
         $stmt->execute([':faculty_id' => $faculty_id]);
