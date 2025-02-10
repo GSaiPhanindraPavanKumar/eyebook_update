@@ -121,12 +121,20 @@ class Faculty {
         $sql = "SELECT * FROM faculty WHERE email = :username";
         $stmt = $conn->prepare($sql);
         $stmt->execute([':username' => $username]);
-        $Faculty = $stmt->fetch(PDO::FETCH_ASSOC);
-
-        if ($Faculty && password_verify($password, $Faculty['password'])) {
-            return $Faculty;
+        $faculty = $stmt->fetch(PDO::FETCH_ASSOC);
+    
+        if ($faculty && password_verify($password, $faculty['password'])) {
+            $_SESSION['email'] = $faculty['email']; // Set email in session
+            $_SESSION['user_id'] = $faculty['id'];
+            $_SESSION['user_type'] = 'faculty';
+            if (is_null($faculty['first_login']) || $faculty['login_count'] == 0) {
+                $_SESSION['force_reset_password'] = true;
+                header('Location: /force_reset_password');
+                exit();
+            }
+            return $faculty;
         }
-
+    
         return false;
     }
 

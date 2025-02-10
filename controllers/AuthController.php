@@ -165,6 +165,54 @@ class AuthController {
         require 'views/index.php';
     }
 
+    public function forceResetPassword() {
+        if (!isset($_SESSION['force_reset_password']) || !$_SESSION['force_reset_password']) {
+            header('Location: /login');
+            exit();
+        }
+        require 'views/force_reset_password.php';
+    }
+    
+    public function handleForceResetPassword() {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $newPassword = $_POST['new_password'];
+            $confirmPassword = $_POST['confirm_password'];
+    
+            if ($newPassword !== $confirmPassword) {
+                $message = 'Passwords do not match.';
+                require 'views/force_reset_password.php';
+                return;
+            }
+    
+            $userId = $_SESSION['user_id'];
+            $userType = $_SESSION['user_type'];
+            $hashedPassword = password_hash($newPassword, PASSWORD_BCRYPT);
+    
+            $conn = Database::getConnection();
+            if ($userType === 'student') {
+                Student::updatePassword($conn, $userId, $hashedPassword);
+                $tableName = 'students';
+            } elseif ($userType === 'faculty') {
+                Faculty::updatePassword($conn, $userId, $hashedPassword);
+                $tableName = 'faculty';
+            } elseif ($userType === 'spoc') {
+                Spoc::updatePassword($conn, $userId, $hashedPassword);
+                $tableName = 'spocs';
+            }
+    
+            // Update the first_login and login_count fields
+            $sql = "UPDATE $tableName SET first_login = NOW(), login_count = login_count + 1 WHERE id = :id";
+            $stmt = $conn->prepare($sql);
+            $stmt->execute([':id' => $userId]);
+    
+            unset($_SESSION['force_reset_password']);
+            $_SESSION['password_reset_success'] = true;
+
+            header('Location: /login');
+            exit();
+        }
+    }
+
     public function logout() {
         $this->clearSession();
         header('Location: /');

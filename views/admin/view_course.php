@@ -319,7 +319,7 @@ if ($assignedCohorts === null) {
                                     <div class="form-group">
                                         <label for="scormFile">SCORM File</label>
                                         <input type="file" class="form-control" id="scormFile" name="scorm_file" required>
-                                        <small class="form-text text-muted">Allowed file formats: .zip inside .xml in main directory</small>
+                                        <small class="form-text text-muted">Allowed file formats: .zip inside .xml in main directory. Maximum file size: 100MB</small>
                                     </div>
                                     <input type="hidden" name="course_id" value="<?php echo htmlspecialchars($course['id']); ?>">
                                     <button type="submit" class="btn btn-primary">Add Course Book</button>
@@ -333,7 +333,7 @@ if ($assignedCohorts === null) {
                                     <div class="form-group">
                                         <label for="ecContentFile">Upload ZIP File</label>
                                         <input type="file" class="form-control" id="ecContentFile" name="ec_content_file" accept=".zip" required>
-                                        <small class="form-text text-muted">Allowed file format: .zip</small>
+                                        <small class="form-text text-muted">Allowed file format: .zip. Maximum file size: 100MB</small>
                                     </div>
                                     <input type="hidden" name="course_id" value="<?php echo htmlspecialchars($course['id']); ?>">
                                     <button type="submit" class="btn btn-primary">Upload EC Content</button>
@@ -358,7 +358,7 @@ if ($assignedCohorts === null) {
                                     <div class="form-group" id="fileInput" style="display: none;">
                                         <label for="contentFile">File</label>
                                         <input type="file" class="form-control" id="contentFile" name="content_file" accept=".pdf,video/*,image/*">
-                                        <small class="form-text text-muted">Allowed file formats: .pdf, video files, image files</small>
+                                        <small class="form-text text-muted">Allowed file formats: .pdf, video files, image files. Maximum file size: 100MB</small>
                                     </div>
                                     <input type="hidden" name="course_id" value="<?php echo htmlspecialchars($course['id']); ?>">
                                     <button type="submit" class="btn btn-primary">Add Additional Content</button>
@@ -616,7 +616,7 @@ if ($assignedCohorts === null) {
                                         <div class="form-group">
                                             <label for="assignment_file">Upload Assignment File:</label>
                                             <input type="file" class="form-control" id="assignment_file" name="assignment_file" accept=".pdf">
-                                            <small class="form-text text-muted">Allowed file format: .pdf</small>
+                                            <small class="form-text text-muted">Allowed file format: .pdf. Maximum file size: 10MB</small>
                                         </div>
                                         <input type="hidden" name="course_id[]" value="<?php echo $course['id']; ?>">
                                         <button type="submit" class="btn btn-primary">Create Assignment</button>
@@ -1060,5 +1060,11 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
     });
+});
+document.addEventListener('DOMContentLoaded', function() {
+    <?php if (isset($_SESSION['message']) && isset($_SESSION['message_type'])): ?>
+        alert('<?php echo $_SESSION['message']; ?>');
+        <?php unset($_SESSION['message']); unset($_SESSION['message_type']); ?>
+    <?php endif; ?>
 });
 </script>

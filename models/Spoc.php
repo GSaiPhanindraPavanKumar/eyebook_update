@@ -54,11 +54,19 @@ class Spoc {
         $stmt = $this->conn->prepare($sql);
         $stmt->execute([':username' => $username]);
         $spoc = $stmt->fetch(PDO::FETCH_ASSOC);
-
+    
         if ($spoc && password_verify($password, $spoc['password'])) {
+            $_SESSION['email'] = $spoc['email']; // Set email in session
+            $_SESSION['user_id'] = $spoc['id'];
+            $_SESSION['user_type'] = 'spoc';
+            if (is_null($spoc['first_login']) || $spoc['login_count'] == 0) {
+                $_SESSION['force_reset_password'] = true;
+                header('Location: /force_reset_password');
+                exit();
+            }
             return $spoc;
         }
-
+    
         return false;
     }
 

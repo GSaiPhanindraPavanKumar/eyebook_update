@@ -206,12 +206,19 @@ class Student {
         $stmt = $conn->prepare($sql);
         $stmt->execute([':username' => $username]);
         $student = $stmt->fetch(PDO::FETCH_ASSOC);
-
+    
         if ($student && password_verify($password, $student['password'])) {
             $_SESSION['email'] = $student['email']; // Set email in session
+            $_SESSION['user_id'] = $student['id'];
+            $_SESSION['user_type'] = 'student';
+            if (is_null($student['first_login']) || $student['login_count'] == 0) {
+                $_SESSION['force_reset_password'] = true;
+                header('Location: /force_reset_password');
+                exit();
+            }
             return $student;
         }
-
+    
         return false;
     }
 
