@@ -30,10 +30,10 @@ class Assignment {
     
     public static function getAssignmentsByFaculty($conn, $faculty_id) {
         try {
-            // Increase memory limit for this operation
-            ini_set('memory_limit', '256M');
+            // Increase memory limit
+            ini_set('memory_limit', '512M');
             
-            // Step 1: Fetch assigned courses for the faculty using a more efficient query
+            // Step 1: Get assigned courses efficiently
             $sql = "SELECT assigned_courses FROM faculty WHERE id = :faculty_id";
             $stmt = $conn->prepare($sql);
             $stmt->execute([':faculty_id' => $faculty_id]);
@@ -48,20 +48,35 @@ class Assignment {
                 return [];
             }
 
-            // Step 2: Fetch assignments using a single JOIN query instead of multiple queries
+            // Step 2: Get assignments and course names in a single query
             $placeholders = str_repeat('?,', count($assigned_courses) - 1) . '?';
             $sql = "SELECT DISTINCT a.*, c.name as course_name 
-                    FROM courses c 
-                    JOIN JSON_TABLE(c.assignments, '$[*]' COLUMNS(assignment_id INT PATH '$')) j
-                    JOIN assignments a ON a.id = j.assignment_id
-                    WHERE c.id IN ($placeholders)";
-                
+                    FROM assignments a
+                    INNER JOIN (
+                        SELECT c.id as course_id, c.name, 
+                               JSON_UNQUOTE(JSON_EXTRACT(c.assignments, '$[*]')) as assignment_ids
+                        FROM courses c 
+                        WHERE c.id IN ($placeholders)
+                    ) c ON FIND_IN_SET(a.id, c.assignment_ids) > 0";
+            
             $stmt = $conn->prepare($sql);
             $stmt->execute($assigned_courses);
-            $assignments = $stmt->fetchAll(PDO::FETCH_ASSOC);
             
-            // Free up memory
+            // Fetch results in chunks to conserve memory
+            $assignments = [];
+            while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+                $assignments[] = $row;
+                
+                // Free some memory after each chunk
+                if (count($assignments) % 100 === 0) {
+                    gc_collect_cycles();
+                }
+            }
+            
+            // Clean up
+            $stmt->closeCursor();
             unset($result, $assigned_courses);
+            gc_collect_cycles();
             
             return $assignments;
             
@@ -69,7 +84,7 @@ class Assignment {
             error_log("Error in getAssignmentsByFaculty: " . $e->getMessage());
             return [];
         } finally {
-            // Reset memory limit to default if needed
+            // Reset memory limit
             ini_set('memory_limit', '128M');
         }
     }
