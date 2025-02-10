@@ -29,64 +29,68 @@ class Assignment {
     }
     
     public static function getAssignmentsByFaculty($conn, $faculty_id) {
-        // Step 1: Fetch assigned courses for the faculty
-        $sql = "SELECT assigned_courses FROM faculty WHERE id = :faculty_id";
-        $stmt = $conn->prepare($sql);
-        $stmt->execute([':faculty_id' => $faculty_id]);
-        $result = $stmt->fetch(PDO::FETCH_ASSOC);
-        $assigned_courses = $result ? json_decode($result['assigned_courses'], true) : [];
+        try {
+            // Increase memory limit
+            ini_set('memory_limit', '512M');
+            
+            // Step 1: Get assigned courses efficiently
+            $sql = "SELECT assigned_courses FROM faculty WHERE id = :faculty_id";
+            $stmt = $conn->prepare($sql);
+            $stmt->execute([':faculty_id' => $faculty_id]);
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+            if (!$result || empty($result['assigned_courses'])) {
+                return [];
+            }
+            
+            $assigned_courses = json_decode($result['assigned_courses'], true) ?: [];
+            if (empty($assigned_courses)) {
+                return [];
+            }
 
-        if (empty($assigned_courses)) {
-            return [];
-        }
-
-        // Step 2: Fetch assignments from the courses
-        $placeholders = implode(',', array_fill(0, count($assigned_courses), '?'));
-        $sql = "SELECT id, assignments FROM courses WHERE id IN ($placeholders)";
-        $stmt = $conn->prepare($sql);
-        $stmt->execute($assigned_courses);
-        $courses = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-        $assignment_ids = [];
-        $course_names = [];
-        foreach ($courses as $course) {
-            $course_assignments = json_decode($course['assignments'] ?? '[]', true);
-            if (is_array($course_assignments)) {
-                $assignment_ids = array_merge($assignment_ids, $course_assignments);
-                foreach ($course_assignments as $assignment_id) {
-                    $course_names[$assignment_id] = $course['id']; // Store course ID for each assignment
+            // Step 2: Get assignments and course names in a single query
+            $placeholders = str_repeat('?,', count($assigned_courses) - 1) . '?';
+            $sql = "SELECT DISTINCT a.*, c.name as course_name 
+                    FROM assignments a
+                    INNER JOIN (
+                        SELECT c.id as course_id, c.name, 
+                               JSON_UNQUOTE(JSON_EXTRACT(c.assignments, '$[*]')) as assignment_ids
+                        FROM courses c 
+                        WHERE c.id IN ($placeholders)
+                    ) c ON FIND_IN_SET(a.id, c.assignment_ids) > 0";
+            
+            $stmt = $conn->prepare($sql);
+            $stmt->execute($assigned_courses);
+            
+            // Fetch results in chunks to conserve memory
+            $assignments = [];
+            while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+                $assignments[] = $row;
+                
+                // Free some memory after each chunk
+                if (count($assignments) % 100 === 0) {
+                    gc_collect_cycles();
                 }
             }
-        }
-
-        if (empty($assignment_ids)) {
+            
+            // Clean up
+            $stmt->closeCursor();
+            unset($result, $assigned_courses);
+            gc_collect_cycles();
+            
+            return $assignments;
+            
+        } catch (\Exception $e) {
+            error_log("Error in getAssignmentsByFaculty: " . $e->getMessage());
             return [];
+        } finally {
+            // Reset memory limit
+            ini_set('memory_limit', '128M');
         }
-
-        // Remove duplicate assignment IDs
-        $assignment_ids = array_unique($assignment_ids);
-
-        // Step 3: Fetch assignment details from the assignments table
-        $placeholders = implode(',', array_fill(0, count($assignment_ids), '?'));
-        $sql = "SELECT * FROM assignments WHERE id IN ($placeholders)";
-        $stmt = $conn->prepare($sql);
-        $stmt->execute($assignment_ids);
-        $assignments = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-        // Step 4: Add course names to assignments
-        foreach ($assignments as &$assignment) {
-            $course_id = $course_names[$assignment['id']];
-            $sql = "SELECT name FROM courses WHERE id = :id";
-            $stmt = $conn->prepare($sql);
-            $stmt->execute([':id' => $course_id]);
-            $course = $stmt->fetch(PDO::FETCH_ASSOC);
-            $assignment['course_name'] = $course['name'];
-        }
-
-        return $assignments;
     }
 
     public static function getAll($conn) {
+        ini_set('memory_limit', '256M');
         $sql = "SELECT a.*, c.name as course_name 
                 FROM assignments a 
                 JOIN courses c ON JSON_CONTAINS(a.course_id, JSON_QUOTE(CAST(c.id AS CHAR)), '$')";
