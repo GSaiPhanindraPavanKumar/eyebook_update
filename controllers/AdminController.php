@@ -1372,7 +1372,7 @@ class AdminController {
     
                 $name = $row[0];
                 $email = $row[1];
-                $phone = $row[2] ?? null;
+                $phone = $row[2] ?? 'NA';
                 $section = $row[3] ?? null;
                 $stream = $row[4] ?? null;
                 $department = $row[5] ?? null;
