@@ -90,6 +90,7 @@ class Assignment {
     }
 
     public static function getAll($conn) {
+        ini_set('memory_limit', '256M');
         $sql = "SELECT a.*, c.name as course_name 
                 FROM assignments a 
                 JOIN courses c ON JSON_CONTAINS(a.course_id, JSON_QUOTE(CAST(c.id AS CHAR)), '$')";
