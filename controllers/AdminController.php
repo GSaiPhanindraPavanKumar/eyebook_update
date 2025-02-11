@@ -1869,6 +1869,8 @@ class AdminController {
             }
             $result = Course::addEcContent($conn, $course_id, $title, $file);
             if (isset($result['indexPath'])) {
+                $_SESSION['message'] = 'EC Content uploaded successfully.';
+                $_SESSION['message_type'] = 'success';
                 header("Location: /admin/view_course/$course_id");
                 exit;
             } else {

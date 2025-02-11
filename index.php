@@ -138,6 +138,8 @@ $router->get('/reset_password', function() {
 $router->post('/reset_password', function() {
     require 'views/reset_password.php';
 });
+$router->get('/force_reset_password', 'AuthController@forceResetPassword');
+$router->post('/force_reset_password', 'AuthController@handleForceResetPassword');
 
 $router->get('/admin', 'AdminController@dashboard');
 $router->get('/admin/dashboard', 'AdminController@dashboard');
