@@ -711,24 +711,61 @@ class StudentController {
         }
         $conn = Database::getConnection();
         $student_id = $_SESSION['student_id']; // Assuming student_id is stored in session
-
+    
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if (isset($_FILES['submission_file']) && $_FILES['submission_file']['error'] == 0) {
-                $file_content = file_get_contents($_FILES['submission_file']['tmp_name']);
+                // Upload file to S3
+                $s3Client = new S3Client([
+                    'region' => AWS_REGION,
+                    'version' => 'latest',
+                    'credentials' => [
+                        'key' => AWS_ACCESS_KEY_ID,
+                        'secret' => AWS_SECRET_ACCESS_KEY,
+                    ],
+                ]);
+    
+                $bucketName = AWS_BUCKET_NAME;
+                $key = 'assignments/submissions/' . $student_id . '/' . basename($_FILES['submission_file']['name']);
+                $filePath = $_FILES['submission_file']['tmp_name'];
+    
+                // Detect file type and set metadata
+                $fileType = mime_content_type($filePath);
+                $metadata = [
+                    'ContentType' => $fileType,
+                ];
+    
+                try {
+                    $result = $s3Client->putObject([
+                        'Bucket' => $bucketName,
+                        'Key' => $key,
+                        'SourceFile' => $filePath,
+                        'ACL' => 'public-read',
+                        'ContentType' => $fileType,
+                        'Metadata' => $metadata,
+                    ]);
+                    $fileUrl = $result['ObjectURL'];
+                } catch (AwsException $e) {
+                    error_log($e->getMessage());
+                    $error = "Failed to upload file to S3.";
+                    $assignment = Assignment::getById($conn, $assignment_id);
+                    require 'views/student/view_assignment.php';
+                    return;
+                }
+    
                 $submission_date = date('Y-m-d H:i:s');
-
+    
                 // Fetch existing submissions
                 $sql = "SELECT submissions FROM assignments WHERE id = :assignment_id";
                 $stmt = $conn->prepare($sql);
                 $stmt->execute([':assignment_id' => $assignment_id]);
                 $result = $stmt->fetch(PDO::FETCH_ASSOC);
                 $submissions = $result ? json_decode($result['submissions'], true) : [];
-
+    
                 // Add or update the student's submission
                 $updated = false;
                 foreach ($submissions as &$submission) {
                     if ($submission['student_id'] == $student_id) {
-                        $submission['file'] = base64_encode($file_content);
+                        $submission['file'] = $fileUrl;
                         $submission['date_of_submit'] = $submission_date;
                         $updated = true;
                         break;
@@ -737,11 +774,11 @@ class StudentController {
                 if (!$updated) {
                     $submissions[] = [
                         'student_id' => $student_id,
-                        'file' => base64_encode($file_content),
+                        'file' => $fileUrl,
                         'date_of_submit' => $submission_date
                     ];
                 }
-
+    
                 // Update submissions in the database
                 $sql = "UPDATE assignments SET submissions = :submissions WHERE id = :assignment_id";
                 $stmt = $conn->prepare($sql);
@@ -749,14 +786,14 @@ class StudentController {
                     ':submissions' => json_encode($submissions),
                     ':assignment_id' => $assignment_id
                 ]);
-
+    
                 header('Location: /student/view_assignment/' . $assignment_id);
                 exit;
             } else {
                 $error = "Failed to upload file.";
             }
         }
-
+    
         $assignment = Assignment::getById($conn, $assignment_id);
         require 'views/student/view_assignment.php';
     }

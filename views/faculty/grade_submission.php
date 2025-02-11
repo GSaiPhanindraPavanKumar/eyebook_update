@@ -26,7 +26,7 @@
                         </div>
                         <?php if (!empty($student_submission['file'])): ?>
                             <div id="fileContent" style="display: none; margin-top: 20px;">
-                                <embed src="data:application/pdf;base64,<?php echo $student_submission['file']; ?>" type="application/pdf" width="100%" height="600px" />
+                                <embed src="<?php echo htmlspecialchars($assignment['file_content']); ?>" type="application/pdf" width="100%" height="600px" />
                             </div>
                         <?php else: ?>
                             <p>No submission file attached.</p>

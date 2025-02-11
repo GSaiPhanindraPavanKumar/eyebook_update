@@ -608,7 +608,7 @@ class FacultyController {
             $file_content = null;
 
             if (isset($_FILES['assignment_file']) && $_FILES['assignment_file']['error'] == 0) {
-                $file_content = file_get_contents($_FILES['assignment_file']['tmp_name']);
+                $file = $_FILES['assignment_file'];
             }
 
             try {
@@ -617,6 +617,9 @@ class FacultyController {
                 foreach ($course_ids as $course_id) {
                     Course::addAssignmentToCourse($conn, $course_id, $assignment_id);
                 }
+
+                $_SESSION['message'] = 'Assignment created successfully.';
+                $_SESSION['message_type'] = 'success';
             
                 // Redirect to the view course page
                 $hashedId = base64_encode($course_ids[0]);

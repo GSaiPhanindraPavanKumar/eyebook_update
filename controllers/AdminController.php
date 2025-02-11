@@ -2562,9 +2562,13 @@ class AdminController {
             $start_time = $_POST['start_time'];
             $due_date = $_POST['due_date'];
             $course_ids = $_POST['course_id'];
-            $file_content = !empty($_FILES['file_content']['tmp_name']) ? file_get_contents($_FILES['file_content']['tmp_name']) : $assignment['file_content'];
+            $file = null;
     
-            Assignment::update($conn, $id, $title, $description, $start_time, $due_date, $course_ids, $file_content);
+            if (isset($_FILES['file_content']) && $_FILES['file_content']['error'] == 0) {
+                $file = $_FILES['file_content'];
+            }
+    
+            Assignment::update($conn, $id, $title, $description, $start_time, $due_date, $course_ids, $file);
     
             header('Location: /admin/manage_assignments');
             exit;
@@ -2586,7 +2590,7 @@ class AdminController {
             $course_ids = $_POST['course_id'];
             $file_content = !empty($_FILES['file_content']['tmp_name']) ? file_get_contents($_FILES['file_content']['tmp_name']) : $assignment['file_content'];
     
-            Assignment::update($conn, $id, $title, $description, $start_time, $due_date, $course_ids, $file_content);
+            Assignment::updatepublic($conn, $id, $title, $description, $start_time, $due_date, $course_ids, $file_content);
     
             header('Location: /admin/manage_assignments');
             exit;
@@ -2623,32 +2627,32 @@ class AdminController {
     public function createAssignment() {
         $conn = Database::getConnection();
         $courses = Course::getAll($conn);
-
+    
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $title = $_POST['assignment_title'];
             $description = $_POST['assignment_description'];
             $start_date = $_POST['start_date'];
             $due_date = $_POST['due_date'];
             $course_ids = $_POST['course_id'];
-            $file_content = null;
-
+            $file = null;
+    
             if (isset($_FILES['assignment_file']) && $_FILES['assignment_file']['error'] == 0) {
-                $file_content = file_get_contents($_FILES['assignment_file']['tmp_name']);
+                $file = $_FILES['assignment_file'];
             }
-
-            $assignment_id = Assignment::create($conn, $title, $description, $start_date, $due_date, $course_ids, $file_content);
-
+    
+            $assignment_id = Assignment::create($conn, $title, $description, $start_date, $due_date, $course_ids, $file);
+    
             foreach ($course_ids as $course_id) {
                 Course::addAssignmentToCourse($conn, $course_id, $assignment_id);
             }
-
+    
             $_SESSION['message'] = 'Assignment created successfully.';
             $_SESSION['message_type'] = 'success';
-
+    
             header('Location: /admin/view_course/'.$course_ids[0]);
             exit();
         }
-
+    
         require 'views/admin/assignment_create.php';
     }
 
@@ -2665,7 +2669,7 @@ class AdminController {
             $file_content = null;
 
             if (isset($_FILES['assignment_file']) && $_FILES['assignment_file']['error'] == 0) {
-                $file_content = file_get_contents($_FILES['assignment_file']['tmp_name']);
+                $file = $_FILES['assignment_file'];
             }
 
             $assignment_id = Assignment::createpublic($conn, $title, $description, $start_date, $due_date, $course_ids, $file_content);

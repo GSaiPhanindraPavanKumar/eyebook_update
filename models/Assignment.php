@@ -4,6 +4,8 @@ namespace Models;
 
 use PDO;
 use PDOException;
+use Aws\S3\S3Client;
+use Aws\Exception\AwsException;
 
 class Assignment {
     public static function getAllByFaculty($conn, $faculty_id) {
@@ -404,7 +406,36 @@ class Assignment {
     }
 
 
-    public static function create($conn, $title, $description, $start_date, $due_date, $course_ids, $file_content) {
+    public static function create($conn, $title, $description, $start_date, $due_date, $course_ids, $file) {
+        // Upload file to S3
+        $s3Client = new S3Client([
+            'region' => AWS_REGION,
+            'version' => 'latest',
+            'credentials' => [
+                'key' => AWS_ACCESS_KEY_ID,
+                'secret' => AWS_SECRET_ACCESS_KEY,
+            ],
+        ]);
+
+        $bucketName = AWS_BUCKET_NAME;
+        $key = "assignments/$title/" . basename($file['name']);
+        $filePath = $file['tmp_name'];
+
+        try {
+            $result = $s3Client->putObject([
+                'Bucket' => $bucketName,
+                'Key' => $key,
+                'SourceFile' => $filePath,
+                'ContentType' => $file['type'],
+                'ACL' => 'public-read',
+            ]);
+            $fileUrl = $result['ObjectURL'];
+        } catch (AwsException $e) {
+            error_log($e->getMessage());
+            return false;
+        }
+
+        // Save assignment details in the database
         $sql = "INSERT INTO assignments (title, description, start_time, due_date, course_id, file_content) VALUES (:title, :description, :start_time, :due_date, :course_id, :file_content)";
         $stmt = $conn->prepare($sql);
         $stmt->execute([
@@ -413,15 +444,42 @@ class Assignment {
             ':start_time' => $start_date,
             ':due_date' => $due_date,
             ':course_id' => json_encode($course_ids),
-            ':file_content' => $file_content
+            ':file_content' => $fileUrl,
         ]);
         return $conn->lastInsertId();
     }
 
-    public static function createpublic($conn, $title, $description, $start_date, $due_date, $course_ids, $file_content) {
+    public static function createpublic($conn, $title, $description, $start_date, $due_date, $course_ids, $file) {
         $course_ids = array_map(function($id) {
             return 'public:' . $id;
         }, $course_ids);
+
+        $s3Client = new S3Client([
+            'region' => AWS_REGION,
+            'version' => 'latest',
+            'credentials' => [
+                'key' => AWS_ACCESS_KEY_ID,
+                'secret' => AWS_SECRET_ACCESS_KEY,
+            ],
+        ]);
+
+        $bucketName = AWS_BUCKET_NAME;
+        $key = "assignments/$title/" . basename($file['name']);
+        $filePath = $file['tmp_name'];
+
+        try {
+            $result = $s3Client->putObject([
+                'Bucket' => $bucketName,
+                'Key' => $key,
+                'SourceFile' => $filePath,
+                'ContentType' => $file['type'],
+                'ACL' => 'public-read',
+            ]);
+            $fileUrl = $result['ObjectURL'];
+        } catch (AwsException $e) {
+            error_log($e->getMessage());
+            return false;
+        }
         
         $course_ids_json = json_encode($course_ids);
         $sql = "INSERT INTO assignments (title, description, start_time, due_date, course_id, file_content) VALUES (:title, :description, :start_time, :due_date, :course_id, :file_content)";
@@ -432,11 +490,51 @@ class Assignment {
             ':start_time' => $start_date,
             ':due_date' => $due_date,
             ':course_id' => $course_ids_json,
-            ':file_content' => $file_content
+            ':file_content' => $fileUrl
         ]);
         return $conn->lastInsertId();
     }
-    public static function update($conn, $id, $title, $description, $start_date, $due_date, $course_ids, $file_content) {
+    public static function update($conn, $id, $title, $description, $start_date, $due_date, $course_ids, $file) {
+        $fileUrl = null;
+
+        if ($file) {
+            // Upload file to S3
+            $s3Client = new S3Client([
+                'region' => AWS_REGION,
+                'version' => 'latest',
+                'credentials' => [
+                    'key' => AWS_ACCESS_KEY_ID,
+                    'secret' => AWS_SECRET_ACCESS_KEY,
+                ],
+            ]);
+
+            $bucketName = AWS_BUCKET_NAME;
+            $key = "assignments/$title/" . basename($file['name']);
+            $filePath = $file['tmp_name'];
+
+            // Detect file type and set metadata
+            $fileType = mime_content_type($filePath);
+            $metadata = [
+                'ContentType' => $fileType,
+            ];
+
+            try {
+                $result = $s3Client->putObject([
+                    'Bucket' => $bucketName,
+                    'Key' => $key,
+                    'SourceFile' => $filePath,
+                    'ACL' => 'public-read',
+                    'ContentType' => $fileType,
+                    'Metadata' => $metadata,
+                ]);
+                $fileUrl = $result['ObjectURL'];
+            } catch (AwsException $e) {
+                error_log($e->getMessage());
+                return false;
+            }
+        }
+
+        // Save assignment details in the database
         $sql = "UPDATE assignments SET title = :title, description = :description, start_time = :start_time, due_date = :due_date, course_id = :course_id, file_content = :file_content WHERE id = :id";
         $stmt = $conn->prepare($sql);
         $stmt->execute([
@@ -445,7 +543,67 @@ class Assignment {
             ':start_time' => $start_date,
             ':due_date' => $due_date,
             ':course_id' => json_encode($course_ids),
-            ':file_content' => $file_content,
+            ':file_content' => $fileUrl,
+            ':id' => $id
+        ]);
+    }
+
+    public static function updatepublic($conn, $id, $title, $description, $start_date, $due_date, $course_ids, $file) {
+        $course_ids = array_map(function($id) {
+            return 'public:' . $id;
+        }, $course_ids);
+
+        
+        $fileUrl = null;
+
+        if ($file) {
+            // Upload file to S3
+            $s3Client = new S3Client([
+                'region' => AWS_REGION,
+                'version' => 'latest',
+                'credentials' => [
+                    'key' => AWS_ACCESS_KEY_ID,
+                    'secret' => AWS_SECRET_ACCESS_KEY,
+                ],
+            ]);
+
+            $bucketName = AWS_BUCKET_NAME;
+            $key = "assignments/$title/" . basename($file['name']);
+            $filePath = $file['tmp_name'];
+
+            // Detect file type and set metadata
+            $fileType = mime_content_type($filePath);
+            $metadata = [
+                'ContentType' => $fileType,
+            ];
+
+            try {
+                $result = $s3Client->putObject([
+                    'Bucket' => $bucketName,
+                    'Key' => $key,
+                    'SourceFile' => $filePath,
+                    'ACL' => 'public-read',
+                    'ContentType' => $fileType,
+                    'Metadata' => $metadata,
+                ]);
+                $fileUrl = $result['ObjectURL'];
+            } catch (AwsException $e) {
+                error_log($e->getMessage());
+                return false;
+            }
+        }
+
+        $course_ids_json = json_encode($course_ids);
+        // Save assignment details in the database
+        $sql = "UPDATE assignments SET title = :title, description = :description, start_time = :start_time, due_date = :due_date, course_id = :course_id, file_content = :file_content WHERE id = :id";
+        $stmt = $conn->prepare($sql);
+        $stmt->execute([
+            ':title' => $title,
+            ':description' => $description,
+            ':start_time' => $start_date,
+            ':due_date' => $due_date,
+            ':course_id' => $course_ids_json,
+            ':file_content' => $fileUrl,
             ':id' => $id
         ]);
     }

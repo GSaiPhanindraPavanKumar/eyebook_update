@@ -26,7 +26,7 @@
                         <?php if (!empty($assignment['file_content'])): ?>
                             <button id="viewButton" class="btn btn-info mb-3" onclick="toggleFileContent()">View File</button>
                             <div id="fileContent" style="display: none; margin-top: 20px;">
-                                <embed src="data:application/pdf;base64,<?php echo base64_encode($assignment['file_content']); ?>" type="application/pdf" width="100%" height="600px" />
+                                <embed src="<?php echo htmlspecialchars($assignment['file_content']); ?>" type="application/pdf" width="100%" height="600px" />
                             </div>
                         <?php else: ?>
                             <p>No file attached.</p>

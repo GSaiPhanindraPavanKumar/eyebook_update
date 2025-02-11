@@ -60,7 +60,7 @@
                                 <label for="file_content">File Content</label>
                                 <input type="file" class="form-control" id="file_content" name="file_content">
                                 <?php if (!empty($assignment['file_content'])): ?>
-                                    <p>Current file: <a href="data:application/pdf;base64,<?php echo base64_encode($assignment['file_content']); ?>" target="_blank">View File</a></p>
+                                    <p>Current file: <a href="<?php echo htmlspecialchars($assignment['file_content']); ?>" target="_blank">View File</a></p>
                                 <?php endif; ?>
                             </div>
                             <button type="submit" class="btn btn-primary">Update Assignment</button>

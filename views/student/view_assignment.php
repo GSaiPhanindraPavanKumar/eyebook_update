@@ -30,7 +30,7 @@
                             <?php if (!empty($assignment['file_content'])): ?>
                                 <button id="viewButton" class="btn btn-info mb-3" onclick="toggleFileContent()">View File</button>
                                 <div id="fileContent" style="display: none; margin-top: 20px;">
-                                    <embed src="data:application/pdf;base64,<?php echo base64_encode($assignment['file_content']); ?>" type="application/pdf" width="100%" height="600px" />
+                                    <embed src="<?php echo htmlspecialchars($assignment['file_content']); ?>" type="application/pdf" width="100%" height="600px" />
                                 </div>
                             <?php else: ?>
                                 <p>No file attached.</p>
@@ -40,7 +40,7 @@
                                 <h5 class="mt-4">Your Submission</h5>
                                 <button id="viewSubmissionButton" class="btn btn-info mb-3" onclick="toggleSubmissionContent()">View Submission</button>
                                 <div id="submissionContent" style="display: none; margin-top: 20px;">
-                                    <embed src="data:application/pdf;base64,<?php echo $student_submission['file']; ?>" type="application/pdf" width="100%" height="600px" />
+                                    <embed src="<?php echo htmlspecialchars($assignment['file_content']); ?>" type="application/pdf" width="100%" height="600px" />
                                 </div>
                                 <?php if (empty($student_submission['grade']) && empty($student_submission['feedback'])): ?>
                                     <form action="/student/delete_submission/<?php echo $assignment['id']; ?>" method="post" style="margin-top: 20px;">
