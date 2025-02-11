@@ -33,7 +33,7 @@ class Assignment {
     public static function getAssignmentsByFaculty($conn, $faculty_id) {
         try {
             // Increase memory limit
-            ini_set('memory_limit', '512M');
+            ini_set('memory_limit', '1024M');
             
             // Step 1: Get assigned courses efficiently
             $sql = "SELECT assigned_courses FROM faculty WHERE id = :faculty_id";
@@ -87,12 +87,12 @@ class Assignment {
             return [];
         } finally {
             // Reset memory limit
-            ini_set('memory_limit', '128M');
+            ini_set('memory_limit', '512M');
         }
     }
 
     public static function getAll($conn) {
-        ini_set('memory_limit', '256M');
+        ini_set('memory_limit', '512M');
         $sql = "SELECT a.*, c.name as course_name 
                 FROM assignments a 
                 JOIN courses c ON JSON_CONTAINS(a.course_id, JSON_QUOTE(CAST(c.id AS CHAR)), '$')";
