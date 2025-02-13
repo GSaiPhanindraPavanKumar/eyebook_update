@@ -355,7 +355,7 @@ document.addEventListener('DOMContentLoaded', function() {
         },
         customButtons: {
             backButton: {
-                text: 'Back to Month',
+                text: '← Back',
                 click: function() {
                     calendar.changeView('dayGridMonth');
                     document.querySelector('.fc-backButton-button').style.display = 'none';
