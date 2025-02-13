@@ -55,6 +55,7 @@ if ($userData) {
     <link rel="stylesheet" href="../../views/ublic/vendors/css/vendor.bundle.base.css">
     <!-- endinject -->
     <!-- Plugin css for this page -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="../../views/public/vendors/datatables.net-bs4/dataTables.bootstrap4.css">
     <link rel="stylesheet" href="../../views/public//vendors/ti-icons/css/themify-icons.css">
     <link rel="stylesheet" type="text/css" href="../../views/public/js/select.dataTables.min.css">
@@ -276,89 +277,238 @@ if ($userData) {
             }
         </style>
 
-        <div class="theme-setting-wrapper">
-            <div id="settings-trigger"><i class="ti-settings"></i></div>
-            <div id="theme-settings" class="settings-panel">
-                <i class="settings-close ti-close"></i>
-                <p class="settings-heading">SIDEBAR SKINS</p>
-                <div class="sidebar-bg-options selected" id="sidebar-light-theme">
-                    <div class="img-ss rounded-circle bg-light border mr-3"></div>Light
-                </div>
-                <div class="sidebar-bg-options" id="sidebar-dark-theme">
-                    <div class="img-ss rounded-circle bg-dark border mr-3"></div>Dark
-                </div>
-                <p class="settings-heading mt-2">HEADER SKINS</p>
-                <div class="color-tiles mx-0 px-4">
-                    <div class="tiles success"></div>
-                    <div class="tiles warning"></div>
-                    <div class="tiles danger"></div>
-                    <div class="tiles info"></div>
-                    <div class="tiles dark"></div>
-                    <div class="tiles default"></div>
+        <!-- Theme Settings Modal -->
+        <div class="modal fade" id="themeModal" tabindex="-1" role="dialog" aria-labelledby="themeModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="themeModalLabel">Theme Settings</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="theme-options">
+                            <div class="theme-option selected" id="theme-light">
+                                <div class="option-icon">
+                                    <i class="fas fa-sun"></i>
+                                </div>
+                                <span>Light Theme</span>
+                            </div>
+                            <div class="theme-option" id="theme-dark">
+                                <div class="option-icon">
+                                    <i class="fas fa-moon"></i>
+                                </div>
+                                <span>Dark Theme</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-        
-        <!-- Add all necessary scripts in the correct order -->
-        <script src="../../views/public/vendors/js/vendor.bundle.base.js"></script>
-        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-        <script src="../../views/public/vendors/bootstrap/js/bootstrap.bundle.min.js"></script>
-        <script src="../../views/public/js/off-canvas.js"></script>
-        <script src="../../views/public/js/hoverable-collapse.js"></script>
-        <script src="../../views/public/js/template.js"></script>
-        
+
+        <!-- Replace the existing theme-setting-wrapper div with this -->
+        <div class="theme-setting-wrapper">
+            <div id="settings-trigger">
+                <i class="fas fa-cog"></i>
+            </div>
+        </div>
+
+        <!-- Add these styles -->
+        <style>
+        /* Update the theme variables */
+        :root {
+            --body-bg: #f4f7fa;
+            --text-color: #333333;
+            --card-bg: #ffffff;
+            --border-color: #dee2e6;
+            --sidebar-bg: #ffffff;
+            --menu-title: #333333;
+            --menu-icon: #4B49AC;
+            --link-color: #4B49AC;
+            --hover-bg: rgba(75, 73, 172, 0.1);
+            --modal-bg: #ffffff;
+            --header-bg: #ffffff;
+            --table-bg: #ffffff;
+            --table-header-bg: #f8f9fa;
+            --table-text: #333333;
+            --table-border: #dee2e6;
+            --heading-color: #333333;
+            --input-bg: #ffffff;
+            --input-text: #495057;
+            --dropdown-bg: #ffffff;
+            --dropdown-text: #333333;
+            --logo-filter: none;
+        }
+
+        body.dark-theme {
+            --body-bg: #1a1a1a;
+            --text-color: #e1e1e1;
+            --card-bg: #2d2d2d;
+            --border-color: #404040;
+            --sidebar-bg: #2d2d2d;
+            --menu-title: #e1e1e1;
+            --menu-icon: #6ea8fe;
+            --link-color: #6ea8fe;
+            --hover-bg: rgba(110, 168, 254, 0.1);
+            --modal-bg: #2d2d2d;
+            --header-bg: #2d2d2d;
+            --table-bg: #2d2d2d;
+            --table-header-bg: #363636;
+            --table-text: #e1e1e1;
+            --table-border: #404040;
+            --heading-color: #e1e1e1;
+            --input-bg: #363636;
+            --input-text: #e1e1e1;
+            --dropdown-bg: #2d2d2d;
+            --dropdown-text: #e1e1e1;
+            --logo-filter: brightness(0) invert(1);
+        }
+
+        /* Global styles */
+        body {
+            background-color: var(--body-bg) !important;
+            color: var(--text-color) !important;
+        }
+
+        /* Header/Navbar styles */
+        .navbar {
+            background-color: var(--header-bg) !important;
+            border-color: var(--border-color) !important;
+        }
+
+        .navbar-brand, .navbar-brand span {
+            color: var(--text-color) !important;
+        }
+
+        /* Card styles */
+        .card {
+            background-color: var(--card-bg) !important;
+            border-color: var(--border-color) !important;
+        }
+
+        .card-title, .card-header {
+            color: var(--heading-color) !important;
+        }
+
+        /* Table styles */
+        .table {
+            background-color: var(--table-bg) !important;
+            color: var(--table-text) !important;
+        }
+
+        .table thead th {
+            background-color: var(--table-header-bg) !important;
+            color: var(--table-text) !important;
+            border-color: var(--table-border) !important;
+        }
+
+        .table td, .table th {
+            border-color: var(--table-border) !important;
+        }
+
+        /* Heading styles */
+        h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6 {
+            color: var(--heading-color) !important;
+        }
+
+        /* Input styles */
+        .form-control {
+            background-color: var(--input-bg) !important;
+            color: var(--input-text) !important;
+            border-color: var(--border-color) !important;
+        }
+
+        /* Dropdown styles */
+        .dropdown-menu {
+            background-color: var(--dropdown-bg) !important;
+            border-color: var(--border-color) !important;
+        }
+
+        .dropdown-item {
+            color: var(--dropdown-text) !important;
+        }
+
+        .dropdown-item:hover {
+            background-color: var(--hover-bg) !important;
+        }
+
+        /* Sidebar menu items */
+        .nav-item .nav-link {
+            color: var(--text-color) !important;
+        }
+
+        .nav-item .nav-link i {
+            color: var(--menu-icon) !important;
+        }
+
+        .nav-item .nav-link .menu-title {
+            color: var(--menu-title) !important;
+        }
+
+        /* Content wrapper */
+        .content-wrapper {
+            background-color: var(--body-bg) !important;
+        }
+
+        /* Footer */
+        .footer {
+            background-color: var(--card-bg) !important;
+            color: var(--text-color) !important;
+            border-color: var(--border-color) !important;
+        }
+
+        /* Notification styles */
+        .preview-list .preview-item {
+            background-color: var(--card-bg) !important;
+            border-color: var(--border-color) !important;
+        }
+
+        .preview-list .preview-item .preview-item-content p {
+            color: var(--text-color) !important;
+        }
+        </style>
+
+        <!-- Add this script -->
         <script>
         document.addEventListener('DOMContentLoaded', function() {
-            if (typeof jQuery !== 'undefined') {
-                // Settings panel toggle
-                $('#settings-trigger').on('click', function(e) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    $('#theme-settings').stop().fadeToggle(300); // Added stop() and animation duration
-                });
+            const settingsTrigger = document.getElementById('settings-trigger');
+            const themeLight = document.getElementById('theme-light');
+            const themeDark = document.getElementById('theme-dark');
 
-                // Close settings panel
-                $('.settings-close').on('click', function(e) {
-                    e.preventDefault();
-                    $('#theme-settings').fadeOut(300);
-                });
+            // Show modal on settings click
+            settingsTrigger.addEventListener('click', function() {
+                $('#themeModal').modal('show');
+            });
 
-                // Close settings when clicking outside
-                $(document).on('click', function(e) {
-                    if (!$(e.target).closest('.theme-setting-wrapper').length) {
-                        $('#theme-settings').fadeOut(300);
-                    }
-                });
-
-                // Prevent settings panel from closing when clicking inside it
-                $('#theme-settings').on('click', function(e) {
-                    e.stopPropagation();
-                });
-
-                // Profile dropdown
-                $('.nav-profile.dropdown').on('click', function(e) {
-                    e.stopPropagation();
-                    $(this).find('.dropdown-menu').toggleClass('show');
-                });
-
-                // Notification dropdown
-                $('#notificationDropdown').on('click', function(e) {
-                    e.stopPropagation();
-                    $(this).next('.dropdown-menu').toggleClass('show');
-                });
-
-                // Close dropdowns when clicking outside
-                $(document).on('click', function(e) {
-                    if (!$(e.target).closest('.dropdown').length) {
-                        $('.dropdown-menu').removeClass('show');
-                    }
-                });
+            function updateTheme(isDark) {
+                if (isDark) {
+                    document.body.classList.add('dark-theme');
+                    themeDark.classList.add('selected');
+                    themeLight.classList.remove('selected');
+                } else {
+                    document.body.classList.remove('dark-theme');
+                    themeLight.classList.add('selected');
+                    themeDark.classList.remove('selected');
+                }
+                localStorage.setItem('theme', isDark ? 'dark' : 'light');
             }
-        });
 
-        function openChatbot() {
-            window.location.href = '/student/askguru';
-        }
+            // Initialize theme
+            const savedTheme = localStorage.getItem('theme');
+            updateTheme(savedTheme === 'dark');
+
+            // Theme option click handlers
+            themeLight.addEventListener('click', () => {
+                updateTheme(false);
+                $('#themeModal').modal('hide');
+            });
+
+            themeDark.addEventListener('click', () => {
+                updateTheme(true);
+                $('#themeModal').modal('hide');
+            });
+        });
         </script>
 
         <!-- Add before your existing scripts -->
@@ -507,6 +657,95 @@ if ($userData) {
             }
         });
         </script>
+
+        <!-- Add this script after your existing scripts -->
+        <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Fix sidebar menu expansion
+            const menuItems = document.querySelectorAll('.nav-item');
+            
+            menuItems.forEach(item => {
+                const link = item.querySelector('.nav-link');
+                const submenu = item.querySelector('.sub-menu');
+                
+                if (link && submenu) {
+                    link.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        
+                        // Toggle the collapsed class
+                        link.classList.toggle('collapsed');
+                        
+                        // Toggle aria-expanded
+                        const isExpanded = link.getAttribute('aria-expanded') === 'true';
+                        link.setAttribute('aria-expanded', !isExpanded);
+                        
+                        // Toggle submenu visibility
+                        if (submenu.style.display === 'block') {
+                            submenu.style.display = 'none';
+                            item.classList.remove('active');
+                        } else {
+                            submenu.style.display = 'block';
+                            item.classList.add('active');
+                        }
+                    });
+                }
+            });
+        });
+        </script>
+
+        <!-- Add these styles -->
+        <style>
+        /* Sidebar menu expansion fixes */
+        .sidebar .nav .nav-item {
+            position: relative;
+        }
+
+        .sidebar .nav .nav-item .nav-link {
+            transition: background-color 0.3s ease;
+        }
+
+        .sidebar .nav .nav-item .sub-menu {
+            display: none;
+            background: var(--sidebar-bg) !important;
+            padding-left: 1.5rem;
+        }
+
+        .sidebar .nav .nav-item.active > .nav-link {
+            background: var(--hover-bg) !important;
+        }
+
+        .sidebar .nav .nav-item.active > .sub-menu {
+            display: block;
+        }
+
+        /* Rotation animation for collapse indicator */
+        .sidebar .nav .nav-item .nav-link[aria-expanded="true"] .menu-arrow {
+            transform: rotate(90deg);
+        }
+
+        .sidebar .nav .nav-item .menu-arrow {
+            transition: transform 0.3s ease;
+        }
+
+        /* Submenu item styles */
+        .sidebar .nav.sub-menu .nav-item .nav-link {
+            padding: 0.75rem 1rem;
+            font-size: 0.875rem;
+            color: var(--text-color) !important;
+            border-radius: 4px;
+        }
+
+        .sidebar .nav.sub-menu .nav-item .nav-link:hover {
+            background: var(--hover-bg) !important;
+        }
+
+        /* Active state styles */
+        .sidebar .nav .nav-item.active > .nav-link .menu-title,
+        .sidebar .nav .nav-item.active > .nav-link i {
+            color: var(--menu-icon) !important;
+        }
+        </style>
 
         <!-- partial -->
         <!-- partial:partials/_sidebar.html -->
@@ -804,5 +1043,157 @@ if ($userData) {
                 visibility: hidden;
                 transition: transform 0.3s ease, visibility 0.3s ease;
             }
+        }
+        </style>
+
+        <!-- Add these specific styles for sidebar and header -->
+        <style>
+        .sidebar {
+            background-color: var(--sidebar-bg) !important;
+            border-right: 1px solid var(--border-color) !important;
+        }
+
+        .sidebar .sidebar-brand-wrapper {
+            background-color: var(--sidebar-bg) !important;
+            border-bottom: 1px solid var(--border-color) !important;
+        }
+
+        .navbar-brand-wrapper {
+            background-color: var(--header-bg) !important;
+            border-right: 1px solid var(--border-color) !important;
+        }
+
+        .navbar-menu-wrapper {
+            background-color: var(--header-bg) !important;
+            color: var(--text-color) !important;
+        }
+
+        /* Logo and brand text */
+        .navbar .navbar-brand-wrapper .navbar-brand {
+            color: var(--text-color) !important;
+        }
+
+        .navbar .navbar-brand-wrapper .navbar-brand img {
+            filter: var(--logo-filter);
+        }
+
+        /* Sidebar menu items */
+        .sidebar .nav .nav-item.active > .nav-link {
+            background-color: var(--hover-bg) !important;
+        }
+
+        .sidebar .nav .nav-item .nav-link:hover {
+            background-color: var(--hover-bg) !important;
+        }
+
+        .sidebar .nav.sub-menu {
+            background-color: var(--sidebar-bg) !important;
+        }
+
+        .sidebar .nav.sub-menu .nav-item .nav-link {
+            color: var(--text-color) !important;
+        }
+
+        /* Settings trigger button */
+        #settings-trigger {
+            position: fixed !important;
+            bottom: 30px !important;
+            right: 30px !important;
+            width: 45px !important;
+            height: 45px !important;
+            background: var(--menu-icon) !important;
+            border-radius: 50% !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            color: #fff !important;
+            cursor: pointer !important;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2) !important;
+            transition: transform 0.3s ease !important;
+            z-index: 1000 !important;
+        }
+
+        #settings-trigger:hover {
+            transform: rotate(30deg) !important;
+        }
+
+        /* Modal styles */
+        .modal-content {
+            background-color: var(--modal-bg) !important;
+            color: var(--text-color) !important;
+        }
+
+        .modal-header {
+            border-color: var(--border-color) !important;
+        }
+
+        .modal-header .close {
+            color: var(--text-color) !important;
+        }
+
+        /* Theme options */
+        .theme-options {
+            display: flex !important;
+            justify-content: center !important;
+            gap: 30px !important;
+            padding: 20px !important;
+        }
+
+        .theme-option {
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: center !important;
+            gap: 12px !important;
+            padding: 20px !important;
+            border-radius: 12px !important;
+            cursor: pointer !important;
+            border: 2px solid transparent !important;
+            transition: all 0.3s ease !important;
+            min-width: 120px !important;
+        }
+
+        .theme-option:hover {
+            background-color: var(--hover-bg) !important;
+        }
+
+        .theme-option.selected {
+            border-color: var(--menu-icon) !important;
+            background-color: var(--hover-bg) !important;
+        }
+        </style>
+
+        <!-- Update the active state styles -->
+        <style>
+        /* Active menu item styles */
+        .sidebar .nav .nav-item.active > .nav-link {
+            background: var(--menu-icon) !important;
+            color: #ffffff !important;
+        }
+
+        .sidebar .nav .nav-item.active > .nav-link .menu-title,
+        .sidebar .nav .nav-item.active > .nav-link i,
+        .sidebar .nav .nav-item.active > .nav-link .menu-arrow {
+            color: #ffffff !important;
+        }
+
+        /* Hover state */
+        .sidebar .nav .nav-item .nav-link:hover {
+            background: var(--hover-bg) !important;
+        }
+
+        .sidebar .nav .nav-item .nav-link:hover .menu-title,
+        .sidebar .nav .nav-item .nav-link:hover i {
+            color: var(--menu-icon) !important;
+        }
+
+        /* Submenu active styles */
+        .sidebar .nav.sub-menu .nav-item .nav-link.active {
+            background: var(--menu-icon) !important;
+            color: #ffffff !important;
+        }
+
+        .sidebar .nav.sub-menu .nav-item .nav-link:hover {
+            background: var(--hover-bg) !important;
+            color: var(--menu-icon) !important;
         }
         </style>

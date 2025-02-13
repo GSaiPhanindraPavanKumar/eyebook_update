@@ -2,11 +2,12 @@
 
 <style>
 .xp-card {
-    background: #f8f9fa;
+    background: var(--card-bg) !important;
     border-radius: 8px;
     padding: 25px;
     box-shadow: 0 1px 3px rgba(0,0,0,0.1);
     margin-bottom: 20px;
+    color: var(--text-color) !important;
 }
 
 .level-info {
@@ -17,7 +18,7 @@
 .level-number {
     font-size: 3em;
     font-weight: bold;
-    color: #1976d2;
+    color: var(--menu-icon) !important;
     margin-bottom: 10px;
 }
 
@@ -33,20 +34,24 @@
 
 .progress {
     height: 25px;
-    background-color: #e9ecef;
+    background-color: var(--progress-bar-bg) !important;
     border-radius: 12px;
     margin: 20px 0;
     overflow: hidden;
+    border: 1px solid var(--border-color) !important;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .progress-bar {
-    background-color: #1976d2;
+    background-color: var(--menu-icon) !important;
     transition: width 0.6s ease;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: white;
+    color: #ffffff !important;
     font-weight: 500;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 }
 
 .stats-grid {
@@ -57,22 +62,23 @@
 }
 
 .stat-card {
-    background: white;
+    background: var(--card-bg) !important;
     padding: 20px;
     border-radius: 8px;
     text-align: center;
     box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    border: 1px solid var(--border-color) !important;
 }
 
 .stat-value {
     font-size: 1.8em;
     font-weight: bold;
-    color: #1976d2;
+    color: var(--menu-icon) !important;
     margin: 10px 0;
 }
 
 .stat-label {
-    color: #666;
+    color: var(--text-color) !important;
     font-size: 0.9em;
 }
 
@@ -80,9 +86,30 @@
     text-align: center;
     margin-top: 30px;
     padding: 20px;
-    background: #e3f2fd;
+    background: var(--hover-bg) !important;
     border-radius: 8px;
-    color: #1976d2;
+    color: var(--menu-icon) !important;
+}
+
+.text-muted {
+    color: var(--text-color) !important;
+    opacity: 0.7;
+}
+
+/* Card title override */
+.card-title {
+    color: var(--text-color) !important;
+}
+
+/* Add these variables to both themes in sidebar.php */
+:root {
+    /* ... existing variables ... */
+    --progress-bar-bg: rgba(75, 73, 172, 0.1);
+}
+
+body.dark-theme {
+    /* ... existing variables ... */
+    --progress-bar-bg: rgba(110, 168, 254, 0.1);
 }
 </style>
 
@@ -163,4 +190,5 @@
             </div>
         </div>
     </div>
+    <?php include("footer.html"); ?>
 </div> 

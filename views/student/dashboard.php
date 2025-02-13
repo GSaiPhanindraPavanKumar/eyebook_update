@@ -575,17 +575,19 @@ document.addEventListener('DOMContentLoaded', function() {
 
 /* List view styling */
 .fc-list-event {
-    cursor: pointer;
-    padding: 12px 16px !important;
+    background: transparent !important;
     border: none !important;
-    margin: 8px !important;
-    border-radius: 6px;
-    background-color: #f8f9fa !important;
-    transition: all 0.2s ease;
+    margin: 4px 0 !important;
+}
+
+.fc-list-event td {
+    background: transparent !important;
+    border-color: var(--border-color) !important;
+    padding: 12px 8px !important;
 }
 
 .fc-list-event-title {
-    color: #333 !important;
+    color: var(--text-color) !important;
     font-weight: 500 !important;
     display: flex !important;
     align-items: center !important;
@@ -659,5 +661,169 @@ document.addEventListener('DOMContentLoaded', function() {
     display: flex !important;
     align-items: center !important;
     gap: 8px !important;
+}
+
+/* Weekly Agenda Theme Support */
+.fc {
+    background: var(--card-bg) !important;
+    color: var(--text-color) !important;
+}
+
+/* Calendar header */
+.fc .fc-toolbar {
+    background: var(--card-bg) !important;
+    color: var(--text-color) !important;
+}
+
+.fc .fc-toolbar-title {
+    color: var(--text-color) !important;
+}
+
+/* Calendar buttons */
+.fc .fc-button-primary {
+    background-color: var(--menu-icon) !important;
+    border-color: var(--menu-icon) !important;
+    color: #ffffff !important;
+}
+
+.fc .fc-button-primary:hover {
+    background-color: var(--link-color) !important;
+    border-color: var(--link-color) !important;
+}
+
+.fc .fc-button-primary:disabled {
+    background-color: var(--menu-icon) !important;
+    border-color: var(--menu-icon) !important;
+    opacity: 0.6;
+}
+
+/* Calendar grid */
+.fc .fc-daygrid-day {
+    background: var(--card-bg) !important;
+    border-color: var(--border-color) !important;
+}
+
+.fc .fc-daygrid-day-number {
+    color: var(--text-color) !important;
+}
+
+/* Today highlight */
+.fc .fc-day-today {
+    background: var(--hover-bg) !important;
+}
+
+/* Events */
+.fc-event {
+    background-color: var(--menu-icon) !important;
+    border-color: var(--menu-icon) !important;
+    color: #ffffff !important;
+}
+
+.fc-event:hover {
+    opacity: 0.9;
+}
+
+/* Week/day headers */
+.fc th {
+    background-color: var(--table-header-bg) !important;
+    color: var(--text-color) !important;
+    border-color: var(--border-color) !important;
+}
+
+/* List view */
+.fc-list {
+    border-color: var(--border-color) !important;
+}
+
+.fc .fc-list-empty {
+    background-color: var(--card-bg) !important;
+    color: var(--text-color) !important;
+}
+
+.fc .fc-list-event:hover td {
+    background-color: var(--hover-bg) !important;
+}
+
+.fc .fc-list-day-cushion {
+    background-color: var(--table-header-bg) !important;
+    color: var(--text-color) !important;
+}
+
+/* Month/week view */
+.fc .fc-scrollgrid {
+    border-color: var(--border-color) !important;
+}
+
+.fc .fc-scrollgrid-section > td {
+    border-color: var(--border-color) !important;
+}
+
+/* More events popover */
+.fc .fc-popover {
+    background-color: var(--card-bg) !important;
+    border-color: var(--border-color) !important;
+}
+
+.fc .fc-popover-header {
+    background-color: var(--table-header-bg) !important;
+    color: var(--text-color) !important;
+}
+
+/* Time grid */
+.fc .fc-timegrid-slot {
+    background-color: var(--card-bg) !important;
+    border-color: var(--border-color) !important;
+}
+
+.fc .fc-timegrid-slot-label {
+    color: var(--text-color) !important;
+}
+
+/* Update calendar list view styles */
+.fc-list-event {
+    background: transparent !important;
+    border: none !important;
+    margin: 4px 0 !important;
+}
+
+.fc-list-event td {
+    background: transparent !important;
+    border-color: var(--border-color) !important;
+    padding: 12px 8px !important;
+}
+
+.fc-list-event-title {
+    color: var(--text-color) !important;
+    font-weight: 500 !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+}
+
+.fc-list-day-cushion {
+    background-color: var(--table-header-bg) !important;
+    color: var(--text-color) !important;
+}
+
+/* Hover effect */
+.fc-list-event:hover td {
+    background-color: var(--hover-bg) !important;
+}
+
+/* Event dot colors */
+.fc-list-event-dot {
+    border-color: var(--menu-icon) !important;
+}
+
+.fc-list-event.meeting-event .fc-list-event-dot {
+    border-color: #4B49AC !important;
+}
+
+.fc-list-event.assignment-event .fc-list-event-dot {
+    border-color: #FF4747 !important;
+}
+
+.fc-list-event.contest-event .fc-list-event-dot {
+    border-color: #28A745 !important;
 }
 </style>
