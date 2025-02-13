@@ -99,17 +99,14 @@ $profileImageUrl = isset($admin['profile_image_url']) && filter_var($admin['prof
             </div>
             <div id="theme-settings" class="settings-panel">
                 <i class="settings-close ti-close"></i>
-                <p class="settings-heading">SIDEBAR SKINS</p>
-                <div class="sidebar-bg-options selected" id="sidebar-light-theme"><div class="img-ss rounded-circle bg-light border mr-3"></div>Light</div>
-                <div class="sidebar-bg-options" id="sidebar-dark-theme"><div class="img-ss rounded-circle bg-dark border mr-3"></div>Dark</div>
-                <p class="settings-heading mt-2">HEADER SKINS</p>
-                <div class="color-tiles mx-0 px-4">
-                    <div class="tiles success"></div>
-                    <div class="tiles warning"></div>
-                    <div class="tiles danger"></div>
-                    <div class="tiles info"></div>
-                    <div class="tiles dark"></div>
-                    <div class="tiles default"></div>
+                <p class="settings-heading">THEME MODE</p>
+                <div class="theme-mode-options">
+                    <div class="mode-option selected" id="light-mode">
+                        <div class="img-ss rounded-circle bg-light border mr-3"></div>Light Mode
+                    </div>
+                    <div class="mode-option" id="dark-mode">
+                        <div class="img-ss rounded-circle bg-dark border mr-3"></div>Dark Mode
+                    </div>
                 </div>
             </div>
         </div>
@@ -286,3 +283,738 @@ $profileImageUrl = isset($admin['profile_image_url']) && filter_var($admin['prof
         End custom js for this page-->
     </body>
 </html>
+
+<script>
+// Theme management constants
+const THEME_DB_NAME = 'adminThemeDB';
+const THEME_STORE_NAME = 'themeSettings';
+const THEME_KEY = 'currentTheme';
+
+// Initialize IndexedDB with better error handling
+const initThemeDB = () => {
+    return new Promise((resolve, reject) => {
+        const request = indexedDB.open(THEME_DB_NAME, 1);
+        
+        request.onerror = () => {
+            console.error('Failed to open theme database:', request.error);
+            reject(request.error);
+        };
+        
+        request.onsuccess = () => {
+            resolve(request.result);
+        };
+        
+        request.onupgradeneeded = (event) => {
+            const db = event.target.result;
+            if (!db.objectStoreNames.contains(THEME_STORE_NAME)) {
+                db.createObjectStore(THEME_STORE_NAME);
+            }
+        };
+    });
+};
+
+// Save theme with better error handling
+const saveThemePreference = async (isDark) => {
+    try {
+        const db = await initThemeDB();
+        const tx = db.transaction(THEME_STORE_NAME, 'readwrite');
+        const store = tx.objectStore(THEME_STORE_NAME);
+        
+        return new Promise((resolve, reject) => {
+            const request = store.put(isDark, THEME_KEY);
+            
+            request.onsuccess = () => {
+                // Broadcast theme change to other open admin pages
+                localStorage.setItem('themeChange', Date.now().toString());
+                resolve();
+            };
+            
+            request.onerror = () => {
+                console.error('Failed to save theme:', request.error);
+                reject(request.error);
+            };
+            
+            tx.oncomplete = () => db.close();
+        });
+    } catch (error) {
+        console.error('Error saving theme:', error);
+        // Fallback to localStorage if IndexedDB fails
+        localStorage.setItem(THEME_KEY, JSON.stringify(isDark));
+    }
+};
+
+// Load theme with better error handling
+const loadThemePreference = async () => {
+    try {
+        const db = await initThemeDB();
+        const tx = db.transaction(THEME_STORE_NAME, 'readonly');
+        const store = tx.objectStore(THEME_STORE_NAME);
+        
+        return new Promise((resolve, reject) => {
+            const request = store.get(THEME_KEY);
+            
+            request.onsuccess = () => {
+                resolve(request.result ?? false); // Default to light theme
+            };
+            
+            request.onerror = () => {
+                console.error('Failed to load theme:', request.error);
+                reject(request.error);
+            };
+            
+            tx.oncomplete = () => db.close();
+        });
+    } catch (error) {
+        console.error('Error loading theme:', error);
+        // Fallback to localStorage if IndexedDB fails
+        const fallbackTheme = localStorage.getItem(THEME_KEY);
+        return fallbackTheme ? JSON.parse(fallbackTheme) : false;
+    }
+};
+
+// Listen for theme changes from other windows/tabs
+window.addEventListener('storage', async (event) => {
+    if (event.key === 'themeChange') {
+        const newTheme = await loadThemePreference();
+        applyTheme(newTheme);
+        updateThemeToggleUI(newTheme);
+    }
+});
+
+// Update UI to match current theme
+const updateThemeToggleUI = (isDark) => {
+    const lightMode = document.getElementById('light-mode');
+    const darkMode = document.getElementById('dark-mode');
+    
+    if (lightMode && darkMode) {
+        if (isDark) {
+            lightMode.classList.remove('selected');
+            darkMode.classList.add('selected');
+        } else {
+            darkMode.classList.remove('selected');
+            lightMode.classList.add('selected');
+        }
+    }
+};
+
+// Update the theme toggle handler
+const handleThemeToggle = async (isDark) => {
+    await saveThemePreference(isDark);
+    applyTheme(isDark);
+    updateThemeToggleUI(isDark);
+};
+
+// Initialize theme on page load
+document.addEventListener('DOMContentLoaded', async () => {
+    try {
+        const savedTheme = await loadThemePreference();
+        applyTheme(savedTheme);
+        updateThemeToggleUI(savedTheme);
+        
+        // Set up click handlers
+        const lightMode = document.getElementById('light-mode');
+        const darkMode = document.getElementById('dark-mode');
+        
+        lightMode?.addEventListener('click', () => handleThemeToggle(false));
+        darkMode?.addEventListener('click', () => handleThemeToggle(true));
+        
+    } catch (error) {
+        console.error('Error initializing theme:', error);
+        // Fallback to light theme
+        applyTheme(false);
+    }
+});
+
+// Apply theme to the entire site
+const applyTheme = (isDark) => {
+    const root = document.documentElement;
+    
+    if (isDark) {
+        root.style.setProperty('--body-bg', '#1a1a1a');
+        root.style.setProperty('--text-color', '#e1e1e1');
+        root.style.setProperty('--card-bg', '#2d2d2d');
+        root.style.setProperty('--border-color', '#404040');
+        root.style.setProperty('--input-bg', '#333333');
+        root.style.setProperty('--input-text', '#ffffff');
+        root.style.setProperty('--table-bg', '#2d2d2d');
+        root.style.setProperty('--table-border', '#404040');
+        root.style.setProperty('--hover-bg', '#3a3a3a');
+        root.style.setProperty('--sidebar-bg', '#2d2d2d');
+        root.style.setProperty('--sidebar-text', '#ffffff');
+        root.style.setProperty('--navbar-bg', '#2d2d2d');
+        root.style.setProperty('--link-color', '#6ea8fe');
+        root.style.setProperty('--muted-text', '#9e9e9e');
+        document.body.classList.add('dark-theme');
+        
+        // Update sidebar theme
+        const sidebar = document.querySelector('.sidebar');
+        if (sidebar) {
+            sidebar.classList.remove('sidebar-light');
+            sidebar.classList.add('sidebar-dark');
+        }
+
+        // Update navbar theme
+        const navbar = document.querySelector('.navbar');
+        if (navbar) {
+            navbar.classList.remove('navbar-light');
+            navbar.classList.add('navbar-dark');
+        }
+        
+        // Update content wrapper background
+        const contentWrapper = document.querySelector('.content-wrapper');
+        if (contentWrapper) {
+            contentWrapper.style.backgroundColor = '#1a1a1a';
+        }
+
+        // Update table styles
+        root.style.setProperty('--table-stripe-bg', 'rgba(255, 255, 255, 0.05)');
+        root.style.setProperty('--table-hover-bg', 'rgba(255, 255, 255, 0.075)');
+
+        // Add these calendar-specific styles to your themeStyles
+        themeStyles.textContent += `
+        /* Calendar styles */
+        .dark-theme .fc {
+            background-color: var(--card-bg);
+            color: var(--text-color);
+        }
+
+        .dark-theme .fc-toolbar-title {
+            color: var(--text-color);
+        }
+
+        .dark-theme .fc-button {
+            background-color: #4B49AC !important;
+            border-color: #4B49AC !important;
+            color: #ffffff !important;
+        }
+
+        .dark-theme .fc-button:hover {
+            background-color: #3f3e91 !important;
+            border-color: #3f3e91 !important;
+        }
+
+        .dark-theme .fc-daygrid-day {
+            background-color: var(--card-bg);
+            border-color: var(--border-color) !important;
+        }
+
+        .dark-theme .fc-daygrid-day-number {
+            color: var(--text-color) !important;
+            font-weight: 500;
+        }
+
+        .dark-theme .fc-daygrid-day.fc-day-today {
+            background-color: rgba(75, 73, 172, 0.15) !important;
+        }
+
+        .dark-theme .fc-daygrid-day.fc-day-today .fc-daygrid-day-number {
+            color: #6ea8fe !important;
+            font-weight: bold;
+        }
+
+        .dark-theme .fc-col-header-cell {
+            background-color: rgba(75, 73, 172, 0.1);
+            color: var(--text-color);
+            border-color: var(--border-color) !important;
+        }
+
+        /* Weekly Agenda styles */
+        .dark-theme .list-group-item {
+            background-color: var(--card-bg);
+            border-color: var(--border-color);
+            color: var(--text-color);
+        }
+
+        .dark-theme .list-group-item:hover {
+            background-color: var(--hover-bg);
+        }
+
+        .dark-theme .list-group-item strong {
+            color: #6ea8fe;
+        }
+
+        .dark-theme .list-group-item a {
+            color: #6ea8fe;
+            text-decoration: none;
+        }
+
+        .dark-theme .list-group-item a:hover {
+            text-decoration: underline;
+        }
+
+        /* Calendar event colors */
+        .dark-theme .fc-event {
+            background-color: #4B49AC;
+            border-color: #4B49AC;
+            color: #ffffff;
+        }
+
+        .dark-theme .fc-event.assignment-event {
+            background-color: #dc3545;
+            border-color: #dc3545;
+        }
+
+        .dark-theme .fc-event.contest-event {
+            background-color: #28a745;
+            border-color: #28a745;
+        }
+
+        /* Calendar event popover */
+        .dark-theme .fc-popover {
+            background-color: var(--card-bg);
+            border-color: var(--border-color);
+        }
+
+        .dark-theme .fc-popover-header {
+            background-color: rgba(75, 73, 172, 0.1);
+            color: var(--text-color);
+        }
+
+        /* Calendar more link */
+        .dark-theme .fc-daygrid-more-link {
+            color: #6ea8fe !important;
+        }
+
+        /* Weekly agenda time slots */
+        .dark-theme .list-group-item time {
+            color: var(--muted-text);
+        }
+
+        .dark-theme .list-group-item .event-type {
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.875em;
+            margin-right: 8px;
+        }
+
+        .dark-theme .list-group-item .event-type.class {
+            background-color: rgba(75, 73, 172, 0.2);
+            color: #6ea8fe;
+        }
+
+        .dark-theme .list-group-item .event-type.assignment {
+            background-color: rgba(220, 53, 69, 0.2);
+            color: #ea868f;
+        }
+
+        .dark-theme .list-group-item .event-type.contest {
+            background-color: rgba(40, 167, 69, 0.2);
+            color: #75b798;
+        }
+
+        /* Empty state styling */
+        .dark-theme .list-group-item.empty-state {
+            color: var(--muted-text);
+            font-style: italic;
+            text-align: center;
+            padding: 2rem;
+        }
+        `;
+
+        // Add these variables to your dark theme in applyTheme function
+        root.style.setProperty('--calendar-bg', '#2d2d2d');
+        root.style.setProperty('--calendar-header', 'rgba(75, 73, 172, 0.1)');
+        root.style.setProperty('--calendar-today', 'rgba(75, 73, 172, 0.15)');
+        root.style.setProperty('--calendar-event', '#4B49AC');
+        root.style.setProperty('--calendar-text', '#e1e1e1');
+    } else {
+        root.style.setProperty('--body-bg', '#f4f7fa');
+        root.style.setProperty('--text-color', '#333333');
+        root.style.setProperty('--card-bg', '#ffffff');
+        root.style.setProperty('--border-color', '#dee2e6');
+        root.style.setProperty('--input-bg', '#ffffff');
+        root.style.setProperty('--input-text', '#495057');
+        root.style.setProperty('--table-bg', '#ffffff');
+        root.style.setProperty('--table-border', '#dee2e6');
+        root.style.setProperty('--hover-bg', '#f8f9fa');
+        root.style.setProperty('--sidebar-bg', '#ffffff');
+        root.style.setProperty('--sidebar-text', '#333333');
+        root.style.setProperty('--navbar-bg', '#ffffff');
+        document.body.classList.remove('dark-theme');
+        
+        // Update sidebar theme
+        const sidebar = document.querySelector('.sidebar');
+        if (sidebar) {
+            sidebar.classList.remove('sidebar-dark');
+            sidebar.classList.add('sidebar-light');
+        }
+
+        // Update navbar theme
+        const navbar = document.querySelector('.navbar');
+        if (navbar) {
+            navbar.classList.remove('navbar-dark');
+            navbar.classList.add('navbar-light');
+        }
+        
+        // Reset content wrapper background
+        const contentWrapper = document.querySelector('.content-wrapper');
+        if (contentWrapper) {
+            contentWrapper.style.backgroundColor = '#f4f7fa';
+        }
+
+        // Reset table styles
+        root.style.setProperty('--table-stripe-bg', 'rgba(0, 0, 0, 0.05)');
+        root.style.setProperty('--table-hover-bg', 'rgba(0, 0, 0, 0.075)');
+
+        // Add these variables to your light theme in applyTheme function
+        root.style.setProperty('--calendar-bg', '#ffffff');
+        root.style.setProperty('--calendar-header', '#f8f9fa');
+        root.style.setProperty('--calendar-today', '#e8f4ff');
+        root.style.setProperty('--calendar-event', '#4B49AC');
+        root.style.setProperty('--calendar-text', '#333333');
+    }
+};
+
+// Add this CSS to the head of the document
+const themeStyles = document.createElement('style');
+themeStyles.textContent = `
+:root {
+    --body-bg: #f4f7fa;
+    --text-color: #333333;
+    --card-bg: #ffffff;
+    --border-color: #dee2e6;
+    --input-bg: #ffffff;
+    --input-text: #495057;
+    --table-bg: #ffffff;
+    --table-border: #dee2e6;
+    --hover-bg: #f8f9fa;
+    --sidebar-bg: #ffffff;
+    --sidebar-text: #333333;
+    --navbar-bg: #ffffff;
+    --link-color: #0d6efd;
+    --muted-text: #6c757d;
+    --table-stripe-bg: rgba(0, 0, 0, 0.05);
+    --table-hover-bg: rgba(0, 0, 0, 0.075);
+}
+
+body {
+    background-color: var(--body-bg);
+    color: var(--text-color);
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.card {
+    background-color: var(--card-bg);
+    border-color: var(--border-color);
+}
+
+.form-control {
+    background-color: var(--input-bg);
+    color: var(--input-text);
+    border-color: var(--border-color);
+}
+
+.table {
+    background-color: var(--table-bg);
+    color: var(--text-color);
+}
+
+.table td, .table th {
+    border-color: var(--table-border);
+}
+
+.table-hover tbody tr:hover {
+    background-color: var(--hover-bg);
+}
+
+.modal-content {
+    background-color: var(--card-bg);
+    color: var(--text-color);
+}
+
+.alert {
+    background-color: var(--card-bg);
+    border-color: var(--border-color);
+}
+
+/* Dark theme specific overrides */
+.dark-theme .btn-primary {
+    background-color: #0d6efd;
+    border-color: #0a58ca;
+}
+
+.dark-theme .btn-secondary {
+    background-color: #6c757d;
+    border-color: #565e64;
+}
+
+.dark-theme .alert-success {
+    background-color: rgba(40, 167, 69, 0.2);
+    border-color: rgba(40, 167, 69, 0.3);
+    color: #98c9a3;
+}
+
+.dark-theme .alert-danger {
+    background-color: rgba(220, 53, 69, 0.2);
+    border-color: rgba(220, 53, 69, 0.3);
+    color: #ea868f;
+}
+
+.dark-theme .alert-warning {
+    background-color: rgba(255, 193, 7, 0.2);
+    border-color: rgba(255, 193, 7, 0.3);
+    color: #ffda6a;
+}
+
+.dark-theme .alert-info {
+    background-color: rgba(23, 162, 184, 0.2);
+    border-color: rgba(23, 162, 184, 0.3);
+    color: #6edff6;
+}
+
+.dark-theme .pagination .page-link {
+    background-color: var(--card-bg);
+    border-color: var(--border-color);
+    color: var(--link-color);
+}
+
+.dark-theme .pagination .page-item.active .page-link {
+    background-color: var(--link-color);
+    border-color: var(--link-color);
+    color: #ffffff;
+}
+
+.settings-panel {
+    padding: 2rem;
+}
+
+.theme-mode-options {
+    margin-bottom: 1.5rem;
+}
+
+.mode-option {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem;
+    margin-bottom: 0.5rem;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+}
+
+.mode-option:hover {
+    background-color: rgba(0,0,0,0.05);
+}
+
+.mode-option.selected {
+    background-color: rgba(110, 168, 254, 0.2);
+}
+
+.color-tiles {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.5rem;
+}
+
+.color-tiles .tiles {
+    width: 35px;
+    height: 35px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.color-tiles .tiles:hover {
+    transform: scale(1.1);
+}
+
+/* Header skin colors */
+.tiles.primary { background-color: #4B49AC; }
+.tiles.success { background-color: #28a745; }
+.tiles.warning { background-color: #ffc107; }
+.tiles.danger { background-color: #dc3545; }
+.tiles.info { background-color: #17a2b8; }
+.tiles.dark { background-color: #343a40; }
+.tiles.light { background-color: #f8f9fa; border: 1px solid #dee2e6; }
+
+/* Add sidebar specific styles */
+.sidebar {
+    background-color: var(--sidebar-bg);
+    color: var(--sidebar-text);
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.sidebar .nav-link {
+    color: var(--sidebar-text);
+}
+
+.sidebar-dark {
+    background-color: #2d2d2d;
+}
+
+.sidebar-dark .nav-link {
+    color: #ffffff;
+}
+
+.sidebar-dark .nav-link:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Navbar styles */
+.navbar {
+    background-color: var(--navbar-bg);
+    color: var(--text-color);
+    transition: background-color 0.3s, color 0.3s;
+}
+
+/* Settings panel styles */
+.settings-panel {
+    padding: 2rem;
+    background-color: var(--card-bg);
+    color: var(--text-color);
+}
+
+.theme-mode-options {
+    margin-bottom: 1.5rem;
+}
+
+.mode-option {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem;
+    margin-bottom: 0.5rem;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+}
+
+.mode-option:hover {
+    background-color: rgba(0,0,0,0.05);
+}
+
+.mode-option.selected {
+    background-color: rgba(110, 168, 254, 0.2);
+}
+
+/* Dark theme overrides */
+.dark-theme .sidebar {
+    border-right: 1px solid var(--border-color);
+}
+
+.dark-theme .navbar {
+    border-bottom: 1px solid var(--border-color);
+}
+
+.dark-theme .settings-panel {
+    border-left: 1px solid var(--border-color);
+}
+
+/* Dark theme specific overrides */
+.dark-theme {
+    /* Improve text visibility in dark mode */
+    --bs-body-color: var(--text-color);
+}
+
+.dark-theme .text-muted {
+    color: var(--muted-text) !important;
+}
+
+.dark-theme a:not(.btn) {
+    color: var(--link-color);
+}
+
+.dark-theme .nav-link {
+    color: var(--text-color);
+}
+
+.dark-theme .nav-link:hover {
+    color: var(--link-color);
+}
+
+.dark-theme .sidebar .nav-link {
+    color: var(--sidebar-text);
+}
+
+.dark-theme .sidebar .nav-link:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: var(--link-color);
+}
+
+.dark-theme .menu-title {
+    color: var(--text-color) !important;
+}
+
+.dark-theme .card-title {
+    color: var(--text-color);
+}
+
+.dark-theme .form-control {
+    background-color: var(--input-bg);
+    color: var(--input-text);
+    border-color: var(--border-color);
+}
+
+.dark-theme .form-control:focus {
+    background-color: var(--input-bg);
+    color: var(--input-text);
+    border-color: var(--link-color);
+    box-shadow: 0 0 0 0.2rem rgba(110, 168, 254, 0.25);
+}
+
+.dark-theme .table {
+    color: var(--text-color);
+    border-color: var(--border-color);
+}
+
+.dark-theme .table th,
+.dark-theme .table td {
+    border-color: var(--border-color);
+}
+
+.dark-theme .table thead th {
+    background-color: var(--card-bg);
+    border-bottom: 2px solid var(--border-color);
+    color: var(--text-color);
+}
+
+.dark-theme .table-striped tbody tr:nth-of-type(odd) {
+    background-color: var(--table-stripe-bg);
+    color: var(--text-color);
+}
+
+.dark-theme .table-hover tbody tr:hover {
+    background-color: var(--table-hover-bg);
+    color: var(--text-color);
+}
+
+.dark-theme .table-bordered {
+    border-color: var(--border-color);
+}
+
+.dark-theme .table-bordered th,
+.dark-theme .table-bordered td {
+    border-color: var(--border-color);
+}
+
+.dark-theme .table-responsive {
+    border-color: var(--border-color);
+}
+
+.dark-theme .table caption {
+    color: var(--muted-text);
+}
+
+.dark-theme .table .sorting::after,
+.dark-theme .table .sorting_asc::after,
+.dark-theme .table .sorting_desc::after {
+    color: var(--text-color);
+}
+
+.dark-theme .table tfoot th,
+.dark-theme .table tfoot td {
+    border-top: 2px solid var(--border-color);
+    color: var(--text-color);
+}
+
+.dark-theme .table .selected {
+    background-color: rgba(110, 168, 254, 0.1) !important;
+}
+
+.dark-theme .table .highlight {
+    background-color: rgba(255, 193, 7, 0.1);
+}
+`;
+
+document.head.appendChild(themeStyles);
+</script>
