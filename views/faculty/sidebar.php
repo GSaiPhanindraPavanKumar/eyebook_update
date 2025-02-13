@@ -56,6 +56,7 @@ if ($userData) {
     <link rel="stylesheet" type="text/css" href="../views\public/js/select.dataTables.min.css">
     <!-- End plugin css for this page -->
     <!-- inject:css -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="/views/public/css/vertical-layout-light/style.css">
     <!-- endinject -->
     <link rel="shortcut icon" href="/views/public\assets\images\android-chrome-512x512.png" />
@@ -74,6 +75,12 @@ if ($userData) {
             </button>
 
             <ul class="navbar-nav navbar-nav-right">
+                <li class="nav-item">
+                    <a class="nav-link" href="#" id="theme-toggle">
+                        <i class="fas fa-sun" id="theme-icon-light" style="display: none;"></i>
+                        <i class="fas fa-moon" id="theme-icon-dark"></i>
+                    </a>
+                </li>
 
                 <li class="nav-item nav-profile dropdown">
                     <a class="nav-link dropdown-toggle" href="#" data-toggle="dropdown" id="profileDropdown">
@@ -102,24 +109,23 @@ if ($userData) {
     </nav>
     <div class="container-fluid page-body-wrapper">
         <!-- partial:partials/_settings-panel.html -->
-        <div class="theme-setting-wrapper">
-            <div id="settings-trigger"><i class="ti-settings"></i></div>
+        <!-- <div class="theme-setting-wrapper">
+            <div id="settings-trigger" style="z-index: 9999; width: 40px; height: 40px; background: #4B49AC; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 15px rgba(0,0,0,0.1);">
+                <i class="ti-settings" style="color: #ffffff;"></i>
+            </div>
             <div id="theme-settings" class="settings-panel">
                 <i class="settings-close ti-close"></i>
-                <p class="settings-heading">SIDEBAR SKINS</p>
-                <div class="sidebar-bg-options selected" id="sidebar-light-theme"><div class="img-ss rounded-circle bg-light border mr-3"></div>Light</div>
-                <div class="sidebar-bg-options" id="sidebar-dark-theme"><div class="img-ss rounded-circle bg-dark border mr-3"></div>Dark</div>
-                <p class="settings-heading mt-2">HEADER SKINS</p>
-                <div class="color-tiles mx-0 px-4">
-                    <div class="tiles success"></div>
-                    <div class="tiles warning"></div>
-                    <div class="tiles danger"></div>
-                    <div class="tiles info"></div>
-                    <div class="tiles dark"></div>
-                    <div class="tiles default"></div>
+                <p class="settings-heading">THEME MODE</p>
+                <div class="theme-mode-options">
+                    <div class="mode-option selected" id="light-mode">
+                        <div class="img-ss rounded-circle bg-light border mr-3"></div>Light Mode
+                    </div>
+                    <div class="mode-option" id="dark-mode">
+                        <div class="img-ss rounded-circle bg-dark border mr-3"></div>Dark Mode
+                    </div>
                 </div>
             </div>
-        </div>
+        </div> -->
 
         <!-- partial -->
         <!-- partial:partials/_sidebar.html -->
@@ -305,3 +311,463 @@ if ($userData) {
 
         </nav>
         <!-- partial -->
+
+<style>
+/* Add these CSS variables and styles */
+:root {
+    /* Light theme default variables */
+    --body-bg: #f4f7fa;
+    --text-color: #333333;
+    --card-bg: #ffffff;
+    --border-color: #dee2e6;
+    --input-bg: #ffffff;
+    --input-text: #495057;
+    --table-bg: #ffffff;
+    --table-border: #dee2e6;
+    --hover-bg: #f8f9fa;
+    --sidebar-bg: #ffffff;
+    --sidebar-text: #333333;
+    --navbar-bg: #ffffff;
+    --link-color: #4B49AC;
+    --muted-text: #6c757d;
+}
+
+/* Apply variables to elements */
+body {
+    background-color: var(--body-bg) !important;
+    color: var(--text-color) !important;
+}
+
+.card {
+    background-color: var(--card-bg) !important;
+    border-color: var(--border-color) !important;
+}
+
+.table {
+    background-color: var(--table-bg) !important;
+    color: var(--text-color) !important;
+}
+
+.table td, .table th {
+    border-color: var(--table-border) !important;
+    color: var(--text-color) !important;
+}
+
+.form-control {
+    background-color: var(--input-bg) !important;
+    color: var(--input-text) !important;
+    border-color: var(--border-color) !important;
+}
+
+.navbar {
+    background-color: var(--navbar-bg) !important;
+}
+
+.sidebar {
+    background-color: var(--sidebar-bg) !important;
+}
+
+/* Dark theme overrides */
+.dark-theme {
+    --body-bg: #222222;
+    --text-color: #e1e1e1;
+    --card-bg: #2d2d2d;
+    --border-color: #404040;
+    --input-bg: #333333;
+    --input-text: #e1e1e1;
+    --table-bg: #2d2d2d;
+    --table-border: #404040;
+    --hover-bg: #3a3a3a;
+    --sidebar-bg: #2d2d2d;
+    --sidebar-text: #ffffff;
+    --navbar-bg: #2d2d2d;
+    --link-color: #6ea8fe;
+    --muted-text: #9e9e9e;
+}
+
+/* Additional dark theme styles */
+.dark-theme .dropdown-menu {
+    background-color: var(--card-bg) !important;
+    border-color: var(--border-color) !important;
+}
+
+.dark-theme .dropdown-item {
+    color: var(--text-color) !important;
+}
+
+.dark-theme .dropdown-item:hover {
+    background-color: var(--hover-bg) !important;
+}
+
+.dark-theme .nav-link {
+    color: var(--text-color) !important;
+}
+
+.dark-theme .footer {
+    background-color: var(--card-bg) !important;
+    color: var(--text-color) !important;
+}
+
+.dark-theme .text-muted {
+    color: var(--muted-text) !important;
+}
+
+.dark-theme h1, 
+.dark-theme h2, 
+.dark-theme h3, 
+.dark-theme h4, 
+.dark-theme h5, 
+.dark-theme h6,
+.dark-theme .card-title {
+    color: var(--text-color) !important;
+}
+
+.dark-theme .btn-light {
+    background-color: var(--card-bg) !important;
+    border-color: var(--border-color) !important;
+    color: var(--text-color) !important;
+}
+
+.dark-theme .modal-content {
+    background-color: var(--card-bg) !important;
+    color: var(--text-color) !important;
+}
+
+#theme-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px;
+    margin-right: 15px;
+    cursor: pointer;
+    border-radius: 50%;
+    transition: background-color 0.3s ease;
+}
+
+#theme-toggle:hover {
+    background-color: rgba(75, 73, 172, 0.1);
+}
+
+#theme-icon-light,
+#theme-icon-dark {
+    font-size: 20px;
+    transition: transform 0.3s ease;
+    color: var(--text-color);
+}
+
+#theme-toggle:hover #theme-icon-light,
+#theme-toggle:hover #theme-icon-dark {
+    transform: rotate(30deg);
+}
+
+.dark-theme #theme-icon-dark {
+    display: none !important;
+}
+
+.dark-theme #theme-icon-light {
+    display: block !important;
+}
+
+.light-theme #theme-icon-light {
+    display: none !important;
+}
+
+.light-theme #theme-icon-dark {
+    display: block !important;
+}
+
+/* Add these additional theme styles */
+.dark-theme .content-wrapper {
+    background-color: var(--body-bg) !important;
+}
+
+.dark-theme .navbar .navbar-brand-wrapper {
+    background-color: var(--card-bg) !important;
+}
+
+.dark-theme .navbar .navbar-menu-wrapper {
+    background-color: var(--card-bg) !important;
+}
+
+.dark-theme .font-weight-bold {
+    color: var(--text-color) !important;
+}
+
+.dark-theme .card .card-title {
+    color: var(--text-color) !important;
+}
+
+.dark-theme .card .card-description {
+    color: var(--muted-text) !important;
+}
+
+.dark-theme .table-hover tbody tr:hover {
+    background-color: var(--hover-bg) !important;
+}
+
+.dark-theme .grid-margin {
+    color: var(--text-color) !important;
+}
+
+.dark-theme .stretch-card {
+    color: var(--text-color) !important;
+}
+
+.dark-theme .menu-title {
+    color: var(--text-color) !important;
+}
+
+.dark-theme .nav-item hr {
+    border-color: var(--border-color) !important;
+}
+
+.dark-theme .settings-panel .settings-heading {
+    color: var(--text-color) !important;
+}
+
+.dark-theme .navbar-brand {
+    color: var(--text-color) !important;
+}
+
+.dark-theme .text-primary {
+    color: var(--link-color) !important;
+}
+
+.dark-theme .btn-primary {
+    background-color: #4B49AC !important;
+    border-color: #4B49AC !important;
+}
+
+.dark-theme .btn-primary:hover {
+    background-color: #3f3e91 !important;
+    border-color: #3f3e91 !important;
+}
+
+/* Fix for specific faculty components */
+.dark-theme .main-panel {
+    background-color: var(--body-bg) !important;
+}
+
+.dark-theme .page-body-wrapper {
+    background-color: var(--body-bg) !important;
+}
+
+.dark-theme .container-fluid {
+    background-color: var(--body-bg) !important;
+}
+
+.dark-theme .container-scroller {
+    background-color: var(--body-bg) !important;
+}
+
+/* Fix for form elements */
+.dark-theme select.form-control {
+    background-color: var(--input-bg) !important;
+    color: var(--input-text) !important;
+}
+
+.dark-theme textarea.form-control {
+    background-color: var(--input-bg) !important;
+    color: var(--input-text) !important;
+}
+
+/* Fix for badges and labels */
+.dark-theme .badge {
+    background-color: var(--card-bg) !important;
+    color: var(--text-color) !important;
+}
+
+/* Fix for icons */
+.dark-theme .menu-icon {
+    color: var(--text-color) !important;
+}
+
+.dark-theme .menu-arrow {
+    color: var(--text-color) !important;
+}
+
+/* Add these table-specific styles */
+.dark-theme .table-striped tbody tr:nth-of-type(odd) {
+    background-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+.dark-theme .table-striped tbody tr:nth-of-type(even) {
+    background-color: var(--card-bg) !important;
+}
+
+.dark-theme .table-borderless th {
+    border: none !important;
+    color: var(--text-color) !important;
+    background-color: var(--card-bg) !important;
+}
+
+.dark-theme .table thead th {
+    border-bottom: 2px solid var(--border-color) !important;
+    background-color: var(--card-bg) !important;
+    color: var(--text-color) !important;
+}
+
+.dark-theme .table tbody td {
+    border-bottom: 1px solid var(--border-color) !important;
+    color: var(--text-color) !important;
+}
+
+.dark-theme .table-responsive {
+    border-color: var(--border-color) !important;
+}
+
+/* Pagination styles for dark theme */
+.dark-theme .page-link {
+    background-color: var(--card-bg) !important;
+    border-color: var(--border-color) !important;
+    color: var(--text-color) !important;
+}
+
+.dark-theme .page-item.active .page-link {
+    background-color: #4B49AC !important;
+    border-color: #4B49AC !important;
+    color: #ffffff !important;
+}
+
+.dark-theme .page-item.disabled .page-link {
+    background-color: var(--card-bg) !important;
+    border-color: var(--border-color) !important;
+    color: var(--muted-text) !important;
+}
+
+/* Search and entries per page controls */
+.dark-theme #searchInput,
+.dark-theme #entriesPerPage {
+    background-color: var(--input-bg) !important;
+    color: var(--input-text) !important;
+    border-color: var(--border-color) !important;
+}
+
+/* Table hover effect */
+.dark-theme .table-striped tbody tr:hover {
+    background-color: rgba(75, 73, 172, 0.1) !important;
+}
+
+/* Text colors */
+.dark-theme #showing-entries,
+.dark-theme .card-title {
+    color: var(--text-color) !important;
+}
+
+.dark-theme #noRecords {
+    color: var(--muted-text) !important;
+}
+</style>
+
+<script>
+// Theme management constants
+const THEME_DB_NAME = 'facultyThemeDB';
+const THEME_STORE_NAME = 'themeSettings';
+const THEME_KEY = 'currentTheme';
+
+// Initialize IndexedDB
+const initThemeDB = () => {
+    return new Promise((resolve, reject) => {
+        const request = indexedDB.open(THEME_DB_NAME, 1);
+        
+        request.onerror = () => reject(request.error);
+        request.onsuccess = () => resolve(request.result);
+        
+        request.onupgradeneeded = (event) => {
+            const db = event.target.result;
+            if (!db.objectStoreNames.contains(THEME_STORE_NAME)) {
+                db.createObjectStore(THEME_STORE_NAME);
+            }
+        };
+    });
+};
+
+// Save theme preference
+const saveThemePreference = async (isDark) => {
+    try {
+        const db = await initThemeDB();
+        const tx = db.transaction(THEME_STORE_NAME, 'readwrite');
+        const store = tx.objectStore(THEME_STORE_NAME);
+        await store.put(isDark, THEME_KEY);
+        localStorage.setItem('themeChange', Date.now().toString());
+    } catch (error) {
+        console.error('Error saving theme:', error);
+        localStorage.setItem(THEME_KEY, JSON.stringify(isDark));
+    }
+};
+
+// Load theme preference
+const loadThemePreference = async () => {
+    try {
+        const db = await initThemeDB();
+        const tx = db.transaction(THEME_STORE_NAME, 'readonly');
+        const store = tx.objectStore(THEME_STORE_NAME);
+        const request = store.get(THEME_KEY);
+        
+        return new Promise((resolve) => {
+            request.onsuccess = () => resolve(request.result ?? false);
+            request.onerror = () => resolve(false);
+        });
+    } catch (error) {
+        console.error('Error loading theme:', error);
+        const fallbackTheme = localStorage.getItem(THEME_KEY);
+        return fallbackTheme ? JSON.parse(fallbackTheme) : false;
+    }
+};
+
+// Apply theme function
+const applyTheme = (isDark) => {
+    if (isDark) {
+        document.body.classList.add('dark-theme');
+        document.body.classList.remove('light-theme');
+    } else {
+        document.body.classList.remove('dark-theme');
+        document.body.classList.add('light-theme');
+    }
+
+    // Update sidebar specifically
+    const sidebar = document.querySelector('.sidebar');
+    if (sidebar) {
+        sidebar.querySelectorAll('.nav-link:not(.active)').forEach(link => {
+            link.style.color = isDark ? '#e1e1e1' : '#333333';
+        });
+        sidebar.querySelectorAll('.nav-link:not(.active) i').forEach(icon => {
+            icon.style.color = isDark ? '#e1e1e1' : '#333333';
+        });
+        sidebar.querySelectorAll('.nav-link.active, .nav-link.active i').forEach(element => {
+            element.style.color = '#ffffff';
+        });
+    }
+};
+
+// Theme toggle handler
+const handleThemeToggle = async () => {
+    const isDark = !document.body.classList.contains('dark-theme');
+    await saveThemePreference(isDark);
+    applyTheme(isDark);
+};
+
+// Initialize theme
+document.addEventListener('DOMContentLoaded', async () => {
+    try {
+        const savedTheme = await loadThemePreference();
+        applyTheme(savedTheme);
+        
+        // Set up click handler for theme toggle
+        const themeToggle = document.getElementById('theme-toggle');
+        themeToggle?.addEventListener('click', handleThemeToggle);
+        
+    } catch (error) {
+        console.error('Error initializing theme:', error);
+        applyTheme(false);
+    }
+});
+
+// Listen for theme changes
+window.addEventListener('storage', async (event) => {
+    if (event.key === 'themeChange') {
+        const newTheme = await loadThemePreference();
+        applyTheme(newTheme);
+    }
+});
+</script>
