@@ -313,6 +313,33 @@ if ($userData) {
         <!-- partial -->
 
 <style>
+/* Update the theme variables */
+:root {
+    /* Existing variables */
+    --body-bg: #f4f7fa;
+    --text-color: #333333;
+    --card-bg: #ffffff;
+    /* ... other existing variables ... */
+
+    /* Add these new variables */
+    --avatar-bg: #4B49AC;
+    --avatar-text: #ffffff;      /* Light text on dark background for light theme */
+    --avatar-hover-bg: #413ea9;
+}
+
+body.dark-theme {
+    /* Existing variables */
+    --body-bg: #1a1a1a;
+    --text-color: #e1e1e1;
+    --card-bg: #2d2d2d;
+    /* ... other existing variables ... */
+
+    /* Add these new variables */
+    --avatar-bg: #6ea8fe;
+    --avatar-text: #333333;      /* Dark text on light background for dark theme */
+    --avatar-hover-bg: #5a95eb;
+}
+
 /* Add these CSS variables and styles */
 :root {
     /* Light theme default variables */
