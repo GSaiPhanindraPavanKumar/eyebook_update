@@ -31,6 +31,11 @@ if ($userData) {
     // User details found, proceed with the rest of the code
     $studentId = $userData['id'];
     $notifications = Notification::getByStudentId($conn, $studentId);
+
+    // Get profile image URL, use default if not set
+    $profileImageUrl = !empty($userData['profile_image_url']) && filter_var($userData['profile_image_url'], FILTER_VALIDATE_URL) ? 
+        htmlspecialchars($userData['profile_image_url']) : 
+        null;
 } else {
     echo "Invalid Credentials";
 }
@@ -107,7 +112,11 @@ if ($userData) {
                 </li>
                 <li class="nav-item nav-profile dropdown">
                     <a class="nav-link dropdown-toggle" href="#" data-toggle="dropdown" id="profileDropdown">
-                        <img src="../../views/public\images\user.jpg" alt="profile"/>
+                        <?php if ($profileImageUrl): ?>
+                            <img src="<?php echo $profileImageUrl; ?>" alt="profile" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;"/>
+                        <?php else: ?>
+                            <img src="../../views/public/images/user.jpg" alt="profile"/>
+                        <?php endif; ?>
                     </a>
                     <div class="dropdown-menu dropdown-menu-right navbar-dropdown" aria-labelledby="profileDropdown">
                         <a class="dropdown-item" href="profile">

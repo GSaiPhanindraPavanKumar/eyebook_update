@@ -31,6 +31,11 @@ if ($userData) {
 } else {
     echo "Invalid Credentials";
 }
+
+// Add after getting user data
+$profileImageUrl = !empty($userData['profile_image_url']) && filter_var($userData['profile_image_url'], FILTER_VALIDATE_URL) ? 
+    htmlspecialchars($userData['profile_image_url']) : 
+    null;
 ?>
 
 <!DOCTYPE html>
@@ -72,7 +77,11 @@ if ($userData) {
             <ul class="navbar-nav navbar-nav-right">
                 <li class="nav-item nav-profile dropdown">
                     <a class="nav-link dropdown-toggle" href="#" data-toggle="dropdown" id="profileDropdown">
-                        <img src="../../views/public/images/user.jpg" alt="profile"/>
+                        <?php if ($profileImageUrl): ?>
+                            <img src="<?php echo $profileImageUrl; ?>" alt="profile" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;"/>
+                        <?php else: ?>
+                            <img src="../../views/public/images/user.jpg" alt="profile"/>
+                        <?php endif; ?>
                     </a>
                     <div class="dropdown-menu dropdown-menu-right navbar-dropdown" aria-labelledby="profileDropdown">
                         <a class="dropdown-item" href="/spoc/profile">

@@ -13,10 +13,10 @@ $accessKey = AWS_ACCESS_KEY_ID;
 $secretKey = AWS_SECRET_ACCESS_KEY;
 
 // Debugging: Log the values of the configuration variables
-error_log('AWS_BUCKET_NAME: ' . $bucketName);
-error_log('AWS_REGION: ' . $region);
-error_log('AWS_ACCESS_KEY_ID: ' . $accessKey);
-error_log('AWS_SECRET_ACCESS_KEY: ' . $secretKey);
+// error_log('AWS_BUCKET_NAME: ' . $bucketName);
+// error_log('AWS_REGION: ' . $region);
+// error_log('AWS_ACCESS_KEY_ID: ' . $accessKey);
+// error_log('AWS_SECRET_ACCESS_KEY: ' . $secretKey);
 
 if (!$bucketName || !$region || !$accessKey || !$secretKey) {
     throw new Exception('Missing AWS configuration in aws_config.php file');
