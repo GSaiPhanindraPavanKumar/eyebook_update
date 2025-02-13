@@ -103,8 +103,8 @@ $upcomingContests = array_filter($contests, function($contest) {
         <!-- Existing content -->
         <div class="row">
             <div class="col-md-6 grid-margin stretch-card">
-                <div class="card tale-bg">
-                    <canvas id="myPieChart" width="200" height="100" style="width: 200px; height: 100px;"></canvas>
+                <div class="card tale-bg d-flex justify-content-center align-items-center">
+                    <canvas id="myPieChart" width="386" height="386"></canvas>
                 </div>
             </div>
             <div class="col-md-6 grid-margin transparent">
@@ -238,7 +238,7 @@ $upcomingContests = array_filter($contests, function($contest) {
                     </div>
                 </div>
             </div>
-            <div class="col-md-4 stretch-card grid-margin">
+            <!-- <div class="col-md-4 stretch-card grid-margin">
                 <div class="card">
                     <div class="card-body">
                         <p class="card-title">Courses</p>
@@ -264,7 +264,7 @@ $upcomingContests = array_filter($contests, function($contest) {
                         </table>
                     </div>
                 </div>
-            </div>
+            </div> -->
         </div>
 
     </div>
@@ -285,14 +285,25 @@ $upcomingContests = array_filter($contests, function($contest) {
             }]
         },
         options: {
-            responsive: true,
+            responsive: false,
+            maintainAspectRatio: false,
+            width: 386,
+            height: 386,
             plugins: {
                 legend: {
                     position: 'top',
+                    labels: {
+                        font: {
+                            size: 12
+                        }
+                    }
                 },
                 title: {
                     display: true,
-                    text: 'Distribution of Entities'
+                    text: 'Distribution of Entities',
+                    font: {
+                        size: 14
+                    }
                 }
             }
         }
@@ -946,5 +957,19 @@ document.addEventListener('DOMContentLoaded', function() {
     padding: 4px !important;
     font-size: 0.9em;
     color: #333;
+}
+
+/* Add these styles for proper centering */
+.card.tale-bg {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    min-height: 450px !important;
+    padding: 20px !important;
+}
+
+canvas#myPieChart {
+    max-width: 100% !important;
+    height: auto !important;
 }
 </style>
