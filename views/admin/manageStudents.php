@@ -442,6 +442,25 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Initial sort
     updateSortIcons();
+
+    const table = document.querySelector('table');
+    
+    table.addEventListener('click', function(e) {
+        // Find the closest row to the clicked element
+        const row = e.target.closest('tr');
+        
+        // Ensure we have a row and it's not the header row
+        if (row && !row.closest('thead')) {
+            // If the click was not on a button/link/form
+            if (!e.target.closest('a') && !e.target.closest('button') && !e.target.closest('input')) {
+                // Find the view button in this row and get its href
+                const viewButton = row.querySelector('a[href*="viewStudentProfile"]');
+                if (viewButton) {
+                    window.location.href = viewButton.href;
+                }
+            }
+        }
+    });
 });
 </script>
 
@@ -516,5 +535,20 @@ document.addEventListener('DOMContentLoaded', function() {
         border-bottom: 2px solid #dee2e6;
         font-weight: 600;
         padding: 12px 8px;
+    }
+
+    tbody tr {
+        cursor: pointer;
+    }
+
+    tbody tr:hover {
+        background-color: rgba(0,0,0,0.05) !important;
+    }
+
+    tbody tr a,
+    tbody tr button,
+    tbody tr input {
+        position: relative;
+        z-index: 2;
     }
 </style>

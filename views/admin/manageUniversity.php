@@ -120,49 +120,89 @@
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/js/all.min.js"></script>
 <script>
-    $(document).ready(function() {
-        $('.edit-btn').on('click', function() {
-            var id = $(this).data('id');
-            var long_name = $(this).data('long_name');
-            var short_name = $(this).data('short_name');
-            var location = $(this).data('location');
-            var country = $(this).data('country');
-            $('#edit-id').val(id);
-            $('#edit-long_name').val(long_name);
-            $('#edit-short_name').val(short_name);
-            $('#edit-location').val(location);
-            $('#edit-country').val(country);
-            $('#editModal').modal('show');
+$(document).ready(function() {
+    $('.edit-btn').on('click', function() {
+        var id = $(this).data('id');
+        var long_name = $(this).data('long_name');
+        var short_name = $(this).data('short_name');
+        var location = $(this).data('location');
+        var country = $(this).data('country');
+        $('#edit-id').val(id);
+        $('#edit-long_name').val(long_name);
+        $('#edit-short_name').val(short_name);
+        $('#edit-location').val(location);
+        $('#edit-country').val(country);
+        $('#editModal').modal('show');
+    });
+
+    $('#searchInput').on('keyup', function() {
+        var value = $(this).val().toLowerCase();
+        var visibleRows = 0;
+        $('#universityTable tr').filter(function() {
+            var isVisible = $(this).text().toLowerCase().indexOf(value) > -1;
+            $(this).toggle(isVisible);
+            if (isVisible) visibleRows++;
         });
+        $('#noRecords').toggle(visibleRows === 0);
+    });
 
-        $('#searchInput').on('keyup', function() {
-            var value = $(this).val().toLowerCase();
-            var visibleRows = 0;
-            $('#universityTable tr').filter(function() {
-                var isVisible = $(this).text().toLowerCase().indexOf(value) > -1;
-                $(this).toggle(isVisible);
-                if (isVisible) visibleRows++;
-            });
-            $('#noRecords').toggle(visibleRows === 0);
-        });
+    $('th[data-sort]').on('click', function() {
+        var table = $(this).parents('table').eq(0);
+        var rows = table.find('tbody tr').toArray().sort(comparer($(this).index()));
+        this.asc = !this.asc;
+        if (!this.asc) { rows = rows.reverse(); }
+        for (var i = 0; i < rows.length; i++) { table.append(rows[i]); }
+    });
 
-        $('th[data-sort]').on('click', function() {
-            var table = $(this).parents('table').eq(0);
-            var rows = table.find('tbody tr').toArray().sort(comparer($(this).index()));
-            this.asc = !this.asc;
-            if (!this.asc) { rows = rows.reverse(); }
-            for (var i = 0; i < rows.length; i++) { table.append(rows[i]); }
-        });
+    function comparer(index) {
+        return function(a, b) {
+            var valA = getCellValue(a, index), valB = getCellValue(b, index);
+            return $.isNumeric(valA) && $.isNumeric(valB) ? valA - valB : valA.localeCompare(valB);
+        };
+    }
 
-        function comparer(index) {
-            return function(a, b) {
-                var valA = getCellValue(a, index), valB = getCellValue(b, index);
-                return $.isNumeric(valA) && $.isNumeric(valB) ? valA - valB : valA.localeCompare(valB);
-            };
-        }
+    function getCellValue(row, index) {
+        return $(row).children('td').eq(index).text();
+    }
+});
 
-        function getCellValue(row, index) {
-            return $(row).children('td').eq(index).text();
+// Add this as a separate event listener
+document.addEventListener('DOMContentLoaded', function() {
+    const table = document.querySelector('table');
+    
+    table.addEventListener('click', function(e) {
+        // Find the closest row to the clicked element
+        const row = e.target.closest('tr');
+        
+        // Ensure we have a row and it's not the header row
+        if (row && !row.closest('thead')) {
+            // If the click was not on a button/link/form
+            if (!e.target.closest('a') && !e.target.closest('button') && !e.target.closest('input')) {
+                // Find the view button in this row and get its href
+                const viewButton = row.querySelector('a.btn-outline-info') || row.querySelector('a[href*="view_university"]');
+                if (viewButton) {
+                    window.location.href = viewButton.href;
+                }
+            }
         }
     });
+});
 </script>
+
+<style>
+/* Move these styles outside of the script tag */
+tbody tr {
+    cursor: pointer;
+}
+
+tbody tr:hover {
+    background-color: rgba(0,0,0,0.05) !important;
+}
+
+tbody tr a,
+tbody tr button,
+tbody tr input {
+    position: relative;
+    z-index: 2;
+}
+</style>
