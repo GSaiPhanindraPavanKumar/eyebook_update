@@ -171,5 +171,40 @@
 
             document.getElementById('noRecords').style.display = noRecords ? '' : 'none';
         });
+
+        const table = document.querySelector('table');
+        
+        table.addEventListener('click', function(e) {
+            // Find the closest row to the clicked element
+            const row = e.target.closest('tr');
+            
+            // Ensure we have a row and it's not the header row
+            if (row && !row.closest('thead')) {
+                // If the click was not on a button/link/form
+                if (!e.target.closest('a') && !e.target.closest('button') && !e.target.closest('input') && !e.target.closest('input[type="checkbox"]')) {
+                    // Get registration number from the row
+                    const regdNo = row.cells[2].textContent;
+                    // Redirect to student profile
+                    window.location.href = `/spoc/view_student_profile/${regdNo}`;
+                }
+            }
+        });
     });
 </script>
+
+<style>
+tbody tr {
+    cursor: pointer;
+}
+
+tbody tr:hover {
+    background-color: rgba(0,0,0,0.05) !important;
+}
+
+tbody tr a,
+tbody tr button,
+tbody tr input {
+    position: relative;
+    z-index: 2;
+}
+</style>
