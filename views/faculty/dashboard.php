@@ -308,14 +308,139 @@ document.addEventListener('DOMContentLoaded', function() {
     var calendarEl = document.getElementById('calendar');
     var calendar = new FullCalendar.Calendar(calendarEl, {
         initialView: 'dayGridMonth',
-        // headerToolbar: {
-        //     left: 'prev,next today',
-        //     center: 'title',
-        //     right: 'dayGridMonth,timeGridWeek,timeGridDay'
-        // },
         headerToolbar: {
-            left: 'title',
+            left: 'title backButton',
             right: 'today prev,next'
+        },
+        customButtons: {
+            backButton: {
+                text: '← Back',
+                click: function() {
+                    calendar.changeView('dayGridMonth');
+                    document.querySelector('.fc-backButton-button').style.display = 'none';
+                }
+            }
+        },
+        views: {
+            dayGridMonth: {
+                dayMaxEventRows: false,
+                dayMaxEvents: false,
+            },
+            listDay: {
+                eventDidMount: function(info) {
+                    let eventEl = info.el;
+                    let title = info.event.title;
+                    let typeLabel = '';
+                    
+                    // Determine event type based on URL
+                    if (info.event.url && (info.event.url.includes('zoom') || info.event.url.includes('join_url'))) {
+                        typeLabel = 'Meeting';
+                        eventEl.classList.add('list-meeting-event');
+                    } else if (info.event.url && info.event.url.includes('view_assignment')) {
+                        typeLabel = 'Assignment';
+                        eventEl.classList.add('list-assignment-event');
+                    } else if (info.event.url && info.event.url.includes('view_contest')) {
+                        typeLabel = 'Contest';
+                        eventEl.classList.add('list-contest-event');
+                    }
+                    
+                    // Hide time element
+                    const timeEl = eventEl.querySelector('.fc-list-event-time');
+                    if (timeEl) {
+                        timeEl.style.display = 'none';
+                    }
+                    
+                    // Update the title with type label
+                    eventEl.querySelector('.fc-list-event-title').innerHTML = 
+                        `<span class="event-type-label">${typeLabel}:</span> ${title}`;
+
+                    // Add click handler
+                    eventEl.style.cursor = 'pointer';
+                    eventEl.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        if (info.event.url && (info.event.url.includes('zoom') || info.event.url.includes('join_url'))) {
+                            window.open(info.event.url, '_blank');
+                        } else {
+                            window.location.href = info.event.url;
+                        }
+                    });
+                }
+            }
+        },
+        dayCellDidMount: function(info) {
+            const date = info.date;
+            const cellDate = new Date(date.setHours(0,0,0,0));
+            
+            // Get all events that are active on this day
+            const dayEvents = calendar.getEvents().filter(event => {
+                const eventStart = new Date(event.start);
+                eventStart.setHours(0,0,0,0);
+                let eventEnd;
+                
+                if (event.end) {
+                    eventEnd = new Date(event.end);
+                    eventEnd.setHours(23,59,59,999);
+                } else {
+                    eventEnd = new Date(eventStart);
+                    eventEnd.setHours(23,59,59,999);
+                }
+
+                // Check if current date falls within event range (inclusive)
+                const cellTime = cellDate.getTime();
+                const startTime = eventStart.getTime();
+                const endTime = eventEnd.getTime();
+                
+                return cellTime >= startTime && cellTime <= endTime;
+            });
+
+            if (dayEvents.length > 0) {
+                // Count events by URL pattern
+                const meetings = dayEvents.filter(event => 
+                    event.url && (event.url.includes('zoom') || event.url.includes('join_url'))
+                ).length;
+                const assignments = dayEvents.filter(event => 
+                    event.url && event.url.includes('view_assignment')
+                ).length;
+                const contests = dayEvents.filter(event => 
+                    event.url && event.url.includes('view_contest')
+                ).length;
+
+                // Create counters container
+                const countersContainer = document.createElement('div');
+                countersContainer.className = 'event-counters-container';
+
+                // Add individual counters for each type if they exist
+                if (meetings > 0) {
+                    const meetingCounter = document.createElement('span');
+                    meetingCounter.className = 'type-counter meeting-counter';
+                    meetingCounter.innerHTML = meetings;
+                    meetingCounter.title = `${meetings} Meeting${meetings > 1 ? 's' : ''}`;
+                    countersContainer.appendChild(meetingCounter);
+                }
+                if (assignments > 0) {
+                    const assignmentCounter = document.createElement('span');
+                    assignmentCounter.className = 'type-counter assignment-counter';
+                    assignmentCounter.innerHTML = assignments;
+                    assignmentCounter.title = `${assignments} Assignment${assignments > 1 ? 's' : ''}`;
+                    countersContainer.appendChild(assignmentCounter);
+                }
+                if (contests > 0) {
+                    const contestCounter = document.createElement('span');
+                    contestCounter.className = 'type-counter contest-counter';
+                    contestCounter.innerHTML = contests;
+                    contestCounter.title = `${contests} Contest${contests > 1 ? 's' : ''}`;
+                    countersContainer.appendChild(contestCounter);
+                }
+
+                // Only append if there are counters
+                if (countersContainer.children.length > 0) {
+                    info.el.appendChild(countersContainer);
+                }
+            }
+        },
+        dateClick: function(info) {
+            calendar.changeView('listDay', info.date);
+            document.querySelector('.fc-backButton-button').style.display = 'flex';
         },
         events: <?php echo json_encode(array_merge(
             array_map(function($class) {
@@ -331,8 +456,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     'title' => $assignment['title'],
                     'start' => $assignment['start_time'],
                     'end' => $assignment['due_date'],
-                    'color' => 'red',
-                    'url' => '/faculty/view_assignment/' . $assignment['id'] // URL to view the assignment
+                    'url' => '/faculty/view_assignment/' . $assignment['id']
                 ];
             }, $assignments),
             array_map(function($contest) {
@@ -340,14 +464,14 @@ document.addEventListener('DOMContentLoaded', function() {
                     'title' => $contest['title'],
                     'start' => $contest['start_date'],
                     'end' => $contest['end_date'],
-                    'color' => 'green',
-                    'url' => '/faculty/view_contest/' . $contest['id'] // URL to view the contest
+                    'url' => '/faculty/view_contest/' . $contest['id']
                 ];
             }, $contests)
-        )); ?>,
-        eventDisplay: 'block' // Ensure event titles are always visible
+        )); ?>
     });
+    
     calendar.render();
+    document.querySelector('.fc-backButton-button').style.display = 'none';
 });
 </script>
 <style>
@@ -414,5 +538,133 @@ document.addEventListener('DOMContentLoaded', function() {
     display: flex;
     justify-content: space-between;
     align-items: center;
+}
+
+/* Add new counter styling */
+.event-counters-container {
+    position: absolute;
+    bottom: 4px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 4px;
+    justify-content: center;
+    align-items: center;
+    z-index: 2;
+}
+
+.type-counter {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7em;
+    font-weight: bold;
+    color: white;
+    cursor: pointer;
+}
+
+.meeting-counter {
+    background-color: #4B49AC;
+}
+
+.assignment-counter {
+    background-color: #FF4747;
+}
+
+/* Add contest counter style */
+.contest-counter {
+    background-color: #28A745;
+}
+
+/* List view styling */
+.fc-list-event {
+    cursor: pointer;
+    padding: 12px 16px !important;
+    border: none !important;
+    margin: 8px !important;
+    border-radius: 6px;
+    background-color: #f8f9fa !important;
+    transition: all 0.2s ease;
+}
+
+.fc-list-event-title {
+    color: #333 !important;
+    font-weight: 500 !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+}
+
+.event-type-label {
+    color: #666 !important;
+    font-weight: 500;
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    min-width: 100px !important;
+}
+
+.event-type-label::before {
+    content: '';
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-right: 4px;
+}
+
+/* Colored dots for list view */
+.list-meeting-event .event-type-label::before {
+    background-color: #4B49AC;
+}
+
+.list-assignment-event .event-type-label::before {
+    background-color: #FF4747;
+}
+
+/* Add contest dot style */
+.list-contest-event .event-type-label::before {
+    background-color: #28A745;
+}
+
+/* Hide default event displays */
+.fc-daygrid-event-harness,
+.fc-daygrid-event,
+.fc-daygrid-dot-event,
+.fc-daygrid-more-link {
+    display: none !important;
+}
+
+/* Back button styling */
+.fc-backButton-button {
+    background-color: #4B49AC !important;
+    border-color: #4B49AC !important;
+    color: white !important;
+    font-size: 0.85em !important;
+    padding: 4px 12px !important;
+    border-radius: 4px !important;
+    display: none !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 85px !important;
+    height: 32px !important;
+    cursor: pointer !important;
+}
+
+/* Show back button in list view */
+.fc-listDay-view ~ .fc-toolbar .fc-backButton-button,
+.fc-backButton-button[style*="display: flex"],
+.fc-backButton-button[style*="display: block"] {
+    display: flex !important;
+}
+
+/* Position the back button */
+.fc-toolbar-chunk {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
 }
 </style>
