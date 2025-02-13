@@ -110,16 +110,19 @@ $upcomingContests = array_filter($contests, function($contest) {
             <div class="col-md-6 grid-margin transparent">
                 <div class="row">
                     <div class="col-md-6 mb-4 stretch-card transparent">
-                        <div class="card card-tale">
+                        <div class="card card-tale" onclick="window.location='/admin/manage_university'" style="cursor: pointer;">
                             <div class="card-body">
+                                <div class="ripple-2"></div>
                                 <p class="mb-4">Total Universities</p>
                                 <p class="fs-30 mb-2"><?php echo $university_count; ?></p>
                             </div>
                         </div>
                     </div>
                     <div class="col-md-6 mb-4 stretch-card transparent">
-                        <div class="card card-dark-blue">
+                        <div class="card card-dark-blue" onclick="window.location='/admin/manage_students'" style="cursor: pointer;">
                             <div class="card-body">
+                            <div class="ripple-2"></div>
+
                                 <p class="mb-4">Total Students</p>
                                 <p class="fs-30 mb-2"><?php echo $student_count; ?></p>
                             </div>
@@ -136,8 +139,10 @@ $upcomingContests = array_filter($contests, function($contest) {
                         </div>
                     </div>
                     <div class="col-md-6 stretch-card transparent">
-                        <div class="card card-light-danger">
+                        <div class="card card-light-danger" onclick="window.location='/admin/manage_courses'" style="cursor: pointer;">
                             <div class="card-body">
+                            <div class="ripple-2"></div>
+
                                 <p class="mb-4">Courses</p>
                                 <p class="fs-30 mb-2"><?php echo $course_count; ?></p>
                             </div>
@@ -146,16 +151,20 @@ $upcomingContests = array_filter($contests, function($contest) {
                 </div><br>
                 <div class="row">
                     <div class="col-md-6 mb-4 mb-lg-0 stretch-card transparent">
-                        <div class="card card-light-blue">
+                        <div class="card card-light-blue" onclick="window.location='/admin/transactions'" style="cursor: pointer;">
                             <div class="card-body">
+                            <div class="ripple-2"></div>
+
                                 <p class="mb-4">Transactions</p>
                                 <p class="fs-30 mb-2"><?php echo $transactions_count; ?></p>
                             </div>
                         </div>
                     </div>
                     <div class="col-md-6 stretch-card transparent">
-                        <div class="card card-light-danger">
+                        <div class="card card-light-danger" onclick="window.location='/admin/manage_public_courses'" style="cursor: pointer;">
                             <div class="card-body">
+                            <div class="ripple-2"></div>
+
                                 <p class="mb-4">Public Course</p>
                                 <p class="fs-30 mb-2"><?php echo $publiccourse_count; ?></p>
                             </div>
@@ -457,5 +466,110 @@ document.addEventListener('DOMContentLoaded', function() {
     display: flex;
     justify-content: space-between;
     align-items: center;
+}
+
+/* Add hover effect for clickable cards */
+.card[onclick] {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.card[onclick]:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+/* Add clickable indicator dot */
+.card[onclick]::before {
+    content: '';
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    animation: none;  /* Remove pulse animation from main dot */
+}
+
+/* Add ripple effect container */
+.card[onclick]::after {
+    content: '';
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    animation: ripple 1.5s linear infinite;
+}
+
+/* Card-specific dot colors */
+.card.card-tale[onclick]::before {
+    background-color: #466ccf;  /* Darker blue matching theme */
+}
+.card.card-tale[onclick]::after {
+    border: 2px solid #4B49AC;
+    box-shadow: 0 0 10px rgba(75, 73, 172, 0.5);
+}
+
+/* Second ripple for universities card */
+.card.card-tale[onclick] .ripple-2 {
+    border: 2px solid #4B49AC;
+    box-shadow: 0 0 10px rgba(75, 73, 172, 0.3);
+}
+
+.card.card-dark-blue[onclick]::before {
+    background-color: #7676d9;
+}
+.card.card-dark-blue[onclick]::after {
+    border: 2px solid #7676d9;
+}
+
+.card.card-light-blue[onclick]::before {
+    background-color: #b4caff;
+}
+.card.card-light-blue[onclick]::after {
+    border: 2px solid #b4caff;
+}
+
+.card.card-light-danger[onclick]::before {
+    background-color: #ffb3b7;
+}
+.card.card-light-danger[onclick]::after {
+    border: 2px solid #ffb3b7;
+}
+
+@keyframes ripple {
+    0% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(3);
+        opacity: 0;
+    }
+}
+
+/* Add multiple ripples */
+.card[onclick]::before {
+    z-index: 2;  /* Keep dot on top */
+}
+
+.card[onclick]::after {
+    z-index: 1;
+}
+
+/* Second ripple with delay */
+.card[onclick] .ripple-2 {
+    content: '';
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    animation: ripple 1.5s linear infinite;
+    animation-delay: 0.5s;  /* Delay second ripple */
 }
 </style>
