@@ -7,6 +7,7 @@ use Aws\S3\S3Client;
 use ZipArchive;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use Mpdf\Mpdf;
 require_once 'aws_config.php';
 
 class CertificateController {
@@ -470,131 +471,92 @@ class CertificateController {
 
     public function download($generationId) {
         try {
-            // Set execution time limit to 100 seconds
-            set_time_limit(100);
-            ini_set('max_execution_time', '100');
-            
-            // Also set memory limit higher if needed
-            // ini_set('memory_limit', '256M');
-            
+            $format = $_GET['format'] ?? 'images';
             $conn = Database::getConnection();
+            
+            // Get certificates
             $stmt = $conn->prepare("SELECT * FROM certificates WHERE generation_id = ?");
             $stmt->execute([$generationId]);
             $certificates = $stmt->fetchAll(\PDO::FETCH_ASSOC);
             
             if (empty($certificates)) {
-                throw new \Exception('No certificates found');
+                throw new \Exception("No certificates found");
             }
             
-            // Create temp directory for this download
-            $tempDir = __DIR__ . '/../storage/temp/download_' . uniqid();
+            // Create temp directory
+            $tempDir = "storage/temp/download_" . uniqid();
             if (!file_exists($tempDir)) {
                 mkdir($tempDir, 0777, true);
             }
             
-            $zipName = "certificates_{$generationId}.zip";
-            $zipPath = $tempDir . '/' . $zipName;
-            
-            $zip = new ZipArchive();
-            if ($zip->open($zipPath, ZipArchive::CREATE) !== TRUE) {
-                throw new \Exception('Cannot create zip file');
-            }
-
-            $successfulDownloads = 0;
-            
-            // Download and add files to zip
+            // Download certificates from S3
             foreach ($certificates as $cert) {
-                try {
-                    $s3Url = $cert['file_path'];
-                    error_log("Processing file - Original URL: " . $s3Url);
+                $s3Key = ltrim(parse_url($cert['file_path'], PHP_URL_PATH), '/');
+                $localPath = "{$tempDir}/" . basename($s3Key);
+                
+                $this->s3->getObject([
+                    'Bucket' => AWS_BUCKET_NAME,
+                    'Key'    => $s3Key,
+                    'SaveAs' => $localPath
+                ]);
+                
+                if ($format === 'pdf') {
+                    // Convert to PDF
+                    $pdfPath = str_replace(['.jpg', '.jpeg', '.png'], '.pdf', $localPath);
+                    $mpdf = new Mpdf(['tempDir' => $tempDir]);
+                    $mpdf->WriteHTML('<img src="' . $localPath . '" style="width: 100%;">');
+                    $mpdf->Output($pdfPath, 'F');
                     
-                    // Extract the path after amazonaws.com/
-                    $pathParts = explode('amazonaws.com/', $s3Url);
-                    if (count($pathParts) < 2) {
-                        error_log("Invalid S3 URL format: " . $s3Url);
-                        continue;
-                    }
-                    
-                    $relativePath = $pathParts[1];
-                    error_log("Extracted relative path: " . $relativePath);
-                    
-                    // Create temp file path maintaining folder structure
-                    $tempFilePath = $tempDir . '/' . basename($relativePath);
-                    
-                    // Download file from URL
-                    $fileContents = @file_get_contents($s3Url);
-                    if ($fileContents === false) {
-                        error_log("Failed to download file from URL: " . $s3Url);
-                        continue;
-                    }
-                    
-                    // Save to temp location
-                    if (@file_put_contents($tempFilePath, $fileContents) === false) {
-                        error_log("Failed to save file to temp location: " . $tempFilePath);
-                        continue;
-                    }
-                    
-                    // Add to zip if file exists
-                    if (file_exists($tempFilePath)) {
-                        // Use registration number and student name for the file name in zip
-                        $zipFileName = sprintf(
-                            "%s_%s.%s",
-                            $cert['registration_number'],
-                            preg_replace('/[^a-zA-Z0-9]/', '_', $cert['student_name']),
-                            pathinfo($relativePath, PATHINFO_EXTENSION)
-                        );
-                        
-                        if ($zip->addFile($tempFilePath, $zipFileName)) {
-                            $successfulDownloads++;
-                            error_log("Added to ZIP: " . $zipFileName);
-                        } else {
-                            error_log("Failed to add file to ZIP: " . $zipFileName);
-                        }
-                    }
-                    
-                } catch (\Exception $e) {
-                    error_log("Error processing certificate: " . $e->getMessage());
-                    continue;
+                    // Remove original image
+                    unlink($localPath);
                 }
             }
             
-            // Close the ZIP file
+            // Create ZIP archive
+            $zipName = "certificates_{$generationId}" . ($format === 'pdf' ? '_pdf' : '') . ".zip";
+            $zipPath = "{$tempDir}/{$zipName}";
+            
+            $zip = new \ZipArchive();
+            if ($zip->open($zipPath, \ZipArchive::CREATE) !== TRUE) {
+                throw new \Exception("Cannot create zip file");
+            }
+            
+            // Add all files to ZIP
+            $filePattern = $format === 'pdf' ? "*.pdf" : "*.{jpg,jpeg,png}";
+            foreach (glob("{$tempDir}/" . $filePattern, GLOB_BRACE) as $file) {
+                $zip->addFile($file, basename($file));
+            }
+            
             $zip->close();
             
-            // Check if we have any files in the ZIP
-            if ($successfulDownloads > 0 && file_exists($zipPath)) {
-                error_log("Serving ZIP file with {$successfulDownloads} certificates");
-                
-                // Clear any output that might have been sent
-                if (ob_get_level()) ob_end_clean();
-                
-                header('Content-Type: application/zip');
-                header('Content-Disposition: attachment; filename=' . $zipName);
-                header('Content-Length: ' . filesize($zipPath));
-                header('Pragma: no-cache');
-                header('Expires: 0');
-                
-                readfile($zipPath);
-                
-                // Register cleanup function
-                register_shutdown_function(function() use ($tempDir, $zipPath) {
-                    if (file_exists($zipPath)) {
-                        unlink($zipPath);
-                    }
-                    if (is_dir($tempDir)) {
-                        $this->cleanupTempFiles($tempDir);
-                    }
-                });
-                
-                exit;
-            } else {
-                throw new \Exception("No certificates could be downloaded successfully");
+            // Before sending the file, send a header to prevent caching
+            header('Cache-Control: no-cache, must-revalidate');
+            header('Pragma: no-cache');
+            header('Content-Type: application/zip');
+            header('Content-Disposition: attachment; filename="' . $zipName . '"');
+            header('Content-Length: ' . filesize($zipPath));
+            
+            // Flush output buffer
+            if (ob_get_level()) {
+                ob_end_clean();
             }
+            
+            // Send file
+            readfile($zipPath);
+            
+            // Cleanup
+            register_shutdown_function(function() use ($tempDir) {
+                $this->cleanupTempFiles($tempDir);
+            });
+            
+            exit;
             
         } catch (\Exception $e) {
             error_log("Download error: " . $e->getMessage());
-            $_SESSION['error'] = 'Failed to download certificates: ' . $e->getMessage();
-            header('Location: /admin/certificate_generations');
+            header('HTTP/1.1 500 Internal Server Error');
+            echo json_encode([
+                'error' => "Error downloading certificates: " . $e->getMessage()
+            ]);
             exit;
         }
     }

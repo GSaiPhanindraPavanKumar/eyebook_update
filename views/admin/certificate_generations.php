@@ -1,4 +1,5 @@
 <?php include("sidebar.php"); ?>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 <div class="main-panel">
     <div class="content-wrapper">
         <div class="row">
@@ -120,6 +121,123 @@
                         display: inline-block;
                         margin-left: 0.5rem;
                     }
+
+                    .download-btn {
+                        cursor: pointer;
+                    }
+
+                    .download-btn.disabled {
+                        pointer-events: none;
+                        opacity: 0.65;
+                    }
+
+                    .download-btn .spinner-border {
+                        width: 1rem;
+                        height: 1rem;
+                        margin-right: 0.5rem;
+                    }
+
+                    .dropdown-item {
+                        display: flex;
+                        align-items: center;
+                        padding: 0.5rem 1rem;
+                    }
+
+                    .dropdown-item i {
+                        width: 20px;
+                    }
+
+                    .btn-group {
+                        position: relative;
+                    }
+
+                    .dropdown-menu {
+                        position: absolute;
+                        min-width: 200px;
+                        padding: 0.5rem 0;
+                        margin: 0.125rem 0 0;
+                        background-color: #fff;
+                        border: 1px solid rgba(0,0,0,.15);
+                        border-radius: 0.25rem;
+                        box-shadow: 0 0.5rem 1rem rgba(0,0,0,.175);
+                        z-index: 1000;
+                    }
+
+                    .dropdown-item {
+                        display: flex;
+                        align-items: center;
+                        padding: 0.75rem 1rem;
+                        color: #212529;
+                        text-decoration: none;
+                        background-color: transparent;
+                        border: 0;
+                        white-space: nowrap;
+                    }
+
+                    .dropdown-item.disabled {
+                        pointer-events: none;
+                        opacity: 0.65;
+                        background-color: #f8f9fa;
+                    }
+
+                    .dropdown-item i {
+                        width: 20px;
+                        margin-right: 0.75rem;
+                    }
+
+                    .spinner-container {
+                        display: inline-flex;
+                        align-items: center;
+                        justify-content: center;
+                    }
+
+                    .spinner-border-sm {
+                        width: 1rem;
+                        height: 1rem;
+                        border-width: 0.2em;
+                        margin-right: 0.5rem;
+                    }
+
+                    /* Add animation for spinner */
+                    @keyframes spinner-border {
+                        to { transform: rotate(360deg); }
+                    }
+
+                    .spinner-border {
+                        display: inline-block;
+                        width: 1rem;
+                        height: 1rem;
+                        vertical-align: text-bottom;
+                        border: 0.2em solid currentColor;
+                        border-right-color: transparent;
+                        border-radius: 50%;
+                        animation: spinner-border .75s linear infinite;
+                    }
+
+                    .download-option {
+                        min-width: 180px;
+                        padding: 10px 20px;
+                    }
+
+                    .download-btn.loading {
+                        pointer-events: none;
+                        opacity: 0.75;
+                    }
+
+                    .spinner-border {
+                        display: inline-block;
+                        width: 1rem;
+                        height: 1rem;
+                        vertical-align: text-bottom;
+                        border: 0.2em solid currentColor;
+                        border-right-color: transparent;
+                        border-radius: 50%;
+                        animation: spinner-border .75s linear infinite;
+                    }
+
+                    @keyframes spinner-border {
+                        to { transform: rotate(360deg); }
+                    }
                 </style>
 
                 <div class="table-responsive mt-3">
@@ -160,18 +278,21 @@
                                 <td><?= $gen['created_at'] ?></td>
                                 <td>
                                     <?php if ($gen['status'] === 'completed'): ?>
-                                        <a href="/admin/certificate_generations/download/<?= $gen['id'] ?>" 
-                                           class="btn btn-outline-primary btn-sm">
-                                            <i class="ti-download mr-1"></i> Download All
-                                        </a>
+                                        <button type="button" 
+                                                class="btn btn-outline-primary btn-sm download-btn" 
+                                                data-generation-id="<?= $gen['id'] ?>">
+                                            <span class="btn-content">
+                                                <i class="ti-download mr-1"></i> Download
+                                            </span>
+                                        </button>
                                     <?php elseif ($gen['status'] === 'processing'): ?>
                                         <a href="/admin/certificate_generations/progress/<?= $gen['id'] ?>" 
                                            class="btn btn-outline-info btn-sm">
-                                            <i class="ti-reload mr-1"></i> View Progress
+                                            <i class="ti-reload"></i> View Progress
                                         </a>
                                     <?php else: ?>
                                         <button class="btn btn-outline-secondary btn-sm" disabled>
-                                            <i class="ti-close mr-1"></i> Failed
+                                            <i class="ti-close"></i> Failed
                                         </button>
                                     <?php endif; ?>
                                 </td>
@@ -211,6 +332,38 @@
     <?php include("footer.html"); ?>
 </div>
 
+<div class="modal fade" id="downloadModal" tabindex="-1" role="dialog" aria-labelledby="downloadModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="downloadModalLabel">Download Certificates</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p class="text-center mb-4">Choose download format:</p>
+                <div class="d-flex justify-content-center gap-3">
+                    <button class="btn btn-outline-primary mr-3 download-option" data-format="images">
+                        <i class="fas fa-images mr-2"></i>
+                        Download as Images
+                    </button>
+                    <button class="btn btn-outline-primary download-option" data-format="pdf">
+                        <i class="fas fa-file-pdf mr-2"></i>
+                        Download as PDF
+                    </button>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add this hidden iframe at the bottom of the page -->
+<iframe id="downloadFrame" style="display:none;"></iframe>
+
 <script>
 // Store all records for client-side pagination and search
 const allRecords = <?= json_encode($allGenerations) ?>;
@@ -234,10 +387,14 @@ function generateTableRow(gen) {
     
     let actionButton = '';
     if (gen.status === 'completed') {
-        actionButton = `<a href="/admin/certificate_generations/download/${gen.id}" 
-                          class="btn btn-outline-primary btn-sm">
-                          <i class="ti-download mr-1"></i> Download All
-                       </a>`;
+        actionButton = `
+            <button type="button" 
+                    class="btn btn-outline-primary btn-sm download-btn" 
+                    data-generation-id="${gen.id}">
+                <span class="btn-content">
+                    <i class="ti-download mr-1"></i> Download
+                </span>
+            </button>`;
     } else if (gen.status === 'processing') {
         actionButton = `<a href="/admin/certificate_generations/progress/${gen.id}" 
                           class="btn btn-outline-info btn-sm">
@@ -289,6 +446,9 @@ function displayCurrentPage() {
     // Generate table rows
     const tableBody = document.getElementById('tableBody');
     tableBody.innerHTML = recordsToShow.map(generateTableRow).join('');
+    
+    // Reinitialize download buttons
+    initializeDownloadButtons();
     
     // Update page info
     document.getElementById('startRecord').textContent = filteredRecords.length ? startIndex + 1 : 0;
@@ -384,5 +544,96 @@ document.addEventListener('DOMContentLoaded', function() {
         currentPage = 1;
         filterAndDisplayRecords();
     });
+
+    let currentDownloadBtn = null;
+    
+    // Handle main download button click
+    document.querySelectorAll('.download-btn').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            currentDownloadBtn = this;
+            $('#downloadModal').modal('show'); // Use jQuery modal
+        });
+    });
+
+    // Add download helper function
+    function startDownload(url, button) {
+        // Create a download timeout
+        const downloadTimeout = setTimeout(() => {
+            resetButton(button);
+        }, 8000); // 15 second fallback
+
+        // Setup download frame
+        const downloadFrame = document.getElementById('downloadFrame');
+        
+        // Listen for the load event
+        downloadFrame.onload = function() {
+            // Clear the timeout since download has started
+            clearTimeout(downloadTimeout);
+            // Reset the button
+            resetButton(button);
+        };
+
+        // Start download
+        downloadFrame.src = url;
+    }
+
+    // Add reset button function
+    function resetButton(button) {
+        if (!button) return;
+        
+        button.classList.remove('loading');
+        button.querySelector('.btn-content').innerHTML = `
+            <i class="ti-download mr-1"></i> Download
+        `;
+    }
+
+    // Update the format selection handler
+    document.querySelectorAll('.download-option').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            if (!currentDownloadBtn) return;
+            
+            const format = this.dataset.format;
+            const generationId = currentDownloadBtn.dataset.generationId;
+            
+            // Close modal
+            $('#downloadModal').modal('hide');
+            
+            // Show spinner in button
+            currentDownloadBtn.classList.add('loading');
+            currentDownloadBtn.querySelector('.btn-content').innerHTML = `
+                <span class="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>
+                Downloading...
+            `;
+            
+            // Start download with the current button reference
+            const downloadUrl = `/admin/certificate_generations/download/${generationId}${format === 'pdf' ? '?format=pdf' : ''}`;
+            startDownload(downloadUrl, currentDownloadBtn);
+            
+            // Clear current button reference
+            currentDownloadBtn = null;
+        });
+    });
+
+    // Update the modal close handler to also reset any loading button
+    $('#downloadModal').on('hidden.bs.modal', function () {
+        if (currentDownloadBtn) {
+            resetButton(currentDownloadBtn);
+            currentDownloadBtn = null;
+        }
+    });
 });
+
+// Add this function to reinitialize download buttons after table updates
+function initializeDownloadButtons() {
+    document.querySelectorAll('.download-btn').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            currentDownloadBtn = this;
+            $('#downloadModal').modal('show');
+        });
+    });
+}
 </script> 
