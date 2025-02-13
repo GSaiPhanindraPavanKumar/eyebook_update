@@ -21,40 +21,290 @@ $message = $message ?? ''; // Ensure $message is defined
     <link rel="stylesheet" type="text/css" href="/views/public/assets/styles/icon-font.min.css">
     <link rel="stylesheet" type="text/css" href="/views/public/assets/styles/style.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet"> <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        h5 {
-            color: blue;
+        /* Remove theme-related variables and keep only light theme colors */
+        :root {
+            --primary-color: #4B49AC;
+            --primary-hover: #3f3e91;
+            --body-bg: #f4f7fa;
+            --text-color: #333333;
+            --card-bg: #ffffff;
+            --border-color: #dee2e6;
+            --input-bg: #ffffff;
+            --input-text: #495057;
+            --muted-text: #6c757d;
+            --box-shadow: 0 8px 24px rgba(149, 157, 165, 0.2);
+            --input-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
         }
+
+        /* Enhanced Footer */
+        .footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background-color: #ffffff;
+            padding: 15px 0;
+            text-align: center;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+            z-index: 1000;
+        }
+
+        .footer p {
+            margin: 0;
+            color: var(--primary-color);
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        .footer a {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .footer a:hover {
+            color: var(--primary-hover);
+        }
+
+        /* Add margin to main content to prevent footer overlap */
+        .login-wrap {
+            margin-bottom: 80px; /* Adjust based on footer height */
+        }
+
+        /* Modern UI Variables */
+        :root {
+            --primary-color: #4B49AC;
+            --primary-hover: #3f3e91;
+            --body-bg: #f4f7fa;
+            --text-color: #333333;
+            --card-bg: #ffffff;
+            --border-color: #dee2e6;
+            --input-bg: #ffffff;
+            --input-text: #495057;
+            --link-color: #4B49AC;
+            --muted-text: #6c757d;
+            --box-shadow: 0 8px 24px rgba(149, 157, 165, 0.2);
+            --input-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Dark theme enhancements */
+        body.dark-theme {
+            --body-bg: #1a1a1a;
+            --text-color: #e1e1e1;
+            --card-bg: #2d2d2d;
+            --border-color: #404040;
+            --input-bg: #333333;
+            --input-text: #e1e1e1;
+            --link-color: #6ea8fe;
+            --muted-text: #9e9e9e;
+            --box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+            --input-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Enhanced Login Box */
+        .login-box {
+            background-color: var(--card-bg);
+            border-radius: 16px !important;
+            box-shadow: var(--box-shadow);
+            padding: 2.5rem !important;
+            border: none !important;
+            transition: all 0.3s ease;
+        }
+
+        /* Modern Form Controls */
+        .form-control {
+            height: 48px;
+            border-radius: 12px;
+            padding: 0.75rem 1.25rem;
+            font-size: 1rem;
+            border: 2px solid var(--border-color);
+            background-color: var(--input-bg);
+            color: var(--input-text);
+            box-shadow: var(--input-shadow);
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(75, 73, 172, 0.15);
+        }
+
+        /* Enhanced Button */
+        .btn-primary {
+            height: 48px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1rem;
+            text-transform: none;
+            letter-spacing: 0.5px;
+            background: var(--primary-color);
+            border: none;
+            box-shadow: 0 4px 6px rgba(75, 73, 172, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-hover);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 8px rgba(75, 73, 172, 0.25);
+        }
+
+        /* Modern Header */
+        .login-header {
+            background-color: var(--card-bg);
+            padding: 0.5rem 0;
+            box-shadow: var(--box-shadow);
+            height: 60px; /* Reduced height */
+        }
+
+        .navbar {
+            padding: 0 !important;
+            min-height: auto !important;
+        }
+
+        .navbar-brand {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0;
+        }
+
+        .navbar-brand img {
+            height: 35px !important; /* Reduced logo size */
+            width: 35px !important;
+        }
+
+        .navbar-brand h2 {
+            margin: 0;
+            font-size: 1.4rem !important; /* Reduced font size */
+            color: var(--text-color);
+            font-family: cursive;
+        }
+
+        /* Container adjustments */
+        .container-fluid {
+            padding: 0 1.5rem;
+        }
+
+        /* Adjust login-wrap top margin to account for smaller header */
+        .login-wrap {
+            margin-top: 20px;
+        }
+
+        /* Checkbox Enhancement */
         .custom-checkbox {
-            margin-top: 0px;
-            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin: 1rem 0;
         }
+
+        .custom-checkbox input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            border-radius: 6px;
+            border: 2px solid var(--border-color);
+            cursor: pointer;
+        }
+
+        /* Password Toggle Enhancement */
         .input-group.custom {
             position: relative;
+            margin-bottom: 1.5rem;
         }
-        .input-group.custom .toggle-password {
+
+        .toggle-password {
             position: absolute;
-            right: 10px;
+            right: 16px;
             top: 50%;
             transform: translateY(-50%);
             cursor: pointer;
-            color: #6c757d;
+            color: var(--muted-text);
+            z-index: 10;
+            transition: color 0.3s ease;
         }
-        .toggle-password:hover {
-            color: #007bff;
+
+        /* Theme Toggle Enhancement */
+        #theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 12px;
+            border-radius: 50%;
+            background: var(--card-bg);
+            box-shadow: var(--box-shadow);
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        #theme-toggle:hover {
+            transform: rotate(30deg);
+            background: var(--primary-color);
+        }
+
+        #theme-toggle:hover i {
+            color: #ffffff;
+        }
+
+        /* Alert Enhancement */
+        .alert {
+            border-radius: 12px;
+            padding: 1rem 1.25rem;
+            margin-bottom: 1.5rem;
+            border: none;
+            background-color: var(--card-bg);
+            box-shadow: var(--box-shadow);
+        }
+
+        /* Footer Enhancement */
+        .footer-text {
+            margin-top: 2rem;
+            padding: 1rem;
+            text-align: center;
+            color: var(--muted-text);
+            font-size: 0.9rem;
+        }
+
+        .footer-text a {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .footer-text a:hover {
+            color: var(--primary-hover);
+        }
+
+        /* Responsive Adjustments */
+        @media (max-width: 768px) {
+            .login-header {
+                height: 50px; /* Even smaller on mobile */
+            }
+
+            .navbar-brand img {
+                height: 30px !important;
+                width: 30px !important;
+            }
+
+            .navbar-brand h2 {
+                font-size: 1.2rem !important;
+            }
         }
     </style>
 </head>
 <body class="login-page">
 <div class="login-header box-shadow">
-    <div class="container-fluid d-flex justify-content-between align-items-center">
+    <div class="container-fluid">
         <nav class="navbar navbar-light">
-            <div class="container">
-                <a class="navbar-brand brand-logo mr-5" href="#">
-                    <img src="/views/public/assets/images/logo1.png" class="mr-2" alt="logo" height="50" width="50">
-                    <h2 style="font-family: cursive; display: inline;">Knowbots</h2>
-                </a>
-            </div>
+            <a class="navbar-brand" href="#">
+                <img src="/views/public/assets/images/logo1.png" alt="logo">
+                <h2>Knowbots</h2>
+            </a>
         </nav>
     </div>
 </div>
@@ -114,9 +364,12 @@ $message = $message ?? ''; // Ensure $message is defined
         </div><br>
     </div>
 </div>
-<div style="bottom:0; background-color: #ffffff; color: #7b09df; text-align: center; padding: 10px 0; font-size: 0.8em;">
-    <p>Developed and maintained by <br> <a href="about.html">Phemesoft</a></p>
-</div>
+<footer class="footer">
+    <p>
+        Developed and maintained by<br>
+        <a href="about.html">Phemesoft</a>
+    </p>
+</footer>
 <script src="/views/public/assets/scripts/core.js"></script>
 <script src="/views/public/assets/scripts/script.min.js"></script>
 <script src="/views/public/assets/scripts/process.js"></script>
