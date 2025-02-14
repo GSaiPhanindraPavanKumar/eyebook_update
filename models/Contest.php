@@ -15,7 +15,12 @@ class Contest {
         $sql = "SELECT * FROM contests WHERE id = :id";
         $stmt = $conn->prepare($sql);
         $stmt->execute([':id' => $id]);
-        return $stmt->fetch(PDO::FETCH_ASSOC);
+        $contest = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        // Add debug logging
+        error_log("Contest fetch result: " . print_r($contest, true));
+        
+        return $contest;
     }
 
     public static function getByUniversityId($conn, $universityId) {
@@ -26,20 +31,34 @@ class Contest {
     }
 
     public static function create($conn, $data) {
-        $sql = "INSERT INTO contests (title, description, start_date, end_date, university_id) 
-                VALUES (:title, :description, :start_date, :end_date, :university_id)";
+        $sql = "INSERT INTO contests (
+                title, description, start_date, end_date, 
+                university_id, time_limit
+                ) 
+                VALUES (
+                :title, :description, :start_date, :end_date, 
+                :university_id, :time_limit
+                )";
         $stmt = $conn->prepare($sql);
         $stmt->execute([
             ':title' => $data['title'],
             ':description' => $data['description'],
             ':start_date' => $data['start_date'],
             ':end_date' => $data['end_date'],
-            ':university_id' => $data['university_id']
+            ':university_id' => $data['university_id'],
+            ':time_limit' => isset($data['time_limit']) ? $data['time_limit'] : 120 // Default 120 minutes if not set
         ]);
     }
 
     public static function update($conn, $id, $data) {
-        $sql = "UPDATE contests SET title = :title, description = :description, start_date = :start_date, end_date = :end_date, university_id = :university_id WHERE id = :id";
+        $sql = "UPDATE contests SET 
+                title = :title, 
+                description = :description, 
+                start_date = :start_date, 
+                end_date = :end_date, 
+                university_id = :university_id,
+                time_limit = :time_limit 
+                WHERE id = :id";
         $stmt = $conn->prepare($sql);
         $stmt->execute([
             ':title' => $data['title'],
@@ -47,6 +66,7 @@ class Contest {
             ':start_date' => $data['start_date'],
             ':end_date' => $data['end_date'],
             ':university_id' => json_encode($data['university_id']),
+            ':time_limit' => isset($data['time_limit']) ? $data['time_limit'] : 120,
             ':id' => $id
         ]);
     }
@@ -100,34 +120,15 @@ class Contest {
         ]);
     }
 
-    public static function getQuestionById($conn, $id) {
+    public static function getQuestionById($conn, $questionId) {
         $sql = "SELECT * FROM contest_questions WHERE id = :id";
         $stmt = $conn->prepare($sql);
-        $stmt->execute([':id' => $id]);
+        $stmt->execute([':id' => $questionId]);
         $question = $stmt->fetch(PDO::FETCH_ASSOC);
-
-        // Fetch the submissions JSON data
-        $submissions = !empty($question['submissions']) ? json_decode($question['submissions'], true) : [];
-
-        // Prepare an array to hold the detailed submissions
-        $detailedSubmissions = [];
-
-        // Fetch student names for each submission and format the submission date
-        foreach ($submissions as $submission) {
-            $sql = "SELECT name FROM students WHERE id = :student_id";
-            $stmt = $conn->prepare($sql);
-            $stmt->execute([':student_id' => $submission['student_id']]);
-            $student = $stmt->fetch(PDO::FETCH_ASSOC);
-
-            if ($student) {
-                $submission['student_name'] = $student['name'];
-                $submission['submission_date'] = date('Y-m-d H:i:s', strtotime($submission['submission_date']));
-                $detailedSubmissions[] = $submission;
-            }
-        }
-
-        $question['submissions'] = $detailedSubmissions;
-
+        
+        // Add debug logging
+        error_log("Question fetch result: " . print_r($question, true));
+        
         return $question;
     }
 
@@ -219,4 +220,39 @@ class Contest {
         return $result['contest_count'];
     }
     
+    public static function getQuestionWithContest($conn, $questionId) {
+        // First get the question
+        $sql = "SELECT q.*, c.id as contest_id, c.title as contest_title, 
+                c.start_date, c.end_date, c.time_limit 
+                FROM contest_questions q 
+                JOIN contests c ON q.contest_id = c.id 
+                WHERE q.id = :id";
+        
+        $stmt = $conn->prepare($sql);
+        $stmt->execute([':id' => $questionId]);
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        if ($result) {
+            return [
+                'question' => [
+                    'id' => $result['id'],
+                    'question' => $result['question'],
+                    'description' => $result['description'],
+                    'input' => $result['input'],
+                    'output' => $result['output'],
+                    'grade' => $result['grade'],
+                    'submissions' => $result['submissions']
+                ],
+                'contest' => [
+                    'id' => $result['contest_id'],
+                    'title' => $result['contest_title'],
+                    'start_date' => $result['start_date'],
+                    'end_date' => $result['end_date'],
+                    'time_limit' => $result['time_limit']
+                ]
+            ];
+        }
+        
+        return null;
+    }
 }

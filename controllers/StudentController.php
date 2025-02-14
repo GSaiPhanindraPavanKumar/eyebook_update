@@ -1281,9 +1281,18 @@ class StudentController {
             header('Location: /session-timeout');
             exit;
         }
+        
         $conn = Database::getConnection();
-        $question = Contest::getQuestionById($conn, $questionId);
-        $contest = Contest::getById($conn, $question['contest_id']);
+        $data = Contest::getQuestionWithContest($conn, $questionId);
+        
+        if (!$data) {
+            header('Location: /student/manage_contests');
+            exit;
+        }
+        
+        $question = $data['question'];
+        $contest = $data['contest'];
+        
         require 'views/student/view_question.php';
     }
     public function updateQuestionSubmission() {
@@ -1545,6 +1554,22 @@ class StudentController {
         $userData = $stmt->fetch(PDO::FETCH_ASSOC);
         
         require 'views/student/xp_status.php';
+    }
+
+    public function startContest($contestId) {
+        if (!isset($_SESSION['email'])) {
+            header('Location: /session-timeout');
+            exit;
+        }
+        
+        $conn = Database::getConnection();
+        $student_id = $_SESSION['student_id'];
+        
+        // Record contest start time
+        Contest::recordContestStart($conn, $contestId, $student_id);
+        
+        header('Location: /student/view_contest/' . $contestId);
+        exit();
     }
 }
 ?>
