@@ -416,53 +416,110 @@ document.addEventListener('DOMContentLoaded', function() {
     align-items: center;
 }
 
-/* Add new counter styling */
+/* Replace the existing event-counters-container and type-counter styles with these updated versions */
+
 .event-counters-container {
     position: absolute;
-    bottom: 4px;
+    bottom: 2px;
     left: 50%;
     transform: translateX(-50%);
     display: flex;
-    gap: 4px;
+    gap: 3px;
     justify-content: center;
     align-items: center;
-    z-index: 2;
+    z-index: 5;
+    pointer-events: none;
+    width: 100%;
+    padding: 2px 0;
 }
 
 .type-counter {
-    width: 16px;
-    height: 16px;
+    width: 18px;
+    height: 18px;
     border-radius: 50%;
-    display: flex;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
-    font-size: 0.7em;
+    font-size: 11px;
     font-weight: bold;
     color: white;
     cursor: pointer;
+    pointer-events: auto;
+    position: relative;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
 }
 
+/* Update the calendar day cell to ensure proper positioning */
+.fc .fc-daygrid-day {
+    position: relative !important;
+    min-height: 85px !important;
+}
+
+/* Ensure the day cell content doesn't overlap with counters */
+.fc .fc-daygrid-day-frame {
+    min-height: 100%;
+    position: relative;
+    padding-bottom: 20px !important;
+}
+
+/* Update specific counter colors with improved visibility */
 .meeting-counter {
     background-color: #4B49AC;
+    border: 1px solid rgba(255,255,255,0.3);
 }
 
 .assignment-counter {
     background-color: #FF4747;
+    border: 1px solid rgba(255,255,255,0.3);
 }
 
-/* List view styling */
+/* Add hover effect for better interaction */
+.type-counter:hover {
+    transform: scale(1.1);
+    transition: transform 0.2s ease;
+}
+
+/* Hide default event displays */
+.fc-daygrid-event-harness,
+.fc-daygrid-event,
+.fc-daygrid-dot-event,
+.fc-daygrid-more-link {
+    display: none !important;
+}
+
+/* Keep the date number styling */
+.fc .fc-daygrid-day-top {
+    display: flex !important;
+    justify-content: flex-start !important;
+}
+
+.fc .fc-daygrid-day-number {
+    position: absolute !important;
+    top: 4px !important;
+    left: 4px !important;
+    padding: 4px !important;
+    font-size: 0.9em;
+    color: #333;
+}
+
+/* Update list view event styling */
 .fc-list-event {
     cursor: pointer;
     padding: 12px 16px !important;
     border: none !important;
     margin: 8px !important;
     border-radius: 6px;
-    background-color: #f8f9fa !important;
+    background-color: var(--card-bg) !important;
     transition: all 0.2s ease;
 }
 
+.fc-list-event:hover {
+    background-color: var(--hover-bg) !important;
+}
+
+/* Style event title and label */
 .fc-list-event-title {
-    color: #333 !important;
+    color: var(--text-color) !important;
     font-weight: 500 !important;
     display: flex !important;
     align-items: center !important;
@@ -470,7 +527,7 @@ document.addEventListener('DOMContentLoaded', function() {
 }
 
 .event-type-label {
-    color: #666 !important;
+    color: var(--text-muted) !important;
     font-weight: 500;
     display: flex !important;
     align-items: center !important;
@@ -487,7 +544,7 @@ document.addEventListener('DOMContentLoaded', function() {
     margin-right: 4px;
 }
 
-/* Colored dots for list view */
+/* Add colored dots before labels */
 .list-meeting-event .event-type-label::before {
     background-color: #4B49AC;
 }
@@ -496,41 +553,26 @@ document.addEventListener('DOMContentLoaded', function() {
     background-color: #FF4747;
 }
 
-/* Hide default event displays */
-.fc-daygrid-event-harness,
-.fc-daygrid-event,
-.fc-daygrid-dot-event,
-.fc-daygrid-more-link {
+/* Hide time */
+.fc-list-event-time {
     display: none !important;
 }
 
-/* Back button styling */
-.fc-backButton-button {
-    background-color: #4B49AC !important;
-    border-color: #4B49AC !important;
-    color: white !important;
-    font-size: 0.85em !important;
-    padding: 4px 12px !important;
-    border-radius: 4px !important;
+/* Style the list day header */
+.fc-list-day-cushion {
+    background-color: var(--card-bg) !important;
+    padding: 16px !important;
+}
+
+.fc-list-day-text,
+.fc-list-day-side-text {
+    color: var(--text-color) !important;
+    font-weight: 600 !important;
+}
+
+/* Remove old dot styling */
+.event-dots-container,
+.event-dot {
     display: none !important;
-    align-items: center !important;
-    justify-content: center !important;
-    width: 85px !important;
-    height: 32px !important;
-    cursor: pointer !important;
-}
-
-/* Show back button in list view */
-.fc-listDay-view ~ .fc-toolbar .fc-backButton-button,
-.fc-backButton-button[style*="display: flex"],
-.fc-backButton-button[style*="display: block"] {
-    display: flex !important;
-}
-
-/* Position the back button */
-.fc-toolbar-chunk {
-    display: flex !important;
-    align-items: center !important;
-    gap: 8px !important;
 }
 </style>

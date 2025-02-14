@@ -894,46 +894,73 @@ document.addEventListener('DOMContentLoaded', function() {
 /* Add new counter styling */
 .event-counters-container {
     position: absolute;
-    bottom: 4px;
+    bottom: 2px;
     left: 50%;
     transform: translateX(-50%);
     display: flex;
-    gap: 4px;
+    gap: 3px;
     justify-content: center;
     align-items: center;
-    z-index: 2;
+    z-index: 5;
+    pointer-events: none;
+    width: 100%;
+    padding: 2px 0;
 }
 
 .type-counter {
-    width: 16px;
-    height: 16px;
+    width: 18px;
+    height: 18px;
     border-radius: 50%;
-    display: flex;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
-    font-size: 0.7em;
+    font-size: 11px;
     font-weight: bold;
     color: white;
     cursor: pointer;
+    pointer-events: auto;
+    position: relative;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
 }
 
 .meeting-counter {
     background-color: #4B49AC;
+    border: 1px solid rgba(255,255,255,0.3);
 }
 
 .assignment-counter {
     background-color: #FF4747;
+    border: 1px solid rgba(255,255,255,0.3);
 }
 
 .contest-counter {
     background-color: #28A745;
+    border: 1px solid rgba(255,255,255,0.3);
 }
 
-/* Ensure proper spacing in day cells */
-.fc .fc-daygrid-day-frame {
-    min-height: 45px !important;
+/* Update the calendar day cell to ensure proper positioning */
+.fc .fc-daygrid-day {
     position: relative !important;
-    padding-top: 25px !important;
+    min-height: 85px !important;
+}
+
+/* Ensure the day cell content doesn't overlap with counters */
+.fc .fc-daygrid-day-frame {
+    min-height: 100%;
+    position: relative;
+    padding-bottom: 20px !important;
+}
+
+/* Add hover effect for better interaction */
+.type-counter:hover {
+    transform: scale(1.1);
+    transition: transform 0.2s ease;
+}
+
+/* Remove old dot styling */
+.event-dots-container,
+.event-dot {
+    display: none !important;
 }
 
 /* Remove any remaining bar styles */
@@ -957,6 +984,78 @@ document.addEventListener('DOMContentLoaded', function() {
     padding: 4px !important;
     font-size: 0.9em;
     color: #333;
+}
+
+/* Update list view event styling */
+.fc-list-event {
+    cursor: pointer;
+    padding: 12px 16px !important;
+    border: none !important;
+    margin: 8px !important;
+    border-radius: 6px;
+    background-color: var(--card-bg) !important;
+    transition: all 0.2s ease;
+}
+
+.fc-list-event:hover {
+    background-color: var(--hover-bg) !important;
+}
+
+/* Style event title and label */
+.fc-list-event-title {
+    color: var(--text-color) !important;
+    font-weight: 500 !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+}
+
+.event-type-label {
+    color: var(--text-muted) !important;
+    font-weight: 500;
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    min-width: 100px !important;
+}
+
+.event-type-label::before {
+    content: '';
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-right: 4px;
+}
+
+/* Add colored dots before labels */
+.list-meeting-event .event-type-label::before {
+    background-color: #4B49AC;
+}
+
+.list-assignment-event .event-type-label::before {
+    background-color: #FF4747;
+}
+
+.list-contest-event .event-type-label::before {
+    background-color: #28A745;
+}
+
+/* Hide time */
+.fc-list-event-time {
+    display: none !important;
+}
+
+/* Style the list day header */
+.fc-list-day-cushion {
+    background-color: var(--card-bg) !important;
+    padding: 16px !important;
+}
+
+.fc-list-day-text,
+.fc-list-day-side-text {
+    color: var(--text-color) !important;
+    font-weight: 600 !important;
 }
 
 /* Add these styles for proper centering */
