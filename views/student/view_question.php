@@ -1,5 +1,15 @@
 <?php include 'sidebar.php'; ?>
 
+<!-- Add timer display at the top -->
+<div id="timer-container" style="position: fixed; top: 70px; right: 20px; z-index: 1000; box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.1); border-radius: 10px;">
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title">Time Remaining</h5>
+            <div id="time-remaining" class="h3 mb-0"></div>
+        </div>
+    </div>
+</div>
+
 <div class="main-panel">
     <div class="content-wrapper">
         <div class="row">
@@ -65,17 +75,93 @@
 
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const endDate = new Date('<?php echo $contest['end_date']; ?>');
-    const currentDate = new Date();
+// IndexedDB setup and helper functions
+const contestDB = (() => {
+    const dbName = 'ContestDB';
+    const storeName = 'contestAttempts';
+    
+    const db = new Promise((resolve, reject) => {
+        const request = indexedDB.open(dbName, 1);
+        request.onerror = () => reject(request.error);
+        request.onsuccess = () => resolve(request.result);
+        
+        request.onupgradeneeded = (event) => {
+            const db = event.target.result;
+            if (!db.objectStoreNames.contains(storeName)) {
+                db.createObjectStore(storeName, { keyPath: 'id' });
+            }
+        };
+    });
 
-    if (currentDate > endDate) {
-        document.getElementById('run-code').disabled = true;
-        document.getElementById('submit-code').disabled = true;
-        document.getElementById('message').textContent = 'The end date has passed. Submissions are no longer allowed.';
-        document.getElementById('message').classList.add('alert', 'alert-danger');
+    return {
+        async getAttempt(attemptId) {
+            const database = await db;
+            const transaction = database.transaction([storeName], 'readonly');
+            const store = transaction.objectStore(storeName);
+            return new Promise((resolve, reject) => {
+                const request = store.get(attemptId);
+                request.onsuccess = () => resolve(request.result);
+                request.onerror = () => reject(request.error);
+            });
+        }
+    };
+})();
+
+// Contest management functions
+const contestManager = {
+    contestId: <?php echo json_encode($contest['id']); ?>,
+    studentEmail: <?php echo json_encode($_SESSION['email']); ?>,
+    timeLimit: <?php echo json_encode($contest['time_limit']); ?>,
+
+    get attemptId() {
+        return `${this.contestId}-${this.studentEmail}`;
+    },
+
+    async checkStatus() {
+        try {
+            const attempt = await contestDB.getAttempt(this.attemptId);
+            if (attempt) {
+                document.getElementById('timer-container').style.display = 'block';
+                this.startTimer(attempt.startTime, attempt.timeLimit);
+            } else {
+                window.location.href = `/student/view_contest/${this.contestId}`;
+            }
+        } catch (error) {
+            console.error('Error checking contest status:', error);
+            window.location.href = `/student/view_contest/${this.contestId}`;
+        }
+    },
+
+    startTimer(startTime, timeLimit) {
+        const timerContainer = document.getElementById('timer-container');
+        const timeRemainingElement = document.getElementById('time-remaining');
+        
+        function updateTimer() {
+            const now = Date.now();
+            const elapsed = now - startTime;
+            const remaining = timeLimit - elapsed;
+            
+            if (remaining <= 0) {
+                window.location.href = `/student/view_contest/${contestManager.contestId}`;
+                return;
+            }
+            
+            const hours = Math.floor(remaining / (1000 * 60 * 60));
+            const minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((remaining % (1000 * 60)) / 1000);
+            
+            timeRemainingElement.textContent = 
+                `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+        
+        updateTimer();
+        const timerInterval = setInterval(updateTimer, 1000);
+        timerContainer.dataset.timerInterval = timerInterval;
     }
-});
+};
+
+// Initialize on page load
+contestManager.checkStatus();
 
 document.getElementById('run-code').addEventListener('click', async () => {
     const endDate = new Date('<?php echo $contest['end_date']; ?>');

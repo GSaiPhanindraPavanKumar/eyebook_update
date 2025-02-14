@@ -23,6 +23,10 @@
                         <input type="datetime-local" class="form-control" id="end_date" name="end_date" required>
                     </div>
                     <div class="form-group">
+                        <label for="time_limit">Time Limit (in minutes)</label>
+                        <input type="number" class="form-control" id="time_limit" name="time_limit" required>
+                    </div>
+                    <div class="form-group">
                         <label for="universities">Select Universities</label>
                         <table class="table">
                             <thead>

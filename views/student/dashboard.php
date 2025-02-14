@@ -535,42 +535,72 @@ document.addEventListener('DOMContentLoaded', function() {
     align-items: center;
 }
 
-/* Add new counter styling */
+/* Replace the existing event-counters-container and type-counter styles with these updated versions */
+
 .event-counters-container {
     position: absolute;
-    bottom: 4px;
+    bottom: 2px;
     left: 50%;
     transform: translateX(-50%);
     display: flex;
-    gap: 4px;
+    gap: 3px;
     justify-content: center;
     align-items: center;
-    z-index: 2;
+    z-index: 5;
+    pointer-events: none;
+    width: 100%;
+    padding: 2px 0;
 }
 
 .type-counter {
-    width: 16px;
-    height: 16px;
+    width: 18px;
+    height: 18px;
     border-radius: 50%;
-    display: flex;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
-    font-size: 0.7em;
+    font-size: 11px;
     font-weight: bold;
     color: white;
     cursor: pointer;
+    pointer-events: auto;
+    position: relative;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
 }
 
+/* Update the calendar day cell to ensure proper positioning */
+.fc .fc-daygrid-day {
+    position: relative !important;
+    min-height: 85px !important;
+}
+
+/* Ensure the day cell content doesn't overlap with counters */
+.fc .fc-daygrid-day-frame {
+    min-height: 100%;
+    position: relative;
+    padding-bottom: 20px !important;
+}
+
+/* Update specific counter colors with improved visibility */
 .meeting-counter {
     background-color: #4B49AC;
+    border: 1px solid rgba(255,255,255,0.3);
 }
 
 .assignment-counter {
     background-color: #FF4747;
+    border: 1px solid rgba(255,255,255,0.3);
 }
 
 .contest-counter {
     background-color: #28A745;
+    border: 1px solid rgba(255,255,255,0.3);
+}
+
+/* Add hover effect for better interaction */
+.type-counter:hover {
+    transform: scale(1.1);
+    transition: transform 0.2s ease;
 }
 
 /* List view styling */
