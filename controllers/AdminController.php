@@ -2421,6 +2421,68 @@ class AdminController {
         require 'views/admin/virtual_classroom_dashboard.php';
     }
 
+    public function manageSpoc() {
+        $conn = Database::getConnection();
+        $spocs = Spoc::getAll($conn);
+        require 'views/admin/manageSpoc.php';
+    }
+
+    public function bulkResetSpocPassword() {
+        $conn = Database::getConnection();
+        $data = json_decode(file_get_contents('php://input'), true);
+        $selected = $data['selected'];
+        $newPassword = $data['new_password'];
+        $confirmPassword = $data['confirm_password'];
+
+        if ($newPassword !== $confirmPassword) {
+            echo json_encode(['status' => 'error', 'message' => 'Passwords do not match.']);
+            return;
+        }
+
+        $hashedPassword = password_hash($newPassword, PASSWORD_BCRYPT);
+
+        foreach ($selected as $spocId) {
+            Spoc::updatePassword($conn, $spocId, $hashedPassword);
+        }
+
+        echo json_encode(['status' => 'success', 'message' => 'Passwords reset successfully.']);
+    }
+
+    public function deleteSpocs() {
+        $conn = Database::getConnection();
+        $spocIds = $_POST['selected'];
+
+        if (!empty($spocIds)) {
+            $placeholders = implode(',', array_fill(0, count($spocIds), '?'));
+            $sql = "DELETE FROM spocs WHERE id IN ($placeholders)";
+            $stmt = $conn->prepare($sql);
+            $stmt->execute($spocIds);
+
+            $_SESSION['message'] = 'Selected SPOCs deleted successfully.';
+            $_SESSION['message_type'] = 'success';
+        } else {
+            $_SESSION['message'] = 'No SPOCs selected for deletion.';
+            $_SESSION['message_type'] = 'warning';
+        }
+
+        header('Location: /admin/manage_spoc');
+        exit();
+    }
+
+    public function manageTransactions() {
+        $conn = Database::getConnection();
+        $sql = "SELECT t.id, t.transaction_id, t.amount, t.status, t.created_at, 
+                       s.name as student_name, c.name as course_name
+                FROM transactions t
+                JOIN students s ON t.student_id = s.id
+                JOIN public_courses c ON t.course_id = c.id";
+        $stmt = $conn->prepare($sql);
+        $stmt->execute();
+        $transactions = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    
+        require 'views/admin/manageTransactions.php';
+    }
+
     public function createVirtualClassroom() {
         $conn = Database::getConnection();
         $courses = Course::getAllWithUniversity($conn);

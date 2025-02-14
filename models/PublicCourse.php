@@ -62,7 +62,7 @@ class PublicCourse {
     }
 
     public static function getTransactionsCount($conn) {
-        $sql = "SELECT COUNT(*) as course_count FROM public_courses";
+        $sql = "SELECT COUNT(*) as course_count FROM transactions";
         $stmt = $conn->query($sql);
         $result = $stmt->fetch(PDO::FETCH_ASSOC);
         return $result['course_count'] ?? 0;

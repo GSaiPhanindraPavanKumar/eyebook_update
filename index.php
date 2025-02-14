@@ -222,6 +222,13 @@ $router->get('/admin/uploadFaculty', 'AdminController@uploadFaculty');
 $router->post('/admin/uploadSingleFaculty', 'AdminController@uploadSingleFaculty');
 $router->post('/admin/uploadFaculty', 'AdminController@uploadFaculty');
 $router->get('/admin/manage_faculty', 'AdminController@manageFaculty');
+
+$router->get('/admin/manage_spoc', 'AdminController@manageSpoc');
+$router->post('/admin/bulk_reset_spoc_password', 'AdminController@bulkResetSpocPassword');
+$router->post('/admin/delete_spocs', 'AdminController@deleteSpocs');
+
+$router->get('/admin/manage_transactions', 'AdminController@manageTransactions');
+
 $router->get('/admin/viewFacultyProfile/(\d+)', 'AdminController@viewFacultyProfile');
 $router->get('/admin/edit_faculty/(\d+)', 'AdminController@editFaculty');
 $router->post('/admin/edit_faculty/(\d+)', 'AdminController@editFaculty');

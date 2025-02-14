@@ -131,7 +131,7 @@ $upcomingContests = array_filter($contests, function($contest) {
                 </div>
                 <div class="row">
                     <div class="col-md-6 mb-4 mb-lg-0 stretch-card transparent">
-                        <div class="card card-light-blue">
+                        <div class="card card-light-blue"onclick="window.location='/admin/manage_spoc'" style="cursor: pointer;">
                             <div class="card-body">
                                 <p class="mb-4">SPOCs</p>
                                 <p class="fs-30 mb-2"><?php echo $spoc_count; ?></p>
@@ -151,7 +151,7 @@ $upcomingContests = array_filter($contests, function($contest) {
                 </div><br>
                 <div class="row">
                     <div class="col-md-6 mb-4 mb-lg-0 stretch-card transparent">
-                        <div class="card card-light-blue" onclick="window.location='/admin/transactions'" style="cursor: pointer;">
+                        <div class="card card-light-blue" onclick="window.location='/admin/manage_transactions'" style="cursor: pointer;">
                             <div class="card-body">
                             <div class="ripple-2"></div>
 

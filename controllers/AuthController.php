@@ -205,10 +205,20 @@ class AuthController {
             $stmt = $conn->prepare($sql);
             $stmt->execute([':id' => $userId]);
     
-            unset($_SESSION['force_reset_password']);
-            $_SESSION['password_reset_success'] = true;
-
-            header('Location: /login');
+            if ($stmt->rowCount() > 0) {
+                unset($_SESSION['force_reset_password']);
+                $_SESSION['password_reset_success'] = true;
+    
+                echo "<script>
+                        alert('Password reset successful. Please log in again.');
+                        window.location.href = '/login';
+                      </script>";
+            } else {
+                echo "<script>
+                        alert('Failed to update login count. Please contact support.');
+                        window.location.href = '/login';
+                      </script>";
+            }
             exit();
         }
     }
