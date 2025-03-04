@@ -802,13 +802,92 @@ class AdminController {
                     ':password' => $passwordHash
                 ]);
     
-                // Send email to the new student
-                $mailer = new Mailer();
-                $subject = 'Welcome to EyeBook!';
-                $body = "Dear $name,<br><br>Your account has been created successfully.<br><br>Username: $email <br>Password: $password<br><br> You can log in at <a href='https://eyebook.phemesoft.com/'>https://eyebook.phemesoft.com/</a><br><br>Best Regards,<br>EyeBook Team";
-                $mailer->sendMail($email, $subject, $body);
-    
-                $successCount++;
+                // Find the section where the email is sent after uploading a single student:
+                if ($stmt->execute()) {
+                    // Send email to the student
+                    $mailer = new Mailer();
+                    $subject = 'Welcome to Knowbots!';
+                    $body = "
+                    <html>
+                    <head>
+                        <style>
+                            .button {
+                                background-color: #6B46C1;
+                                color: white;
+                                padding: 12px 25px;
+                                text-decoration: none;
+                                border-radius: 5px;
+                                display: inline-block;
+                                margin: 15px 0;
+                                font-weight: bold;
+                            }
+                            .button:hover {
+                                background-color: #553C9A;
+                            }
+                            .footer {
+                                border-top: 1px solid #E2E8F0;
+                                padding-top: 20px;
+                                margin-top: 30px;
+                            }
+                        </style>
+                    </head>
+                    <body style='font-family: Arial, sans-serif; line-height: 1.6; color: #2D3748; margin: 0; padding: 0;'>
+                        <div style='max-width: 600px; margin: 0 auto; padding: 20px;'>
+                            <!-- Header with Logo -->
+                            <div style='text-align: center; margin-bottom: 30px;'>
+                                <img src='https://i.ibb.co/7xL13b10/knowbots-logo.png' alt='Knowbots Logo' style='max-width: 200px; height: auto;'>
+                            </div>
+                            
+                            <!-- Welcome Message -->
+                            <div style='background-color: #6B46C1; color: white; padding: 30px; border-radius: 10px; margin-bottom: 30px;'>
+                                <h1 style='margin: 0; text-align: center; font-size: 24px;'>Welcome to Knowbots!</h1>
+                            </div>
+                            
+                            <p style='font-size: 16px;'>Dear $name,</p>
+                            
+                            <p style='font-size: 16px;'>Thank you for joining Knowbots! Your account has been successfully created, and you're now part of our growing educational community.</p>
+                            
+                            <!-- Account Details Box -->
+                            <div style='background-color: #F7FAFC; padding: 25px; border-radius: 10px; border-left: 4px solid #6B46C1; margin: 25px 0;'>
+                                <h3 style='color: #6B46C1; margin-top: 0;'>Your Account Details</h3>
+                                <ul style='list-style: none; padding: 0; margin: 0;'>
+                                    <li style='margin-bottom: 10px;'><strong>Username:</strong> $email</li>
+                                    <li style='margin-bottom: 10px;'><strong>Password:</strong> $password</li>
+                                </ul>
+                            </div>
+                            
+                            <!-- Call to Action -->
+                            <div style='text-align: center;'>
+                                <a href='https://eyebook.phemesoft.com/login' class='button' style='background-color: #6B46C1; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; display: inline-block; margin: 15px 0; font-weight: bold;'>
+                                    Login to Your Account
+                                </a>
+                            </div>
+                            
+                            <!-- Security Notice -->
+                            <div style='background-color: #FFF5F5; padding: 20px; border-radius: 10px; margin: 25px 0;'>
+                                <p style='color: #C53030; margin: 0;'><strong>⚠️ Security Recommendation:</strong> Please change your password after your first login for enhanced security.</p>
+                            </div>
+                            
+                            <p style='font-size: 16px;'>If you have any questions or need assistance, our support team is here to help!</p>
+                            
+                            <!-- Footer -->
+                            <div class='footer' style='text-align: center; color: #718096; font-size: 14px;'>
+                                <p>© 2025 Knowbots. All rights reserved.</p>
+                                <p>
+                                    <a href='https://eyebook.phemesoft.com/terms' style='color: #6B46C1; text-decoration: none; margin: 0 10px;'>Terms of Service</a> | 
+                                    <a href='https://eyebook.phemesoft.com/privacy' style='color: #6B46C1; text-decoration: none; margin: 0 10px;'>Privacy Policy</a>
+                                </p>
+                                <p style='margin-top: 15px;'>
+                                    This is an automated message, please do not reply to this email.
+                                </p>
+                            </div>
+                        </div>
+                    </body>
+                    </html>";
+
+                    $mailer->sendMail($email, $subject, $body);
+                    $successCount++;
+                }
             }
     
             if (empty($duplicateRecords)) {
@@ -1330,13 +1409,98 @@ class AdminController {
                 Student::createFacultyStudentAccount($conn, $facultyData);
 
                 $passwordHash = password_hash($passwordPlain, PASSWORD_BCRYPT);
-                // Send email to the new faculty member
+                // In the uploadSingleFaculty method, replace the email body with:
                 $mailer = new Mailer();
                 $email_student = str_replace('@', '_student@', $email);
-                $subject = 'Welcome to EyeBook!';
-                $body = "Dear $name,<br><br>Your account has been created successfully.<br><br>Username: $email <br>Password: $passwordPlain<br><br> Student account created with email: $email <br> and password: $passwordPlain <br> You can log in at <a href='https://eyebook.phemesoft.com/'>https://eyebook.phemesoft.com/</a><br><br>Best Regards,<br>EyeBook Team";
-                $mailer->sendMail($email, $subject, $body);
+                $subject = 'Welcome to Knowbots!';
+                $body = "
+                <html>
+                <head>
+                    <style>
+                        .button {
+                            background-color: #6B46C1;
+                            color: white;
+                            padding: 12px 25px;
+                            text-decoration: none;
+                            border-radius: 5px;
+                            display: inline-block;
+                            margin: 15px 0;
+                            font-weight: bold;
+                        }
+                        .button:hover {
+                            background-color: #553C9A;
+                        }
+                        .footer {
+                            border-top: 1px solid #E2E8F0;
+                            padding-top: 20px;
+                            margin-top: 30px;
+                        }
+                    </style>
+                </head>
+                <body style='font-family: Arial, sans-serif; line-height: 1.6; color: #2D3748; margin: 0; padding: 0;'>
+                    <div style='max-width: 600px; margin: 0 auto; padding: 20px;'>
+                        <!-- Header with Logo -->
+                        <div style='text-align: center; margin-bottom: 30px;'>
+                            <img src='https://i.ibb.co/7xL13b10/knowbots-logo.png' alt='Knowbots Logo' style='max-width: 200px; height: auto;'>
+                        </div>
+                        
+                        <!-- Welcome Message -->
+                        <div style='background-color: #6B46C1; color: white; padding: 30px; border-radius: 10px; margin-bottom: 30px;'>
+                            <h1 style='margin: 0; text-align: center; font-size: 24px;'>Welcome to Knowbots!</h1>
+                        </div>
+                        
+                        <p style='font-size: 16px;'>Dear {$name},</p>
+                        
+                        <p style='font-size: 16px;'>Your faculty account has been successfully created. Welcome to our educational platform!</p>
+                        
+                        <!-- Faculty Account Details Box -->
+                        <div style='background-color: #F7FAFC; padding: 25px; border-radius: 10px; border-left: 4px solid #6B46C1; margin: 25px 0;'>
+                            <h3 style='color: #6B46C1; margin-top: 0;'>Faculty Account Details</h3>
+                            <ul style='list-style: none; padding: 0; margin: 0;'>
+                                <li style='margin-bottom: 10px;'><strong>Email:</strong> {$email}</li>
+                                <li style='margin-bottom: 10px;'><strong>Password:</strong> {$passwordPlain}</li>
+                            </ul>
+                        </div>
 
+                        <!-- Student Account Details Box -->
+                        <div style='background-color: #F7FAFC; padding: 25px; border-radius: 10px; border-left: 4px solid #6B46C1; margin: 25px 0;'>
+                            <h3 style='color: #6B46C1; margin-top: 0;'>Student Account Details</h3>
+                            <ul style='list-style: none; padding: 0; margin: 0;'>
+                                <li style='margin-bottom: 10px;'><strong>Email:</strong> {$email_student}</li>
+                                <li style='margin-bottom: 10px;'><strong>Password:</strong> {$passwordPlain}</li>
+                            </ul>
+                        </div>
+                        
+                        <!-- Call to Action -->
+                        <div style='text-align: center;'>
+                            <a href='https://eyebook.phemesoft.com/login' class='button' style='background-color: #6B46C1; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; display: inline-block; margin: 15px 0; font-weight: bold;'>
+                                Login to Your Account
+                            </a>
+                        </div>
+                        
+                        <!-- Security Notice -->
+                        <div style='background-color: #FFF5F5; padding: 20px; border-radius: 10px; margin: 25px 0;'>
+                            <p style='color: #C53030; margin: 0;'><strong>⚠️ Security Recommendation:</strong> Please change your password after your first login for enhanced security.</p>
+                        </div>
+                        
+                        <p style='font-size: 16px;'>If you have any questions or need assistance, our support team is here to help!</p>
+                        
+                        <!-- Footer -->
+                        <div class='footer' style='text-align: center; color: #718096; font-size: 14px;'>
+                            <p>© 2025 Knowbots. All rights reserved.</p>
+                            <p>
+                                <a href='https://eyebook.phemesoft.com/terms' style='color: #6B46C1; text-decoration: none; margin: 0 10px;'>Terms of Service</a> | 
+                                <a href='https://eyebook.phemesoft.com/privacy' style='color: #6B46C1; text-decoration: none; margin: 0 10px;'>Privacy Policy</a>
+                            </p>
+                            <p style='margin-top: 15px;'>
+                                This is an automated message, please do not reply to this email.
+                            </p>
+                        </div>
+                    </div>
+                </body>
+                </html>";
+
+                $mailer->sendMail($email, $subject, $body);
     
                 $message = "Faculty uploaded successfully.";
                 $message_type = "success";
@@ -1419,12 +1583,97 @@ class AdminController {
                 ];
                 Student::createFacultyStudentAccount($conn, $facultyData);
 
-                // Send email to the new faculty member
+                // In the uploadFaculty method, replace the email body with:
                 $mailer = new Mailer();
-                $subject = 'Welcome to EyeBook!';
-                $body = "Dear $name,<br><br>Your account has been created successfully.<br><br>Username: $email <br>Password: $passwordPlain<br><br> Student account created with email: $email <br> and password: $passwordPlain <br> You can log in at <a href='https://eyebook.phemesoft.com/'>https://eyebook.phemesoft.com/</a><br><br>Best Regards,<br>EyeBook Team";
-                $mailer->sendMail($email, $subject, $body);
+                $subject = 'Welcome to Knowbots!';
+                $body = "
+                <html>
+                <head>
+                    <style>
+                        .button {
+                            background-color: #6B46C1;
+                            color: white;
+                            padding: 12px 25px;
+                            text-decoration: none;
+                            border-radius: 5px;
+                            display: inline-block;
+                            margin: 15px 0;
+                            font-weight: bold;
+                        }
+                        .button:hover {
+                            background-color: #553C9A;
+                        }
+                        .footer {
+                            border-top: 1px solid #E2E8F0;
+                            padding-top: 20px;
+                            margin-top: 30px;
+                        }
+                    </style>
+                </head>
+                <body style='font-family: Arial, sans-serif; line-height: 1.6; color: #2D3748; margin: 0; padding: 0;'>
+                    <div style='max-width: 600px; margin: 0 auto; padding: 20px;'>
+                        <!-- Header with Logo -->
+                        <div style='text-align: center; margin-bottom: 30px;'>
+                            <img src='https://i.ibb.co/7xL13b10/knowbots-logo.png' alt='Knowbots Logo' style='max-width: 200px; height: auto;'>
+                        </div>
+                        
+                        <!-- Welcome Message -->
+                        <div style='background-color: #6B46C1; color: white; padding: 30px; border-radius: 10px; margin-bottom: 30px;'>
+                            <h1 style='margin: 0; text-align: center; font-size: 24px;'>Welcome to Knowbots!</h1>
+                        </div>
+                        
+                        <p style='font-size: 16px;'>Dear {$name},</p>
+                        
+                        <p style='font-size: 16px;'>Your faculty account has been successfully created. Welcome to our educational platform!</p>
+                        
+                        <!-- Faculty Account Details Box -->
+                        <div style='background-color: #F7FAFC; padding: 25px; border-radius: 10px; border-left: 4px solid #6B46C1; margin: 25px 0;'>
+                            <h3 style='color: #6B46C1; margin-top: 0;'>Faculty Account Details</h3>
+                            <ul style='list-style: none; padding: 0; margin: 0;'>
+                                <li style='margin-bottom: 10px;'><strong>Email:</strong> {$email}</li>
+                                <li style='margin-bottom: 10px;'><strong>Password:</strong> {$passwordPlain}</li>
+                            </ul>
+                        </div>
 
+                        <!-- Student Account Details Box -->
+                        <div style='background-color: #F7FAFC; padding: 25px; border-radius: 10px; border-left: 4px solid #6B46C1; margin: 25px 0;'>
+                            <h3 style='color: #6B46C1; margin-top: 0;'>Student Account Details</h3>
+                            <ul style='list-style: none; padding: 0; margin: 0;'>
+                                <li style='margin-bottom: 10px;'><strong>Email:</strong> " . str_replace('@', '_student@', $email) . "</li>
+                                <li style='margin-bottom: 10px;'><strong>Password:</strong> {$passwordPlain}</li>
+                            </ul>
+                        </div>
+                        
+                        <!-- Call to Action -->
+                        <div style='text-align: center;'>
+                            <a href='https://eyebook.phemesoft.com/login' class='button' style='background-color: #6B46C1; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; display: inline-block; margin: 15px 0; font-weight: bold;'>
+                                Login to Your Account
+                            </a>
+                        </div>
+                        
+                        <!-- Security Notice -->
+                        <div style='background-color: #FFF5F5; padding: 20px; border-radius: 10px; margin: 25px 0;'>
+                            <p style='color: #C53030; margin: 0;'><strong>⚠️ Security Recommendation:</strong> Please change your password after your first login for enhanced security.</p>
+                        </div>
+                        
+                        <p style='font-size: 16px;'>If you have any questions or need assistance, our support team is here to help!</p>
+                        
+                        <!-- Footer -->
+                        <div class='footer' style='text-align: center; color: #718096; font-size: 14px;'>
+                            <p>© 2025 Knowbots. All rights reserved.</p>
+                            <p>
+                                <a href='https://eyebook.phemesoft.com/terms' style='color: #6B46C1; text-decoration: none; margin: 0 10px;'>Terms of Service</a> | 
+                                <a href='https://eyebook.phemesoft.com/privacy' style='color: #6B46C1; text-decoration: none; margin: 0 10px;'>Privacy Policy</a>
+                            </p>
+                            <p style='margin-top: 15px;'>
+                                This is an automated message, please do not reply to this email.
+                            </p>
+                        </div>
+                    </div>
+                </body>
+                </html>";
+
+                $mailer->sendMail($email, $subject, $body);
                 $successCount++;
             }
     
@@ -2116,13 +2365,91 @@ class AdminController {
             $stmt->bindValue(':dept', $dept);
             $stmt->bindValue(':password', $hashed_password);
     
+            // Find the section where the email is sent after uploading a single student:
             if ($stmt->execute()) {
                 // Send email to the student
                 $mailer = new Mailer();
-                $subject = 'Welcome to EyeBook!';
-                $body = "Dear $name,<br><br>Your account has been created successfully.<br><br>Username: $email <br>Password: $password<br><br>You can log in at <a href='https://eyebook.phemesoft.com/'>https://eyebook.phemesoft.com/</a><br><br>Best Regards,<br>EyeBook Team";
+                $subject = 'Welcome to Knowbots!';
+                $body = "
+                <html>
+                <head>
+                    <style>
+                        .button {
+                            background-color: #6B46C1;
+                            color: white;
+                            padding: 12px 25px;
+                            text-decoration: none;
+                            border-radius: 5px;
+                            display: inline-block;
+                            margin: 15px 0;
+                            font-weight: bold;
+                        }
+                        .button:hover {
+                            background-color: #553C9A;
+                        }
+                        .footer {
+                            border-top: 1px solid #E2E8F0;
+                            padding-top: 20px;
+                            margin-top: 30px;
+                        }
+                    </style>
+                </head>
+                <body style='font-family: Arial, sans-serif; line-height: 1.6; color: #2D3748; margin: 0; padding: 0;'>
+                    <div style='max-width: 600px; margin: 0 auto; padding: 20px;'>
+                        <!-- Header with Logo -->
+                        <div style='text-align: center; margin-bottom: 30px;'>
+                            <img src='https://i.ibb.co/7xL13b10/knowbots-logo.png' alt='Knowbots Logo' style='max-width: 200px; height: auto;'>
+                        </div>
+                        
+                        <!-- Welcome Message -->
+                        <div style='background-color: #6B46C1; color: white; padding: 30px; border-radius: 10px; margin-bottom: 30px;'>
+                            <h1 style='margin: 0; text-align: center; font-size: 24px;'>Welcome to Knowbots!</h1>
+                        </div>
+                        
+                        <p style='font-size: 16px;'>Dear $name,</p>
+                        
+                        <p style='font-size: 16px;'>Thank you for joining Knowbots! Your account has been successfully created, and you're now part of our growing educational community.</p>
+                        
+                        <!-- Account Details Box -->
+                        <div style='background-color: #F7FAFC; padding: 25px; border-radius: 10px; border-left: 4px solid #6B46C1; margin: 25px 0;'>
+                            <h3 style='color: #6B46C1; margin-top: 0;'>Your Account Details</h3>
+                            <ul style='list-style: none; padding: 0; margin: 0;'>
+                                <li style='margin-bottom: 10px;'><strong>Username:</strong> $email</li>
+                                <li style='margin-bottom: 10px;'><strong>Password:</strong> $password</li>
+                            </ul>
+                        </div>
+                        
+                        <!-- Call to Action -->
+                        <div style='text-align: center;'>
+                            <a href='https://eyebook.phemesoft.com/login' class='button' style='background-color: #6B46C1; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; display: inline-block; margin: 15px 0; font-weight: bold;'>
+                                Login to Your Account
+                            </a>
+                        </div>
+                        
+                        <!-- Security Notice -->
+                        <div style='background-color: #FFF5F5; padding: 20px; border-radius: 10px; margin: 25px 0;'>
+                            <p style='color: #C53030; margin: 0;'><strong>⚠️ Security Recommendation:</strong> Please change your password after your first login for enhanced security.</p>
+                        </div>
+                        
+                        <p style='font-size: 16px;'>If you have any questions or need assistance, our support team is here to help!</p>
+                        
+                        <!-- Footer -->
+                        <div class='footer' style='text-align: center; color: #718096; font-size: 14px;'>
+                            <p>© 2025 Knowbots. All rights reserved.</p>
+                            <p>
+                                <a href='https://eyebook.phemesoft.com/terms' style='color: #6B46C1; text-decoration: none; margin: 0 10px;'>Terms of Service</a> | 
+                                <a href='https://eyebook.phemesoft.com/privacy' style='color: #6B46C1; text-decoration: none; margin: 0 10px;'>Privacy Policy</a>
+                            </p>
+                            <p style='margin-top: 15px;'>
+                                This is an automated message, please do not reply to this email.
+                            </p>
+                        </div>
+                    </div>
+                </body>
+                </html>";
+                
                 $mailer->sendMail($email, $subject, $body);
-    
+
                 $_SESSION['message'] = 'Student uploaded successfully and email sent.';
                 $_SESSION['message_type'] = 'success';
             } else {
