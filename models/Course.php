@@ -29,6 +29,26 @@ class Course {
         ]);
     }
 
+    public static function isStudentAssigned($conn, $studentId, $courseId) {
+        try {
+            $sql = "SELECT assigned_students FROM courses WHERE id = :course_id";
+            $stmt = $conn->prepare($sql);
+            $stmt->execute([':course_id' => $courseId]);
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+    
+            if (!$result) {
+                return false;
+            }
+    
+            $assignedStudents = json_decode($result['assigned_students'], true) ?? [];
+            return in_array((string)$studentId, $assignedStudents);
+    
+        } catch (PDOException $e) {
+            error_log("Error checking course assignment: " . $e->getMessage());
+            return false;
+        }
+    }
+
     public static function assignCourseToUniversities($conn, $course_id, $university_ids) {
         $course = self::getById($conn, $course_id);
         $assigned_universities = is_string($course['university_id']) ? json_decode($course['university_id'], true) : $course['university_id'];
