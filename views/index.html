@@ -24,7 +24,23 @@
     <meta name="msapplication-TileImage" content="assets/img/favicons/mstile-150x150.png">
     <meta name="theme-color" content="#ffffff">
 
-
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              primary: '#4B49AC',
+              'primary-hover': '#3f3e91',
+            },
+            fontFamily: {
+              sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            },
+          }
+        }
+      }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200;300;400;500;600;700;800&display=swap" rel="stylesheet">
     <!-- ===============================================-->
     <!--    Stylesheets-->
     <!-- ===============================================-->
@@ -39,20 +55,76 @@
     <!--    Main Content-->
     <!-- ===============================================-->
     <main class="main" id="top">
-      <nav class="navbar navbar-expand-lg navbar-light fixed-top py-3" data-navbar-on-scroll="data-navbar-on-scroll">
-        <!-- <div class="container"><a class="navbar-brand" href="#"><img class="img-fluid" src="assets/img/icons/logo.png" alt=""  height="10%" width="10%"/></a> -->
-          <button class="navbar-toggler collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
-          <div class="collapse navbar-collapse" id="navbarSupportedContent">
-            <ul class="navbar-nav me-auto ms-lg-4 ms-xl-7 border-bottom border-lg-bottom-0 pt-2 pt-lg-0">
-              <li class="nav-item"><a class="nav-link fw-bold active" aria-current="page" href="#">About</a></li>
-              <li class="nav-item"><a class="nav-link fw-medium" href="#">Help</a></li>
-              <li class="nav-item"><a class="nav-link fw-medium" href="#">Features</a></li>
-              <li class="nav-item"><a class="nav-link fw-medium" href="#">Signup</a></li>
-            </ul>
-            <form class="d-flex py-3 py-lg-0"><a class="btn btn-light rounded-pill shadow fw-bold" href="#" role="button">Login
-                <svg class="bi bi-arrow-right" xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="#9C69E2" viewBox="0 0 16 16">
-                  <path fill-rule="evenodd" d="M1 8a.5.5 0 0 1 .5-.5h11.793l-3.147-3.146a.5.5 0 0 1 .708-.708l4 4a.5.5 0 0 1 0 .708l-4 4a.5.5 0 0 1-.708-.708L13.293 8.5H1.5A.5.5 0 0 1 1 8z"></path>
-                </svg></a></form>
+      <nav class="fixed w-full top-0 z-50 bg-white/80 backdrop-blur-lg border-b border-gray-200/30 transition-all duration-300">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div class="flex justify-between items-center h-20">
+            <!-- Logo Section -->
+            <div class="flex items-center space-x-4">
+              <a href="/" class="flex items-center space-x-3">
+                <img class="h-10 w-auto" src="assets/img/icons/logo.png" alt="Knowbots Logo">
+                <div>
+                  <h1 class="text-2xl font-bold bg-gradient-to-r from-primary to-[#6366F1] bg-clip-text text-transparent">
+                    Knowbots
+                  </h1>
+                  <p class="text-xs text-gray-500">Learning Platform</p>
+                </div>
+              </a>
+            </div>
+
+            <!-- Desktop Navigation -->
+            <div class="hidden md:flex items-center space-x-8">
+              <a href="#about" class="text-gray-700 hover:text-primary font-medium transition-colors">About</a>
+              <a href="#help" class="text-gray-700 hover:text-primary font-medium transition-colors">Help</a>
+              <a href="#features" class="text-gray-700 hover:text-primary font-medium transition-colors">Features</a>
+              <a href="#signup" class="text-gray-700 hover:text-primary font-medium transition-colors">Signup</a>
+              
+              <!-- Login Button -->
+              <a href="/login" class="inline-flex items-center px-6 py-2.5 rounded-full font-medium text-white 
+                 bg-gradient-to-r from-primary to-[#6366F1] hover:from-primary-hover hover:to-[#5457e5]
+                 transition-all duration-200 transform hover:scale-[1.02] focus:outline-none focus:ring-2 
+                 focus:ring-primary/50 shadow-lg shadow-primary/25">
+                Login
+                <svg class="ml-2 -mr-1 w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                </svg>
+              </a>
+            </div>
+
+            <!-- Mobile Menu Button -->
+            <div class="md:hidden">
+              <button type="button" class="mobile-menu-button inline-flex items-center justify-center p-2 rounded-md text-gray-700 
+                 hover:text-primary hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary/50 transition-colors">
+                <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
+                  <path class="menu-icon" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                  <path class="close-icon hidden" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Mobile Menu -->
+        <div class="mobile-menu hidden md:hidden bg-white border-t border-gray-200/30">
+          <div class="px-2 pt-2 pb-3 space-y-1">
+            <a href="#about" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-primary hover:bg-gray-50 transition-colors">
+              About
+            </a>
+            <a href="#help" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-primary hover:bg-gray-50 transition-colors">
+              Help
+            </a>
+            <a href="#features" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-primary hover:bg-gray-50 transition-colors">
+              Features
+            </a>
+            <a href="#signup" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-primary hover:bg-gray-50 transition-colors">
+              Signup
+            </a>
+            <div class="px-3 py-3">
+              <a href="/login" class="block w-full px-6 py-3 text-center font-medium text-white bg-gradient-to-r 
+                 from-primary to-[#6366F1] rounded-full hover:from-primary-hover hover:to-[#5457e5] 
+                 transition-all duration-200 transform hover:scale-[1.02] shadow-lg shadow-primary/25">
+                Login
+              </a>
+            </div>
           </div>
         </div>
       </nav>
@@ -539,6 +611,43 @@
   <script src="assets/js/theme.js"></script>
 
   <link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,300;0,400;0,700;0,900;1,300;1,700;1,900&amp;display=swap" rel="stylesheet">
+  <script>
+    // Mobile menu functionality
+    const mobileMenuButton = document.querySelector('.mobile-menu-button');
+    const mobileMenu = document.querySelector('.mobile-menu');
+    const menuIcon = document.querySelector('.menu-icon');
+    const closeIcon = document.querySelector('.close-icon');
+
+    mobileMenuButton.addEventListener('click', () => {
+      mobileMenu.classList.toggle('hidden');
+      menuIcon.classList.toggle('hidden');
+      closeIcon.classList.toggle('hidden');
+    });
+
+    // Navbar scroll behavior
+    const navbar = document.querySelector('nav');
+    let lastScroll = 0;
+
+    window.addEventListener('scroll', () => {
+      const currentScroll = window.pageYOffset;
+      
+      if (currentScroll <= 0) {
+        navbar.classList.remove('shadow-lg');
+        return;
+      }
+      
+      if (currentScroll > lastScroll) {
+        // Scrolling down
+        navbar.classList.add('-translate-y-full', 'shadow-lg');
+      } else {
+        // Scrolling up
+        navbar.classList.remove('-translate-y-full');
+        navbar.classList.add('shadow-lg');
+      }
+      
+      lastScroll = currentScroll;
+    });
+  </script>
 </body>
 
 </html>

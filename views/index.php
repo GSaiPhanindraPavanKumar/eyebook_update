@@ -1,393 +1,200 @@
-<?php
-// session_start();
-
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
-$message = $message ?? ''; // Ensure $message is defined
-
-?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Knowbots</title>
-    <link rel="apple-touch-icon" sizes="180x180" href="/views/public/assets/images/apple-touch-icon.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="/views/public/assets/images/android-chrome-512x512.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="/views/public/assets/images/android-chrome-192x192.png">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" type="text/css" href="/views/public/assets/styles/core.css">
-    <link rel="stylesheet" type="text/css" href="/views/public/assets/styles/icon-font.min.css">
-    <link rel="stylesheet" type="text/css" href="/views/public/assets/styles/style.css">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet"> <!-- Font Awesome -->
+    <title>Knowbots - Learning Platform</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200;300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#4B49AC',
+                        'primary-hover': '#3f3e91',
+                        'gradient-start': '#4B49AC',
+                        'gradient-end': '#6366F1',
+                    },
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                    },
+                    animation: {
+                        'float': 'float 6s ease-in-out infinite',
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-20px)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
     <style>
-        /* Remove theme-related variables and keep only light theme colors */
-        :root {
-            --primary-color: #4B49AC;
-            --primary-hover: #3f3e91;
-            --body-bg: #f4f7fa;
-            --text-color: #333333;
-            --card-bg: #ffffff;
-            --border-color: #dee2e6;
-            --input-bg: #ffffff;
-            --input-text: #495057;
-            --muted-text: #6c757d;
-            --box-shadow: 0 8px 24px rgba(149, 157, 165, 0.2);
-            --input-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        .gradient-border {
+            background: linear-gradient(white, white) padding-box,
+                        linear-gradient(to right, #4B49AC, #6366F1) border-box;
+            border: 2px solid transparent;
         }
-
-        /* Enhanced Footer */
-        .footer {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            background-color: #ffffff;
-            padding: 15px 0;
-            text-align: center;
-            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
-            z-index: 1000;
-        }
-
-        .footer p {
-            margin: 0;
-            color: var(--primary-color);
-            font-size: 0.9rem;
-            line-height: 1.5;
-        }
-
-        .footer a {
-            color: var(--primary-color);
-            text-decoration: none;
-            font-weight: 500;
-            transition: color 0.3s ease;
-        }
-
-        .footer a:hover {
-            color: var(--primary-hover);
-        }
-
-        /* Add margin to main content to prevent footer overlap */
-        .login-wrap {
-            margin-bottom: 80px; /* Adjust based on footer height */
-        }
-
-        /* Modern UI Variables */
-        :root {
-            --primary-color: #4B49AC;
-            --primary-hover: #3f3e91;
-            --body-bg: #f4f7fa;
-            --text-color: #333333;
-            --card-bg: #ffffff;
-            --border-color: #dee2e6;
-            --input-bg: #ffffff;
-            --input-text: #495057;
-            --link-color: #4B49AC;
-            --muted-text: #6c757d;
-            --box-shadow: 0 8px 24px rgba(149, 157, 165, 0.2);
-            --input-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-        }
-
-        /* Dark theme enhancements */
-        body.dark-theme {
-            --body-bg: #1a1a1a;
-            --text-color: #e1e1e1;
-            --card-bg: #2d2d2d;
-            --border-color: #404040;
-            --input-bg: #333333;
-            --input-text: #e1e1e1;
-            --link-color: #6ea8fe;
-            --muted-text: #9e9e9e;
-            --box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
-            --input-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-        }
-
-        /* Enhanced Login Box */
-        .login-box {
-            background-color: var(--card-bg);
-            border-radius: 16px !important;
-            box-shadow: var(--box-shadow);
-            padding: 2.5rem !important;
-            border: none !important;
-            transition: all 0.3s ease;
-        }
-
-        /* Modern Form Controls */
-        .form-control {
-            height: 48px;
-            border-radius: 12px;
-            padding: 0.75rem 1.25rem;
-            font-size: 1rem;
-            border: 2px solid var(--border-color);
-            background-color: var(--input-bg);
-            color: var(--input-text);
-            box-shadow: var(--input-shadow);
-            transition: all 0.3s ease;
-        }
-
-        .form-control:focus {
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(75, 73, 172, 0.15);
-        }
-
-        /* Enhanced Button */
-        .btn-primary {
-            height: 48px;
-            border-radius: 12px;
-            font-weight: 600;
-            font-size: 1rem;
-            text-transform: none;
-            letter-spacing: 0.5px;
-            background: var(--primary-color);
-            border: none;
-            box-shadow: 0 4px 6px rgba(75, 73, 172, 0.2);
-            transition: all 0.3s ease;
-        }
-
-        .btn-primary:hover {
-            background: var(--primary-hover);
-            transform: translateY(-1px);
-            box-shadow: 0 6px 8px rgba(75, 73, 172, 0.25);
-        }
-
-        /* Modern Header */
-        .login-header {
-            background-color: var(--card-bg);
-            padding: 0.5rem 0;
-            box-shadow: var(--box-shadow);
-            height: 60px; /* Reduced height */
-        }
-
-        .navbar {
-            padding: 0 !important;
-            min-height: auto !important;
-        }
-
-        .navbar-brand {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            padding: 0;
-        }
-
-        .navbar-brand img {
-            height: 35px !important; /* Reduced logo size */
-            width: 35px !important;
-        }
-
-        .navbar-brand h2 {
-            margin: 0;
-            font-size: 1.4rem !important; /* Reduced font size */
-            color: var(--text-color);
-            font-family: cursive;
-        }
-
-        /* Container adjustments */
-        .container-fluid {
-            padding: 0 1.5rem;
-        }
-
-        /* Adjust login-wrap top margin to account for smaller header */
-        .login-wrap {
-            margin-top: 20px;
-        }
-
-        /* Checkbox Enhancement */
-        .custom-checkbox {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            margin: 1rem 0;
-        }
-
-        .custom-checkbox input[type="checkbox"] {
-            width: 18px;
-            height: 18px;
-            border-radius: 6px;
-            border: 2px solid var(--border-color);
-            cursor: pointer;
-        }
-
-        /* Password Toggle Enhancement */
-        .input-group.custom {
-            position: relative;
-            margin-bottom: 1.5rem;
-        }
-
-        .toggle-password {
-            position: absolute;
-            right: 16px;
-            top: 50%;
-            transform: translateY(-50%);
-            cursor: pointer;
-            color: var(--muted-text);
-            z-index: 10;
-            transition: color 0.3s ease;
-        }
-
-        /* Theme Toggle Enhancement */
-        #theme-toggle {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 12px;
-            border-radius: 50%;
-            background: var(--card-bg);
-            box-shadow: var(--box-shadow);
-            border: none;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        #theme-toggle:hover {
-            transform: rotate(30deg);
-            background: var(--primary-color);
-        }
-
-        #theme-toggle:hover i {
-            color: #ffffff;
-        }
-
-        /* Alert Enhancement */
-        .alert {
-            border-radius: 12px;
-            padding: 1rem 1.25rem;
-            margin-bottom: 1.5rem;
-            border: none;
-            background-color: var(--card-bg);
-            box-shadow: var(--box-shadow);
-        }
-
-        /* Footer Enhancement */
-        .footer-text {
-            margin-top: 2rem;
-            padding: 1rem;
-            text-align: center;
-            color: var(--muted-text);
-            font-size: 0.9rem;
-        }
-
-        .footer-text a {
-            color: var(--primary-color);
-            text-decoration: none;
-            font-weight: 500;
-            transition: color 0.3s ease;
-        }
-
-        .footer-text a:hover {
-            color: var(--primary-hover);
-        }
-
-        /* Responsive Adjustments */
-        @media (max-width: 768px) {
-            .login-header {
-                height: 50px; /* Even smaller on mobile */
-            }
-
-            .navbar-brand img {
-                height: 30px !important;
-                width: 30px !important;
-            }
-
-            .navbar-brand h2 {
-                font-size: 1.2rem !important;
-            }
+        
+        .bg-blur {
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
         }
     </style>
 </head>
-<body class="login-page">
-<div class="login-header box-shadow">
-    <div class="container-fluid">
-        <nav class="navbar navbar-light">
-            <a class="navbar-brand" href="#">
-                <img src="/views/public/assets/images/logo1.png" alt="logo">
-                <h2>Knowbots</h2>
-            </a>
-        </nav>
+<body class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+    <!-- Decorative Elements -->
+    <div class="fixed inset-0 -z-10 overflow-hidden">
+        <div class="absolute -top-1/2 -left-1/2 w-full h-full bg-gradient-to-br from-primary/5 to-gradient-end/5 rotate-12"></div>
+        <div class="absolute top-0 left-0 w-full h-full">
+            <div class="absolute top-1/4 left-1/4 w-64 h-64 bg-gradient-start/10 rounded-full filter blur-3xl animate-float"></div>
+            <div class="absolute bottom-1/4 right-1/4 w-64 h-64 bg-gradient-end/10 rounded-full filter blur-3xl animate-float" style="animation-delay: 2s"></div>
+        </div>
     </div>
-</div>
-<div class="login-wrap d-flex align-items-center flex-wrap justify-content-center">
-    <div class="container">
-        <?php if (!empty($warning)): ?>
-            <div class="row justify-content-center">
-                <div class="col-md-6 col-lg-5">
-                    <div class="alert alert-warning" role="alert">
-                        <?php echo htmlspecialchars($warning); ?>
+
+    <!-- Navbar -->
+    <nav class="fixed w-full top-0 z-50 bg-white/80 bg-blur border-b border-gray-200/50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center space-x-3">
+                    <img src="/views/public/assets/images/logo1.png" alt="Knowbots Logo" class="h-9">
+                    <div>
+                        <h2 class="text-2xl font-bold bg-gradient-to-r from-primary to-gradient-end bg-clip-text text-transparent">
+                            Knowbots
+                        </h2>
+                        <p class="text-xs text-gray-500">Learning Platform</p>
                     </div>
                 </div>
             </div>
-        <?php endif; ?>
+        </div>
+    </nav>
 
-        <div class="row align-items-center">
-            <div class="col-md-6 col-lg-7">
-                <img src="/views/public/assets/images/login-page-img.webp" alt="">
+    <!-- Main Content -->
+    <div class="min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8 pt-16">
+        <div class="max-w-6xl w-full space-y-8 flex flex-col lg:flex-row lg:space-y-0 lg:space-x-8 items-center">
+            <!-- Left side - Hero Content -->
+            <div class="w-full lg:w-1/2 space-y-6 text-center lg:text-left">
+                <h1 class="text-4xl lg:text-5xl font-bold text-gray-900">
+                    Welcome to the Future of
+                    <span class="bg-gradient-to-r from-primary to-gradient-end bg-clip-text text-transparent">
+                        Learning
+                    </span>
+                </h1>
+                <p class="text-lg text-gray-600 max-w-lg mx-auto lg:mx-0">
+                    Join thousands of students in their journey of knowledge and discovery.
+                </p>
+                <div class="relative w-full max-w-lg mx-auto lg:mx-0">
+                    <img style="border-radius: 10px;" src="https://i.ibb.co/RkFMyDw1/studentss.png" alt="Learning Illustration" 
+                         class="w-full h-auto animate-float">
+                </div>
             </div>
-            <div class="col-md-6 col-lg-5">
-                <div class="login-box bg-light box-shadow border-radius-12">
-                    <div class="login-title">
-                        <h2 class="text-center text-primary" style="font-family: cursive;">Login</h2>
+
+            <!-- Right side - Login Form -->
+            <div class="w-full lg:w-1/2 max-w-md">
+                <div class="bg-white/80 bg-blur rounded-2xl shadow-xl p-8 gradient-border">
+                    <div class="text-center mb-8">
+                        <h2 class="text-3xl font-bold text-gray-900">Sign In</h2>
+                        <p class="mt-2 text-gray-600">Access your learning journey</p>
                     </div>
-                    <form id="loginForm" action="/login" method="POST">
-                        <div class="input-group custom">
-                            <input type="text" class="form-control form-control-lg" placeholder="Username/Email id" name="username" id="username" required>
+
+                    <?php if (!empty($warning)): ?>
+                        <div class="mb-6 p-4 rounded-lg bg-amber-50 border border-amber-200 text-amber-700">
+                            <?php echo htmlspecialchars($warning); ?>
                         </div>
-                        <div class="input-group custom">
-                            <input type="password" class="form-control form-control-lg" placeholder="**********" name="password" id="password" required>
-                            <span class="toggle-password" onclick="togglePasswordVisibility()">
-                                <i class="fas fa-eye"></i>
-                            </span>
-                        </div>
-                        <div class="input-group custom custom-checkbox">
-                            <input type="checkbox" name="agree" id="agree" required>
-                            <label for="agree" class="ml-2">I agree to the <a href="/#privacy-policy" style="color: blue;">Privacy Policy</a></label>
-                        </div>
-                        <div class="row">
-                            <div class="col-sm-12">
-                                <div class="input-group mb-0">
-                                    <input class="btn btn-primary btn-lg btn-block" name="login" id="login" type="submit" value="Sign In">
-                                </div>
-                                <div class="col-6 mt-3 float-right">
-                                    <div class="forgot-password"><a href="/forgot_password" style="color: blue;">Forgot Password?</a></div>
-                                </div>
+                    <?php endif; ?>
+
+                    <form id="loginForm" action="/login" method="POST" class="space-y-6">
+                        <!-- Email Input -->
+                        <div class="space-y-2">
+                            <label for="username" class="block text-sm font-medium text-gray-700">Email address</label>
+                            <div class="relative">
+                                <input type="text" id="username" name="username" required
+                                    class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors placeholder:text-gray-400"
+                                    placeholder="Enter your email">
+                                <span class="absolute right-3 top-3 text-gray-400">
+                                    <i class="fas fa-envelope"></i>
+                                </span>
                             </div>
-                            <?php if (!empty($message)): ?>
-                                <div class="alert alert-danger">
-                                    <?php echo htmlspecialchars($message); ?>
-                                </div>
-                            <?php endif; ?>
+                        </div>
+
+                        <!-- Password Input -->
+                        <div class="space-y-2">
+                            <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
+                            <div class="relative">
+                                <input type="password" id="password" name="password" required
+                                    class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors placeholder:text-gray-400"
+                                    placeholder="Enter your password">
+                                <button type="button" onclick="togglePasswordVisibility()" 
+                                    class="absolute right-3 top-3 text-gray-400 hover:text-gray-600 transition-colors">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Remember Me & Privacy Policy -->
+                        <div class="flex items-center space-x-2">
+                            <input type="checkbox" id="agree" name="agree" required
+                                class="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary/20">
+                            <label for="agree" class="text-sm text-gray-600">
+                                I agree to the <a href="/#privacy-policy" class="text-primary hover:text-primary-hover font-medium">Privacy Policy</a>
+                            </label>
+                        </div>
+
+                        <?php if (!empty($message)): ?>
+                            <div class="p-4 rounded-lg bg-red-50 border border-red-200 text-red-700">
+                                <?php echo htmlspecialchars($message); ?>
+                            </div>
+                        <?php endif; ?>
+
+                        <!-- Sign In Button -->
+                        <button type="submit" name="login" id="login"
+                            class="w-full py-3 px-4 rounded-lg font-medium text-white bg-gradient-to-r from-primary to-gradient-end hover:from-primary-hover hover:to-gradient-end focus:outline-none focus:ring-2 focus:ring-primary/50 transform transition-all duration-200 hover:scale-[1.02]">
+                            Sign in
+                        </button>
+
+                        <!-- Forgot Password -->
+                        <div class="text-center">
+                            <a href="/forgot_password" 
+                               class="text-sm text-gray-600 hover:text-primary transition-colors">
+                                Forgot your password?
+                            </a>
                         </div>
                     </form>
                 </div>
             </div>
-        </div><br>
+        </div>
     </div>
-</div>
-<footer class="footer">
-    <p>
-        Developed and maintained by<br>
-        <a href="about.html">Phemesoft</a>
-    </p>
-</footer>
-<script src="/views/public/assets/scripts/core.js"></script>
-<script src="/views/public/assets/scripts/script.min.js"></script>
-<script src="/views/public/assets/scripts/process.js"></script>
-<script src="/views/public/assets/scripts/layout-settings.js"></script>
-<script>
-function togglePasswordVisibility() {
-    var passwordInput = document.getElementById('password');
-    var toggleIcon = document.querySelector('.toggle-password i');
-    if (passwordInput.type === 'password') {
-        passwordInput.type = 'text';
-        toggleIcon.classList.remove('fa-eye');
-        toggleIcon.classList.add('fa-eye-slash');
-    } else {
-        passwordInput.type = 'password';
-        toggleIcon.classList.remove('fa-eye-slash');
-        toggleIcon.classList.add('fa-eye');
-    }
-}
-</script>
+
+    <!-- Footer -->
+    <footer class="fixed bottom-0 w-full py-4 bg-white/80 bg-blur border-t border-gray-200/50">
+        <div class="text-center">
+            <p class="text-sm text-gray-600">
+                Developed and maintained by
+                <a href="about.html" class="font-medium text-primary hover:text-primary-hover transition-colors">
+                    Phemesoft
+                </a>
+            </p>
+        </div>
+    </footer>
+
+    <script>
+        function togglePasswordVisibility() {
+            const passwordInput = document.getElementById('password');
+            const toggleIcon = document.querySelector('.fa-eye, .fa-eye-slash');
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                toggleIcon.classList.replace('fa-eye', 'fa-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                toggleIcon.classList.replace('fa-eye-slash', 'fa-eye');
+            }
+        }
+    </script>
 </body>
 </html>

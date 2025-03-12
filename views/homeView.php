@@ -30,6 +30,71 @@
     <!-- ===============================================-->
     <link href="/views/landing/assets/css/theme.css" rel="stylesheet" />
 
+    <!-- Tailwind and Custom Fonts -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#4B49AC',
+                        'primary-hover': '#3f3e91',
+                    },
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200;300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+      .fancy-button {
+        position: relative;
+        overflow: hidden;
+        transition: all 700ms ease;
+        z-index: 1;
+        text-decoration: none;
+      }
+      
+      .fancy-button::before {
+        content: "";
+        position: absolute;
+        left: -50px;
+        top: 0;
+        width: 0;
+        height: 100%;
+        background-color: #4B49AC;
+        transform: skewX(45deg);
+        z-index: -1;
+        transition: width 700ms ease;
+      }
+      
+      .fancy-button:hover::before {
+        width: 250%;
+      }
+      
+      .fancy-button:hover {
+        color: white;
+        transform: scale(1.05);
+        box-shadow: 4px 5px 17px -4px rgba(75, 73, 172, 0.3);
+        text-decoration: none;
+      }
+      
+      .login-button {
+        background: linear-gradient(to right, #4B49AC, #6366F1);
+        transition: all 700ms ease;
+        text-decoration: none;
+      }
+      
+      .login-button:hover {
+        transform: scale(1.05);
+        box-shadow: 4px 5px 17px -4px rgba(75, 73, 172, 0.4);
+        text-decoration: none;
+      }
+    </style>
+
   </head>
 
 
@@ -39,26 +104,74 @@
     <!--    Main Content-->
     <!-- ===============================================-->
     <main class="main" id="top">
-      <nav class="navbar navbar-expand-lg navbar-light fixed-top py-3" data-navbar-on-scroll="data-navbar-on-scroll">
-        <!-- <div class="container"><a class="navbar-brand" href="#"><img class="img-fluid" src="assets/img/icons/logo.png" alt=""  height="10%" width="10%"/></a> -->
-          <button class="navbar-toggler collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
-          <div class="collapse navbar-collapse" id="navbarSupportedContent">
-            <ul class="navbar-nav me-auto ms-lg-4 ms-xl-7 border-bottom border-lg-bottom-0 pt-2 pt-lg-0">
-              <!-- <li class="nav-item"><a class="nav-link fw-bold active" aria-current="page" href="#">About</a></li>
-              <li class="nav-item"><a class="nav-link fw-medium" href="#">Help</a></li>
-              <li class="nav-item"><a class="nav-link fw-medium" href="#">Features</a></li>
-              <li class="nav-item"><a class="nav-link fw-medium" href="#">Signup</a></li> -->
-              <img src="https://i.ibb.co/7xL13b10/knowbots-logo.png" alt="Knowbots Logo" class="img-fluid" style="height: 10%; width: 10%; padding-right: 10px;">
-              <h3>Knowbots</h3>
-            </ul>
-            <form class="d-flex py-3 py-lg-0">
-              <a class="btn btn-light rounded-pill shadow fw-bold me-2" href="register_student" role="button">Register</a>
-              <a class="btn btn-light rounded-pill shadow fw-bold" href="login" role="button">Login
-                <svg class="bi bi-arrow-right" xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="#9C69E2" viewBox="0 0 16 16">
-                  <path fill-rule="evenodd" d="M1 8a.5.5 0 0 1 .5-.5h11.793l-3.147-3.146a.5.5 0 0 1 .708-.708l4 4a.5.5 0 0 1 0 .708l-4 4a.5.5 0 0 1-.708-.708L13.293 8.5H1.5A.5.5 0 0 1 1 8z"></path>
+      <!-- Modern Navbar -->
+      <nav class="fixed w-full top-0 z-50 bg-white/80 backdrop-blur-lg border-b border-gray-200/30 transition-all duration-300">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div class="flex justify-between items-center h-20">
+            <!-- Logo Section -->
+            <div class="flex items-center space-x-4">
+              <a href="/" class="flex items-center space-x-3">
+                <img src="https://i.ibb.co/7xL13b10/knowbots-logo.png" alt="Knowbots Logo" class="h-10 w-auto">
+                <div>
+                  <h1 class="text-2xl font-bold bg-gradient-to-r from-primary to-[#6366F1] bg-clip-text text-transparent">
+                    Knowbots
+                  </h1>
+                  <p class="text-xs text-gray-500">Learning Platform</p>
+                </div>
+              </a>
+            </div>
+
+            <!-- Desktop Navigation -->
+            <div class="hidden md:flex items-center space-x-6">
+              <!-- Register Button -->
+              <a href="register_student" 
+                 class="fancy-button no-underline px-5 py-2 rounded-full font-medium text-sm text-gray-700
+                        border border-primary/30
+                        hover:border-primary">
+                Register
+              </a>
+              
+              <!-- Login Button -->
+              <a href="login" 
+                 class="login-button no-underline inline-flex items-center px-5 py-2 rounded-full font-medium text-sm text-white 
+                        focus:outline-none focus:ring-2 focus:ring-primary/50">
+                Login
+                <svg class="ml-2 -mr-1 w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                 </svg>
               </a>
-            </form>
+            </div>
+
+            <!-- Mobile Menu Button -->
+            <div class="md:hidden">
+              <button type="button" class="mobile-menu-button inline-flex items-center justify-center p-2 rounded-md text-gray-700 
+                      hover:text-primary hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary/50 
+                      transition-all duration-300 ease-in-out">
+                <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
+                  <path class="menu-icon" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                  <path class="close-icon hidden" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Mobile Menu -->
+        <div class="mobile-menu hidden md:hidden bg-white border-t border-gray-200/30">
+          <div class="px-2 pt-2 pb-3 space-y-1">
+            <a href="register_student" 
+               class="fancy-button no-underline block mx-3 px-5 py-2 rounded-full text-sm font-medium text-gray-700
+                      border border-primary/30 text-center
+                      hover:border-primary">
+              Register
+            </a>
+            <div class="px-3 py-3">
+              <a href="login" 
+                 class="login-button no-underline block w-full px-5 py-2 text-center text-sm font-medium text-white
+                        rounded-full">
+                Login
+              </a>
+            </div>
           </div>
         </div>
       </nav>
@@ -99,7 +212,7 @@
                   <div class="col-md-7 col-lg-6 px-md-2 px-xl-6 text-center text-md-start">
                     <div class="card-body px-4 py-5 p-lg-3 p-md-4">
                       <h1 class="mb-4 fw-bold">Highly professional LMS features<br class="d-md-none d-xxl-block" /></h1>
-                      <p class="card-text">Our LMS offers a comprehensive learning experience. With personalized learning paths, you can tailor your journey to your specific goals. Engage with interactive content, including videos, quizzes, and simulations, to enhance your understanding. Collaborate with fellow learners and experts through our vibrant community forums. Track your progress in real-time and stay motivated. Access our platform from any device, anytime, anywhere. Finally, validate your skills and showcase your achievements with certifications and badges.<br class="d-none d-xxl-block" /> <br class="d-none d-xxl-block" /><br class="d-none d-xxl-block" /><br class="d-none d-xxl-block" /> <br class="d-none d-xxl-block" /> </p>
+                      <p class="card-text">Our LMS offers a comprehensive learning experience. With personalized learning paths, you can tailor your journey to your specific goals. Engage with interactive content, including videos, quizzes, and simulations, to enhance your understanding. Collaborate with fellow learners and experts through our vibrant community forums. Track your progress in real-time and stay motivated. Access our platform from any device, anytime, anywhere. Finally, validate your skills and showcase your achievements with certifications and badges.<br class="d-none d-xxl-block" /> <br class="d-none d-xxl-block" /> <br class="d-none d-xxl-block" /> <br class="d-none d-xxl-block" /> <br class="d-none d-xxl-block" /> </p>
                     </div>
                   </div>
                 </div>
@@ -651,82 +764,300 @@
   });
   </script>
 
-  <!-- Add these styles to fix content overflow -->
-  <style>
-  .card {
-    height: 100%;
-    overflow: hidden;
-  }
+  <!-- Add this script before closing body tag -->
+  <script>
+    // Mobile menu functionality
+    const mobileMenuButton = document.querySelector('.mobile-menu-button');
+    const mobileMenu = document.querySelector('.mobile-menu');
+    const menuIcon = document.querySelector('.menu-icon');
+    const closeIcon = document.querySelector('.close-icon');
 
-  .card-body {
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-  }
+    mobileMenuButton.addEventListener('click', () => {
+      mobileMenu.classList.toggle('hidden');
+      menuIcon.classList.toggle('hidden');
+      closeIcon.classList.toggle('hidden');
+    });
 
-  .card-text {
-    flex-grow: 1;
-    overflow: hidden;
-  }
+    // Navbar scroll behavior
+    const navbar = document.querySelector('nav');
+    let lastScroll = 0;
 
-  .modal-dialog {
-    margin: 1.75rem auto;
-  }
+    window.addEventListener('scroll', () => {
+      const currentScroll = window.pageYOffset;
+      
+      if (currentScroll <= 0) {
+        navbar.classList.remove('shadow-lg');
+        return;
+      }
+      
+      if (currentScroll > lastScroll) {
+        // Scrolling down
+        navbar.classList.add('-translate-y-full', 'shadow-lg');
+      } else {
+        // Scrolling up
+        navbar.classList.remove('-translate-y-full');
+        navbar.classList.add('shadow-lg');
+      }
+      
+      lastScroll = currentScroll;
+    });
+  </script>
 
-  .modal-content {
-    border-radius: 1rem;
-  }
-
-  .modal-header {
-    background-color: #f8f9fa;
-    border-bottom: 1px solid #dee2e6;
-  }
-
-  .modal-body h4 {
-    color: #9C69E2;
-    margin-top: 1.5rem;
-  }
-
-  .modal-body p {
-    margin-bottom: 1.5rem;
-  }
-
-  @media (max-width: 768px) {
-    .card {
-      margin-bottom: 1rem;
-    }
+  <!-- Privacy Policy Modal -->
+  <div id="privacyPolicyModal" class="fixed inset-0 z-50 hidden overflow-y-auto">
+    <!-- Backdrop -->
+    <div class="fixed inset-0 bg-black bg-opacity-50 transition-opacity"></div>
     
-    .modal-dialog {
-      margin: 0.5rem;
+    <!-- Modal Content -->
+    <div class="relative min-h-screen flex items-center justify-center p-4">
+        <div class="relative bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden shadow-xl">
+            <!-- Modal Header -->
+            <div class="bg-white px-6 py-4 border-b border-gray-200 sticky top-0 z-10">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-xl font-semibold text-gray-900">Privacy Policy</h3>
+                    <button onclick="closePrivacyModal()" class="text-gray-400 hover:text-gray-500 focus:outline-none">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+                <!-- Search Bar -->
+                <div class="mt-4">
+                    <div class="relative">
+                        <input type="text" id="policySearch" 
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                               placeholder="Search privacy policy...">
+                        <span class="absolute right-3 top-2.5 text-gray-400">
+                            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                            </svg>
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal Body -->
+            <div class="px-6 py-4 overflow-y-auto max-h-[calc(90vh-140px)]" id="policyContent">
+                <div class="space-y-6">
+                    <section>
+                        <h4 class="text-xl font-semibold text-gray-900">1. Information Collection and Use</h4>
+                        <div class="mt-4 space-y-3 text-gray-600">
+                            <p>We collect several types of information for various purposes to provide and improve our Service to you:</p>
+                            <div class="ml-4 space-y-3">
+                                <div>
+                                    <h5 class="font-medium text-gray-900">1.1 Personal Data</h5>
+                                    <ul class="list-disc ml-4 mt-2 space-y-1">
+                                        <li>Name and contact details</li>
+                                        <li>Educational institution information</li>
+                                        <li>Academic records and progress</li>
+                                        <li>Login credentials and account information</li>
+                                    </ul>
+                                </div>
+                                <div>
+                                    <h5 class="font-medium text-gray-900">1.2 Usage Data</h5>
+                                    <ul class="list-disc ml-4 mt-2 space-y-1">
+                                        <li>Course interaction and completion data</li>
+                                        <li>Assessment results and feedback</li>
+                                        <li>Learning preferences and patterns</li>
+                                        <li>Technical session information</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="mt-8">
+                        <h4 class="text-xl font-semibold text-gray-900">2. Data Protection</h4>
+                        <div class="mt-4 space-y-3 text-gray-600">
+                            <p>We implement robust security measures to protect your personal information:</p>
+                            <ul class="list-disc ml-4 space-y-2">
+                                <li>End-to-end encryption for sensitive data</li>
+                                <li>Regular security audits and updates</li>
+                                <li>Strict access controls and authentication</li>
+                                <li>Compliance with educational data protection standards</li>
+                            </ul>
+                        </div>
+                    </section>
+
+                    <section class="mt-8">
+                        <h4 class="text-xl font-semibold text-gray-900">3. Data Usage and Sharing</h4>
+                        <div class="mt-4 space-y-3 text-gray-600">
+                            <p>Your information is used strictly for:</p>
+                            <ul class="list-disc ml-4 space-y-2">
+                                <li>Providing and improving educational services</li>
+                                <li>Personalizing learning experiences</li>
+                                <li>Academic progress tracking and reporting</li>
+                                <li>Required institutional compliance</li>
+                            </ul>
+                        </div>
+                    </section>
+
+                    <section class="mt-8">
+                        <h4 class="text-xl font-semibold text-gray-900">4. Your Rights</h4>
+                        <div class="mt-4 space-y-3 text-gray-600">
+                            <p>You have the right to:</p>
+                            <ul class="list-disc ml-4 space-y-2">
+                                <li>Access your personal data</li>
+                                <li>Request data correction or deletion</li>
+                                <li>Opt-out of certain data processing</li>
+                                <li>Receive a copy of your data</li>
+                            </ul>
+                        </div>
+                    </section>
+                </div>
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="bg-gray-50 px-6 py-4 border-t border-gray-200">
+                <button onclick="closePrivacyModal()" 
+                        class="w-full sm:w-auto px-6 py-2.5 bg-gray-600 text-white rounded-lg hover:bg-gray-700 
+                               transition-colors duration-200 text-sm font-medium focus:outline-none focus:ring-2 
+                               focus:ring-gray-500 focus:ring-offset-2">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add this script before closing body tag -->
+<script>
+    // Privacy Policy Modal Functions
+    function openPrivacyModal() {
+        document.getElementById('privacyPolicyModal').classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
     }
-  }
 
-  .learn-more-btn {
-    background: none;
-    border: none;
-    padding: 0;
-    font: inherit;
-    cursor: pointer;
-    outline: inherit;
-    display: inline-flex;
-    align-items: center;
-    text-decoration: none;
-    color: inherit;
-  }
+    function closePrivacyModal() {
+        document.getElementById('privacyPolicyModal').classList.add('hidden');
+        document.body.style.overflow = 'auto';
+    }
 
-  .learn-more-btn:hover {
-    color: #9C69E2;
-  }
+    // Search Functionality
+    document.getElementById('policySearch').addEventListener('input', function(e) {
+        const searchText = e.target.value.toLowerCase();
+        const content = document.getElementById('policyContent');
+        const textNodes = [];
+        
+        // Get all text nodes
+        function getTextNodes(node) {
+            if (node.nodeType === 3) {
+                textNodes.push(node);
+            } else {
+                for (let child of node.childNodes) {
+                    getTextNodes(child);
+                }
+            }
+        }
+        
+        getTextNodes(content);
+        
+        // Remove existing highlights
+        const highlights = content.querySelectorAll('mark');
+        highlights.forEach(h => {
+            const parent = h.parentNode;
+            parent.replaceChild(document.createTextNode(h.textContent), h);
+            parent.normalize();
+        });
+        
+        if (searchText) {
+            textNodes.forEach(node => {
+                const text = node.textContent;
+                const index = text.toLowerCase().indexOf(searchText);
+                
+                if (index >= 0) {
+                    const before = text.substring(0, index);
+                    const match = text.substring(index, index + searchText.length);
+                    const after = text.substring(index + searchText.length);
+                    
+                    const highlight = document.createElement('mark');
+                    highlight.textContent = match;
+                    highlight.style.backgroundColor = '#4B49AC20';
+                    highlight.style.color = '#4B49AC';
+                    highlight.style.padding = '0 2px';
+                    highlight.style.borderRadius = '2px';
+                    
+                    const fragment = document.createDocumentFragment();
+                    fragment.appendChild(document.createTextNode(before));
+                    fragment.appendChild(highlight);
+                    fragment.appendChild(document.createTextNode(after));
+                    
+                    node.parentNode.replaceChild(fragment, node);
+                }
+            });
+        }
+    });
+</script>
 
-  .learn-more-btn svg {
-    margin-left: 8px;
-    transition: transform 0.2s;
-  }
+<!-- Footer -->
+<footer class="bg-white border-t border-gray-200">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <!-- Company Info -->
+      <div>
+        <h3 class="text-lg font-semibold text-gray-900 mb-4">Knowbots</h3>
+        <p class="text-gray-600 text-sm">
+          Empowering education through innovative learning solutions.
+        </p>
+      </div>
+      
+      <!-- Quick Links -->
+      <div>
+        <h3 class="text-lg font-semibold text-gray-900 mb-4">Quick Links</h3>
+        <ul class="space-y-2">
+          <li>
+            <a href="/privacy"
+                class="group relative inline-flex items-center px-5 py-2.5 rounded-lg text-sm font-medium
+                        border border-primary/30 text-gray-700
+                        hover:bg-primary/5 hover:border-primary/50 hover:text-primary
+                        transition-all duration-300 ease-in-out">
+              <span class="flex items-center">
+                <svg class="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                View Privacy Policies
+              </span>
+              <svg class="w-4 h-4 ml-2 transform transition-transform duration-300 group-hover:translate-x-1" 
+                   fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                      d="M9 5l7 7-7 7" />
+              </svg>
+            </a>
+          </li>
+          <li>
+            <a href="#" class="text-gray-600 hover:text-primary text-sm transition-colors duration-200 ml-1">
+              Terms of Service
+            </a>
+          </li>
+          <li>
+            <a href="#" class="text-gray-600 hover:text-primary text-sm transition-colors duration-200 ml-1">
+              Contact Us
+            </a>
+          </li>
+        </ul>
+      </div>
+      
+      <!-- Contact Info -->
+      <div>
+        <h3 class="text-lg font-semibold text-gray-900 mb-4">Contact</h3>
+        <ul class="space-y-2">
+          <li class="text-gray-600 text-sm">Email: support@knowbots.com</li>
+          <li class="text-gray-600 text-sm">Phone: (555) 123-4567</li>
+        </ul>
+      </div>
+    </div>
+    
+    <!-- Copyright -->
+    <div class="mt-8 pt-8 border-t border-gray-200">
+      <p class="text-center text-gray-600 text-sm">
+        © 2024 Knowbots. All rights reserved.
+      </p>
+    </div>
+  </div>
+</footer>
 
-  .learn-more-btn:hover svg {
-    transform: translateX(5px);
-  }
-  </style>
 </body>
 
 </html>
