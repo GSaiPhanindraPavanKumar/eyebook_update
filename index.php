@@ -607,7 +607,8 @@ $router->get('/student/view_question/([0-9]+)', 'StudentController@viewQuestion'
 $router->post('/student/update_question_submission', 'StudentController@updateQuestionSubmission');
 
 $router->get('/student/manage_assessments', 'StudentController@manageAssessments');
-
+$router->get('/student/view_assessments', 'StudentController@viewAssessments');
+$router->get('/student/view_assessment/(\d+)', 'StudentController@viewAssessment');
 
 
 

@@ -1714,5 +1714,19 @@ class StudentController {
         $assessments = Assessment::getAll($conn);
         require 'views/student/manage_assessments.php';
     }
+    public function viewAssessments() {
+        if (!isset($_SESSION['email'])) {
+            header('Location: /session-timeout');
+            exit;
+        }
+    
+        $conn = Database::getConnection();
+        $studentId = $_SESSION['student_id'];
+    
+        // Fetch assessments
+        $assessments = Assessment::getAll($conn);
+    
+        require 'views/student/view_assessments.php';
+    }
 }
 ?>
