@@ -80,5 +80,22 @@ class Assessment {
             return false;
         }
     }
+    public function viewAssessment($id) {
+        if (!isset($_SESSION['email'])) {
+            header('Location: /session-timeout');
+            exit;
+        }
+    
+        $conn = Database::getConnection();
+        $assessment = Assessment::getById($conn, $id);
+    
+        if (!$assessment) {
+            $_SESSION['error'] = "Assessment not found.";
+            header('Location: /student/view_assessments');
+            exit;
+        }
+    
+        require 'views/student/view_assessment.php';
+    }
 }
 ?>
