@@ -540,5 +540,157 @@ class Student {
             ':password' => $faculty['password']
         ]);
     }
+
+    public static function updateCheckIn($conn, $studentId) {
+        $today = date('Y-m-d');
+        
+        // Get last check-in
+        $stmt = $conn->prepare("SELECT last_check_in, check_in_streak FROM students WHERE id = ?");
+        $stmt->execute([$studentId]);
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        $yesterday = date('Y-m-d', strtotime('-1 day'));
+        $newStreak = ($result['last_check_in'] == $yesterday) ? $result['check_in_streak'] + 1 : 1;
+        
+        try {
+            // Start transaction
+            $conn->beginTransaction();
+            
+            // Update student check-in status
+            $sql = "UPDATE students 
+                    SET last_check_in = ?, 
+                        check_in_streak = ?,
+                        total_check_ins = total_check_ins + 1 
+                    WHERE id = ?";
+            $stmt = $conn->prepare($sql);
+            $stmt->execute([$today, $newStreak, $studentId]);
+            
+            // Store check-in history
+            $sql = "INSERT INTO student_checkins (student_id, check_in_date) 
+                    VALUES (?, ?) 
+                    ON DUPLICATE KEY UPDATE created_at = CURRENT_TIMESTAMP";
+            $stmt = $conn->prepare($sql);
+            $stmt->execute([$studentId, $today]);
+            
+            // Commit transaction
+            $conn->commit();
+            return true;
+        } catch (PDOException $e) {
+            // Rollback on error
+            $conn->rollBack();
+            error_log("Check-in error: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    public static function getCheckInHistory($conn, $studentId) {
+        $sql = "SELECT check_in_date, created_at 
+                FROM student_checkins 
+                WHERE student_id = ? 
+                ORDER BY check_in_date DESC";
+        $stmt = $conn->prepare($sql);
+        $stmt->execute([$studentId]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public static function getCheckInStatus($conn, $studentId) {
+        // Get current check-in status
+        $stmt = $conn->prepare("
+            SELECT s.last_check_in, s.check_in_streak, s.total_check_ins,
+                   (SELECT COUNT(*) FROM student_checkins WHERE student_id = s.id) as total_days_checked_in
+            FROM students s 
+            WHERE s.id = ?
+        ");
+        $stmt->execute([$studentId]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+    public static function getStudentMetrics($conn, $studentId) {
+        // Get student data including assigned courses and completed books
+        $stmt = $conn->prepare("
+            SELECT s.*, 
+                   s.level as student_level,
+                   s.assigned_courses,
+                   s.completed_books
+            FROM students s 
+            WHERE s.id = ?
+        ");
+        $stmt->execute([$studentId]);
+        $student = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        // Parse assigned courses and completed books
+        $assignedCourses = !empty($student['assigned_courses']) ? json_decode($student['assigned_courses'], true) : [];
+        $completedBooks = !empty($student['completed_books']) ? json_decode($student['completed_books'], true) : [];
+
+        // Get course details for assigned courses
+        $courses = [];
+        if (!empty($assignedCourses)) {
+            $placeholders = implode(',', array_fill(0, count($assignedCourses), '?'));
+            $stmt = $conn->prepare("SELECT id, name, course_book, status FROM courses WHERE id IN ($placeholders)");
+            $stmt->execute($assignedCourses);
+            $courses = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        }
+
+        // Calculate overall progress
+        $totalProgress = 0;
+        $courseCount = 0;
+        foreach ($courses as $course) {
+            $courseId = $course['id'];
+            $courseBooks = !empty($course['course_book']) ? json_decode($course['course_book'], true) : [];
+            $totalBooks = is_array($courseBooks) ? count($courseBooks) : 0;
+            $completedBooksCount = is_array($completedBooks[$courseId] ?? []) ? count($completedBooks[$courseId] ?? []) : 0;
+            
+            if ($totalBooks > 0) {
+                $totalProgress += ($completedBooksCount / $totalBooks) * 100;
+                $courseCount++;
+            }
+        }
+
+        // Calculate completed projects (from contest submissions)
+        $stmt = $conn->prepare("
+            SELECT COUNT(DISTINCT q.id) as completed_projects
+            FROM contest_questions q 
+            JOIN contest_questions cq ON q.id = cq.id 
+            WHERE JSON_CONTAINS(cq.submissions, JSON_OBJECT('student_id', ?))
+        ");
+        $stmt->execute([$studentId]);
+        $projectData = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        return [
+            'total_courses' => count($courses),
+            'completed_projects' => $projectData['completed_projects'] ?? 0,
+            'overall_progress' => $courseCount > 0 ? $totalProgress / $courseCount : 0,
+            'student_level' => $student['student_level'] ?? 1
+        ];
+    }
+
+    public static function getCoursesWithProgress($conn, $studentId) {
+        // Fetch the assigned courses for the student
+        $stmt = $conn->prepare("SELECT assigned_courses, completed_books FROM students WHERE id = :student_id");
+        $stmt->execute(['student_id' => $studentId]);
+        $student = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        $assignedCourses = !empty($student['assigned_courses']) ? json_decode($student['assigned_courses'], true) : [];
+        $completedBooks = !empty($student['completed_books']) ? json_decode($student['completed_books'], true) : [];
+
+        if (empty($assignedCourses)) {
+            return [];
+        }
+
+        $placeholders = implode(',', array_fill(0, count($assignedCourses), '?'));
+        $stmt = $conn->prepare("SELECT id, name, description, course_book, status FROM courses WHERE id IN ($placeholders)");
+        $stmt->execute($assignedCourses);
+        $courses = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        foreach ($courses as &$course) {
+            $courseId = $course['id'];
+            $courseBooks = !empty($course['course_book']) ? json_decode($course['course_book'], true) : [];
+            $totalBooks = is_array($courseBooks) ? count($courseBooks) : 0;
+            $completedBooksCount = is_array($completedBooks[$courseId] ?? []) ? count($completedBooks[$courseId] ?? []) : 0;
+            $course['progress'] = ($totalBooks > 0) ? ($completedBooksCount / $totalBooks) * 100 : 0;
+        }
+
+        return $courses;
+    }
 }
 ?>
