@@ -221,139 +221,337 @@ if (php_sapi_name() !== 'cli' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <style>
+        :root {
+            --primary-color: #4B49AC;
+            --primary-hover: #3f3e91;
+            --primary-light: #4B49AC20;
+            --primary-border: #4B49AC30;
+            --bg-color: #f0f2f5;
+            --chat-bg: white;
+            --text-color: #2D3748;
+            --text-muted: #718096;
+            --border-color: #E2E8F0;
+            --btn-bg: white;
+            --input-bg: white;
+            --loader-bg: #E2E8F0;
+            --code-bg: #F7FAFC;
+            --hover-bg: rgba(0, 0, 0, 0.05);
+        }
+
+        .dark {
+            --bg-color: #1A202C;
+            --chat-bg: #2D3748;
+            --text-color: #E2E8F0;
+            --text-muted: #A0AEC0;
+            --border-color: #4A5568;
+            --btn-bg: #2D3748;
+            --input-bg: #2D3748;
+            --loader-bg: #4A5568;
+            --code-bg: #2D3748;
+            --hover-bg: rgba(255, 255, 255, 0.05);
+        }
+
         body {
-            background-color: #f0f2f5;
-            font-family: 'Arial', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Plus Jakarta Sans', sans-serif;
         }
+
+        .text-primary {
+            color: var(--primary-color) !important;
+        }
+
         .chat-container {
-            height: 400px;
+            height: 500px;
             overflow-y: auto;
-            background-color: white;
-            border-radius: 15px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            background-color: var(--chat-bg);
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
         }
+
         .message {
-            padding: 12px 15px;
-            margin: 10px;
-            border-radius: 20px;
-            max-width: 80%;
-            font-size: 14px;
-            line-height: 1.4;
+            padding: 1rem 1.25rem;
+            margin: 0.75rem;
+            border-radius: 1rem;
+            max-width: 85%;
+            font-size: 0.875rem;
+            line-height: 1.5;
         }
+
         .user-message {
-            background-color: #e3f2fd;
-            align-self: flex-end;
+            background-color: var(--primary-light);
+            color: var(--text-color);
             margin-left: auto;
+            border: 1px solid var(--primary-border);
         }
+
         .guru-message {
-            background-color: #f1f3f4;
-            white-space: normal;
+            background-color: var(--message-bg);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
         }
-        .guru-message br {
-            display: block;
-            margin: 5px 0;
-        }
+
         .query-buttons {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 10px;
-            margin: 20px 0;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 1rem;
+            margin: 1.5rem 0;
         }
+
         .query-btn {
-            padding: 12px 20px;
+            padding: 1rem 1.25rem;
             border: none;
-            border-radius: 10px;
-            background-color: #fff;
-            color: #333;
-            font-size: 14px;
+            border-radius: 0.75rem;
+            background-color: var(--btn-bg);
+            color: var(--text-color);
+            font-size: 0.875rem;
             text-align: left;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
             transition: all 0.3s ease;
+            border: 1px solid var(--border-color);
         }
+
         .query-btn:hover {
-            background-color: #e3f2fd;
+            background-color: var(--primary-light);
             transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            border-color: var(--primary-color);
         }
+
         .query-btn.other-btn {
-            background-color: #007bff;
+            background-color: var(--primary-color);
             color: white;
+            border: none;
         }
+
         .query-btn.other-btn:hover {
-            background-color: #0056b3;
+            background-color: var(--primary-hover);
         }
+
         .input-container {
-            display: none;
-            margin-top: 20px;
+            margin-top: 1.5rem;
         }
+
         .input-group {
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            border-radius: 25px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            border-radius: 0.75rem;
             overflow: hidden;
+            background-color: var(--input-bg);
+            border: 1px solid var(--border-color);
         }
+
         .form-control {
             border: none;
-            padding: 15px 20px;
+            padding: 1rem 1.25rem;
+            background-color: transparent;
+            color: var(--text-color);
         }
+
+        .form-control:focus {
+            outline: none;
+            box-shadow: none;
+        }
+
         .btn-primary {
-            border-radius: 0 25px 25px 0;
-            padding: 15px 30px;
+            background-color: var(--primary-color);
+            border: none;
+            padding: 1rem 1.5rem;
+            color: white;
+            transition: background-color 0.3s ease;
         }
+
+        .btn-primary:hover {
+            background-color: var(--primary-hover);
+        }
+
         .thinking {
             display: flex;
             align-items: center;
-            margin: 10px;
-            font-style: italic;
-            color: #666;
+            margin: 0.75rem;
+            color: var(--text-muted);
+            font-size: 0.875rem;
         }
+
         .loader {
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid #3498db;
+            border: 2px solid var(--loader-bg);
+            border-top: 2px solid var(--primary-color);
             border-radius: 50%;
-            width: 20px;
-            height: 20px;
-            animation: spin 1s linear infinite;
-            margin-right: 10px;
+            width: 1.25rem;
+            height: 1.25rem;
+            margin-right: 0.75rem;
         }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+
+        /* Dark mode support */
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-color: #1A202C;
+                --chat-bg: #2D3748;
+                --text-color: #E2E8F0;
+                --border-color: #4A5568;
+                --primary-light: #4B49AC40;
+                --message-bg: #2D3748;
+                --btn-bg: #2D3748;
+                --input-bg: #2D3748;
+                --loader-bg: #4A5568;
+                --text-muted: #A0AEC0;
+            }
         }
-        .feature-list p {
-            margin-bottom: 15px;
+
+        /* Feature list and response text styles */
+        .feature-list, .response-text {
             line-height: 1.6;
         }
-        
-        .feature-list strong {
-            color: #007bff;
+
+        .feature-list p, .response-text p {
+            margin-bottom: 1rem;
         }
-        
-        .response-text p {
-            margin-bottom: 12px;
-            line-height: 1.6;
+
+        .feature-list strong, .response-text strong {
+            color: var(--primary-color);
+            font-weight: 600;
         }
-        
-        .response-text p:last-child {
-            margin-bottom: 0;
+
+        /* Code block styling */
+        code {
+            background-color: var(--code-bg);
+            padding: 0.2em 0.4em;
+            border-radius: 0.25rem;
+            font-size: 0.875em;
+            color: var(--primary-color);
         }
-        
-        .response-text strong {
-            color: #007bff;
+
+        /* List styling */
+        ul, ol {
+            margin: 1rem 0;
+            padding-left: 1.5rem;
+        }
+
+        li {
+            margin-bottom: 0.5rem;
+        }
+
+        /* Theme toggle button styles */
+        .theme-switch button {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--btn-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .theme-switch button:hover {
+            transform: rotate(12deg);
+            background: var(--hover-bg);
+        }
+
+        .theme-switch button i {
+            font-size: 1.25rem;
+        }
+
+        /* Message colors */
+        .message.guru-message {
+            background-color: var(--message-bg);
+            border: 1px solid var(--border-color);
+        }
+
+        .message.user-message {
+            background-color: var(--primary-light);
+            border: 1px solid var(--primary-border);
+        }
+
+        /* Text colors */
+        h1.text-gray-900.dark\:text-white {
+            color: var(--text-color);
+        }
+
+        /* Input field colors */
+        .input-group {
+            background-color: var(--input-bg);
+            border: 1px solid var(--border-color);
+        }
+
+        .input-group .form-control {
+            color: var(--text-color);
+        }
+
+        .input-group .form-control::placeholder {
+            color: var(--text-muted);
+        }
+
+        /* Query buttons */
+        .query-btn {
+            background-color: var(--btn-bg);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+        }
+
+        .query-btn:hover {
+            background-color: var(--primary-light);
+            border-color: var(--primary-color);
+        }
+
+        .query-btn.other-btn {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .query-btn.other-btn:hover {
+            background-color: var(--primary-hover);
+        }
+
+        /* Thinking animation */
+        .thinking {
+            color: var(--text-muted);
+        }
+
+        .loader {
+            border-color: var(--loader-bg);
+            border-top-color: var(--primary-color);
+        }
+
+        /* Code blocks */
+        code {
+            background-color: var(--code-bg);
+            color: var(--primary-color);
+        }
+
+        /* Transitions */
+        body, .chat-container, .message, .query-btn, .input-group, .theme-switch button {
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
         }
     </style>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
+    <div class="theme-switch fixed top-4 right-4 z-50">
+        <button id="themeToggle" class="rounded-full">
+            <i id="darkIcon" class="fas fa-moon"></i>
+            <i id="lightIcon" class="fas fa-sun hidden"></i>
+        </button>
+    </div>
     <div class="container mt-5" style="max-width: 800px;">
-        <h1 class="text-center mb-4">AskGuru - Educational Chatbot</h1>
-        <div class="chat-container p-3 mb-3" id="chat-container">
+        <h1 class="text-center mb-4 text-2xl font-semibold text-gray-900 dark:text-white">
+            AskGuru - Educational Chatbot
+        </h1>
+        <div class="chat-container p-4 mb-4" id="chat-container">
             <div class="message guru-message">
-                <strong>AskGuru:</strong> Welcome! How can I help you today? Please select a topic or choose "Other" for a custom question.
+                <strong class="text-primary">AskGuru:</strong> 
+                Welcome! How can I help you today? Please select a topic or choose "Other" for a custom question.
             </div>
         </div>
 
         <!-- Predefined Query Buttons -->
         <div class="query-buttons">
-            <button class="query-btn" onclick="sendPredefinedQuery('forgot password')">Forgot Password</button>
+            <button class="query-btn hover:shadow-md" onclick="sendPredefinedQuery('forgot password')">
+                <i class="fas fa-key mr-2 text-primary"></i>Forgot Password
+            </button>
             <button class="query-btn" onclick="sendPredefinedQuery('edit profile')">Edit Profile</button>
             <button class="query-btn" onclick="sendPredefinedQuery('upload files')">Upload Files Help</button>
             <button class="query-btn" onclick="sendPredefinedQuery('download files')">Download Files Help</button>
@@ -365,11 +563,16 @@ if (php_sapi_name() !== 'cli' && $_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
 
         <!-- Custom Input Field (Hidden by default) -->
-        <div class="input-container" id="input-container">
-            <div class="input-group mb-3">
-                <button class="btn btn-secondary" onclick="showButtons()" style="border-radius: 25px 0 0 25px;">Back</button>
-                <input type="text" id="user-input" class="form-control" placeholder="Type your question here...">
-                <button class="btn btn-primary" onclick="sendMessage()">Send</button>
+        <div class="input-container hidden" id="input-container">
+            <div class="input-group">
+                <button class="btn text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 px-4" onclick="showButtons()">
+                    <i class="fas fa-arrow-left"></i>
+                </button>
+                <input type="text" id="user-input" class="form-control flex-grow text-gray-800 dark:text-gray-200 placeholder-gray-500 dark:placeholder-gray-400" 
+                       placeholder="Type your question here...">
+                <button class="btn btn-primary px-6" onclick="sendMessage()">
+                    <i class="fas fa-paper-plane mr-2"></i>Send
+                </button>
             </div>
         </div>
     </div>
@@ -403,11 +606,20 @@ if (php_sapi_name() !== 'cli' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     function sendPredefinedQuery(query) {
-        // Add user message to chat
-        $('#chat-container').append('<div class="message user-message"><strong>You:</strong> ' + query + '</div>');
+        // Add user message to chat with proper text coloring
+        $('#chat-container').append(`
+            <div class="message user-message">
+                <strong class="text-primary">You:</strong> ${query}
+            </div>
+        `);
         
-        // Add thinking message with loader
-        $('#chat-container').append('<div class="thinking"><div class="loader"></div>Guru is thinking...</div>');
+        // Add thinking message with proper coloring
+        $('#chat-container').append(`
+            <div class="thinking">
+                <div class="loader"></div>
+                <span class="text-muted">Guru is thinking...</span>
+            </div>
+        `);
         $('#chat-container').scrollTop($('#chat-container')[0].scrollHeight);
 
         // Send the request
@@ -419,10 +631,17 @@ if (php_sapi_name() !== 'cli' && $_SERVER['REQUEST_METHOD'] === 'POST') {
                 $('.thinking').remove();
                 try {
                     var response = JSON.parse(data);
-                    $('#chat-container').append('<div class="message guru-message"><strong>AskGuru:</strong> ' + response.response + '</div>');
+                    $('#chat-container').append(`
+                        <div class="message guru-message">
+                            <strong class="text-primary">AskGuru:</strong> ${response.response}
+                        </div>
+                    `);
                 } catch(e) {
-                    // If response is already HTML
-                    $('#chat-container').append('<div class="message guru-message"><strong>AskGuru:</strong> ' + data + '</div>');
+                    $('#chat-container').append(`
+                        <div class="message guru-message">
+                            <strong class="text-primary">AskGuru:</strong> ${data}
+                        </div>
+                    `);
                 }
                 $('#chat-container').scrollTop($('#chat-container')[0].scrollHeight);
             },
@@ -473,6 +692,37 @@ if (php_sapi_name() !== 'cli' && $_SERVER['REQUEST_METHOD'] === 'POST') {
         if(e.which == 13) {
             sendMessage();
         }
+    });
+
+    // Theme switching functionality
+    document.addEventListener('DOMContentLoaded', () => {
+        const themeToggle = document.getElementById('themeToggle');
+        const lightIcon = document.getElementById('lightIcon');
+        const darkIcon = document.getElementById('darkIcon');
+        
+        // Check for saved theme preference or default to system preference
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+            lightIcon.classList.remove('hidden');
+            darkIcon.classList.add('hidden');
+        }
+
+        function updateThemeIcons() {
+            if (document.documentElement.classList.contains('dark')) {
+                lightIcon.classList.remove('hidden');
+                darkIcon.classList.add('hidden');
+            } else {
+                lightIcon.classList.add('hidden');
+                darkIcon.classList.remove('hidden');
+            }
+        }
+
+        themeToggle.addEventListener('click', () => {
+            document.documentElement.classList.toggle('dark');
+            localStorage.theme = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
+            updateThemeIcons();
+        });
     });
     </script>
 
