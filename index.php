@@ -163,6 +163,12 @@ $router->post('/admin/add_unit', 'AdminController@addUnit');
 // $router->post('/admin/add_unit', function(){
 //     require 'views/admin/add_unit.php';
 // });
+$router->get('/admin/manage_assessments', 'AdminController@manageAssessments');
+$router->get('/admin/create_assessment', 'AdminController@createAssessment');
+$router->post('/admin/create_assessment', 'AdminController@createAssessment');
+$router->get('/admin/edit_assessment/(\d+)', 'AdminController@editAssessment');
+$router->post('/admin/edit_assessment/(\d+)', 'AdminController@editAssessment');
+$router->get('/admin/delete_assessment/(\d+)', 'AdminController@deleteAssessment');
 $router->post('/admin/assign_course', 'AdminController@assignCourse');
 $router->post('/admin/unassign_course', 'AdminController@unassignCourse');
 $router->get('/admin/manage_students', 'AdminController@manageStudents');

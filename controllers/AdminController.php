@@ -21,6 +21,7 @@ use Models\Lab;
 use Models\Contest;
 use Models\PublicCourse;
 use Models\PublicLab;
+use Models\Assessment;
 use PDO;
 use ZipArchive;
 use Models\VirtualClassroom;
@@ -2525,25 +2526,7 @@ class AdminController {
     }
 
     
-    public function createAssessment() {
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $title = $_POST['title'];
-            $questions = json_decode($_POST['questions'], true);
-            $deadline = $_POST['deadline'];
-
-            try {
-                $conn = Database::getConnection();
-                $conn->createAssessment($title, $questions, $deadline);
-                $success = "Assessment created successfully!";
-                include 'views/success.php';
-            } catch (Exception $e) {
-                $error = "Error creating assessment: " . $e->getMessage();
-                include 'views/error.php';
-            }
-        } else {
-            include 'views/create_assessment.php';
-        }
-    }
+    
 
     public function generateQuestions() {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -4229,6 +4212,55 @@ class AdminController {
         ];
         
         require 'views/admin/ticket_analytics.php';
+    }
+    public function manageAssessments() {
+        $conn = Database::getConnection();
+        $assessments = Assessment::getAll($conn);
+        require 'views/admin/manage_assessments.php';
+    }
+    
+    public function createAssessment() {
+        $conn = Database::getConnection();
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            $data = [
+                'title' => $_POST['title'],
+                'start_time' => $_POST['start_time'],
+                'end_time' => $_POST['end_time'],
+                'duration' => $_POST['duration'],
+                'questions' => $_POST['questions'],
+                'submissions' => []
+            ];
+            Assessment::create($conn, $data);
+            header('Location: /admin/manage_assessments');
+            exit();
+        }
+        require 'views/admin/create_assessment.php';
+    }
+    
+    public function editAssessment($id) {
+        $conn = Database::getConnection();
+        $assessment = Assessment::getById($conn, $id);
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            $data = [
+                'title' => $_POST['title'],
+                'start_time' => $_POST['start_time'],
+                'end_time' => $_POST['end_time'],
+                'duration' => $_POST['duration'],
+                'questions' => $_POST['questions'],
+                'submissions' => $assessment['submissions']
+            ];
+            Assessment::update($conn, $id, $data);
+            header('Location: /admin/manage_assessments');
+            exit();
+        }
+        require 'views/admin/edit_assessment.php';
+    }
+    
+    public function deleteAssessment($id) {
+        $conn = Database::getConnection();
+        Assessment::delete($conn, $id);
+        header('Location: /admin/manage_assessments');
+        exit();
     }
 }
 ?>

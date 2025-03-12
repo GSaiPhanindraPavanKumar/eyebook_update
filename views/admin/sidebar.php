@@ -198,6 +198,12 @@ $profileImageUrl = isset($admin['profile_image_url']) && filter_var($admin['prof
                     </div>
                 </li>
                 <li class="nav-item">
+                    <a class="nav-link" href="/admin/manage_assessments">
+                        <i class="icon-bar-graph menu-icon"></i>
+                        <span class="menu-title">Assessments</span>
+                    </a>
+                </li>
+                <li class="nav-item">
                     <a class="nav-link" data-toggle="collapse" href="#cohort" aria-expanded="false" aria-controls="cohort">
                         <i class="icon-layout menu-icon"></i>
                         <span class="menu-title">Cohort</span>
