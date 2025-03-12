@@ -471,9 +471,14 @@ $router->get('/student/view_grades', 'StudentController@viewGrades');
 $router->get('/student/dashboard', function(){
     require 'views/student/dashboard.php';
 });
+
+// Add the new check-in route here
+$router->post('/student/check_in', 'StudentController@checkIn');
+
 $router->get('/student/all_courses', function(){
     require 'views/student/all_courses.php';
 });
+
 $router->get('/student/updatePassword', function(){
     require 'views/student/updatePassword.php';
 });
@@ -658,4 +663,13 @@ $router->get('/student/xp_status', 'StudentController@xpStatus');
 
 $router->post('/student/toggle_like', 'DiscussionController@toggleLike');
 
+// Add this with other student routes
+$router->post('/student/check_in', 'StudentController@checkIn');
+$router->get('/privacy', function(){
+    require 'views/privacy.php';
+});
+
+
 $router->run();
+
+// Add this to your routes

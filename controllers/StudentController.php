@@ -1571,5 +1571,124 @@ class StudentController {
         header('Location: /student/view_contest/' . $contestId);
         exit();
     }
+
+    public function checkIn() {
+        if (!isset($_SESSION['email'])) {
+            header('Content-Type: application/json');
+            echo json_encode(['success' => false, 'message' => 'Not logged in']);
+            exit;
+        }
+
+        $conn = Database::getConnection();
+        $studentId = $_SESSION['student_id'];
+        
+        $success = Student::updateCheckIn($conn, $studentId);
+        $status = Student::getCheckInStatus($conn, $studentId);
+        $history = Student::getCheckInHistory($conn, $studentId);
+        
+        header('Content-Type: application/json');
+        echo json_encode([
+            'success' => $success,
+            'data' => $status,
+            'history' => $history
+        ]);
+        exit;
+    }
+
+    public function dashboard() {
+        if (!isset($_SESSION['email'])) {
+            header('Location: /session-timeout');
+            exit;
+        }
+        $conn = Database::getConnection();
+        $email = $_SESSION['email'];
+        $studentId = $_SESSION['student_id'];
+
+        // Fetch user data and metrics
+        $userData = Student::getUserDataByEmail($conn, $email);
+        
+        // Initialize metrics with default values
+        $metrics = [
+            'total_courses' => 0,
+            'completed_projects' => 0
+        ];
+        
+        // Get actual metrics if available
+        $studentMetrics = Student::getStudentMetrics($conn, $studentId);
+        if ($studentMetrics) {
+            $metrics = array_merge($metrics, $studentMetrics);
+        }
+
+        // Ensure university_short_name is set
+        $universityShortName = isset($userData['university_short_name']) ? htmlspecialchars($userData['university_short_name']) : '';
+
+        // Fetch today's classes
+        $todaysClasses = $this->getTodaysClasses($userData['id']);
+
+        // Fetch courses and progress
+        $courses = Student::getCoursesWithProgress($conn, $studentId);
+        $ongoingCourses = array_filter($courses, function($course) {
+            return $course['status'] === 'ongoing';
+        });
+
+        // Calculate overall progress
+        $overallProgress = 0;
+        $courseCount = count($ongoingCourses);
+        if ($courseCount > 0) {
+            $totalProgress = array_sum(array_column($ongoingCourses, 'progress'));
+            $overallProgress = $totalProgress / $courseCount;
+        }
+
+        // Get least progress courses
+        $leastProgressCourses = array_filter($ongoingCourses, function($course) {
+            return !empty($course['course_book']) && $course['progress'] < 100;
+        });
+        $leastProgressCourses = array_slice($leastProgressCourses, 0, 5);
+
+        // Fetch all virtual classes for the calendar
+        $virtualClasses = $this->getAllVirtualClasses($studentId);
+
+        // Fetch assignments for the assigned courses
+        $assignments = Assignment::getAssignmentsByStudentId($conn, $email);
+
+        // Filter assignments to exclude those with passed due dates
+        $upcomingAssignments = array_filter($assignments, function($assignment) {
+            return strtotime($assignment['due_date']) >= time();
+        });
+
+        // Filter virtual classes for the upcoming week
+        $upcomingClasses = array_filter($virtualClasses, function($class) {
+            $startTime = strtotime($class['start_time']);
+            $now = time();
+            $oneWeekLater = strtotime('+1 week', $now);
+            return $startTime >= $now && $startTime <= $oneWeekLater;
+        });
+
+        // Fetch contests
+        $student = Student::getById($conn, $studentId);
+        $universityId = $student['university_id'];
+        $contests = Contest::getByUniversityId($conn, $universityId);
+
+        // Curated list of quotes
+        $quotes = [
+            // ... existing quotes array ...
+        ];
+
+        // Select a random quote based on the current date
+        $thoughtOfTheDay = $quotes[date('z') % count($quotes)];
+
+        // Pass all variables to the view
+        require 'views/student/dashboard.php';
+    }
+
+    private function getTodaysClasses($studentId) {
+        $conn = Database::getConnection();
+        // ... rest of the getTodaysClasses implementation ...
+    }
+
+    private function getAllVirtualClasses($studentId) {
+        $conn = Database::getConnection();
+        // ... rest of the getAllVirtualClasses implementation ...
+    }
 }
 ?>
