@@ -28,6 +28,17 @@ function custom_base64_encode($data) {
 
 <div class="main-panel">
     <div class="content-wrapper">
+        <?php if (isset($_SESSION['error'])): ?>
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <?php 
+                echo $_SESSION['error'];
+                unset($_SESSION['error']);
+                ?>
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        <?php endif; ?>
         <div class="row">
             <div class="col-md-12 grid-margin">
                 <div class="row">

@@ -52,7 +52,25 @@ class PublicCourse {
         return $course;
     }
 
+    public static function isStudentEnrolled($conn, $studentId, $courseId) {
+        try {
+            $sql = "SELECT enrolled_students FROM public_courses WHERE id = :course_id";
+            $stmt = $conn->prepare($sql);
+            $stmt->execute([':course_id' => $courseId]);
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
     
+            if (!$result) {
+                return false;
+            }
+    
+            $enrolledStudents = json_decode($result['enrolled_students'], true) ?? [];
+            return in_array((string)$studentId, $enrolledStudents);
+    
+        } catch (PDOException $e) {
+            error_log("Error checking enrollment: " . $e->getMessage());
+            return false;
+        }
+    }
 
     public static function getCount($conn) {
         $sql = "SELECT COUNT(*) as course_count FROM public_courses";
@@ -62,7 +80,7 @@ class PublicCourse {
     }
 
     public static function getTransactionsCount($conn) {
-        $sql = "SELECT COUNT(*) as course_count FROM public_courses";
+        $sql = "SELECT COUNT(*) as course_count FROM transactions";
         $stmt = $conn->query($sql);
         $result = $stmt->fetch(PDO::FETCH_ASSOC);
         return $result['course_count'] ?? 0;

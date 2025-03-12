@@ -10,6 +10,17 @@ $studentId = $_SESSION['student_id'];
 $courseId = base64_decode($hashedId);
 $course = PublicCourse::getById($conn, $courseId);
 
+// Check if student is enrolled in this course
+$isEnrolled = PublicCourse::isStudentEnrolled($conn, $studentId, $courseId);
+
+// If not enrolled, redirect to courses page with message
+if (!$isEnrolled) {
+    $_SESSION['error'] = "You must be enrolled in this course to view its content.";
+    header('Location: /student/manage_public_courses');
+    exit;
+}
+
+
 // Fetch assignments for the course
 $assignments = PublicCourse::getAssignments($conn, $courseId);
 

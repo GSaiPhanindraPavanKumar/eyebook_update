@@ -55,11 +55,20 @@ class StudentController {
             exit;
         }
         $conn = Database::getConnection();
-        $course_id = base64_decode($hashedId);
-        if (!is_numeric($course_id)) {
+        $courseId = base64_decode($hashedId);
+        $studentId = $_SESSION['student_id'];
+
+        if (!is_numeric($courseId)) {
             die('Invalid course ID');
         }
-        $course = Course::getById($conn, $course_id);
+
+        // Check if student is assigned to this course
+        if (!Course::isStudentAssigned($conn, $studentId, $courseId)) {
+            $_SESSION['error'] = "You are not assigned to this course.";
+            header('Location: /student/my_courses');
+            exit;
+        }
+        $course = Course::getById($conn, $courseId);
     
         // Fetch the student data
         $student = Student::getByEmail($conn, $_SESSION['email']);
@@ -90,7 +99,7 @@ class StudentController {
         }
 
         // Fetch assignments for the course
-        $assignments = Assignment::getByCourseId($conn, $course_id);
+        $assignments = Assignment::getByCourseId($conn, $courseId);
 
         foreach ($assignments as &$assignment) {
             $assignment['submission_count'] = Assignment::getSubmissionCount($conn, $assignment['id']);
@@ -439,27 +448,36 @@ class StudentController {
             header('Location: /session-timeout');
             exit;
         }
+        
         $conn = Database::getConnection();
         $student = Student::getByEmail($conn, $_SESSION['email']);
-
-        $courseId = str_replace(['-', '_'], ['+', '/'], $hashedId);
-        $courseId = base64_decode($courseId);
+        $studentId = $_SESSION['student_id'];
+    
+        $courseId = base64_decode($hashedId);
         if (!is_numeric($courseId)) {
             die('Invalid course ID');
         }
+        
+        // Check enrollment status
+        if (!PublicCourse::isStudentEnrolled($conn, $studentId, $courseId)) {
+            $_SESSION['error'] = "You must be enrolled in this course to view its content.";
+            header('Location: /student/manage_public_courses');
+            exit;
+        }
+    
         $course = PublicCourse::getById($conn, $courseId);
-
+    
         // Fetch assignments for the course
         $assignments = Assignment::getByCourseId($conn, $courseId);
-
+    
         foreach ($assignments as &$assignment) {
             $assignment['submission_count'] = Assignment::getSubmissionCount($conn, $assignment['id']);
         }
-
+    
         usort($assignments, function($a, $b) {
             return strtotime($b['due_date']) - strtotime($a['due_date']);
         });
-
+    
         require 'views/student/view_public_course.php';
     }
 

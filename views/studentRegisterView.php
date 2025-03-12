@@ -1,4 +1,3 @@
-<!-- filepath: /c:/xampp/htdocs/eyebook_update/views/studentRegisterView.php -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -88,228 +87,115 @@
         .hidden {
             display: none;
         }
-
-        .form-row {
-            margin-left: -10px;
-            margin-right: -10px;
-        }
-
-        .form-row > .col,
-        .form-row > [class*="col-"] {
-            padding-left: 10px;
-            padding-right: 10px;
-        }
-
         .required-field::after {
-            content: "*";
-            color: #dc3545;
-            margin-left: 4px;
+            content: " *";
+            color: red;
+            font-weight: bold;
         }
-
-        .input-icon {
-            position: relative;
+        .form-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
         }
-
-        .input-icon i {
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            left: 15px;
+        .form-header {
+            margin-bottom: 25px;
+            text-align: center;
+        }
+        .note {
+            font-size: 0.85rem;
             color: #6c757d;
-        }
-
-        .input-icon input {
-            padding-left: 40px;
-        }
-
-        @media (max-width: 768px) {
-            .registration-container {
-                margin: 20px;
-                padding: 20px;
-            }
+            margin-top: 5px;
         }
     </style>
 </head>
 <body>
-    <div class="registration-container">
-        <h2 class="form-title">Student Registration</h2>
-        <p class="form-subtitle">Join our academic community and start your learning journey</p>
-        
-        <form action="/register_student" method="POST">
-            <!-- Personal Information Section -->
-            <div class="form-section">
-                <h3 class="section-title">Personal Information</h3>
-                <div class="form-row">
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label class="required-field" for="regd_no">Registration Number</label>
-                            <div class="input-icon">
-                                <i class="fas fa-id-card"></i>
-                                <input type="text" class="form-control" id="regd_no" name="regd_no" required>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label class="required-field" for="name">Full Name</label>
-                            <div class="input-icon">
-                                <i class="fas fa-user"></i>
-                                <input type="text" class="form-control" id="name" name="name" required>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="form-row">
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label class="required-field" for="email">Email Address</label>
-                            <div class="input-icon">
-                                <i class="fas fa-envelope"></i>
-                                <input type="email" class="form-control" id="email" name="email" required>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label class="required-field" for="phone">Phone Number</label>
-                            <div class="input-icon">
-                                <i class="fas fa-phone"></i>
-                                <input type="text" class="form-control" id="phone" name="phone" required>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+    <div class="container mt-5">
+        <div class="form-container">
+            <div class="form-header">
+                <h2>Student Registration</h2>
+                <p class="note">Fields marked with <span style="color: red; font-weight: bold;">*</span> are required</p>
             </div>
-
-            <!-- Academic Information Section -->
-            <div class="form-section">
-                <h3 class="section-title">Academic Information</h3>
-                <div class="form-row">
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label class="required-field" for="section">Section</label>
-                            <div class="input-icon">
-                                <i class="fas fa-layer-group"></i>
-                                <input type="text" class="form-control" id="section" name="section" required>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label class="required-field" for="stream">Stream</label>
-                            <div class="input-icon">
-                                <i class="fas fa-graduation-cap"></i>
-                                <input type="text" class="form-control" id="stream" name="stream" required>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="form-row">
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label class="required-field" for="year">Year</label>
-                            <div class="input-icon">
-                                <i class="fas fa-calendar-alt"></i>
-                                <input type="text" class="form-control" id="year" name="year" required>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label class="required-field" for="dept">Department</label>
-                            <div class="input-icon">
-                                <i class="fas fa-building"></i>
-                                <input type="text" class="form-control" id="dept" name="dept" required>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- University Information Section -->
-            <div class="form-section">
-                <h3 class="section-title">University Information</h3>
+            
+            <?php if(isset($errorMessage)): ?>
+                <div class="alert alert-danger"><?= $errorMessage ?></div>
+            <?php endif; ?>
+            
+            <form action="/register_student" method="POST" novalidate>
                 <div class="form-group">
-                    <label class="required-field" for="university_id">Select University</label>
-                    <div class="input-icon">
-                        <i class="fas fa-university"></i>
-                        <select class="form-control" id="university_id" name="university_id" required>
-                            <option value="">Select University</option>
-                            <?php foreach ($universities as $university): ?>
-                                <option value="<?php echo $university['id']; ?>">
-                                    <?php echo htmlspecialchars($university['long_name']) . ' (' . htmlspecialchars($university['location']) . ')'; ?>
-                                </option>
-                            <?php endforeach; ?>
-                            <option value="other">Other University</option>
-                        </select>
-                    </div>
+                    <label for="regd_no" class="required-field">Username/Registration Number:</label>
+                    <input type="text" class="form-control" id="regd_no" name="regd_no" required>
                 </div>
-
+                <div class="form-group">
+                    <label for="name" class="required-field">Name:</label>
+                    <input type="text" class="form-control" id="name" name="name" required>
+                </div>
+                <div class="form-group">
+                    <label for="email" class="required-field">Email:</label>
+                    <input type="email" class="form-control" id="email" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="phone" class="required-field">Phone:</label>
+                    <input type="text" class="form-control" id="phone" name="phone" required>
+                </div>
+                <div class="form-group">
+                    <label for="section">Section:</label>
+                    <input type="text" class="form-control" id="section" name="section">
+                </div>
+                <div class="form-group">
+                    <label for="stream">Stream:</label>
+                    <input type="text" class="form-control" id="stream" name="stream">
+                </div>
+                <div class="form-group">
+                    <label for="year">Year:</label>
+                    <input type="number" class="form-control" id="year" name="year" min="1" max="6" placeholder="Enter academic year (1-6)">
+                    <small class="form-text text-muted">Enter a number between 1 and 6</small>
+                </div>
+                <div class="form-group">
+                    <label for="dept">Department:</label>
+                    <input type="text" class="form-control" id="dept" name="dept">
+                </div>
+                <div class="form-group">
+                    <label for="university_id" class="required-field">University:</label>
+                    <select class="form-control" id="university_id" name="university_id" required>
+                        <option value="">Select University</option>
+                        <?php foreach ($universities as $university): ?>
+                            <option value="<?php echo $university['id']; ?>"><?php echo htmlspecialchars($university['long_name']) . ' (' . htmlspecialchars($university['location']) . ')'; ?></option>
+                        <?php endforeach; ?>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
                 <div id="newUniversityFields" class="hidden">
-                    <div class="form-row">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label class="required-field" for="long_name">University Full Name</label>
-                                <div class="input-icon">
-                                    <i class="fas fa-university"></i>
-                                    <input type="text" class="form-control" id="long_name" name="long_name">
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label class="required-field" for="short_name">University Short Name</label>
-                                <div class="input-icon">
-                                    <i class="fas fa-university"></i>
-                                    <input type="text" class="form-control" id="short_name" name="short_name">
-                                </div>
-                            </div>
-                        </div>
+                    <div class="form-group">
+                        <label for="long_name" class="required-field">University Long Name:</label>
+                        <input type="text" class="form-control" id="long_name" name="long_name">
                     </div>
-
-                    <div class="form-row">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label class="required-field" for="location">Location</label>
-                                <div class="input-icon">
-                                    <i class="fas fa-map-marker-alt"></i>
-                                    <input type="text" class="form-control" id="location" name="location">
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label class="required-field" for="country">Country</label>
-                                <div class="input-icon">
-                                    <i class="fas fa-globe"></i>
-                                    <input type="text" class="form-control" id="country" name="country">
-                                </div>
-                            </div>
-                        </div>
+                    <div class="form-group">
+                        <label for="short_name" class="required-field">University Short Name:</label>
+                        <input type="text" class="form-control" id="short_name" name="short_name">
+                    </div>
+                    <div class="form-group">
+                        <label for="location" class="required-field">Location:</label>
+                        <input type="text" class="form-control" id="location" name="location">
+                    </div>
+                    <div class="form-group">
+                        <label for="country" class="required-field">Country:</label>
+                        <input type="text" class="form-control" id="country" name="country">
                     </div>
                 </div>
-            </div>
-
-            <!-- Password Section -->
-            <div class="form-section">
-                <h3 class="section-title">Security</h3>
                 <div class="form-group">
-                    <label class="required-field" for="password">Password</label>
-                    <div class="input-icon">
-                        <i class="fas fa-lock"></i>
-                        <input type="password" class="form-control" id="password" name="password" required>
-                    </div>
+                    <label for="password" class="required-field">Password:</label>
+                    <input type="password" class="form-control" id="password" name="password" required>
+                    <small class="form-text text-muted">Choose a strong password</small>
                 </div>
-            </div>
-
-            <div class="text-center">
-                <button type="submit" class="btn btn-primary btn-register">
-                    <i class="fas fa-user-plus mr-2"></i>Register
-                </button>
-            </div>
-        </form>
+                <div class="text-center mt-4">
+                    <button type="submit" class="btn btn-primary">Register</button>
+                    <a href="/login" class="btn btn-outline-secondary ml-2">Cancel</a>
+                </div>
+            </form>
+        </div>
     </div>
 
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
@@ -326,9 +212,38 @@
                 });
             } else {
                 newUniversityFields.classList.add('hidden');
-                requiredFields.forEach(field => {
-                    document.getElementById(field).required = false;
-                });
+                document.getElementById('long_name').required = false;
+                document.getElementById('short_name').required = false;
+                document.getElementById('location').required = false;
+                document.getElementById('country').required = false;
+            }
+        });
+
+        // Form validation
+        document.querySelector('form').addEventListener('submit', function(e) {
+            var form = this;
+            var isValid = true;
+            
+            // Check all required fields
+            form.querySelectorAll('[required]').forEach(function(field) {
+                if (!field.value.trim()) {
+                    field.classList.add('is-invalid');
+                    isValid = false;
+                } else {
+                    field.classList.remove('is-invalid');
+                }
+            });
+            
+            // Validate email format
+            var email = document.getElementById('email');
+            var emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (email.value && !emailPattern.test(email.value)) {
+                email.classList.add('is-invalid');
+                isValid = false;
+            }
+            
+            if (!isValid) {
+                e.preventDefault();
             }
         });
     </script>

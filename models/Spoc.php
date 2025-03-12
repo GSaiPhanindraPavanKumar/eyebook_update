@@ -33,6 +33,14 @@ class Spoc {
         $stmt = $conn->query($sql);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+    public static function getAllWithUniversity($conn) {
+        $sql = "SELECT spocs.*, universities.short_name AS university_short_name
+                FROM spocs
+                LEFT JOIN universities ON spocs.university_id = universities.id";
+        $stmt = $conn->prepare($sql);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
 
     public static function getByEmail($conn, $email) {
         $sql = "SELECT * FROM spocs WHERE email = :email";
