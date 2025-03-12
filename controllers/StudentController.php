@@ -15,6 +15,7 @@ use Models\Ticket;
 use Models\PublicCourse;
 use Models\PublicLab;
 use Models\PublicFeedback;
+use Models\Assessment;
 use PDO;
 use Razorpay\Api\Api;
 use PDOException;
@@ -1707,6 +1708,11 @@ class StudentController {
     private function getAllVirtualClasses($studentId) {
         $conn = Database::getConnection();
         // ... rest of the getAllVirtualClasses implementation ...
+    }
+    public function manageAssessments() {
+        $conn = Database::getConnection();
+        $assessments = Assessment::getAll($conn);
+        require 'views/student/manage_assessments.php';
     }
 }
 ?>

@@ -380,6 +380,12 @@ $router->get('/faculty/manage_students', 'FacultyController@manageStudents');
 $router->get('/faculty/create_lab', 'FacultyController@createLab');
 $router->post('/faculty/create_lab', 'FacultyController@createLab');
 
+$router->get('/faculty/manage_assessments', 'FacultyController@manageAssessments');
+$router->get('/faculty/create_assessment', 'FacultyController@createAssessment');
+$router->post('/faculty/create_assessment', 'FacultyController@createAssessment');
+$router->get('/faculty/edit_assessment/(\d+)', 'FacultyController@editAssessment');
+$router->post('/faculty/edit_assessment/(\d+)', 'FacultyController@editAssessment');
+$router->get('/faculty/delete_assessment/(\d+)', 'FacultyController@deleteAssessment');
 
 $router->get('/faculty/manage_assignments', 'FacultyController@manageAssignments');
 $router->get('/faculty/create_assignment', 'FacultyController@createAssignment');
@@ -599,6 +605,11 @@ $router->get('/student/manage_contests', 'StudentController@manageContests');
 $router->get('/student/view_contest/([0-9]+)', 'StudentController@viewContest');
 $router->get('/student/view_question/([0-9]+)', 'StudentController@viewQuestion');
 $router->post('/student/update_question_submission', 'StudentController@updateQuestionSubmission');
+
+$router->get('/student/manage_assessments', 'StudentController@manageAssessments');
+
+
+
 
 $router->get('/logout', 'AuthController@logout');
 $router->get('/admin/logout', 'AuthController@logout');

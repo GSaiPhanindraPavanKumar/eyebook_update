@@ -13,6 +13,7 @@ use Models\Discussion;
 use Models\Lab;
 use Models\Contest;
 use Models\Ticket;
+use Models\Assessment;
 use PDO;
 use \PDOException;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
@@ -1015,6 +1016,55 @@ class FacultyController {
             echo json_encode(['success' => false, 'message' => 'Error closing ticket: ' . $e->getMessage()]);
         }
         exit;
+    }
+    public function manageAssessments() {
+        $conn = Database::getConnection();
+        $assessments = Assessment::getAll($conn);
+        require 'views/faculty/manage_assessments.php';
+    }
+    
+    public function createAssessment() {
+        $conn = Database::getConnection();
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            $data = [
+                'title' => $_POST['title'],
+                'start_time' => $_POST['start_time'],
+                'end_time' => $_POST['end_time'],
+                'duration' => $_POST['duration'],
+                'questions' => $_POST['questions'],
+                'submissions' => []
+            ];
+            Assessment::create($conn, $data);
+            header('Location: /faculty/manage_assessments');
+            exit();
+        }
+        require 'views/faculty/create_assessment.php';
+    }
+    
+    public function editAssessment($id) {
+        $conn = Database::getConnection();
+        $assessment = Assessment::getById($conn, $id);
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            $data = [
+                'title' => $_POST['title'],
+                'start_time' => $_POST['start_time'],
+                'end_time' => $_POST['end_time'],
+                'duration' => $_POST['duration'],
+                'questions' => $_POST['questions'],
+                'submissions' => $assessment['submissions']
+            ];
+            Assessment::update($conn, $id, $data);
+            header('Location: /faculty/manage_assessments');
+            exit();
+        }
+        require 'views/faculty/edit_assessment.php';
+    }
+    
+    public function deleteAssessment($id) {
+        $conn = Database::getConnection();
+        Assessment::delete($conn, $id);
+        header('Location: /faculty/manage_assessments');
+        exit();
     }
 }
     

@@ -184,6 +184,12 @@ if ($userData) {
                     </div>
                 </li> -->
                 <li class="nav-item">
+                    <a class="nav-link" href="/faculty/manage_assessments">
+                        <i class="icon-bar-graph menu-icon"></i>
+                        <span class="menu-title">Assessments</span>
+                    </a>
+                </li>
+                <li class="nav-item">
                     <a class="nav-link" data-toggle="collapse" href="#discussion" aria-expanded="false" aria-controls="discussion">
                         <i class="icon-bar-graph menu-icon"></i>
                         <span class="menu-title" >Discussion</span>
