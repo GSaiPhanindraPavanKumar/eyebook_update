@@ -20,10 +20,10 @@
                                 <tbody>
                                     <?php foreach ($assessments as $assessment): ?>
                                         <tr>
-                                            <td><?php echo htmlspecialchars($assessment['title']); ?></td>
-                                            <td><?php echo htmlspecialchars($assessment['start_time']); ?></td>
-                                            <td><?php echo htmlspecialchars($assessment['end_time']); ?></td>
-                                            <td><?php echo htmlspecialchars($assessment['duration']); ?></td>
+                                            <td><?php echo htmlspecialchars($assessment['title'] ?? ''); ?></td>
+                                            <td><?php echo htmlspecialchars($assessment['start_time'] ?? ''); ?></td>
+                                            <td><?php echo htmlspecialchars($assessment['end_time'] ?? ''); ?></td>
+                                            <td><?php echo htmlspecialchars($assessment['duration'] ?? ''); ?></td>
                                             <td>
                                                 <a href="/student/view_assessment?id=<?php echo htmlspecialchars($assessment['id']); ?>" class="btn btn-info btn-sm">View Exam</a>
                                             </td>
