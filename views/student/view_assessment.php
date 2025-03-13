@@ -10,20 +10,10 @@
                         <div class="clearfix"></div>
                         <?php 
                         // Decode the JSON string into an array
-                        $questions = $assessment['questions'];
+                        $questions = json_decode($assessment['questions'], true);
 
-                        $jsonString = $questions;
-
-                        // Remove newline characters from the JSON string
-                        $jsonString = preg_replace('/\s+/', ' ', $jsonString);
-                        $jsonString = trim($jsonString);
-                        $questions = json_decode($jsonString, true);
-                        print_r(html_entity_decode($questions));
-                        // print_r($questions);
-                        print_r($questions[0]);
-                        // print_r($questions[0]);
                         // Check if the decoded value is an array
-                        if (is_array($questions)) {
+                        if (json_last_error() === JSON_ERROR_NONE && is_array($questions)) {
                             // Loop through the questions array
                             foreach ($questions as $index => $question) {
                                 ?>
