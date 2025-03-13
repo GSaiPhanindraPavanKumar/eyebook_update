@@ -38,6 +38,8 @@ while ($row = $stmt->fetch()) {
                             $currentTime = new DateTime();
                             $startTime = new DateTime($assessment['start_time']);
                             $endTime = new DateTime($assessment['end_time']);
+                            $startTime->modify('+5 hours 30 minutes');
+                            $endTime->modify('+5 hours 30 minutes');
                         ?>
                             <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                                 <td class="px-4 py-3">
