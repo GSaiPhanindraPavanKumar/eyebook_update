@@ -74,6 +74,11 @@ $xpPoints = $stats['xp'] ?? 0;
 $completedBooks = json_decode($userData['completed_books'] ?? '[]', true);
 $totalBooks = count($assignedCourses);
 $completionRate = $totalBooks > 0 ? round((count($completedBooks) / $totalBooks) * 100) : 0;
+
+// Check if the user has checked in today
+$today = date('Y-m-d');
+$lastCheckIn = $stats['last_check_in'] ?? null;
+$hasCheckedInToday = ($lastCheckIn === $today);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -357,6 +362,21 @@ $completionRate = $totalBooks > 0 ? round((count($completedBooks) / $totalBooks)
                             </a>
                         </div> -->
 
+                        <!-- Assessments Section -->
+                        <div class="nav-category mt-4">
+                            <div class="flex items-center px-4 py-2 text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase category-header">
+                                Assessments
+                            </div>
+                            
+                            <a href="/student/view_assessments" class="nav-link flex items-center px-4 py-3 text-sm font-medium text-gray-600 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-primary dark:hover:text-white group transition-all duration-300">
+                                <svg class="mr-3 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                          d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                                </svg>
+                                <span class="nav-text">Assessments</span>
+                            </a>
+                        </div>
+
                         <!-- Support Section -->
                         <!-- <div class="nav-category mt-4">
                             <div class="flex items-center px-4 py-2 text-xs font-semibold text-gray-400 uppercase">
@@ -559,7 +579,7 @@ $completionRate = $totalBooks > 0 ? round((count($completedBooks) / $totalBooks)
                         <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
                             <!-- Check-in Card -->
                             <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
-                                <div class="flex flex-col space-y-4 sm:flex-row sm:space-y-0 sm:justify-between sm:items-center">
+                                <div class="flex flex-col space-y-4">
                                     <div class="flex items-center">
                                         <div class="p-3 rounded-lg bg-warning/10 dark:bg-warning/20">
                                             <svg class="h-6 w-6 text-warning" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -568,29 +588,39 @@ $completionRate = $totalBooks > 0 ? round((count($completedBooks) / $totalBooks)
                                             </svg>
                                         </div>
                                         <div class="ml-4">
-                                            <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Check-in Status</h3>
-                                            <p class="text-sm font-medium text-gray-900 dark:text-white">
-                                                <?php 
-                                                $today = date('Y-m-d');
-                                                $lastCheckIn = $stats['last_check_in'] ?? null;
-                                                $hasCheckedInToday = ($lastCheckIn === $today);
-                                                echo $hasCheckedInToday ? 'Checked In' : 'Not Checked In';
-                                                ?>
-                                            </p>
+                                            <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Daily Check-in</h3>
+                                            <?php if (!$hasCheckedInToday): ?>
+                                                <button id="checkInButton" 
+                                                        onclick="handleCheckIn()"
+                                                        class="mt-2 w-full px-4 py-2 bg-warning hover:bg-warning/90 text-white rounded-lg transition-colors">
+                                                    Check In
+                                                </button>
+                                            <?php else: ?>
+                                                <p class="text-sm font-medium text-success">✓ Checked In</p>
+                                            <?php endif; ?>
                                         </div>
                                     </div>
-                                    <div class="flex flex-row space-x-2 sm:flex-nowrap">
-                                        <?php if (!$hasCheckedInToday): ?>
-                                            <button id="checkInButton" 
-                                                    onclick="handleCheckIn()"
-                                                    class="flex-1 sm:flex-none px-4 py-2 bg-warning hover:bg-warning/90 text-white rounded-lg transition-colors">
-                                                Check In
+                                </div>
+                            </div>
+
+                            <!-- Check-in History Card -->
+                            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
+                                <div class="flex items-center">
+                                    <div class="p-3 rounded-lg bg-info/10 dark:bg-info/20">
+                                        <svg class="h-6 w-6 text-info" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                                  d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                    </div>
+                                    <div class="ml-4">
+                                        <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Check-in History</h3>
+                                        <div class="flex items-center space-x-2">
+                                            <p class="text-lg font-semibold text-gray-900 dark:text-white"><?php echo $stats['total_check_ins']; ?></p>
+                                            <button onclick="viewCheckInHistory()"
+                                                    class="text-sm text-primary hover:text-primary-hover dark:text-primary dark:hover:text-primary-hover transition-colors">
+                                                View History
                                             </button>
-                                        <?php endif; ?>
-                                        <button onclick="viewCheckInHistory()"
-                                                class="flex-1 sm:flex-none px-4 py-2 bg-primary hover:bg-primary-hover text-white rounded-lg transition-colors">
-                                            View History
-                                        </button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -964,7 +994,7 @@ $completionRate = $totalBooks > 0 ? round((count($completedBooks) / $totalBooks)
                     html: `
                         <div class="max-h-96 overflow-y-auto">
                             <div class="text-left">
-                                <p class="mb-4">Total Check-ins: ${data.data.total_days_checked_in}</p>
+                                <p class="mb-4">Total Check-ins: ${data.data.total_check_ins}</p>
                                 <p class="mb-4">Current Streak: ${data.data.check_in_streak} days</p>
                                 <div class="divide-y">${historyHTML}</div>
                             </div>
