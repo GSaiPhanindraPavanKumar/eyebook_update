@@ -30,10 +30,10 @@ while ($row = $stmt->fetch()) {
                                 <tbody>
                                     <?php foreach ($assessments as $assessment): ?>
                                         <tr>
-                                            <td><?php echo htmlspecialchars($assessment['title']); ?></td>
-                                            <td><?php echo htmlspecialchars($assessment['start_time']); ?></td>
-                                            <td><?php echo htmlspecialchars($assessment['end_time']); ?></td>
-                                            <td><?php echo htmlspecialchars($assessment['duration']); ?></td>
+                                            <td><?php echo htmlspecialchars($assessment['title'] ?? ''); ?></td>
+                                            <td><?php echo htmlspecialchars($assessment['start_time'] ?? ''); ?></td>
+                                            <td><?php echo htmlspecialchars($assessment['end_time'] ?? ''); ?></td>
+                                            <td><?php echo htmlspecialchars($assessment['duration'] ?? ''); ?></td>
                                             <td>
                                                 <?php if (isset($completedAssessments[$assessment['id']])): ?>
                                                     <span class="badge badge-success">Completed (<?php echo $completedAssessments[$assessment['id']]; ?>%)</span>
@@ -68,6 +68,8 @@ while ($row = $stmt->fetch()) {
     <?php include 'footer.html'; ?>
 </div>
 
+<!-- Include jQuery -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
 function showCompletedMessage(score) {

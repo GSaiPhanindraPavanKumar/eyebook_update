@@ -35,12 +35,12 @@
                                         $stats = $stmt->fetch();
                                     ?>
                                         <tr>
-                                            <td><?php echo htmlspecialchars($assessment['title']); ?></td>
-                                            <td><?php echo htmlspecialchars($assessment['start_time']); ?></td>
-                                            <td><?php echo htmlspecialchars($assessment['end_time']); ?></td>
-                                            <td><?php echo htmlspecialchars($assessment['duration']); ?></td>
+                                            <td><?php echo htmlspecialchars($assessment['title'] ?? ''); ?></td>
+                                            <td><?php echo htmlspecialchars($assessment['start_time'] ?? ''); ?></td>
+                                            <td><?php echo htmlspecialchars($assessment['end_time'] ?? ''); ?></td>
+                                            <td><?php echo htmlspecialchars($assessment['duration'] ?? ''); ?></td>
                                             <td><?php echo $stats['attempts']; ?></td>
-                                            <td><?php echo number_format($stats['avg_score'], 2); ?>%</td>
+                                            <td><?php echo $stats['avg_score'] !== null ? number_format($stats['avg_score'], 2) . '%' : 'N/A'; ?></td>
                                             <td>
                                                 <a href="/admin/edit_assessment/<?php echo $assessment['id']; ?>" class="btn btn-warning btn-sm">Edit</a>
                                                 <button type="button" 
