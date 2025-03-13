@@ -1614,6 +1614,29 @@ class StudentController {
         exit;
     }
 
+    public function checkInHistory() {
+        if (!isset($_SESSION['email'])) {
+            header('Content-Type: application/json');
+            echo json_encode(['success' => false, 'message' => 'Not logged in']);
+            exit;
+        }
+
+        $conn = Database::getConnection();
+        $studentId = $_SESSION['student_id'];
+        
+        // Get check-in status and history
+        $status = Student::getCheckInStatus($conn, $studentId);
+        $history = Student::getCheckInHistory($conn, $studentId);
+        
+        header('Content-Type: application/json');
+        echo json_encode([
+            'success' => true,
+            'data' => $status,
+            'history' => $history
+        ]);
+        exit;
+    }
+
     public function dashboard() {
         if (!isset($_SESSION['email'])) {
             header('Location: /session-timeout');

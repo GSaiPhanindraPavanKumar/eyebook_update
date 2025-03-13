@@ -584,23 +584,13 @@ class Student {
     }
 
     public static function getCheckInHistory($conn, $studentId) {
-        $sql = "SELECT check_in_date, created_at 
-                FROM student_checkins 
-                WHERE student_id = ? 
-                ORDER BY check_in_date DESC";
-        $stmt = $conn->prepare($sql);
+        $stmt = $conn->prepare("SELECT check_in_date FROM student_checkins WHERE student_id = ? ORDER BY check_in_date DESC");
         $stmt->execute([$studentId]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     public static function getCheckInStatus($conn, $studentId) {
-        // Get current check-in status
-        $stmt = $conn->prepare("
-            SELECT s.last_check_in, s.check_in_streak, s.total_check_ins,
-                   (SELECT COUNT(*) FROM student_checkins WHERE student_id = s.id) as total_days_checked_in
-            FROM students s 
-            WHERE s.id = ?
-        ");
+        $stmt = $conn->prepare("SELECT check_in_streak, total_check_ins, last_check_in FROM students WHERE id = ?");
         $stmt->execute([$studentId]);
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }

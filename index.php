@@ -609,8 +609,7 @@ $router->post('/student/update_question_submission', 'StudentController@updateQu
 $router->get('/student/manage_assessments', 'StudentController@manageAssessments');
 $router->get('/student/view_assessments', 'StudentController@viewAssessments');
 $router->get('/student/view_assessment/(\d+)', 'StudentController@viewAssessment');
-
-
+$router->post('/student/submit_assessment_result', 'StudentController@submitAssessmentResult');
 
 $router->get('/logout', 'AuthController@logout');
 $router->get('/admin/logout', 'AuthController@logout');
@@ -695,6 +694,12 @@ $router->get('/privacy', function(){
 });
 
 
-$router->run();
+$router->get('/admin/get_assessment_results/(\d+)', 'AdminController@getAssessmentResults');
+$router->get('/admin/export_assessment_results', 'AdminController@exportAssessmentResults');
+$router->get('/faculty/get_assessment_results/(\d+)', 'FacultyController@getAssessmentResults');
+$router->get('/faculty/export_assessment_results', 'FacultyController@exportAssessmentResults');
 
-// Add this to your routes
+// Add this with other student routes
+$router->get('/student/check_in_history', 'StudentController@checkInHistory');
+
+$router->run();
