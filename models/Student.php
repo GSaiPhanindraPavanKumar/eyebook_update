@@ -543,6 +543,9 @@ class Student {
 
     public static function updateCheckIn($conn, $studentId) {
         $today = date('Y-m-d');
+        $day = date('d');
+        $month = date('m');
+        $year = date('Y');
         
         // Get last check-in
         $stmt = $conn->prepare("SELECT last_check_in, check_in_streak FROM students WHERE id = ?");
@@ -558,19 +561,17 @@ class Student {
             
             // Update student check-in status
             $sql = "UPDATE students 
-                    SET last_check_in = ?, 
-                        check_in_streak = ?,
-                        total_check_ins = total_check_ins + 1 
+                    SET last_check_in = ?, check_in_streak = ? 
                     WHERE id = ?";
             $stmt = $conn->prepare($sql);
             $stmt->execute([$today, $newStreak, $studentId]);
             
             // Store check-in history
-            $sql = "INSERT INTO student_checkins (student_id, check_in_date) 
-                    VALUES (?, ?) 
-                    ON DUPLICATE KEY UPDATE created_at = CURRENT_TIMESTAMP";
+            $sql = "INSERT INTO student_checkins (student_id, check_in_date, check_in_time, check_in_day, check_in_month, check_in_year) 
+                    VALUES (?, ?, NOW(), ?, ?, ?)
+                    ON DUPLICATE KEY UPDATE check_in_time = NOW(), check_in_day = VALUES(check_in_day), check_in_month = VALUES(check_in_month), check_in_year = VALUES(check_in_year)";
             $stmt = $conn->prepare($sql);
-            $stmt->execute([$studentId, $today]);
+            $stmt->execute([$studentId, $today, $day, $month, $year]);
             
             // Commit transaction
             $conn->commit();
