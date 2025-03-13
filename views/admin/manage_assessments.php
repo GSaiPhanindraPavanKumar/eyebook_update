@@ -35,10 +35,10 @@
                                         $stats = $stmt->fetch();
                                     ?>
                                         <tr>
-                                            <td><?php echo htmlspecialchars($assessment['title']); ?></td>
-                                            <td><?php echo htmlspecialchars($assessment['start_time']); ?></td>
-                                            <td><?php echo htmlspecialchars($assessment['end_time']); ?></td>
-                                            <td><?php echo htmlspecialchars($assessment['duration']); ?></td>
+                                            <td><?php echo htmlspecialchars($assessment['title'] ?? ''); ?></td>
+                                            <td><?php echo htmlspecialchars($assessment['start_time'] ?? ''); ?></td>
+                                            <td><?php echo htmlspecialchars($assessment['end_time'] ?? ''); ?></td>
+                                            <td><?php echo htmlspecialchars($assessment['duration'] ?? ''); ?></td>
                                             <td><?php echo $stats['attempts']; ?></td>
                                             <td><?php echo number_format($stats['avg_score'], 2); ?>%</td>
                                             <td>
