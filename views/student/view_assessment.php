@@ -9,21 +9,26 @@
                         <h5 class="float-right">Time Remaining: <span id="timer">00:00:00</span></h5>
                         <div class="clearfix"></div>
                         <?php 
-                        // Decode the JSON string into an array
-                        $questions = $assessment['questions'];
-
-                        $jsonString = $questions;
-
-                        // Remove newline characters from the JSON string
+                        // Clean and decode the JSON string
+                        $jsonString = $assessment['questions'];
+                        $jsonString = trim($jsonString, '"');
                         $jsonString = preg_replace('/\s+/', ' ', $jsonString);
-                        $jsonString = trim($jsonString);
+                        $jsonString = stripslashes($jsonString);
+                        
                         $questions = json_decode($jsonString, true);
-                        print_r(html_entity_decode($questions));
-                        // print_r($questions);
-                        print_r($questions[0]);
-                        // print_r($questions[0]);
+                        
+                        // Debug JSON errors if needed
+                        if (json_last_error() !== JSON_ERROR_NONE) {
+                            echo '<p class="text-danger">JSON Error: ' . json_last_error_msg() . '</p>';
+                            echo '<pre>Cleaned JSON: ' . htmlspecialchars($jsonString) . '</pre>';
+                            echo '<pre>Original JSON: ' . htmlspecialchars($assessment['questions']) . '</pre>';
+                        }
+
                         // Check if the decoded value is an array
                         if (is_array($questions)) {
+                            // Randomize questions order
+                            shuffle($questions);
+                            echo '<form id="assessment-form">';
                             // Loop through the questions array
                             foreach ($questions as $index => $question) {
                                 ?>
@@ -32,34 +37,35 @@
                                         <h6 class="card-subtitle mb-2 text-muted">Question <?php echo $index + 1; ?></h6>
                                         <p class="card-text"><?php echo htmlspecialchars($question['question']); ?></p>
                                         <div class="form-check">
-                                            <input class="form-check-input" type="radio" name="question_<?php echo $index; ?>" id="option_<?php echo $index; ?>_a" value="a">
+                                            <input class="form-check-input" type="radio" name="question_<?php echo $index; ?>" id="option_<?php echo $index; ?>_a" value="a" data-correct="<?php echo $question['ans']; ?>">
                                             <label class="form-check-label" for="option_<?php echo $index; ?>_a">
                                                 <?php echo htmlspecialchars($question['a']); ?>
                                             </label>
                                         </div>
                                         <div class="form-check">
-                                            <input class="form-check-input" type="radio" name="question_<?php echo $index; ?>" id="option_<?php echo $index; ?>_b" value="b">
+                                            <input class="form-check-input" type="radio" name="question_<?php echo $index; ?>" id="option_<?php echo $index; ?>_b" value="b" data-correct="<?php echo $question['ans']; ?>">
                                             <label class="form-check-label" for="option_<?php echo $index; ?>_b">
                                                 <?php echo htmlspecialchars($question['b']); ?>
                                             </label>
                                         </div>
                                         <div class="form-check">
-                                            <input class="form-check-input" type="radio" name="question_<?php echo $index; ?>" id="option_<?php echo $index; ?>_c" value="c">
+                                            <input class="form-check-input" type="radio" name="question_<?php echo $index; ?>" id="option_<?php echo $index; ?>_c" value="c" data-correct="<?php echo $question['ans']; ?>">
                                             <label class="form-check-label" for="option_<?php echo $index; ?>_c">
                                                 <?php echo htmlspecialchars($question['c']); ?>
                                             </label>
                                         </div>
                                         <div class="form-check">
-                                            <input class="form-check-input" type="radio" name="question_<?php echo $index; ?>" id="option_<?php echo $index; ?>_d" value="d">
+                                            <input class="form-check-input" type="radio" name="question_<?php echo $index; ?>" id="option_<?php echo $index; ?>_d" value="d" data-correct="<?php echo $question['ans']; ?>">
                                             <label class="form-check-label" for="option_<?php echo $index; ?>_d">
                                                 <?php echo htmlspecialchars($question['d']); ?>
                                             </label>
                                         </div>
-                                        <button type="button" class="btn btn-primary mt-3" onclick="submitAnswer(<?php echo $index; ?>, '<?php echo $question['ans']; ?>')">Submit</button>
                                     </div>
                                 </div>
                                 <?php
                             }
+                            echo '<button type="button" class="btn btn-primary btn-lg mt-4 w-100" onclick="submitAssessment()">Submit Assessment</button>';
+                            echo '</form>';
                         } else {
                             // Display an error message if the decoded value is not an array
                             echo '<p class="text-danger">Error: Invalid question data.</p>';
@@ -97,64 +103,164 @@ document.onkeydown = function(e) {
     }
 }
 
-var elem = document.documentElement;
-function openFullscreen() {
-    if (elem.requestFullscreen) {
-        elem.requestFullscreen();
-    } else if (elem.webkitRequestFullscreen) { /* Safari */
-        elem.webkitRequestFullscreen();
-    } else if (elem.msRequestFullscreen) { /* IE11 */
-        elem.msRequestFullscreen();
+// Show fullscreen prompt when page loads
+Swal.fire({
+    title: 'Start Assessment',
+    text: 'Click Start to begin the assessment in fullscreen mode',
+    icon: 'info',
+    allowOutsideClick: false,
+    confirmButtonText: 'Start'
+}).then((result) => {
+    if (result.isConfirmed) {
+        const elem = document.documentElement;
+        if (elem.requestFullscreen) {
+            elem.requestFullscreen();
+        } else if (elem.webkitRequestFullscreen) {
+            elem.webkitRequestFullscreen();
+        } else if (elem.msRequestFullscreen) {
+            elem.msRequestFullscreen();
+        }
+        // Initialize timer after user interaction
+        initializeTimer();
     }
+});
+
+// IndexedDB initialization
+const dbName = "AssessmentDB";
+const storeName = "assessmentStore";
+const assessmentId = <?php echo $assessment['id']; ?>;
+const assessmentDuration = <?php echo $assessment['duration']; ?>;
+
+// Initialize timer function
+function initializeTimer() {
+    const request = indexedDB.open(dbName, 1);
+
+    request.onerror = function(event) {
+        console.error("Database error: " + event.target.error);
+    };
+
+    request.onupgradeneeded = function(event) {
+        const db = event.target.result;
+        if (!db.objectStoreNames.contains(storeName)) {
+            db.createObjectStore(storeName, { keyPath: "id" });
+        }
+    };
+
+    request.onsuccess = function(event) {
+        const db = event.target.result;
+        const transaction = db.transaction([storeName], "readwrite");
+        const store = transaction.objectStore(storeName);
+        
+        // Try to get existing start time
+        const getRequest = store.get(assessmentId);
+        
+        getRequest.onsuccess = function(event) {
+            let startTime;
+            if (!event.target.result) {
+                // If no start time exists, create one
+                startTime = new Date().getTime();
+                // Store the start time
+                store.put({ id: assessmentId, startTime: startTime });
+                console.log('New start time created:', startTime);
+            } else {
+                // Use existing start time
+                startTime = event.target.result.startTime;
+                console.log('Using existing start time:', startTime);
+            }
+            
+            // Calculate end time based on start time and duration
+            const endTime = startTime + (assessmentDuration * 60 * 1000);
+            console.log('End time:', endTime);
+            console.log('Current time:', new Date().getTime());
+            console.log('Duration in ms:', assessmentDuration * 60 * 1000);
+            
+            // Start the timer
+            const timerInterval = setInterval(function() {
+                const now = new Date().getTime();
+                const distance = endTime - now;
+                console.log('Distance:', distance);
+
+                if (distance < 0) {
+                    clearInterval(timerInterval);
+                    document.getElementById("timer").innerHTML = "00:00:00";
+                    autoSubmit();
+                    return;
+                }
+
+                const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+                const displayHours = hours < 10 ? "0" + hours : hours;
+                const displayMinutes = minutes < 10 ? "0" + minutes : minutes;
+                const displaySeconds = seconds < 10 ? "0" + seconds : seconds;
+
+                const timerDisplay = `${displayHours}:${displayMinutes}:${displaySeconds}`;
+                console.log('Timer display:', timerDisplay);
+                document.getElementById("timer").innerHTML = timerDisplay;
+            }, 1000);
+        };
+
+        getRequest.onerror = function(event) {
+            console.error("Error getting start time:", event.target.error);
+        };
+    };
 }
 
-openFullscreen();
+// Function to clear timer data
+function clearAssessmentData() {
+    const request = indexedDB.open(dbName, 1);
+    request.onsuccess = function(event) {
+        const db = event.target.result;
+        const transaction = db.transaction([storeName], "readwrite");
+        const store = transaction.objectStore(storeName);
+        store.delete(assessmentId);
+    };
+}
 
-var endTime = new Date().getTime() + <?php echo $assessment['duration'] * 60 * 1000; ?>;
-var timerInterval = setInterval(function() {
-    var now = new Date().getTime();
-    var distance = endTime - now;
-
-    var hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-    var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-    var seconds = Math.floor((distance % (1000 * 60)) / 1000);
-
-    hours = hours < 10 ? "0" + hours : hours;
-    minutes = minutes < 10 ? "0" + minutes : minutes;
-    seconds = seconds < 10 ? "0" + seconds : seconds;
-
-    document.getElementById("timer").innerHTML = hours + ":" + minutes + ":" + seconds;
-
-    if (distance < 0) {
-        clearInterval(timerInterval);
-        document.getElementById("timer").innerHTML = "00:00:00";
-        autoSubmit();
-    }
-}, 1000);
-
-function submitAnswer(questionIndex, correctAnswer) {
-    var selectedAnswer = document.querySelector('input[name="question_' + questionIndex + '"]:checked');
-    if(selectedAnswer) {
-        if(selectedAnswer.value === correctAnswer) {
-            Swal.fire({
-                icon: 'success',
-                title: 'Correct!',
-                text: 'Your answer is correct.',
-            });
-        } else {
-            Swal.fire({
-                icon: 'error',
-                title: 'Incorrect!',
-                text: 'Your answer is incorrect.',
-            });
+function submitAssessment() {
+    var totalQuestions = <?php echo count($questions); ?>;
+    var answeredQuestions = 0;
+    var correctAnswers = 0;
+    
+    // Check all questions
+    for(var i = 0; i < totalQuestions; i++) {
+        var selectedAnswer = document.querySelector('input[name="question_' + i + '"]:checked');
+        if(selectedAnswer) {
+            answeredQuestions++;
+            if(selectedAnswer.value === selectedAnswer.dataset.correct) {
+                correctAnswers++;
+            }
         }
-    } else {
+    }
+    
+    if(answeredQuestions < totalQuestions) {
         Swal.fire({
             icon: 'warning',
-            title: 'No Answer Selected',
-            text: 'Please select an answer.',
+            title: 'Incomplete Assessment',
+            text: 'Please answer all questions before submitting.',
         });
+        return;
     }
+    
+    var score = (correctAnswers / totalQuestions) * 100;
+    
+    Swal.fire({
+        icon: 'success',
+        title: 'Assessment Completed!',
+        html: `
+            <p>Your Score: ${score}%</p>
+            <p>Correct Answers: ${correctAnswers}/${totalQuestions}</p>
+        `,
+        confirmButtonText: 'OK',
+        allowOutsideClick: false
+    }).then((result) => {
+        if (result.isConfirmed) {
+            clearAssessmentData(); // Clear the stored time when assessment is submitted
+            // TODO: Save the results to database
+            window.location.href = '/student/assessments';
+        }
+    });
 }
 
 function autoSubmit() {
@@ -167,8 +273,7 @@ function autoSubmit() {
         confirmButtonText: 'OK'
     }).then((result) => {
         if (result.isConfirmed) {
-            // TODO: Submit the assessment
-            window.location.href = '/student/assessments';
+            submitAssessment();
         }
     });
 }
