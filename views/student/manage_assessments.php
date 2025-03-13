@@ -1,4 +1,4 @@
-<?php include "sidebar.php"; ?>
+<?php include "sidebar-content.php"; ?>
 <div class="main-panel">
     <div class="content-wrapper">
         <div class="row">

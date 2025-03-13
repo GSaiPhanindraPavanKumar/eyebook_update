@@ -1,5 +1,5 @@
 <?php
-include 'sidebar.php';
+include 'sidebar-content.php';
 use Models\Database;
 use Models\PublicCourse;
 
@@ -7,7 +7,7 @@ $conn = Database::getConnection();
 if (!isset($_SESSION['student_id'])) {
     die('Student ID not set in session.');
 }
-$studentId = $_SESSION['student_id']; // Assuming student ID is stored in session
+$studentId = $_SESSION['student_id'];
 
 // Fetch enrolled courses
 $enrolledCourses = PublicCourse::getEnrolledCourses($conn, $studentId);
@@ -26,90 +26,113 @@ function custom_base64_encode($data) {
 }
 ?>
 
-<div class="main-panel">
-    <div class="content-wrapper">
+<!-- Main Content -->
+<div id="main-content" class="main-content-expanded min-h-screen bg-gray-50 dark:bg-gray-900 pt-20">
+    <div class="px-4 sm:px-6 lg:px-8 py-8 w-full max-w-9xl mx-auto">
         <?php if (isset($_SESSION['error'])): ?>
-            <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                <?php 
-                echo $_SESSION['error'];
-                unset($_SESSION['error']);
-                ?>
-                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-        <?php endif; ?>
-        <div class="row">
-            <div class="col-md-12 grid-margin">
-                <div class="row">
-                    <div class="col-12 col-xl-8 mb-4 mb-xl-0">
-                        <h3 class="font-weight-bold">Manage Public Courses</h3>
-                    </div>
+            <div class="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg dark:bg-red-900/20 dark:border-red-600 dark:text-red-400" role="alert">
+                <div class="flex items-center justify-between">
+                    <span><?php echo $_SESSION['error']; ?></span>
+                    <button type="button" class="text-red-500 hover:text-red-600 focus:outline-none" onclick="this.parentElement.parentElement.style.display='none'">
+                        <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                        </svg>
+                    </button>
                 </div>
+            </div>
+            <?php unset($_SESSION['error']); ?>
+        <?php endif; ?>
+
+        <!-- Page Header -->
+        <div class="sm:flex sm:justify-between sm:items-center mb-8">
+            <div class="mb-4 sm:mb-0">
+                <h1 class="text-2xl md:text-3xl font-bold text-gray-800 dark:text-white">Manage Public Courses</h1>
             </div>
         </div>
-        <div class="row">
-            <div class="col-md-12 grid-margin">
-                <p class="card-title mb-0" style="font-size:x-large">Enrolled Courses</p><br>
-                <div class="row">
-                    <?php if (empty($enrolledCourses)): ?>
-                        <p>You are not enrolled in any courses.</p>
-                    <?php else: ?>
-                        <?php foreach ($enrolledCourses as $course): ?>
-                            <div class="col-md-4 d-flex align-items-stretch">
-                                <div class="card mb-4" style="width: 100%;">
-                                    <div class="card-body">
-                                        <h5 class="card-title" style="font-family:cursive"><?php echo htmlspecialchars($course['name']); ?></h5>
-                                        <p class="card-text"><?php echo htmlspecialchars($course['description']); ?></p>
-                                        <?php
-                                        $hashedId = custom_base64_encode($course['id']);
-                                        ?>
-                                        <a href="/student/view_public_course/<?php echo $hashedId; ?>" class="btn btn-primary">View Course</a>
-                                        <a href="/student/view_public_lab/<?php echo $hashedId; ?>" class="btn btn-secondary ml-2">View Lab</a>
-                                    </div>
-                                </div>
-                            </div>
-                        <?php endforeach; ?>
-                    <?php endif; ?>
-                </div>
 
-                <p class="card-title mb-0" style="font-size:x-large">Featured Courses</p><br>
-                <div class="row">
-                    <?php if (empty($featuredCourses)): ?>
-                        <p>No featured courses available.</p>
-                    <?php else: ?>
-                        <?php foreach ($featuredCourses as $course): ?>
-                            <div class="col-md-4 d-flex align-items-stretch">
-                                <div class="card mb-4" style="width: 100%;">
-                                    <div class="card-body">
-                                        <h5 class="card-title" style="font-family:cursive"><?php echo htmlspecialchars($course['name']); ?></h5>
-                                        <p class="card-text"><?php echo htmlspecialchars($course['description']); ?></p>
-                                        <p class="card-text">Price: Rs<?php echo htmlspecialchars($course['price']); ?></p>
-                                        <?php if (!in_array($course['id'], $enrolledCourseIds)): ?>
-                                            <?php if ($course['price'] > 0): ?>
-                                                <form action="/student/pay_for_course" method="POST">
-                                                    <input type="hidden" name="course_id" value="<?php echo $course['id']; ?>">
-                                                    <input type="hidden" name="amount" value="<?php echo $course['price']; ?>">
-                                                    <button type="submit" class="btn btn-success">Enroll</button>
-                                                </form>
-                                            <?php else: ?>
-                                                <form action="/student/enroll_in_course" method="POST">
-                                                    <input type="hidden" name="course_id" value="<?php echo $course['id']; ?>">
-                                                    <button type="submit" class="btn btn-success">Enroll</button>
-                                                </form>
-                                            <?php endif; ?>
-                                        <?php else: ?>
-                                            <button class="btn btn-secondary" disabled>Enrolled</button>
-                                        <?php endif; ?>
-                                    </div>
+        <!-- Enrolled Courses Section -->
+        <div class="mb-8">
+            <h2 class="text-xl font-semibold text-gray-800 dark:text-white mb-4">Enrolled Courses</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <?php if (empty($enrolledCourses)): ?>
+                    <p class="text-gray-500 dark:text-gray-400">You are not enrolled in any courses.</p>
+                <?php else: ?>
+                    <?php foreach ($enrolledCourses as $course): ?>
+                        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden">
+                            <div class="p-6">
+                                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                                    <?php echo htmlspecialchars($course['name']); ?>
+                                </h3>
+                                <p class="text-gray-600 dark:text-gray-300 mb-4">
+                                    <?php echo htmlspecialchars($course['description']); ?>
+                                </p>
+                                <?php $hashedId = custom_base64_encode($course['id']); ?>
+                                <div class="flex space-x-3">
+                                    <a href="/student/view_public_course/<?php echo $hashedId; ?>" 
+                                       class="px-4 py-2 text-sm font-medium text-white bg-primary rounded-md hover:bg-primary-hover transition-colors">
+                                        View Course
+                                    </a>
+                                    <a href="/student/view_public_lab/<?php echo $hashedId; ?>" 
+                                       class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600 transition-colors">
+                                        View Lab
+                                    </a>
                                 </div>
                             </div>
-                        <?php endforeach; ?>
-                    <?php endif; ?>
-                </div>
+                        </div>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+            </div>
+        </div>
+
+        <!-- Featured Courses Section -->
+        <div>
+            <h2 class="text-xl font-semibold text-gray-800 dark:text-white mb-4">Featured Courses</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <?php if (empty($featuredCourses)): ?>
+                    <p class="text-gray-500 dark:text-gray-400">No featured courses available.</p>
+                <?php else: ?>
+                    <?php foreach ($featuredCourses as $course): ?>
+                        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden">
+                            <div class="p-6">
+                                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                                    <?php echo htmlspecialchars($course['name']); ?>
+                                </h3>
+                                <p class="text-gray-600 dark:text-gray-300 mb-2">
+                                    <?php echo htmlspecialchars($course['description']); ?>
+                                </p>
+                                <p class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                                    Price: Rs<?php echo htmlspecialchars($course['price']); ?>
+                                </p>
+                                <?php if (!in_array($course['id'], $enrolledCourseIds)): ?>
+                                    <?php if ($course['price'] > 0): ?>
+                                        <form action="/student/pay_for_course" method="POST">
+                                            <input type="hidden" name="course_id" value="<?php echo $course['id']; ?>">
+                                            <input type="hidden" name="amount" value="<?php echo $course['price']; ?>">
+                                            <button type="submit" 
+                                                    class="w-full px-4 py-2 text-sm font-medium text-white bg-success hover:bg-success/90 rounded-md transition-colors">
+                                                Enroll
+                                            </button>
+                                        </form>
+                                    <?php else: ?>
+                                        <form action="/student/enroll_in_course" method="POST">
+                                            <input type="hidden" name="course_id" value="<?php echo $course['id']; ?>">
+                                            <button type="submit" 
+                                                    class="w-full px-4 py-2 text-sm font-medium text-white bg-success hover:bg-success/90 rounded-md transition-colors">
+                                                Enroll
+                                            </button>
+                                        </form>
+                                    <?php endif; ?>
+                                <?php else: ?>
+                                    <button disabled 
+                                            class="w-full px-4 py-2 text-sm font-medium text-gray-500 bg-gray-100 rounded-md cursor-not-allowed dark:bg-gray-700 dark:text-gray-400">
+                                        Enrolled
+                                    </button>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
+                <?php endif; ?>
             </div>
         </div>
     </div>
-    <!-- content-wrapper ends -->
-    <?php include 'footer.html'; ?>
 </div>

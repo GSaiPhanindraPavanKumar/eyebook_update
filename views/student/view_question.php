@@ -1,78 +1,133 @@
-<?php include 'sidebar.php'; ?>
+<?php include 'sidebar-content.php'; ?>
 
-<!-- Add timer display at the top -->
-<div id="timer-container" style="position: fixed; top: 70px; right: 20px; z-index: 1000; box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.1); border-radius: 10px;">
-    <div class="card">
-        <div class="card-body">
-            <h5 class="card-title">Time Remaining</h5>
-            <div id="time-remaining" class="h3 mb-0"></div>
+<!-- Main Content -->
+<div id="main-content" class="main-content-expanded min-h-screen bg-gray-50 dark:bg-gray-900 pt-20">
+    <!-- Timer Display -->
+    <div id="timer-container" class="hidden fixed top-20 right-4 z-50">
+        <div class="bg-white dark:bg-gray-800 shadow-lg rounded-lg p-4 transform transition-transform duration-300 hover:scale-105">
+            <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Time Remaining</h3>
+            <div id="time-remaining" class="text-2xl font-bold text-primary"></div>
         </div>
     </div>
-</div>
 
-<div class="main-panel">
-    <div class="content-wrapper">
-        <div class="row">
-            <div class="col-md-12 grid-margin">
-                <div class="d-flex justify-content-between align-items-center">
-                    <h3 class="font-weight-bold">Question Details</h3>
-                </div>
-            </div>
+    <div class="px-4 sm:px-6 lg:px-8 py-8 w-full max-w-9xl mx-auto">
+        <!-- Header -->
+        <div class="mb-8">
+            <h1 class="text-2xl font-bold text-gray-800 dark:text-white">
+                Question Details
+            </h1>
         </div>
-        <div class="row">
-            <div class="col-md-6 grid-margin stretch-card">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title"><?php echo htmlspecialchars($question['question']); ?></h5>
-                        <p><strong>Description:</strong> <?php echo htmlspecialchars($question['description']); ?></p>
-                        <p><strong>Input:</strong> <?php echo htmlspecialchars($question['input']); ?></p>
-                        <p><strong>Output:</strong> <?php echo htmlspecialchars($question['output']); ?></p>
-                        <p><strong>Grade:</strong> <?php echo htmlspecialchars($question['grade']); ?></p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-6 grid-margin stretch-card">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">Code Compiler</h5>
-                        <form id="compiler-form">
-                            <div class="form-group">
-                                <label for="language">Select Language:</label>
-                                <select id="language" class="form-control">
-                                    <option value="python">Python</option>
-                                    <option value="javascript">JavaScript</option>
-                                    <option value="java">Java</option>
-                                    <option value="c">C</option>
-                                    <option value="cpp">C++</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label for="code">Write your code here:</label>
-                                <textarea class="form-control" id="code" name="code" rows="10"></textarea>
-                            </div>
-                            <div class="form-group">
-                                <label for="input">Input (optional):</label>
-                                <textarea class="form-control" id="input" name="input" rows="3"><?php echo htmlspecialchars($question['input']); ?></textarea>
-                            </div>
-                            <button type="button" class="btn btn-primary" id="run-code">Run Code</button>
-                            <button type="button" class="btn btn-success" id="submit-code">Submit Code</button>
-                        </form>
-                        <div id="output" class="mt-3">
-                            <pre id="output-content">Your output will appear here...</pre>
-                            <input type="text" id="program-input" placeholder="Press Enter to submit input..." style="display: none;" />
+
+        <!-- Content Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Question Details Card -->
+            <div class="bg-white dark:bg-gray-800 shadow-lg rounded-lg overflow-hidden">
+                <div class="p-6">
+                    <h2 class="text-xl font-semibold text-gray-800 dark:text-white mb-6">
+                        <?php echo htmlspecialchars($question['question']); ?>
+                    </h2>
+                    
+                    <div class="space-y-4">
+                        <div>
+                            <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Description</h3>
+                            <p class="mt-1 text-gray-900 dark:text-gray-300">
+                                <?php echo htmlspecialchars($question['description']); ?>
+                            </p>
                         </div>
-                        <div id="message" class="mt-3"></div>
+                        
+                        <div>
+                            <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Input</h3>
+                            <p class="mt-1 text-gray-900 dark:text-gray-300">
+                                <?php echo htmlspecialchars($question['input']); ?>
+                            </p>
+                        </div>
+                        
+                        <div>
+                            <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Output</h3>
+                            <p class="mt-1 text-gray-900 dark:text-gray-300">
+                                <?php echo htmlspecialchars($question['output']); ?>
+                            </p>
+                        </div>
+                        
+                        <div>
+                            <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Grade</h3>
+                            <p class="mt-1 text-gray-900 dark:text-gray-300">
+                                <?php echo htmlspecialchars($question['grade']); ?>
+                            </p>
+                        </div>
                     </div>
+                </div>
+            </div>
+
+            <!-- Code Compiler Card -->
+            <div class="bg-white dark:bg-gray-800 shadow-lg rounded-lg overflow-hidden">
+                <div class="p-6">
+                    <h2 class="text-xl font-semibold text-gray-800 dark:text-white mb-6">Code Compiler</h2>
+                    
+                    <form id="compiler-form" class="space-y-6">
+                        <div>
+                            <label for="language" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                Select Language:
+                            </label>
+                            <select id="language" 
+                                    class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                                <option value="python">Python</option>
+                                <option value="javascript">JavaScript</option>
+                                <option value="java">Java</option>
+                                <option value="c">C</option>
+                                <option value="cpp">C++</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label for="code" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                Write your code here:
+                            </label>
+                            <textarea id="code" 
+                                      name="code" 
+                                      rows="10"
+                                      class="mt-1 block w-full px-3 py-2 text-base border-gray-300 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white"></textarea>
+                        </div>
+
+                        <div>
+                            <label for="input" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                Input (optional):
+                            </label>
+                            <textarea id="input" 
+                                      name="input" 
+                                      rows="3"
+                                      class="mt-1 block w-full px-3 py-2 text-base border-gray-300 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white"><?php echo htmlspecialchars($question['input']); ?></textarea>
+                        </div>
+
+                        <div class="flex space-x-4">
+                            <button type="button" 
+                                    id="run-code"
+                                    class="px-4 py-2 text-sm font-medium text-white bg-primary rounded-md hover:bg-primary-hover transition-colors">
+                                Run Code
+                            </button>
+                            <button type="button" 
+                                    id="submit-code"
+                                    class="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-md hover:bg-green-700 transition-colors">
+                                Submit Code
+                            </button>
+                        </div>
+                    </form>
+
+                    <div id="output" class="mt-6">
+                        <pre id="output-content" 
+                             class="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg text-sm text-gray-900 dark:text-gray-300 overflow-x-auto">Your output will appear here...</pre>
+                        <input type="text" 
+                               id="program-input" 
+                               class="hidden mt-2 w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                               placeholder="Press Enter to submit input..." />
+                    </div>
+
+                    <div id="message" class="mt-4"></div>
                 </div>
             </div>
         </div>
     </div>
-    <!-- content-wrapper ends -->
-    <?php include 'footer.html'; ?>
 </div>
-
-<!-- Include Bootstrap CSS -->
-
 
 <script>
 // IndexedDB setup and helper functions
@@ -389,4 +444,26 @@ document.getElementById('submit-code').addEventListener('click', async () => {
         outputDiv.classList.add('error');
     }
 });
+
+function showMessage(message, type) {
+    const messageDiv = document.getElementById('message');
+    messageDiv.textContent = message;
+    messageDiv.className = `mt-4 p-4 rounded-lg ${
+        type === 'success' 
+            ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400'
+            : 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400'
+    }`;
+}
+
+// Update error display
+function showError(outputContent, message) {
+    outputContent.textContent = message;
+    outputContent.classList.add('text-red-600', 'dark:text-red-400');
+}
 </script>
+
+<style>
+.error {
+    @apply text-red-600 dark:text-red-400;
+}
+</style>

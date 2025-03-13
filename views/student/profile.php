@@ -1,5 +1,5 @@
 <?php
-include 'sidebar.php';
+include 'sidebar-content.php';
 require 'vendor/autoload.php';
 require_once __DIR__ . '/../../aws_config.php';
 
@@ -133,90 +133,145 @@ $dept = isset($userData['dept']) ? htmlspecialchars($userData['dept']) : "Journa
 $university = isset($userData['university_name']) ? htmlspecialchars($userData['university_name']) : "Unknown University";
 ?>
 
-<!-- HTML Content -->
-<div class="main-panel">
-    <div class="content-wrapper">
-        <div class="row">
-            <div class="col-md-12 grid-margin stretch-card">
-                <div class="card">
-                    <div class="card-body" style="text-align: center;">
-                        <!-- Profile Image -->
-                        <div style="display: flex; justify-content: center; margin-bottom: 20px;">
-                            <?php if ($profileImage): ?>
-                                <img src="<?php echo $profileImage; ?>" alt="Profile Image" style="border-radius: 50%; width: 100px; height: 100px;">
-                            <?php else: ?>
-                                <i class="fas fa-user-circle" style="font-size: 100px; color: gray;"></i>
-                            <?php endif; ?>
-                        </div>
+<!-- Main Content -->
+<div id="main-content" class="main-content-expanded min-h-screen bg-gray-50 dark:bg-gray-900 pt-20">
+    <div class="px-4 sm:px-6 lg:px-8 py-8 w-full max-w-9xl mx-auto">
+        <!-- Profile Card -->
+        <div class="bg-white dark:bg-gray-800 shadow-lg rounded-lg overflow-hidden">
+            <div class="p-8">
+                <!-- Profile Header -->
+                <div class="text-center">
+                    <!-- Profile Image -->
+                    <div class="mb-6">
+                        <?php if ($profileImage): ?>
+                            <img src="<?php echo $profileImage; ?>" 
+                                 alt="Profile Image" 
+                                 class="h-32 w-32 rounded-full mx-auto object-cover border-4 border-white dark:border-gray-700 shadow-lg">
+                        <?php else: ?>
+                            <div class="h-32 w-32 rounded-full mx-auto bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+                                <svg class="h-20 w-20 text-gray-400 dark:text-gray-500" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                                </svg>
+                            </div>
+                        <?php endif; ?>
+                    </div>
 
-                        <!-- User Info -->
-                        <h2 style="margin: 0;"><?php echo $name; ?></h2>
-                        <p style="color: gray;">Student</p>
+                    <!-- Profile Info -->
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-1">
+                        <?php echo $name; ?>
+                    </h2>
+                    <p class="text-gray-500 dark:text-gray-400 mb-6">Student</p>
 
-                        <!-- Additional User Details -->
-                        <div style="margin-top: 20px;">
-                            <p><strong>Email:</strong> <?php echo $email; ?></p>
-                            <p><strong>Registration Number:</strong> <?php echo $regd_no; ?></p>
-                            <p><strong>Section:</strong> <?php echo $section; ?></p>
-                            <p><strong>Stream:</strong> <?php echo $stream; ?></p>
-                            <p><strong>Year:</strong> <?php echo $year; ?></p>
-                            <p><strong>Dept:</strong> <?php echo $dept; ?></p>
-                            <p><strong>University:</strong> <?php echo $university; ?></p>
-                        </div>
+                    <!-- Action Buttons -->
+                    <div class="flex justify-center space-x-4 mb-8">
+                        <button onclick="document.getElementById('editProfileForm').style.display='block'" 
+                                class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600 transition-colors">
+                            Edit Profile
+                        </button>
+                        <a href="updatePassword" 
+                           class="px-4 py-2 text-sm font-medium text-white bg-primary rounded-md hover:bg-primary-hover transition-colors">
+                            Update Password
+                        </a>
+                    </div>
 
-                        <!-- Edit Profile and Update Password Buttons -->
-                        <div style="margin-top: 20px;">
-                            <button class="btn btn-secondary" onclick="document.getElementById('editProfileForm').style.display='block'">Edit Profile</button>
-                            <a href="updatePassword" class="btn btn-primary">Update Password</a>
+                    <!-- User Details Grid -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl mx-auto">
+                        <div class="text-left">
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Email</p>
+                            <p class="text-base font-medium text-gray-900 dark:text-white"><?php echo $email; ?></p>
                         </div>
+                        <div class="text-left">
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Registration Number</p>
+                            <p class="text-base font-medium text-gray-900 dark:text-white"><?php echo $regd_no; ?></p>
+                        </div>
+                        <div class="text-left">
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Section</p>
+                            <p class="text-base font-medium text-gray-900 dark:text-white"><?php echo $section; ?></p>
+                        </div>
+                        <div class="text-left">
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Stream</p>
+                            <p class="text-base font-medium text-gray-900 dark:text-white"><?php echo $stream; ?></p>
+                        </div>
+                        <div class="text-left">
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Year</p>
+                            <p class="text-base font-medium text-gray-900 dark:text-white"><?php echo $year; ?></p>
+                        </div>
+                        <div class="text-left">
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Department</p>
+                            <p class="text-base font-medium text-gray-900 dark:text-white"><?php echo $dept; ?></p>
+                        </div>
+                        <div class="text-left md:col-span-2">
+                            <p class="text-sm text-gray-500 dark:text-gray-400">University</p>
+                            <p class="text-base font-medium text-gray-900 dark:text-white"><?php echo $university; ?></p>
+                        </div>
+                    </div>
 
-                        <!-- Edit Profile Form -->
-                        <div id="editProfileForm" style="display: none; margin-top: 20px;">
-                            <form action="/student/profile" method="post" enctype="multipart/form-data">
-                                <div class="form-group">
-                                    <label for="name">Name:</label>
-                                    <input type="text" class="form-control" id="name" name="name" value="<?php echo $name; ?>" required>
+                    <!-- Edit Profile Form (Hidden by default) -->
+                    <div id="editProfileForm" class="hidden mt-8 max-w-2xl mx-auto">
+                        <form action="/student/profile" method="post" enctype="multipart/form-data" class="space-y-6">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label for="name" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Name</label>
+                                    <input type="text" id="name" name="name" value="<?php echo $name; ?>" required
+                                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary dark:bg-gray-700 dark:border-gray-600 dark:text-white">
                                 </div>
-                                <div class="form-group">
-                                    <label for="email">Email:</label>
-                                    <input type="email" class="form-control" id="email" name="email" value="<?php echo $email; ?>" required>
+                                <div>
+                                    <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Email</label>
+                                    <input type="email" id="email" name="email" value="<?php echo $email; ?>" required
+                                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary dark:bg-gray-700 dark:border-gray-600 dark:text-white">
                                 </div>
-                                <div class="form-group">
-                                    <label for="regd_no">Registration Number:</label>
-                                    <input type="text" class="form-control" id="regd_no" name="regd_no" value="<?php echo $regd_no; ?>" required>
+                                <!-- Add other form fields with similar styling -->
+                                <div>
+                                    <label for="regd_no" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Registration Number</label>
+                                    <input type="text" id="regd_no" name="regd_no" value="<?php echo $regd_no; ?>" required
+                                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary dark:bg-gray-700 dark:border-gray-600 dark:text-white">
                                 </div>
-                                <div class="form-group">
-                                    <label for="section">Section:</label>
-                                    <input type="text" class="form-control" id="section" name="section" value="<?php echo $section; ?>" required>
+                                <div>
+                                    <label for="section" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Section</label>
+                                    <input type="text" id="section" name="section" value="<?php echo $section; ?>" required
+                                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary dark:bg-gray-700 dark:border-gray-600 dark:text-white">
                                 </div>
-                                <div class="form-group">
-                                    <label for="stream">Stream:</label>
-                                    <input type="text" class="form-control" id="stream" name="stream" value="<?php echo $stream; ?>" required>
+                                <div>
+                                    <label for="stream" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Stream</label>
+                                    <input type="text" id="stream" name="stream" value="<?php echo $stream; ?>" required
+                                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary dark:bg-gray-700 dark:border-gray-600 dark:text-white">
                                 </div>
-                                <div class="form-group">
-                                    <label for="year">Year:</label>
-                                    <input type="text" class="form-control" id="year" name="year" value="<?php echo $year; ?>" required>
+                                <div>
+                                    <label for="year" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Year</label>
+                                    <input type="text" id="year" name="year" value="<?php echo $year; ?>" required
+                                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary dark:bg-gray-700 dark:border-gray-600 dark:text-white">
                                 </div>
-                                <div class="form-group">
-                                    <label for="department">Dept:</label>
-                                    <input type="text" class="form-control" id="department" name="dept" value="<?php echo $dept; ?>" required>
+                                <div>
+                                    <label for="department" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Department</label>
+                                    <input type="text" id="department" name="dept" value="<?php echo $dept; ?>" required
+                                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary dark:bg-gray-700 dark:border-gray-600 dark:text-white">
                                 </div>
-                                <div class="form-group">
-                                    <label for="profile_image">Profile Image:</label>
-                                    <input type="file" class="form-control" id="profile_image" name="profile_image" accept="image/*">
-                                    <small class="form-text text-muted">Allowed file formats: .png, .jpeg, .jpg</small>
+                                <div class="md:col-span-2">
+                                    <label for="profile_image" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Profile Image</label>
+                                    <input type="file" id="profile_image" name="profile_image" accept="image/*"
+                                           class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-primary file:text-white hover:file:bg-primary-hover dark:text-gray-400">
+                                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Allowed file formats: .png, .jpeg, .jpg</p>
                                 </div>
-                                <button type="submit" class="btn btn-primary">Save Changes</button>
-                                <button type="button" class="btn btn-secondary" onclick="document.getElementById('editProfileForm').style.display='none'">Cancel</button>
-                            </form>
-                        </div>
+                            </div>
+
+                            <!-- Form Actions -->
+                            <div class="flex justify-end space-x-3">
+                                <button type="button" 
+                                        onclick="document.getElementById('editProfileForm').style.display='none'"
+                                        class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600 transition-colors">
+                                    Cancel
+                                </button>
+                                <button type="submit" 
+                                        class="px-4 py-2 text-sm font-medium text-white bg-primary rounded-md hover:bg-primary-hover transition-colors">
+                                    Save Changes
+                                </button>
+                            </div>
+                        </form>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    <!-- content-wrapper ends -->
-    <?php include 'footer.html'; ?>
 </div>
 
 <!-- Include Font Awesome -->

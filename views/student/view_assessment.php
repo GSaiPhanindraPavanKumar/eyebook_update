@@ -1,82 +1,99 @@
-<?php include "sidebar.php"; ?>
-<div class="main-panel">
-    <div class="content-wrapper">
-        <div class="row">
-            <div class="col-md-12 grid-margin">
-                <div class="card">
-                    <div class="card-body">
-                        <h4 class="card-title float-left"><?php echo htmlspecialchars($assessment['title']); ?></h4>
-                        <h5 class="float-right">Time Remaining: <span id="timer">00:00:00</span></h5>
-                        <div class="clearfix"></div>
-                        <?php 
-                        // Clean and decode the JSON string
-                        $jsonString = $assessment['questions'];
-                        $jsonString = trim($jsonString, '"');
-                        $jsonString = preg_replace('/\s+/', ' ', $jsonString);
-                        $jsonString = stripslashes($jsonString);
-                        
-                        $questions = json_decode($jsonString, true);
-                        
-                        // Debug JSON errors if needed
-                        if (json_last_error() !== JSON_ERROR_NONE) {
-                            echo '<p class="text-danger">JSON Error: ' . json_last_error_msg() . '</p>';
-                            echo '<pre>Cleaned JSON: ' . htmlspecialchars($jsonString) . '</pre>';
-                            echo '<pre>Original JSON: ' . htmlspecialchars($assessment['questions']) . '</pre>';
-                        }
+<?php include "sidebar-content.php"; ?>
 
-                        // Check if the decoded value is an array
-                        if (is_array($questions)) {
-                            // Randomize questions order
-                            shuffle($questions);
-                            echo '<form id="assessment-form">';
-                            // Loop through the questions array
-                            foreach ($questions as $index => $question) {
-                                ?>
-                                <div class="card mt-3">
-                                    <div class="card-body">
-                                        <h6 class="card-subtitle mb-2 text-muted">Question <?php echo $index + 1; ?></h6>
-                                        <p class="card-text"><?php echo htmlspecialchars($question['question']); ?></p>
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="radio" name="question_<?php echo $index; ?>" id="option_<?php echo $index; ?>_a" value="a" data-correct="<?php echo $question['ans']; ?>">
-                                            <label class="form-check-label" for="option_<?php echo $index; ?>_a">
-                                                <?php echo htmlspecialchars($question['a']); ?>
-                                            </label>
-                                        </div>
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="radio" name="question_<?php echo $index; ?>" id="option_<?php echo $index; ?>_b" value="b" data-correct="<?php echo $question['ans']; ?>">
-                                            <label class="form-check-label" for="option_<?php echo $index; ?>_b">
-                                                <?php echo htmlspecialchars($question['b']); ?>
-                                            </label>
-                                        </div>
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="radio" name="question_<?php echo $index; ?>" id="option_<?php echo $index; ?>_c" value="c" data-correct="<?php echo $question['ans']; ?>">
-                                            <label class="form-check-label" for="option_<?php echo $index; ?>_c">
-                                                <?php echo htmlspecialchars($question['c']); ?>
-                                            </label>
-                                        </div>
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="radio" name="question_<?php echo $index; ?>" id="option_<?php echo $index; ?>_d" value="d" data-correct="<?php echo $question['ans']; ?>">
-                                            <label class="form-check-label" for="option_<?php echo $index; ?>_d">
-                                                <?php echo htmlspecialchars($question['d']); ?>
-                                            </label>
-                                        </div>
-                                    </div>
-                                </div>
-                                <?php
-                            }
-                            echo '<button type="button" class="btn btn-primary btn-lg mt-4 w-100" onclick="submitAssessment()">Submit Assessment</button>';
-                            echo '</form>';
-                        } else {
-                            // Display an error message if the decoded value is not an array
-                            echo '<p class="text-danger">Error: Invalid question data.</p>';
-                        }
-                        ?>
+<!-- Main Content -->
+<div id="main-content" class="main-content-expanded min-h-screen bg-gray-50 dark:bg-gray-900 pt-20">
+    <div class="px-4 sm:px-6 lg:px-8 py-8 w-full max-w-9xl mx-auto">
+        <!-- Assessment Card -->
+        <div class="bg-white dark:bg-gray-800 shadow-lg rounded-lg overflow-hidden">
+            <div class="p-6">
+                <!-- Header -->
+                <div class="flex justify-between items-center mb-6">
+                    <h1 class="text-2xl font-bold text-gray-800 dark:text-white">
+                        <?php echo htmlspecialchars($assessment['title']); ?>
+                    </h1>
+                    <div class="text-lg font-semibold text-gray-700 dark:text-gray-300">
+                        Time Remaining: <span id="timer" class="text-primary">00:00:00</span>
                     </div>
                 </div>
+
+                <?php 
+                // Clean and decode the JSON string
+                $jsonString = $assessment['questions'];
+                $jsonString = trim($jsonString, '"');
+                $jsonString = preg_replace('/\s+/', ' ', $jsonString);
+                $jsonString = stripslashes($jsonString);
+                
+                $questions = json_decode($jsonString, true);
+                
+                // Debug JSON errors if needed
+                if (json_last_error() !== JSON_ERROR_NONE) {
+                    echo '<div class="p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg dark:bg-red-900/20 dark:border-red-600 dark:text-red-400">';
+                    echo '<p>JSON Error: ' . json_last_error_msg() . '</p>';
+                    echo '<pre class="mt-2 text-sm">' . htmlspecialchars($jsonString) . '</pre>';
+                    echo '<pre class="mt-2 text-sm">' . htmlspecialchars($assessment['questions']) . '</pre>';
+                    echo '</div>';
+                }
+
+                // Check if the decoded value is an array
+                if (is_array($questions)) {
+                    // Randomize questions order
+                    shuffle($questions);
+                    echo '<form id="assessment-form" class="space-y-6">';
+                    // Loop through the questions array
+                    foreach ($questions as $index => $question) {
+                        ?>
+                        <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-6">
+                            <div class="mb-4">
+                                <h2 class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">
+                                    Question <?php echo $index + 1; ?>
+                                </h2>
+                                <p class="text-gray-900 dark:text-white text-lg">
+                                    <?php echo htmlspecialchars($question['question']); ?>
+                                </p>
+                            </div>
+
+                            <div class="space-y-3">
+                                <?php
+                                $options = [
+                                    'a' => $question['a'],
+                                    'b' => $question['b'],
+                                    'c' => $question['c'],
+                                    'd' => $question['d']
+                                ];
+                                foreach ($options as $key => $value):
+                                ?>
+                                <label class="flex items-center p-3 rounded-lg bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer transition-colors">
+                                    <input type="radio" 
+                                           name="question_<?php echo $index; ?>" 
+                                           value="<?php echo $key; ?>" 
+                                           data-correct="<?php echo $question['ans']; ?>"
+                                           class="w-4 h-4 text-primary bg-gray-100 border-gray-300 focus:ring-primary dark:bg-gray-700 dark:border-gray-600">
+                                    <span class="ml-3 text-gray-700 dark:text-gray-300">
+                                        <?php echo htmlspecialchars($value); ?>
+                                    </span>
+                                </label>
+                                <?php endforeach; ?>
+                            </div>
+                        </div>
+                        <?php
+                    }
+                    ?>
+                    <button type="button" 
+                            onclick="submitAssessment()" 
+                            class="w-full px-4 py-3 text-sm font-medium text-white bg-primary hover:bg-primary-hover rounded-lg transition-colors">
+                        Submit Assessment
+                    </button>
+                    <?php
+                    echo '</form>';
+                } else {
+                    echo '<div class="p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg dark:bg-red-900/20 dark:border-red-600 dark:text-red-400">';
+                    echo '<p>Error: Invalid question data.</p>';
+                    echo '</div>';
+                }
+                ?>
             </div>
         </div>
     </div>
-    <?php include 'footer.html'; ?>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -121,6 +138,7 @@ window.onload = function() {
         icon: 'info',
         allowOutsideClick: false,
         confirmButtonText: 'Start',
+        confirmButtonColor: '#4B49AC',
         allowEscapeKey: false
     }).then((result) => {
         if (result.isConfirmed) {
@@ -132,7 +150,6 @@ window.onload = function() {
             } else if (elem.msRequestFullscreen) {
                 elem.msRequestFullscreen();
             }
-            // Start timer immediately after confirmation
             startAssessment();
         }
     });
@@ -189,9 +206,9 @@ function storeStartTime(startTime) {
 }
 
 function submitAssessment() {
-    // Disable the submit button to prevent multiple submissions
     const submitButton = document.querySelector('button[onclick="submitAssessment()"]');
     submitButton.disabled = true;
+    submitButton.classList.add('opacity-50', 'cursor-not-allowed');
     
     var totalQuestions = <?php echo count($questions); ?>;
     var answeredQuestions = 0;
@@ -209,10 +226,13 @@ function submitAssessment() {
     }
     
     if(answeredQuestions < totalQuestions) {
+        submitButton.disabled = false;
+        submitButton.classList.remove('opacity-50', 'cursor-not-allowed');
         Swal.fire({
             icon: 'warning',
             title: 'Incomplete Assessment',
             text: 'Please answer all questions before submitting.',
+            confirmButtonColor: '#4B49AC'
         });
         return;
     }
@@ -220,30 +240,32 @@ function submitAssessment() {
     var score = (correctAnswers / totalQuestions) * 100;
     
     // Send results to server
+    const formData = new URLSearchParams();
+    formData.append('assessment_id', <?php echo $assessment['id']; ?>);
+    formData.append('score', score);
+    formData.append('total_questions', totalQuestions);
+    formData.append('correct_answers', correctAnswers);
+
     fetch('/student/submit_assessment_result', {
         method: 'POST',
         headers: {
-            'Content-Type': 'application/json',
+            'Content-Type': 'application/x-www-form-urlencoded',
         },
-        body: JSON.stringify({
-            assessment_id: <?php echo $assessment['id']; ?>,
-            score: score,
-            total_questions: totalQuestions,
-            correct_answers: correctAnswers
-        })
+        body: formData.toString()
     })
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            clearInterval(timerVars.timerInterval);  // Clear timer
+            clearInterval(timerVars.timerInterval);
             Swal.fire({
                 icon: 'success',
                 title: 'Assessment Completed!',
                 html: `
-                    <p>Your Score: ${score}%</p>
+                    <p class="mb-2">Your Score: ${score}%</p>
                     <p>Correct Answers: ${correctAnswers}/${totalQuestions}</p>
                 `,
                 confirmButtonText: 'OK',
+                confirmButtonColor: '#4B49AC',
                 allowOutsideClick: false
             }).then((result) => {
                 if (result.isConfirmed) {
@@ -252,20 +274,24 @@ function submitAssessment() {
                 }
             });
         } else {
-            submitButton.disabled = false;  // Re-enable button on error
+            submitButton.disabled = false;
+            submitButton.classList.remove('opacity-50', 'cursor-not-allowed');
             Swal.fire({
                 icon: 'error',
                 title: 'Submission Error',
-                text: 'Failed to save assessment results. Please try again.'
+                text: 'Failed to save assessment results. Please try again.',
+                confirmButtonColor: '#4B49AC'
             });
         }
     })
     .catch(error => {
-        submitButton.disabled = false;  // Re-enable button on error
+        submitButton.disabled = false;
+        submitButton.classList.remove('opacity-50', 'cursor-not-allowed');
         Swal.fire({
             icon: 'error',
             title: 'Submission Error',
-            text: 'An error occurred while submitting. Please try again.'
+            text: 'An error occurred while submitting. Please try again.',
+            confirmButtonColor: '#4B49AC'
         });
     });
 }

@@ -1,194 +1,107 @@
-<?php include("sidebar.php"); ?>
+<?php include("sidebar-content.php"); ?>
 
-<style>
-.xp-card {
-    background: var(--card-bg) !important;
-    border-radius: 8px;
-    padding: 25px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-    margin-bottom: 20px;
-    color: var(--text-color) !important;
-}
+<!-- Main Content -->
+<div id="main-content" class="main-content-expanded min-h-screen bg-gray-50 dark:bg-gray-900 pt-20">
+    <div class="px-4 sm:px-6 lg:px-8 py-8 w-full max-w-9xl mx-auto">
+        <!-- XP Status Card -->
+        <div class="bg-white dark:bg-gray-800 shadow-lg rounded-lg overflow-hidden">
+            <div class="p-8">
+                <h2 class="text-2xl font-bold text-gray-800 dark:text-white mb-8">
+                    Experience Points & Levels
+                </h2>
 
-.level-info {
-    text-align: center;
-    margin-bottom: 30px;
-}
+                <!-- Level Info -->
+                <div class="text-center mb-8">
+                    <div class="text-5xl font-bold text-primary dark:text-primary mb-4">
+                        Level <?php echo $userData['level']; ?>
+                    </div>
 
-.level-number {
-    font-size: 3em;
-    font-weight: bold;
-    color: var(--menu-icon) !important;
-    margin-bottom: 10px;
-}
+                    <?php if ($stars = floor($userData['level'] / 10)): ?>
+                        <div class="flex justify-center items-center space-x-1 mb-2">
+                            <?php for($i = 0; $i < $stars; $i++): ?>
+                                <svg class="w-8 h-8 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                                </svg>
+                            <?php endfor; ?>
+                        </div>
+                        <div class="text-gray-500 dark:text-gray-400">
+                            <?php echo $stars; ?> <?php echo $stars === 1 ? 'Star' : 'Stars'; ?> Earned
+                        </div>
+                    <?php endif; ?>
+                </div>
 
-.stars-container {
-    margin: 15px 0;
-}
+                <?php
+                $currentXP = $userData['xp'];
+                $currentLevel = $userData['level'];
+                $nextLevelXP = ($currentLevel + 1) * 100;
+                $progress = ($currentXP % 100);
+                $progressPercent = ($progress / 100) * 100;
+                ?>
 
-.star {
-    color: #ffd700;
-    font-size: 1.5em;
-    margin: 0 2px;
-}
-
-.progress {
-    height: 25px;
-    background-color: var(--progress-bar-bg) !important;
-    border-radius: 12px;
-    margin: 20px 0;
-    overflow: hidden;
-    border: 1px solid var(--border-color) !important;
-    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
-}
-
-.progress-bar {
-    background-color: var(--menu-icon) !important;
-    transition: width 0.6s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #ffffff !important;
-    font-weight: 500;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
-}
-
-.stats-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 20px;
-    margin-top: 30px;
-}
-
-.stat-card {
-    background: var(--card-bg) !important;
-    padding: 20px;
-    border-radius: 8px;
-    text-align: center;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-    border: 1px solid var(--border-color) !important;
-}
-
-.stat-value {
-    font-size: 1.8em;
-    font-weight: bold;
-    color: var(--menu-icon) !important;
-    margin: 10px 0;
-}
-
-.stat-label {
-    color: var(--text-color) !important;
-    font-size: 0.9em;
-}
-
-.next-level-info {
-    text-align: center;
-    margin-top: 30px;
-    padding: 20px;
-    background: var(--hover-bg) !important;
-    border-radius: 8px;
-    color: var(--menu-icon) !important;
-}
-
-.text-muted {
-    color: var(--text-color) !important;
-    opacity: 0.7;
-}
-
-/* Card title override */
-.card-title {
-    color: var(--text-color) !important;
-}
-
-/* Add these variables to both themes in sidebar.php */
-:root {
-    /* ... existing variables ... */
-    --progress-bar-bg: rgba(75, 73, 172, 0.1);
-}
-
-body.dark-theme {
-    /* ... existing variables ... */
-    --progress-bar-bg: rgba(110, 168, 254, 0.1);
-}
-</style>
-
-<div class="main-panel">
-    <div class="content-wrapper">
-        <div class="row">
-            <div class="col-md-12 grid-margin">
-                <div class="card">
-                    <div class="card-body">
-                        <h4 class="card-title">Experience Points & Levels</h4>
-                        
-                        <div class="xp-card">
-                            <div class="level-info">
-                                <div class="level-number">
-                                    Level <?php echo $userData['level']; ?>
-                                </div>
-                                
-                                <?php if ($stars = floor($userData['level'] / 10)): ?>
-                                    <div class="stars-container">
-                                        <?php for($i = 0; $i < $stars; $i++): ?>
-                                            <i class="fas fa-star star"></i>
-                                        <?php endfor; ?>
-                                    </div>
-                                    <div class="text-muted">
-                                        <?php echo $stars; ?> <?php echo $stars === 1 ? 'Star' : 'Stars'; ?> Earned
-                                    </div>
-                                <?php endif; ?>
-                            </div>
-
-                            <?php
-                            $currentXP = $userData['xp'];
-                            $currentLevel = $userData['level'];
-                            $nextLevelXP = ($currentLevel + 1) * 100;
-                            $progress = ($currentXP % 100);
-                            $progressPercent = ($progress / 100) * 100;
-                            ?>
-                            
-                            <div class="progress">
-                                <div class="progress-bar" role="progressbar" 
-                                     style="width: <?php echo $progressPercent; ?>%"
-                                     aria-valuenow="<?php echo $progress; ?>" 
-                                     aria-valuemin="0" 
-                                     aria-valuemax="100">
-                                    <?php echo $progress; ?>/100 XP
-                                </div>
-                            </div>
-
-                            <div class="stats-grid">
-                                <div class="stat-card">
-                                    <div class="stat-value"><?php echo $currentXP; ?></div>
-                                    <div class="stat-label">Total XP</div>
-                                </div>
-                                
-                                <div class="stat-card">
-                                    <div class="stat-value"><?php echo $stars; ?></div>
-                                    <div class="stat-label">Stars Earned</div>
-                                </div>
-                                
-                                <div class="stat-card">
-                                    <div class="stat-value"><?php echo $nextLevelXP - $currentXP; ?></div>
-                                    <div class="stat-label">XP to Next Level</div>
-                                </div>
-                            </div>
-
-                            <div class="next-level-info">
-                                <h5>Next Milestone</h5>
-                                <?php
-                                $nextStar = (floor($currentLevel / 10) + 1) * 10;
-                                $levelsToStar = $nextStar - $currentLevel;
-                                ?>
-                                <p>
-                                    <?php echo $levelsToStar; ?> more levels until your next star at Level <?php echo $nextStar; ?>!
-                                </p>
-                            </div>
+                <!-- Progress Bar -->
+                <div class="relative pt-1 mb-8">
+                    <div class="flex mb-2 items-center justify-between">
+                        <div class="text-sm text-gray-600 dark:text-gray-400">
+                            Progress to Next Level
+                        </div>
+                        <div class="text-sm text-gray-600 dark:text-gray-400">
+                            <?php echo $progress; ?>/100 XP
                         </div>
                     </div>
+                    <div class="overflow-hidden h-6 bg-gray-200 dark:bg-gray-700 rounded-full">
+                        <div class="h-full bg-primary rounded-full transition-all duration-500"
+                             style="width: <?php echo $progressPercent; ?>%">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Stats Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    <!-- Total XP -->
+                    <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-6 text-center">
+                        <div class="text-3xl font-bold text-primary dark:text-primary mb-2">
+                            <?php echo $currentXP; ?>
+                        </div>
+                        <div class="text-sm text-gray-600 dark:text-gray-400">
+                            Total XP
+                        </div>
+                    </div>
+
+                    <!-- Stars Earned -->
+                    <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-6 text-center">
+                        <div class="text-3xl font-bold text-primary dark:text-primary mb-2">
+                            <?php echo $stars; ?>
+                        </div>
+                        <div class="text-sm text-gray-600 dark:text-gray-400">
+                            Stars Earned
+                        </div>
+                    </div>
+
+                    <!-- XP to Next Level -->
+                    <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-6 text-center">
+                        <div class="text-3xl font-bold text-primary dark:text-primary mb-2">
+                            <?php echo $nextLevelXP - $currentXP; ?>
+                        </div>
+                        <div class="text-sm text-gray-600 dark:text-gray-400">
+                            XP to Next Level
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Next Milestone -->
+                <?php
+                $nextStar = (floor($currentLevel / 10) + 1) * 10;
+                $levelsToStar = $nextStar - $currentLevel;
+                ?>
+                <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-6 text-center">
+                    <h3 class="text-xl font-semibold text-primary dark:text-primary mb-2">
+                        Next Milestone
+                    </h3>
+                    <p class="text-gray-600 dark:text-gray-400">
+                        <?php echo $levelsToStar; ?> more levels until your next star at Level <?php echo $nextStar; ?>!
+                    </p>
                 </div>
             </div>
         </div>
     </div>
-    <?php include("footer.html"); ?>
 </div> 
