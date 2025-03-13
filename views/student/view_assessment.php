@@ -103,122 +103,96 @@ document.onkeydown = function(e) {
     }
 }
 
-// Show fullscreen prompt when page loads
-Swal.fire({
-    title: 'Start Assessment',
-    text: 'Click Start to begin the assessment in fullscreen mode',
-    icon: 'info',
-    allowOutsideClick: false,
-    confirmButtonText: 'Start'
-}).then((result) => {
-    if (result.isConfirmed) {
-        const elem = document.documentElement;
-        if (elem.requestFullscreen) {
-            elem.requestFullscreen();
-        } else if (elem.webkitRequestFullscreen) {
-            elem.webkitRequestFullscreen();
-        } else if (elem.msRequestFullscreen) {
-            elem.msRequestFullscreen();
-        }
-        // Initialize timer after user interaction
-        initializeTimer();
-    }
-});
+// Initialize variables for timer
+const timerVars = {
+    dbName: "AssessmentDB",
+    storeName: "assessmentStore",
+    assessmentId: <?php echo $assessment['id']; ?>,
+    assessmentDuration: <?php echo $assessment['duration']; ?>,
+    startTime: null,
+    timerInterval: null
+};
 
-// IndexedDB initialization
-const dbName = "AssessmentDB";
-const storeName = "assessmentStore";
-const assessmentId = <?php echo $assessment['id']; ?>;
-const assessmentDuration = <?php echo $assessment['duration']; ?>;
-
-// Initialize timer function
-function initializeTimer() {
-    const request = indexedDB.open(dbName, 1);
-
-    request.onerror = function(event) {
-        console.error("Database error: " + event.target.error);
-    };
-
-    request.onupgradeneeded = function(event) {
-        const db = event.target.result;
-        if (!db.objectStoreNames.contains(storeName)) {
-            db.createObjectStore(storeName, { keyPath: "id" });
-        }
-    };
-
-    request.onsuccess = function(event) {
-        const db = event.target.result;
-        const transaction = db.transaction([storeName], "readwrite");
-        const store = transaction.objectStore(storeName);
-        
-        // Try to get existing start time
-        const getRequest = store.get(assessmentId);
-        
-        getRequest.onsuccess = function(event) {
-            let startTime;
-            if (!event.target.result) {
-                // If no start time exists, create one
-                startTime = new Date().getTime();
-                // Store the start time
-                store.put({ id: assessmentId, startTime: startTime });
-                console.log('New start time created:', startTime);
-            } else {
-                // Use existing start time
-                startTime = event.target.result.startTime;
-                console.log('Using existing start time:', startTime);
+// Show start prompt when page loads
+window.onload = function() {
+    Swal.fire({
+        title: 'Start Assessment',
+        text: 'Click Start to begin the assessment in fullscreen mode',
+        icon: 'info',
+        allowOutsideClick: false,
+        confirmButtonText: 'Start',
+        allowEscapeKey: false
+    }).then((result) => {
+        if (result.isConfirmed) {
+            const elem = document.documentElement;
+            if (elem.requestFullscreen) {
+                elem.requestFullscreen();
+            } else if (elem.webkitRequestFullscreen) {
+                elem.webkitRequestFullscreen();
+            } else if (elem.msRequestFullscreen) {
+                elem.msRequestFullscreen();
             }
-            
-            // Calculate end time based on start time and duration
-            const endTime = startTime + (assessmentDuration * 60 * 1000);
-            console.log('End time:', endTime);
-            console.log('Current time:', new Date().getTime());
-            console.log('Duration in ms:', assessmentDuration * 60 * 1000);
-            
-            // Start the timer
-            const timerInterval = setInterval(function() {
-                const now = new Date().getTime();
-                const distance = endTime - now;
-                console.log('Distance:', distance);
+            // Start timer immediately after confirmation
+            startAssessment();
+        }
+    });
+};
 
-                if (distance < 0) {
-                    clearInterval(timerInterval);
-                    document.getElementById("timer").innerHTML = "00:00:00";
-                    autoSubmit();
-                    return;
-                }
-
-                const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-                const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-
-                const displayHours = hours < 10 ? "0" + hours : hours;
-                const displayMinutes = minutes < 10 ? "0" + minutes : minutes;
-                const displaySeconds = seconds < 10 ? "0" + seconds : seconds;
-
-                const timerDisplay = `${displayHours}:${displayMinutes}:${displaySeconds}`;
-                console.log('Timer display:', timerDisplay);
-                document.getElementById("timer").innerHTML = timerDisplay;
-            }, 1000);
-        };
-
-        getRequest.onerror = function(event) {
-            console.error("Error getting start time:", event.target.error);
-        };
-    };
+function startAssessment() {
+    // Set start time if not already set
+    if (!timerVars.startTime) {
+        timerVars.startTime = new Date().getTime();
+        // Store in IndexedDB
+        storeStartTime(timerVars.startTime);
+    }
+    
+    // Calculate end time
+    const endTime = timerVars.startTime + (timerVars.assessmentDuration * 60 * 1000);
+    
+    // Start timer
+    timerVars.timerInterval = setInterval(() => {
+        const now = new Date().getTime();
+        const distance = endTime - now;
+        
+        if (distance < 0) {
+            clearInterval(timerVars.timerInterval);
+            document.getElementById("timer").innerHTML = "00:00:00";
+            autoSubmit();
+            return;
+        }
+        
+        const hours = Math.floor(distance / (1000 * 60 * 60));
+        const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+        
+        document.getElementById("timer").innerHTML = 
+            `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    }, 1000);
 }
 
-// Function to clear timer data
-function clearAssessmentData() {
-    const request = indexedDB.open(dbName, 1);
+function storeStartTime(startTime) {
+    const request = indexedDB.open(timerVars.dbName, 1);
+    
+    request.onupgradeneeded = function(event) {
+        const db = event.target.result;
+        if (!db.objectStoreNames.contains(timerVars.storeName)) {
+            db.createObjectStore(timerVars.storeName, { keyPath: "id" });
+        }
+    };
+    
     request.onsuccess = function(event) {
         const db = event.target.result;
-        const transaction = db.transaction([storeName], "readwrite");
-        const store = transaction.objectStore(storeName);
-        store.delete(assessmentId);
+        const transaction = db.transaction([timerVars.storeName], "readwrite");
+        const store = transaction.objectStore(timerVars.storeName);
+        store.put({ id: timerVars.assessmentId, startTime: startTime });
     };
 }
 
 function submitAssessment() {
+    // Disable the submit button to prevent multiple submissions
+    const submitButton = document.querySelector('button[onclick="submitAssessment()"]');
+    submitButton.disabled = true;
+    
     var totalQuestions = <?php echo count($questions); ?>;
     var answeredQuestions = 0;
     var correctAnswers = 0;
@@ -245,21 +219,54 @@ function submitAssessment() {
     
     var score = (correctAnswers / totalQuestions) * 100;
     
-    Swal.fire({
-        icon: 'success',
-        title: 'Assessment Completed!',
-        html: `
-            <p>Your Score: ${score}%</p>
-            <p>Correct Answers: ${correctAnswers}/${totalQuestions}</p>
-        `,
-        confirmButtonText: 'OK',
-        allowOutsideClick: false
-    }).then((result) => {
-        if (result.isConfirmed) {
-            clearAssessmentData(); // Clear the stored time when assessment is submitted
-            // TODO: Save the results to database
-            window.location.href = '/student/assessments';
+    // Send results to server
+    fetch('/student/submit_assessment_result', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            assessment_id: <?php echo $assessment['id']; ?>,
+            score: score,
+            total_questions: totalQuestions,
+            correct_answers: correctAnswers
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            clearInterval(timerVars.timerInterval);  // Clear timer
+            Swal.fire({
+                icon: 'success',
+                title: 'Assessment Completed!',
+                html: `
+                    <p>Your Score: ${score}%</p>
+                    <p>Correct Answers: ${correctAnswers}/${totalQuestions}</p>
+                `,
+                confirmButtonText: 'OK',
+                allowOutsideClick: false
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    clearAssessmentData();
+                    window.location.href = '/student/assessments';
+                }
+            });
+        } else {
+            submitButton.disabled = false;  // Re-enable button on error
+            Swal.fire({
+                icon: 'error',
+                title: 'Submission Error',
+                text: 'Failed to save assessment results. Please try again.'
+            });
         }
+    })
+    .catch(error => {
+        submitButton.disabled = false;  // Re-enable button on error
+        Swal.fire({
+            icon: 'error',
+            title: 'Submission Error',
+            text: 'An error occurred while submitting. Please try again.'
+        });
     });
 }
 
@@ -276,5 +283,16 @@ function autoSubmit() {
             submitAssessment();
         }
     });
+}
+
+// Function to clear timer data
+function clearAssessmentData() {
+    const request = indexedDB.open(timerVars.dbName, 1);
+    request.onsuccess = function(event) {
+        const db = event.target.result;
+        const transaction = db.transaction([timerVars.storeName], "readwrite");
+        const store = transaction.objectStore(timerVars.storeName);
+        store.delete(timerVars.assessmentId);
+    };
 }
 </script>

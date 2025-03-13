@@ -1743,7 +1743,54 @@ class StudentController {
             exit;
         }
     
+        // Check if student has already taken this assessment
+        $stmt = $conn->prepare("SELECT * FROM assessment_results WHERE student_email = ? AND assessment_id = ?");
+        $stmt->execute([$_SESSION['email'], $id]);
+        $previousAttempt = $stmt->fetch();
+        
+        if ($previousAttempt) {
+            $_SESSION['error'] = "You have already completed this assessment. Score: " . $previousAttempt['score'] . "%";
+            header('Location: /student/view_assessments');
+            exit;
+        }
+    
         require 'views/student/view_assessment.php';
+    }
+
+    public function submitAssessmentResult() {
+        if (!isset($_SESSION['email'])) {
+            header('Location: /session-timeout');
+            exit;
+        }
+
+        $conn = Database::getConnection();
+        
+        // Get POST data
+        $data = json_decode(file_get_contents('php://input'), true);
+        
+        // Prepare the result data
+        $result = [
+            'student_email' => $_SESSION['email'],
+            'assessment_id' => $data['assessment_id'],
+            'score' => $data['score'],
+            'total_questions' => $data['total_questions'],
+            'correct_answers' => $data['correct_answers'],
+            'submission_date' => date('Y-m-d H:i:s')
+        ];
+        
+        try {
+            // Insert into assessment_results table
+            $sql = "INSERT INTO assessment_results (student_email, assessment_id, score, total_questions, correct_answers, submission_date) 
+                    VALUES (:student_email, :assessment_id, :score, :total_questions, :correct_answers, :submission_date)";
+            
+            $stmt = $conn->prepare($sql);
+            $success = $stmt->execute($result);
+            
+            echo json_encode(['success' => $success]);
+        } catch (PDOException $e) {
+            error_log("Assessment submission error: " . $e->getMessage());
+            echo json_encode(['success' => false, 'error' => 'Database error']);
+        }
     }
 }
 ?>
