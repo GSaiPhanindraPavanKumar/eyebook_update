@@ -36,10 +36,9 @@ while ($row = $stmt->fetch()) {
                     <tbody class="bg-white divide-y dark:divide-gray-700 dark:bg-gray-800">
                         <?php foreach ($assessments as $assessment): 
                             $currentTime = new DateTime();
+                            $currentTime->modify('+5 hours 30 minutes');
                             $startTime = new DateTime($assessment['start_time']);
                             $endTime = new DateTime($assessment['end_time']);
-                            $startTime->modify('-5 hours 30 minutes');
-                            $endTime->modify('-5 hours 30 minutes');
                         ?>
                             <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                                 <td class="px-4 py-3">
@@ -49,12 +48,12 @@ while ($row = $stmt->fetch()) {
                                 </td>
                                 <td class="px-4 py-3">
                                     <span class="text-sm text-gray-700 dark:text-gray-300">
-                                        <?php echo htmlspecialchars($assessment['start_time'] ?? ''); ?>
+                                        <?php echo htmlspecialchars($startTime->format('Y-m-d H:i:s') ?? ''); ?>
                                     </span>
                                 </td>
                                 <td class="px-4 py-3">
                                     <span class="text-sm text-gray-700 dark:text-gray-300">
-                                        <?php echo htmlspecialchars($assessment['end_time'] ?? ''); ?>
+                                        <?php echo htmlspecialchars($endTime->format('Y-m-d H:i:s') ?? ''); ?>
                                     </span>
                                 </td>
                                 <td class="px-4 py-3">
