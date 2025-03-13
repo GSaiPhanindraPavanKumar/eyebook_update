@@ -548,12 +548,13 @@ class Student {
         $year = date('Y');
         
         // Get last check-in
-        $stmt = $conn->prepare("SELECT last_check_in, check_in_streak FROM students WHERE id = ?");
+        $stmt = $conn->prepare("SELECT last_check_in, check_in_streak, total_check_ins FROM students WHERE id = ?");
         $stmt->execute([$studentId]);
         $result = $stmt->fetch(PDO::FETCH_ASSOC);
         
         $yesterday = date('Y-m-d', strtotime('-1 day'));
         $newStreak = ($result['last_check_in'] == $yesterday) ? $result['check_in_streak'] + 1 : 1;
+        $totalCheckIns = $result['total_check_ins'] + 1;
         
         try {
             // Start transaction
@@ -561,17 +562,17 @@ class Student {
             
             // Update student check-in status
             $sql = "UPDATE students 
-                    SET last_check_in = ?, check_in_streak = ? 
+                    SET last_check_in = ?, check_in_streak = ?, total_check_ins = ? 
                     WHERE id = ?";
             $stmt = $conn->prepare($sql);
-            $stmt->execute([$today, $newStreak, $studentId]);
+            $stmt->execute([$today, $newStreak, $totalCheckIns, $studentId]);
             
             // Store check-in history
-            $sql = "INSERT INTO student_checkins (student_id, check_in_date, check_in_time, check_in_day, check_in_month, check_in_year) 
-                    VALUES (?, ?, NOW(), ?, ?, ?)
-                    ON DUPLICATE KEY UPDATE check_in_time = NOW(), check_in_day = VALUES(check_in_day), check_in_month = VALUES(check_in_month), check_in_year = VALUES(check_in_year)";
+            $sql = "INSERT INTO student_checkins (student_id, check_in_date, check_in_time, check_in_day, check_in_month, check_in_year, streak_count) 
+                    VALUES (?, ?, NOW(), ?, ?, ?, ?)
+                    ON DUPLICATE KEY UPDATE check_in_time = NOW(), check_in_day = VALUES(check_in_day), check_in_month = VALUES(check_in_month), check_in_year = VALUES(check_in_year), streak_count = VALUES(streak_count)";
             $stmt = $conn->prepare($sql);
-            $stmt->execute([$studentId, $today, $day, $month, $year]);
+            $stmt->execute([$studentId, $today, $day, $month, $year, $newStreak]);
             
             // Commit transaction
             $conn->commit();
