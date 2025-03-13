@@ -4262,5 +4262,54 @@ class AdminController {
         header('Location: /admin/manage_assessments');
         exit();
     }
+
+    public function getAssessmentResults($id) {
+
+
+        $conn = Database::getConnection();
+        $stmt = $conn->prepare("SELECT * FROM assessment_results WHERE assessment_id = ? ORDER BY submission_date DESC");
+        $stmt->execute([$id]);
+        $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        header('Content-Type: application/json');
+        echo json_encode($results);
+    }
+
+    public function exportAssessmentResults() {
+
+        $conn = Database::getConnection();
+        
+        // Get all results with assessment titles
+        $sql = "SELECT 
+            a.title as assessment_title,
+            r.student_email,
+            r.score,
+            r.correct_answers,
+            r.total_questions,
+            r.submission_date
+            FROM assessment_results r
+            JOIN assessments a ON r.assessment_id = a.id
+            ORDER BY a.title, r.submission_date DESC";
+        
+        $results = $conn->query($sql)->fetchAll(PDO::FETCH_ASSOC);
+        
+        // Create CSV
+        $filename = "assessment_results_" . date('Y-m-d_H-i-s') . ".csv";
+        header('Content-Type: text/csv');
+        header('Content-Disposition: attachment; filename="' . $filename . '"');
+        
+        $output = fopen('php://output', 'w');
+        
+        // Add headers
+        fputcsv($output, array_keys($results[0]));
+        
+        // Add data
+        foreach ($results as $row) {
+            fputcsv($output, $row);
+        }
+        
+        fclose($output);
+        exit;
+    }
 }
 ?>

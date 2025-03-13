@@ -133,8 +133,12 @@ $(document).ready(function(){
                         var jsonString = match ? match[1] : textContent;
                         try {
                             var parsedQuestions = JSON.parse(jsonString);
-                            // Populate the textarea with the generated JSON (pretty printed)
-                            $('#questions').val(JSON.stringify(parsedQuestions, null, 2));
+                            // Format the JSON properly for database storage
+                            var formattedJson = JSON.stringify(parsedQuestions);
+                            // Remove any escaped characters that might cause issues
+                            formattedJson = formattedJson.replace(/\\/g, '');
+                            // Populate the textarea with the formatted JSON
+                            $('#questions').val(formattedJson);
                             Swal.fire({
                                 icon: 'success',
                                 title: 'Questions Generated',
@@ -171,5 +175,49 @@ $(document).ready(function(){
             }
         });
     });
+
+    $('form').on('submit', function(e) {
+        var questionsJson = $('#questions').val();
+        try {
+            // Validate JSON format
+            JSON.parse(questionsJson);
+        } catch(e) {
+            e.preventDefault();
+            Swal.fire({
+                icon: 'error',
+                title: 'Invalid JSON Format',
+                text: 'Please ensure the questions are in valid JSON format.'
+            });
+            return false;
+        }
+    });
 });
 </script>
+
+<?php
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Validate questions JSON
+    $questions = $_POST['questions'];
+    
+    // Decode and re-encode to ensure proper JSON format
+    $decoded = json_decode($questions, true);
+    if (json_last_error() === JSON_ERROR_NONE) {
+        // Re-encode without pretty printing and escaping
+        $questions = json_encode($decoded, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        
+        // Now $questions contains properly formatted JSON for database storage
+        // ... rest of your database insertion code ...
+        
+    } else {
+        // Handle invalid JSON
+        echo "<script>
+            Swal.fire({
+                icon: 'error',
+                title: 'Invalid JSON Format',
+                text: 'Please ensure the questions are in valid JSON format.'
+            });
+        </script>";
+        exit;
+    }
+}
+?>
