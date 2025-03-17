@@ -34,7 +34,12 @@ while ($row = $stmt->fetch()) {
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y dark:divide-gray-700 dark:bg-gray-800">
-                        <?php foreach ($assessments as $assessment): ?>
+                        <?php foreach ($assessments as $assessment): 
+                            $currentTime = new DateTime();
+                            $currentTime->modify('+5 hours 30 minutes');
+                            $startTime = new DateTime($assessment['start_time']);
+                            $endTime = new DateTime($assessment['end_time']);
+                        ?>
                             <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                                 <td class="px-4 py-3">
                                     <span class="text-sm font-medium text-gray-900 dark:text-white">
@@ -43,12 +48,12 @@ while ($row = $stmt->fetch()) {
                                 </td>
                                 <td class="px-4 py-3">
                                     <span class="text-sm text-gray-700 dark:text-gray-300">
-                                        <?php echo htmlspecialchars($assessment['start_time'] ?? ''); ?>
+                                        <?php echo htmlspecialchars($startTime->format('Y-m-d H:i:s') ?? ''); ?>
                                     </span>
                                 </td>
                                 <td class="px-4 py-3">
                                     <span class="text-sm text-gray-700 dark:text-gray-300">
-                                        <?php echo htmlspecialchars($assessment['end_time'] ?? ''); ?>
+                                        <?php echo htmlspecialchars($endTime->format('Y-m-d H:i:s') ?? ''); ?>
                                     </span>
                                 </td>
                                 <td class="px-4 py-3">
@@ -74,11 +79,15 @@ while ($row = $stmt->fetch()) {
                                                 class="px-3 py-1 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600 transition-colors">
                                             View Result
                                         </button>
-                                    <?php else: ?>
+                                    <?php elseif ($currentTime >= $startTime && $currentTime <= $endTime): ?>
                                         <a href="/student/view_assessment/<?php echo $assessment['id']; ?>" 
                                            class="px-3 py-1 text-sm font-medium text-white bg-primary rounded-md hover:bg-primary-hover transition-colors">
                                             Start Assessment
                                         </a>
+                                    <?php else: ?>
+                                        <span class="px-3 py-1 text-sm font-medium text-gray-700 bg-gray-100 rounded-md dark:bg-gray-700 dark:text-gray-300">
+                                            Not Available
+                                        </span>
                                     <?php endif; ?>
                                 </td>
                             </tr>
