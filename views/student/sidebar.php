@@ -138,7 +138,7 @@ if ($userData) {
     </nav>
     <div class="container-fluid page-body-wrapper">
         <!-- partial:partials/_settings-panel.html -->
-        <div id="chatbot-trigger" style="position: fixed; bottom: 100px; right: 30px; z-index: 1032; background-color: #4B49AC; width: 45px; height: 45px; border-radius: 100%; cursor: pointer; transition: rotate .3s ease; color: white; display: flex; align-items: center; justify-content: center;" onclick="openChatbot()">
+        <div id="chatbot-trigger" style="position: fixed; bottom: 100px; right: 30px; z-index: 1032; background-color: #4B49AC; width: 45px; height: 45px; border-radius: 100%; cursor: pointer; transition: rotate .3s ease; color: white; display: flex; align-items: center; justify-content: center;" onclick="window.open('/student/askguru', '_blank')">
             <i class="ti-comments" style="font-size: 20px;"></i>
             <div class="pulse" style="position: absolute; width: 100%; height: 100%; border-radius: 100%; border: 3px solid #4B49AC; animation: pulse 2s infinite;"></div>
         </div>
@@ -747,6 +747,107 @@ if ($userData) {
         }
         </style>
 
+        <!-- Update the script block that handles sidebar toggle -->
+        <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Handle sidebar toggle button click
+            const sidebarToggleBtn = document.querySelector('button[data-toggle="minimize"]');
+            const body = document.querySelector('body');
+            
+            if (sidebarToggleBtn) {
+                sidebarToggleBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation(); // Prevent event bubbling
+                    body.classList.toggle('sidebar-icon-only');
+                    
+                    // Store the sidebar state
+                    localStorage.setItem('sidebarState', 
+                        body.classList.contains('sidebar-icon-only') ? 'collapsed' : 'expanded'
+                    );
+                });
+            }
+
+            // Restore sidebar state on page load
+            const sidebarState = localStorage.getItem('sidebarState');
+            if (sidebarState === 'collapsed') {
+                body.classList.add('sidebar-icon-only');
+            }
+
+            // Handle mobile sidebar toggle
+            const mobileToggleBtn = document.querySelector('.navbar-toggler-right');
+            if (mobileToggleBtn) {
+                mobileToggleBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    body.classList.toggle('sidebar-open');
+                });
+            }
+        });
+        </script>
+
+        <!-- Add these additional styles -->
+        <style>
+        /* Sidebar transition styles */
+        body {
+            transition: all 0.3s ease;
+        }
+
+        .sidebar {
+            transition: width 0.3s ease, min-width 0.3s ease;
+        }
+
+        /* Sidebar collapsed state */
+        .sidebar-icon-only .sidebar {
+            width: 70px !important;
+            min-width: 70px !important;
+        }
+
+        .sidebar-icon-only .sidebar .nav-item {
+            padding: 0;
+        }
+
+        .sidebar-icon-only .sidebar .nav-item .nav-link {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+
+        .sidebar-icon-only .sidebar .menu-title,
+        .sidebar-icon-only .sidebar .menu-arrow,
+        .sidebar-icon-only .sidebar .nav-item .nav-link span {
+            display: none !important;
+        }
+
+        .sidebar-icon-only .sidebar .nav-item .nav-link i {
+            margin: 0;
+        }
+
+        /* Main panel adjustment when sidebar is collapsed */
+        .sidebar-icon-only .main-panel {
+            width: calc(100% - 70px) !important;
+        }
+
+        /* Mobile sidebar styles */
+        @media (max-width: 991px) {
+            .sidebar {
+                position: fixed;
+                z-index: 1031;
+                top: 0;
+                left: 0;
+                bottom: 0;
+                transform: translateX(-100%);
+            }
+
+            .sidebar-open .sidebar {
+                transform: translateX(0);
+            }
+
+            .sidebar-icon-only .main-panel {
+                width: 100% !important;
+            }
+        }
+        </style>
+
         <!-- partial -->
         <!-- partial:partials/_sidebar.html -->
         <nav class="sidebar sidebar-offcanvas" id="sidebar">
@@ -938,40 +1039,27 @@ if ($userData) {
         <script>
         document.addEventListener('DOMContentLoaded', function() {
             // Handle sidebar toggle button click
-            const sidebarToggleBtn = document.querySelector('.navbar-toggler[data-toggle="minimize"]');
+            const sidebarToggleBtn = document.querySelector('button[data-toggle="minimize"]');
             const body = document.querySelector('body');
             
             if (sidebarToggleBtn) {
                 sidebarToggleBtn.addEventListener('click', function(e) {
                     e.preventDefault();
+                    e.stopPropagation(); // Prevent event bubbling
                     body.classList.toggle('sidebar-icon-only');
+                    
+                    // Store the sidebar state
+                    localStorage.setItem('sidebarState', 
+                        body.classList.contains('sidebar-icon-only') ? 'collapsed' : 'expanded'
+                    );
                 });
             }
 
-            // Handle sidebar menu item collapse
-            const menuItems = document.querySelectorAll('.nav-item');
-            menuItems.forEach(item => {
-                const link = item.querySelector('.nav-link[data-toggle="collapse"]');
-                if (link) {
-                    link.addEventListener('click', function(e) {
-                        e.preventDefault();
-                        
-                        // Get the target collapse element
-                        const targetId = this.getAttribute('href');
-                        const targetCollapse = document.querySelector(targetId);
-                        
-                        // Toggle the collapse state
-                        if (targetCollapse) {
-                            const isExpanded = this.getAttribute('aria-expanded') === 'true';
-                            this.setAttribute('aria-expanded', !isExpanded);
-                            targetCollapse.classList.toggle('show');
-                        }
-
-                        // Toggle active class on parent nav-item
-                        item.classList.toggle('active');
-                    });
-                }
-            });
+            // Restore sidebar state on page load
+            const sidebarState = localStorage.getItem('sidebarState');
+            if (sidebarState === 'collapsed') {
+                body.classList.add('sidebar-icon-only');
+            }
 
             // Handle mobile sidebar toggle
             const mobileToggleBtn = document.querySelector('.navbar-toggler-right');
@@ -982,30 +1070,6 @@ if ($userData) {
                 });
             }
         });
-
-        // Add this to preserve sidebar state across page loads
-        (function() {
-            const sidebarState = localStorage.getItem('sidebarState');
-            if (sidebarState === 'collapsed') {
-                document.body.classList.add('sidebar-icon-only');
-            }
-
-            // Update localStorage when sidebar state changes
-            const observer = new MutationObserver(function(mutations) {
-                mutations.forEach(function(mutation) {
-                    if (mutation.target.classList.contains('sidebar-icon-only')) {
-                        localStorage.setItem('sidebarState', 'collapsed');
-                    } else {
-                        localStorage.setItem('sidebarState', 'expanded');
-                    }
-                });
-            });
-
-            observer.observe(document.body, {
-                attributes: true,
-                attributeFilter: ['class']
-            });
-        })();
         </script>
 
         <style>

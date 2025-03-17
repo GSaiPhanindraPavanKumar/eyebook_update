@@ -754,7 +754,7 @@ $hasCheckedInToday = ($lastCheckIn === $today);
 
     <!-- Support Chat Icon -->
     <div class="fixed bottom-6 right-6 z-50">
-        <button onclick="toggleChat()" 
+        <button onclick="window.open('/student/askguru', '_blank')" 
                 class="bg-primary hover:bg-primary-hover text-white rounded-full p-4 shadow-lg transition-all duration-300 hover:scale-110">
             <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 

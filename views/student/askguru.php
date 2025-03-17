@@ -142,7 +142,7 @@ function askGemini($prompt) {
     }
     
     // If no predefined response, proceed with API call
-    $url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent';
+    $url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-pro-exp-02-05:generateContent';
     $api_key = 'AIzaSyCF50DaE1rLpa-IjLugLTMDCpeD-d420ko';
 
     $data = [
