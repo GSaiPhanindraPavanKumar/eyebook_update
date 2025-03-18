@@ -295,66 +295,61 @@ class Assignment {
     }
 
     public static function getAssignmentsByfacultyId($conn, $email) {
-        try {
-            // Step 1: Fetch assigned courses for the faculty
-            $sql = "SELECT assigned_courses FROM faculty WHERE email = :email";
-            $stmt = $conn->prepare($sql);
-            $stmt->execute([':email' => $email]);
-            $result = $stmt->fetch(PDO::FETCH_ASSOC);
-            $assigned_courses = $result ? json_decode($result['assigned_courses'] ?? '[]', true) : [];
-    
-            if (empty($assigned_courses)) {
-                return [];
-            }
-    
-            // Step 2: Fetch assignments from the courses
-            $placeholders = implode(',', array_fill(0, count($assigned_courses), '?'));
-            $sql = "SELECT id, name, assignments FROM courses WHERE id IN ($placeholders)";
-            $stmt = $conn->prepare($sql);
-            $stmt->execute($assigned_courses);
-            $courses = $stmt->fetchAll(PDO::FETCH_ASSOC);
-    
-            $assignment_ids = [];
-            $course_names = [];
-            foreach ($courses as $course) {
-                $course_assignments = json_decode($course['assignments'] ?? '[]', true);
-                if (is_array($course_assignments)) {
-                    $assignment_ids = array_merge($assignment_ids, $course_assignments);
-                    foreach ($course_assignments as $assignment_id) {
-                        $course_names[$assignment_id] = $course['name']; // Store course name for each assignment
-                    }
-                }
-            }
-    
-            if (empty($assignment_ids)) {
-                return [];
-            }
-    
-            // Remove duplicate assignment IDs
-            $assignment_ids = array_unique($assignment_ids);
-    
-            // Step 3: Fetch assignment details from the assignments table
-            $placeholders = implode(',', array_fill(0, count($assignment_ids), '?'));
-            $sql = "SELECT * FROM assignments WHERE id IN ($placeholders)";
-            $stmt = $conn->prepare($sql);
-            $stmt->execute($assignment_ids);
-            $assignments = $stmt->fetchAll(PDO::FETCH_ASSOC);
-    
-            // Step 4: Add course names and grade information to assignments
-            foreach ($assignments as &$assignment) {
-                $assignment['course_name'] = $course_names[$assignment['id']] ?? 'Unknown Course';
-                $sql = "SELECT submissions FROM assignments WHERE id = :assignment_id";
-                $stmt = $conn->prepare($sql);
-                $stmt->execute([':assignment_id' => $assignment['id']]);
-                $result = $stmt->fetch(PDO::FETCH_ASSOC);
-                $submissions = isset($result['submissions']) ? json_decode($result['submissions'] ?? '[]', true) : [];
-            }
-    
-            return $assignments;
-        } catch (PDOException $e) {
-            error_log("Error fetching assignments: " . $e->getMessage());
+        // Step 1: Fetch assigned courses for the student
+        $sql = "SELECT assigned_courses FROM faculty WHERE email = :email";
+        $stmt = $conn->prepare($sql);
+        $stmt->execute([':email' => $email]);
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        $assigned_courses = $result ? json_decode($result['assigned_courses'] ?? '[]', true) : [];
+
+        if (empty($assigned_courses)) {
             return [];
         }
+
+        // Step 2: Fetch assignments from the courses
+        $placeholders = implode(',', array_fill(0, count($assigned_courses), '?'));
+        $sql = "SELECT id, name, assignments FROM courses WHERE id IN ($placeholders)";
+        $stmt = $conn->prepare($sql);
+        $stmt->execute($assigned_courses);
+        $courses = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        $assignment_ids = [];
+        $course_names = [];
+        foreach ($courses as $course) {
+            $course_assignments = json_decode($course['assignments'] ?? '[]', true);
+            if (is_array($course_assignments)) {
+                $assignment_ids = array_merge($assignment_ids, $course_assignments);
+                foreach ($course_assignments as $assignment_id) {
+                    $course_names[$assignment_id] = $course['name']; // Store course name for each assignment
+                }
+            }
+        }
+
+        if (empty($assignment_ids)) {
+            return [];
+        }
+
+        // Remove duplicate assignment IDs
+        $assignment_ids = array_unique($assignment_ids);
+
+        // Step 3: Fetch assignment details from the assignments table
+        $placeholders = implode(',', array_fill(0, count($assignment_ids), '?'));
+        $sql = "SELECT * FROM assignments WHERE id IN ($placeholders)";
+        $stmt = $conn->prepare($sql);
+        $stmt->execute($assignment_ids);
+        $assignments = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        // Step 4: Add course names and grade information to assignments
+        foreach ($assignments as &$assignment) {
+            $assignment['course_name'] = $course_names[$assignment['id']] ?? 'Unknown Course';
+            $sql = "SELECT submissions FROM assignments WHERE id = :assignment_id";
+            $stmt = $conn->prepare($sql);
+            $stmt->execute([':assignment_id' => $assignment['id']]);
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+            $submissions = isset($result['submissions']) ? json_decode($result['submissions'] ?? '[]', true) : [];
+        }
+
+        return $assignments;
     }
 
     public function viewAssignment($assignment_id) {
