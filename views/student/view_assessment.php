@@ -237,21 +237,24 @@ function submitAssessment() {
         return;
     }
     
-    var score = (correctAnswers / totalQuestions) * 100;
+    var score = parseFloat(((correctAnswers / totalQuestions) * 100).toFixed(2));
     
-    // Send results to server
-    const formData = new URLSearchParams();
-    formData.append('assessment_id', <?php echo $assessment['id']; ?>);
-    formData.append('score', score);
-    formData.append('total_questions', totalQuestions);
-    formData.append('correct_answers', correctAnswers);
+    // Create the data object
+    const assessmentData = {
+        assessment_id: <?php echo $assessment['id']; ?>,
+        score: score,
+        total_questions: totalQuestions,
+        correct_answers: correctAnswers
+    };
 
+    // Send results to server using fetch with proper headers
     fetch('/student/submit_assessment_result', {
         method: 'POST',
         headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
         },
-        body: formData.toString()
+        body: JSON.stringify(assessmentData)
     })
     .then(response => response.json())
     .then(data => {
@@ -270,7 +273,7 @@ function submitAssessment() {
             }).then((result) => {
                 if (result.isConfirmed) {
                     clearAssessmentData();
-                    window.location.href = '/student/assessments';
+                    window.location.href = '/student/view_assessments';
                 }
             });
         } else {
@@ -279,7 +282,7 @@ function submitAssessment() {
             Swal.fire({
                 icon: 'error',
                 title: 'Submission Error',
-                text: 'Failed to save assessment results. Please try again.',
+                text: data.error || 'Failed to save assessment results. Please try again.',
                 confirmButtonColor: '#4B49AC'
             });
         }
@@ -287,6 +290,7 @@ function submitAssessment() {
     .catch(error => {
         submitButton.disabled = false;
         submitButton.classList.remove('opacity-50', 'cursor-not-allowed');
+        console.error('Error:', error);
         Swal.fire({
             icon: 'error',
             title: 'Submission Error',

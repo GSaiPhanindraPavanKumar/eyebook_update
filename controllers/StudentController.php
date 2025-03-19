@@ -1782,14 +1782,30 @@ class StudentController {
 
     public function submitAssessmentResult() {
         if (!isset($_SESSION['email'])) {
-            header('Location: /session-timeout');
+            error_log("Session email not set");
+            echo json_encode(['success' => false, 'error' => 'Not logged in']);
             exit;
         }
 
         $conn = Database::getConnection();
         
-        // Get POST data
-        $data = json_decode(file_get_contents('php://input'), true);
+        // Get and log raw POST data
+        $raw_data = file_get_contents('php://input');
+        error_log("Raw assessment data received: " . $raw_data);
+        
+        // Decode JSON data
+        $data = json_decode($raw_data, true);
+        
+        // Log decoded data
+        error_log("Decoded assessment data: " . print_r($data, true));
+        
+        // Check if the required data is present
+        if (!isset($data['assessment_id']) || !isset($data['score']) || 
+            !isset($data['total_questions']) || !isset($data['correct_answers'])) {
+            error_log("Missing assessment data fields. Required fields not present in: " . json_encode($data));
+            echo json_encode(['success' => false, 'error' => 'Missing assessment data']);
+            exit;
+        }
         
         // Prepare the result data
         $result = [
@@ -1808,6 +1824,12 @@ class StudentController {
             
             $stmt = $conn->prepare($sql);
             $success = $stmt->execute($result);
+            
+            if ($success) {
+                error_log("Assessment result successfully saved for student: " . $_SESSION['email']);
+            } else {
+                error_log("Failed to save assessment result for student: " . $_SESSION['email']);
+            }
             
             echo json_encode(['success' => $success]);
         } catch (PDOException $e) {
