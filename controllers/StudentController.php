@@ -1837,5 +1837,74 @@ class StudentController {
             echo json_encode(['success' => false, 'error' => 'Database error']);
         }
     }
+
+    public function updateProfileField() {
+
+        $conn = Database::getConnection();
+        $studentId = $_SESSION['student_id'];
+
+        // Get the field and value from POST data
+        $allowedFields = ['name', 'email', 'regd_no', 'section', 'stream', 'year', 'dept'];
+        
+        // Get the first key from POST data as the field name
+        $field = array_keys($_POST)[0] ?? null;
+        $value = $_POST[$field] ?? null;
+
+        if (!$field || !$value) {
+            echo json_encode(['success' => false, 'message' => 'Missing field or value']);
+            exit;
+        }
+
+        if (!in_array($field, $allowedFields)) {
+            echo json_encode(['success' => false, 'message' => 'Invalid field']);
+            exit;
+        }
+
+        // Special validation for email
+        if ($field === 'email') {
+            if (!filter_var($value, FILTER_VALIDATE_EMAIL)) {
+                echo json_encode(['success' => false, 'message' => 'Invalid email format']);
+                exit;
+            }
+
+            // Check if email already exists for another user
+            $stmt = $conn->prepare("SELECT id FROM students WHERE email = ? AND id != ?");
+            $stmt->execute([$value, $studentId]);
+            if ($stmt->fetch()) {
+                echo json_encode(['success' => false, 'message' => 'Email already in use']);
+                exit;
+            }
+        }
+
+        try {
+            // Prepare and execute the update query
+            $sql = "UPDATE students SET $field = ? WHERE id = ?";
+            $stmt = $conn->prepare($sql);
+            $success = $stmt->execute([$value, $studentId]);
+
+            if ($success) {
+                // If email was updated, update the session
+                if ($field === 'email') {
+                    $_SESSION['email'] = $value;
+                }
+
+                echo json_encode([
+                    'success' => true,
+                    'message' => ucfirst($field) . ' updated successfully'
+                ]);
+            } else {
+                echo json_encode([
+                    'success' => false,
+                    'message' => 'Failed to update ' . $field
+                ]);
+            }
+        } catch (PDOException $e) {
+            error_log("Error updating profile field: " . $e->getMessage());
+            echo json_encode([
+                'success' => false,
+                'message' => 'Database error occurred'
+            ]);
+        }
+    }
 }
 ?>
