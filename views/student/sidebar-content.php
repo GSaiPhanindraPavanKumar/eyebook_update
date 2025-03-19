@@ -135,12 +135,88 @@ if ($userData) {
                 </button>
 
                 <!-- Notifications -->
-                <div class="relative" x-data="{ open: false }">
-                    <button @click="open = !open" class="p-2 rounded-md text-gray-500 hover:text-gray-600 dark:text-gray-400 dark:hover:text-gray-300">
-                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <div x-data="notificationsData()" 
+                     @keydown.escape="showNotifications = false"
+                     @notification-received.window="handleNewNotification($event.detail)">
+                    <button @click="showNotifications = true" 
+                            class="flex-shrink-0 p-1 rounded-full text-gray-400 hover:text-gray-500 dark:text-gray-300 dark:hover:text-gray-200 relative">
+                        <span class="sr-only">Notifications</span>
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                         </svg>
+                        <span x-show="unreadCount > 0" 
+                              x-text="unreadCount"
+                              class="absolute -top-1 -right-1 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-red-100 bg-red-600 rounded-full">
+                        </span>
                     </button>
+                    
+                    <!-- Notifications Modal -->
+                    <div x-show="showNotifications" 
+                         x-transition:enter="transition ease-out duration-300"
+                         x-transition:enter-start="opacity-0"
+                         x-transition:enter-end="opacity-100"
+                         x-transition:leave="transition ease-in duration-200"
+                         x-transition:leave-start="opacity-100"
+                         x-transition:leave-end="opacity-0"
+                         class="fixed inset-0 z-50 overflow-y-auto" 
+                         aria-labelledby="modal-title" 
+                         role="dialog" 
+                         aria-modal="true"
+                         @click.away="showNotifications = false"
+                         style="display: none;">
+                        
+                        <!-- Modal backdrop -->
+                        <div class="fixed inset-0 bg-black bg-opacity-50 transition-opacity"></div>
+
+                        <!-- Modal panel -->
+                        <div class="relative min-h-screen flex items-center justify-center p-4">
+                            <div class="relative bg-white dark:bg-gray-800 rounded-lg max-w-md w-full shadow-xl">
+                                <div class="px-4 py-3 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
+                                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Notifications</h3>
+                                    <button @click="showNotifications = false" class="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300">
+                                        <span class="sr-only">Close</span>
+                                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                        </svg>
+                                    </button>
+                                </div>
+                                
+                                <div class="divide-y divide-gray-200 dark:divide-gray-700 max-h-[70vh] overflow-y-auto">
+                                    <template x-if="notifications.length > 0">
+                                        <template x-for="notification in notifications" :key="notification.id">
+                                            <a :href="notification.link" 
+                                               @click="markRead(notification.id); showNotifications = false; $event.stopPropagation();"
+                                               class="block px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700"
+                                               :class="{ 'opacity-75': notification.read }">
+                                                <div class="flex items-start">
+                                                    <div class="flex-shrink-0">
+                                                        <template x-if="notification.type === 'success'">
+                                                            <span class="w-2 h-2 bg-success rounded-full block"></span>
+                                                        </template>
+                                                        <template x-if="notification.type === 'warning'">
+                                                            <span class="w-2 h-2 bg-warning rounded-full block"></span>
+                                                        </template>
+                                                        <template x-if="notification.type === 'info'">
+                                                            <span class="w-2 h-2 bg-info rounded-full block"></span>
+                                                        </template>
+                                                    </div>
+                                                    <div class="ml-3">
+                                                        <p class="text-sm text-gray-900 dark:text-white" x-text="notification.message"></p>
+                                                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1" x-text="formatDate(notification.timestamp)"></p>
+                                                    </div>
+                                                </div>
+                                            </a>
+                                        </template>
+                                    </template>
+                                    <template x-if="notifications.length === 0">
+                                        <div class="px-4 py-3">
+                                            <p class="text-sm text-gray-500 dark:text-gray-400 text-center">No new notifications</p>
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -393,6 +469,106 @@ if ($userData) {
         }
     });
 </script> 
+
+<!-- Add this before the closing </body> tag -->
+<script>
+// IndexedDB setup for notifications
+const dbName = 'studentDB';
+const storeName = 'notifications';
+
+async function initDB() {
+    const db = await idb.openDB(dbName, 1, {
+        upgrade(db) {
+            if (!db.objectStoreNames.contains(storeName)) {
+                const store = db.createObjectStore(storeName, { keyPath: 'id', autoIncrement: true });
+                store.createIndex('read', 'read');
+                store.createIndex('timestamp', 'timestamp');
+            }
+        },
+    });
+    return db;
+}
+
+async function saveNotification(notification) {
+    const db = await initDB();
+    await db.add(storeName, {
+        ...notification,
+        timestamp: new Date().toISOString(),
+        read: false
+    });
+}
+
+async function markAsRead(notificationId) {
+    const db = await initDB();
+    const tx = db.transaction(storeName, 'readwrite');
+    const store = tx.objectStore(storeName);
+    const notification = await store.get(notificationId);
+    if (notification) {
+        notification.read = true;
+        await store.put(notification);
+    }
+    await tx.done;
+}
+
+async function getUnreadCount() {
+    const db = await initDB();
+    const tx = db.transaction(storeName, 'readonly');
+    const store = tx.objectStore(storeName);
+    const unread = await store.index('read').count(0);
+    return unread;
+}
+
+// Notifications component
+function notificationsData() {
+    return {
+        showNotifications: false,
+        notifications: [],
+        unreadCount: 0,
+        async init() {
+            const db = await initDB();
+            const tx = db.transaction(storeName, 'readonly');
+            const store = tx.objectStore(storeName);
+            this.notifications = await store.index('timestamp').getAll();
+            this.notifications.reverse();
+            this.updateUnreadCount();
+        },
+        async handleNewNotification(notification) {
+            await saveNotification(notification);
+            this.notifications.unshift({
+                ...notification,
+                timestamp: new Date().toISOString(),
+                read: false
+            });
+            this.updateUnreadCount();
+        },
+        async markRead(id) {
+            await markAsRead(id);
+            const notification = this.notifications.find(n => n.id === id);
+            if (notification) {
+                notification.read = true;
+                this.updateUnreadCount();
+            }
+        },
+        async updateUnreadCount() {
+            this.unreadCount = await getUnreadCount();
+        },
+        formatDate(timestamp) {
+            const date = new Date(timestamp);
+            const now = new Date();
+            const diff = now - date;
+            
+            if (diff < 60000) return 'Just now';
+            if (diff < 3600000) return `${Math.floor(diff/60000)}m ago`;
+            if (diff < 86400000) return `${Math.floor(diff/3600000)}h ago`;
+            if (diff < 604800000) return `${Math.floor(diff/86400000)}d ago`;
+            return date.toLocaleDateString();
+        }
+    }
+}
+</script>
+
+<!-- Add IndexedDB library -->
+<script src="https://cdn.jsdelivr.net/npm/idb@7/build/umd.js"></script>
 
 </body>
 </html> 

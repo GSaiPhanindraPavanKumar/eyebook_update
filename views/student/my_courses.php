@@ -429,101 +429,131 @@ $notifications = array_map(function($notification) {
                     <!-- Ongoing Courses Section -->
                     <div class="mb-8">
                         <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">Ongoing Courses</h2>
-                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            <?php foreach ($ongoingCourses as $course): ?>
-                                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden">
-                                    <div class="p-6">
-                                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                                            <?php echo htmlspecialchars($course['name']); ?>
-                                        </h3>
-                                        <p class="text-gray-500 dark:text-gray-400 text-sm mb-4">
-                                            <?php echo htmlspecialchars($course['description']); ?>
-                                        </p>
-                                        
-                                        <!-- Progress Bar -->
-                                        <div class="mb-4">
-                                            <div class="flex justify-between items-center mb-1">
-                                                <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Progress</span>
-                                                <span class="text-sm font-medium text-gray-700 dark:text-gray-300">
-                                                    <?php echo round($progressData[$course['id']], 1); ?>%
-                                                </span>
-                                            </div>
-                                            <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                                                <div class="bg-primary rounded-full h-2 transition-all duration-300"
-                                                     style="width: <?php echo $progressData[$course['id']]; ?>%">
+                        <?php if (empty($ongoingCourses)): ?>
+                            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
+                                <div class="text-center">
+                                    <svg class="mx-auto h-24 w-24 text-gray-400 dark:text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" 
+                                              d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                                    </svg>
+                                    <h3 class="mt-4 text-lg font-medium text-gray-900 dark:text-gray-100">No Ongoing Courses</h3>
+                                    <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">You don't have any ongoing courses at the moment.</p>
+                                    <a href="/student/manage_public_courses" 
+                                       class="mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-primary hover:bg-primary-hover focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors">
+                                        Browse Available Courses
+                                    </a>
+                                </div>
+                            </div>
+                        <?php else: ?>
+                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                <?php foreach ($ongoingCourses as $course): ?>
+                                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden">
+                                        <div class="p-6">
+                                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                                                <?php echo htmlspecialchars($course['name']); ?>
+                                            </h3>
+                                            <p class="text-gray-500 dark:text-gray-400 text-sm mb-4">
+                                                <?php echo htmlspecialchars($course['description']); ?>
+                                            </p>
+                                            
+                                            <!-- Progress Bar -->
+                                            <div class="mb-4">
+                                                <div class="flex justify-between items-center mb-1">
+                                                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Progress</span>
+                                                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                                                        <?php echo round($progressData[$course['id']], 1); ?>%
+                                                    </span>
+                                                </div>
+                                                <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                                                    <div class="bg-primary rounded-full h-2 transition-all duration-300"
+                                                         style="width: <?php echo $progressData[$course['id']]; ?>%">
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                        
-                                        <!-- Action Buttons -->
-                                        <div class="flex space-x-2">
-                                            <?php 
-                                            $hashedId = base64_encode($course['id']);
-                                            $hashedId = str_replace(['+', '/', '='], ['-', '_', ''], $hashedId);
-                                            ?>
-                                            <a href="view_course/<?php echo $hashedId; ?>" 
-                                               class="flex-1 inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-primary hover:bg-primary-hover transition-colors">
-                                                View Course
-                                            </a>
-                                            <a href="view_lab/<?php echo $hashedId; ?>" 
-                                               class="flex-1 inline-flex justify-center items-center px-4 py-2 border border-primary text-sm font-medium rounded-lg text-primary hover:bg-primary hover:text-white transition-colors">
-                                                View Lab
-                                            </a>
+                                            
+                                            <!-- Action Buttons -->
+                                            <div class="flex space-x-2">
+                                                <?php 
+                                                $hashedId = base64_encode($course['id']);
+                                                $hashedId = str_replace(['+', '/', '='], ['-', '_', ''], $hashedId);
+                                                ?>
+                                                <a href="view_course/<?php echo $hashedId; ?>" 
+                                                   class="flex-1 inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-primary hover:bg-primary-hover transition-colors">
+                                                    View Course
+                                                </a>
+                                                <a href="view_lab/<?php echo $hashedId; ?>" 
+                                                   class="flex-1 inline-flex justify-center items-center px-4 py-2 border border-primary text-sm font-medium rounded-lg text-primary hover:bg-primary hover:text-white transition-colors">
+                                                    View Lab
+                                                </a>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            <?php endforeach; ?>
-                        </div>
+                                <?php endforeach; ?>
+                            </div>
+                        <?php endif; ?>
                     </div>
 
                     <!-- Archived Courses Section -->
                     <div>
                         <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">Archived Courses</h2>
-                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            <?php foreach ($archivedCourses as $course): ?>
-                                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden opacity-75">
-                                    <div class="p-6">
-                                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                                            <?php echo htmlspecialchars($course['name']); ?>
-                                        </h3>
-                                        <p class="text-gray-500 dark:text-gray-400 text-sm mb-4">
-                                            <?php echo htmlspecialchars($course['description']); ?>
-                                        </p>
-                                        
-                                        <!-- Progress Bar -->
-                                        <div class="mb-4">
-                                            <div class="flex justify-between items-center mb-1">
-                                                <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Progress</span>
-                                                <span class="text-sm font-medium text-gray-700 dark:text-gray-300">
-                                                    <?php echo round($progressData[$course['id']], 1); ?>%
-                                                </span>
-                                            </div>
-                                            <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                                                <div class="bg-gray-500 rounded-full h-2 transition-all duration-300"
-                                                     style="width: <?php echo $progressData[$course['id']]; ?>%">
+                        <?php if (empty($archivedCourses)): ?>
+                            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
+                                <div class="text-center">
+                                    <svg class="mx-auto h-24 w-24 text-gray-400 dark:text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" 
+                                              d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
+                                    </svg>
+                                    <h3 class="mt-4 text-lg font-medium text-gray-900 dark:text-gray-100">No Archived Courses</h3>
+                                    <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">You don't have any archived courses yet.</p>
+                                </div>
+                            </div>
+                        <?php else: ?>
+                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                <?php foreach ($archivedCourses as $course): ?>
+                                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden opacity-75">
+                                        <div class="p-6">
+                                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                                                <?php echo htmlspecialchars($course['name']); ?>
+                                            </h3>
+                                            <p class="text-gray-500 dark:text-gray-400 text-sm mb-4">
+                                                <?php echo htmlspecialchars($course['description']); ?>
+                                            </p>
+                                            
+                                            <!-- Progress Bar -->
+                                            <div class="mb-4">
+                                                <div class="flex justify-between items-center mb-1">
+                                                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Progress</span>
+                                                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                                                        <?php echo round($progressData[$course['id']], 1); ?>%
+                                                    </span>
+                                                </div>
+                                                <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                                                    <div class="bg-gray-500 rounded-full h-2 transition-all duration-300"
+                                                         style="width: <?php echo $progressData[$course['id']]; ?>%">
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                        
-                                        <!-- Action Buttons -->
-                                        <div class="flex space-x-2">
-                                            <?php 
-                                            $hashedId = base64_encode($course['id']);
-                                            $hashedId = str_replace(['+', '/', '='], ['-', '_', ''], $hashedId);
-                                            ?>
-                                            <a href="view_course/<?php echo $hashedId; ?>" 
-                                               class="flex-1 inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-gray-500 hover:bg-gray-600 transition-colors">
-                                                View Course
-                                            </a>
-                                            <a href="view_lab/<?php echo $hashedId; ?>" 
-                                               class="flex-1 inline-flex justify-center items-center px-4 py-2 border border-gray-500 text-sm font-medium rounded-lg text-gray-500 hover:bg-gray-500 hover:text-white transition-colors">
-                                                View Lab
-                                            </a>
+                                            
+                                            <!-- Action Buttons -->
+                                            <div class="flex space-x-2">
+                                                <?php 
+                                                $hashedId = base64_encode($course['id']);
+                                                $hashedId = str_replace(['+', '/', '='], ['-', '_', ''], $hashedId);
+                                                ?>
+                                                <a href="view_course/<?php echo $hashedId; ?>" 
+                                                   class="flex-1 inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-gray-500 hover:bg-gray-600 transition-colors">
+                                                    View Course
+                                                </a>
+                                                <a href="view_lab/<?php echo $hashedId; ?>" 
+                                                   class="flex-1 inline-flex justify-center items-center px-4 py-2 border border-gray-500 text-sm font-medium rounded-lg text-gray-500 hover:bg-gray-500 hover:text-white transition-colors">
+                                                    View Lab
+                                                </a>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            <?php endforeach; ?>
-                        </div>
+                                <?php endforeach; ?>
+                            </div>
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>
@@ -650,83 +680,4 @@ $notifications = array_map(function($notification) {
                             <div class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">
                                 No new notifications
                             </div>
-                        `;
-                    }
-                }
-
-                // Update notification count
-                updateNotificationCount();
-
-                // Navigate to the notification link
-                window.location.href = element.href;
-            }, 300);
-        } catch (error) {
-            console.error('Error marking notification as read:', error);
-        }
-    }
-
-    // Check if notification is read
-    async function isNotificationRead(notificationId) {
-        const userId = <?php echo json_encode($studentId); ?>;
-        const key = `${userId}_${notificationId}`;
-        
-        try {
-            const tx = db.transaction(storeName, 'readonly');
-            const store = tx.objectStore(storeName);
-            const result = await store.get(key);
-            return !!result;
-        } catch (error) {
-            console.error('Error checking notification status:', error);
-            return false;
-        }
-    }
-
-    // Update notification count in the UI
-    async function updateNotificationCount() {
-        const unreadCount = await getUnreadCount();
-        const countElement = document.querySelector('.count');
-        if (countElement) {
-            if (unreadCount > 0) {
-                countElement.style.display = 'flex';
-                countElement.textContent = unreadCount;
-            } else {
-                countElement.style.display = 'none';
-            }
-        }
-    }
-
-    // Get unread notifications count
-    async function getUnreadCount() {
-        const notifications = <?php echo json_encode($notifications); ?>;
-        let unreadCount = notifications.length; // Start with total count
-        
-        for (const notification of notifications) {
-            const isRead = await isNotificationRead(notification.id);
-            if (isRead) unreadCount--; // Decrease count only for read notifications
-        }
-        
-        return unreadCount;
-    }
-
-    // Initialize when page loads
-    document.addEventListener('DOMContentLoaded', async () => {
-        try {
-            await initDB();
-            
-            // Get all notification elements
-            const notifications = document.querySelectorAll('[data-notification-id]');
-            
-            // Only add transition for smooth removal
-            notifications.forEach(notification => {
-                notification.style.transition = 'opacity 0.3s ease-out';
-            });
-
-            // Update notification count
-            await updateNotificationCount();
-        } catch (error) {
-            console.error('Error initializing IndexedDB:', error);
-        }
-    });
-    </script>
-</body>
-</html>
+                        `

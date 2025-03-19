@@ -299,6 +299,13 @@ $hasCheckedInToday = ($lastCheckIn === $today);
                                 </svg>
                                 <span class="nav-text">Assignments</span>
                             </a>
+                            <a href="/student/view_assessments" class="nav-link flex items-center px-4 py-3 text-sm font-medium text-gray-600 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-primary dark:hover:text-white group transition-all duration-300">
+                                <svg class="mr-3 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                          d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                                </svg>
+                                <span class="nav-text">Assessments</span>
+                            </a>
                         </div>
 
                         <!-- Community Section -->
@@ -363,7 +370,7 @@ $hasCheckedInToday = ($lastCheckIn === $today);
                         </div> -->
 
                         <!-- Assessments Section -->
-                        <div class="nav-category mt-4">
+                        <!-- <div class="nav-category mt-4">
                             <div class="flex items-center px-4 py-2 text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase category-header">
                                 Assessments
                             </div>
@@ -375,7 +382,7 @@ $hasCheckedInToday = ($lastCheckIn === $today);
                                 </svg>
                                 <span class="nav-text">Assessments</span>
                             </a>
-                        </div>
+                        </div> -->
 
                         <!-- Support Section -->
                         <!-- <div class="nav-category mt-4">
@@ -436,17 +443,60 @@ $hasCheckedInToday = ($lastCheckIn === $today);
                             </button>
                         </div>
 
-                        <!-- Search Bar -->
-                        <div class="flex-1 flex items-center justify-center px-2 lg:ml-6 lg:justify-end">
-                            <div class="max-w-lg w-full lg:max-w-xs">
-                                <label for="search" class="sr-only">Search</label>
-                                <div class="relative">
-                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                        <svg class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                                        </svg>
+                        <div class="p-4 bg-white dark:bg-gray-800 shadow-sm rounded-lg">
+                            <div class="max-w-4xl mx-auto">
+                                <div class="relative" x-data="searchData">
+                                    <!-- Search Input -->
+                                    <div class="relative">
+                                        <input type="text" 
+                                               x-model="searchQuery"
+                                               placeholder="Search your courses..." 
+                                               class="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-700 rounded-md leading-5 bg-white dark:bg-gray-800 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary sm:text-sm">
+                                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                            <svg class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                            </svg>
+                                        </div>
+                                        <!-- Loading Spinner -->
+                                        <div x-show="isLoading" 
+                                             class="absolute inset-y-0 right-0 pr-3 flex items-center">
+                                            <svg class="animate-spin h-4 w-4 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                            </svg>
+                                        </div>
                                     </div>
-                                    <input id="search" class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-primary focus:border-primary sm:text-sm" placeholder="Search courses..." type="search">
+
+                                    <!-- Search Results Dropdown -->
+                                    <div x-show="searchResults.length > 0" 
+                                         x-transition:enter="transition ease-out duration-200"
+                                         x-transition:enter-start="opacity-0 translate-y-1"
+                                         x-transition:enter-end="opacity-100 translate-y-0"
+                                         x-transition:leave="transition ease-in duration-150"
+                                         x-transition:leave-start="opacity-100 translate-y-0"
+                                         x-transition:leave-end="opacity-0 translate-y-1"
+                                         @click.away="searchResults = []"
+                                         class="absolute z-50 mt-2 w-full bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700">
+                                        <ul class="py-2 max-h-60 overflow-y-auto">
+                                            <template x-for="course in searchResults" :key="course.id">
+                                                <li>
+                                                    <a :href="'/student/view_course/' + course.hashedId"
+                                                       class="flex items-center px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                                                        <div class="flex-1">
+                                                            <p class="text-sm font-medium text-gray-900 dark:text-gray-100" x-text="course.name"></p>
+                                                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1" x-text="course.description"></p>
+                                                        </div>
+                                                        <div class="ml-4">
+                                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+                                                                  :class="course.status === 'ongoing' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200'"
+                                                                  x-text="course.status">
+                                                            </span>
+                                                        </div>
+                                                    </a>
+                                                </li>
+                                            </template>
+                                        </ul>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -1014,6 +1064,89 @@ $hasCheckedInToday = ($lastCheckIn === $today);
             });
         }
     }
+    </script>
+
+    <!-- Add this after the header section and before the main content -->
+
+
+    <!-- Add this script before the closing body tag -->
+    <script>
+    function searchCourses(query) {
+        if (!query || query.length < 1) {
+            this.searchResults = [];
+            return;
+        }
+
+        this.isLoading = true;
+        
+        // Get student's assigned courses and filter them directly
+        const assignedCourses = <?php 
+            // Get student's assigned courses
+            $stmt = $conn->prepare("SELECT assigned_courses FROM students WHERE id = ?");
+            $stmt->execute([$_SESSION['student_id']]);
+            $assignedCourses = json_decode($stmt->fetchColumn(), true) ?? [];
+            
+            if (!empty($assignedCourses)) {
+                // Fetch course details
+                $placeholders = str_repeat('?,', count($assignedCourses) - 1) . '?';
+                $sql = "SELECT id, name, description, status FROM courses WHERE id IN ($placeholders)";
+                $stmt = $conn->prepare($sql);
+                $stmt->execute($assignedCourses);
+                $courses = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                echo json_encode($courses);
+            } else {
+                echo '[]';
+            }
+        ?>;
+
+        // Client-side search implementation
+        const searchResults = assignedCourses.filter(course => {
+            const searchLower = query.toLowerCase();
+            const nameLower = course.name.toLowerCase();
+            const descLower = course.description.toLowerCase();
+            
+            // Prioritize matches in name
+            if (nameLower.startsWith(searchLower)) {
+                course.priority = 1;
+            } else if (nameLower.includes(searchLower)) {
+                course.priority = 2;
+            } else if (descLower.includes(searchLower)) {
+                course.priority = 3;
+            } else {
+                return false;
+            }
+            return true;
+        })
+        .sort((a, b) => {
+            // Sort by priority first, then alphabetically by name
+            if (a.priority !== b.priority) {
+                return a.priority - b.priority;
+            }
+            return a.name.localeCompare(b.name);
+        })
+        .slice(0, 10) // Limit to 10 results
+        .map(course => ({
+            ...course,
+            hashedId: btoa(course.id).replace(/[+/=]/g, m => ({ '+': '-', '/': '_', '=': '' })[m])
+        }));
+
+        this.searchResults = searchResults;
+        this.isLoading = false;
+    }
+
+    // Update the input to trigger on each keystroke
+    document.addEventListener('alpine:init', () => {
+        Alpine.data('searchData', () => ({
+            searchResults: [],
+            isLoading: false,
+            searchQuery: '',
+            init() {
+                this.$watch('searchQuery', (value) => {
+                    searchCourses.call(this, value);
+                });
+            }
+        }));
+    });
     </script>
 </body>
 </html>

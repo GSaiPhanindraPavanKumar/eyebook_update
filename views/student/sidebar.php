@@ -852,6 +852,7 @@ if ($userData) {
         <!-- partial:partials/_sidebar.html -->
         <nav class="sidebar sidebar-offcanvas" id="sidebar">
             <ul class="nav">
+                <!-- Dashboard -->
                 <li class="nav-item">
                     <a class="nav-link" href="/student/dashboard">
                         <i class="icon-grid menu-icon"></i>
@@ -861,26 +862,11 @@ if ($userData) {
 
                 <li class="nav-item"><hr></li>
 
-                <!-- <li class="nav-item">
-                    <a class="nav-link" data-toggle="collapse" href="#faculty" aria-expanded="false" aria-controls="faculty">
-                        <i class="icon-layout menu-icon"></i>
-                        <span class="menu-title">Faculty</span>
-                        <i class="menu-arrow"></i>
-                    </a>
-                    <div class="collapse" id="faculty">
-                        <ul class="nav flex-column sub-menu">
-                            <li class="nav-item"> <a class="nav-link" href="#">Upload Faculty</a></li>
-                            <li class="nav-item"> <a class="nav-link" href="add_faculty">Add Faculty</a></li>
-                           <li class="nav-item"> <a class="nav-link" href="#">Manage Faculty</a></li>
-                        </ul>
-                    </div>
-                </li> -->
-
-
+                <!-- Course Management -->
                 <li class="nav-item">
                     <a class="nav-link" data-toggle="collapse" href="#courses" aria-expanded="false" aria-controls="courses">
                         <i class="icon-columns menu-icon"></i>
-                        <span class="menu-title" >Courses</span>
+                        <span class="menu-title">Courses</span>
                         <i class="menu-arrow"></i>
                     </a>
                     <div class="collapse" id="courses">
@@ -888,150 +874,72 @@ if ($userData) {
                             <li class="nav-item"><a class="nav-link" href="/student/my_courses">My Courses</a></li>
                             <li class="nav-item"><a class="nav-link" href="/student/manage_public_courses">Paid Courses</a></li>
                             <li class="nav-item"><a class="nav-link" href="/student/virtual_classroom">Virtual Classroom</a></li>
-                            <!-- <li class="nav-item"><a class="nav-link" href="/student/manage_assignments">Assignments</a></li> -->
-                            <!-- <li class="nav-item"><a class="nav-link" href="#">Meetings</a></li>  -->
                         </ul>
                     </div>
                 </li>
 
+                <!-- Assignments & Labs -->
                 <li class="nav-item">
-                    <a class="nav-link" data-toggle="collapse" href="#discussion" aria-expanded="false" aria-controls="discussion">
-                        <i class="icon-bar-graph menu-icon"></i>
-                        <span class="menu-title" >Discussion</span>
-                        <i class="menu-arrow"></i>
+                    <a class="nav-link" href="/student/manage_assignments">
+                        <i class="icon-paper menu-icon"></i>
+                        <span class="menu-title">Assignments</span>
                     </a>
-                    <div class="collapse" id="discussion">
-                        <ul class="nav flex-column sub-menu">
-                            <li class="nav-item"> <a class="nav-link" href="/student/discussion_forum">Discussion Forum</a></li>
-                        </ul>
-                    </div>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" data-toggle="collapse" href="#lab" aria-expanded="false" aria-controls="lab">
-                        <i class="icon-columns menu-icon"></i>
-                        <span class="menu-title">Lab</span>
-                        <i class="menu-arrow"></i>
-                    </a>
-                    <div class="collapse" id="lab">
-                        <ul class="nav flex-column sub-menu">
-                            <li class="nav-item"> <a class="nav-link" href="/student/manage_contests">Contests</a></li>
-                        </ul>
-                    </div>
-                </li>
+
                 <li class="nav-item">
                     <a class="nav-link" href="/student/view_assessments">
                         <i class="icon-bar-graph menu-icon"></i>
                         <span class="menu-title">Assessments</span>
                     </a>
                 </li>
-                
-                <!-- <li class="nav-item">
-                    <a class="nav-link" data-toggle="collapse" href="#a" aria-expanded="false" aria-controls="student">
+
+                <!-- Community -->
+                <li class="nav-item">
+                    <a class="nav-link" href="/student/discussion_forum">
                         <i class="icon-bar-graph menu-icon"></i>
-                        <span class="menu-title" >Student</span>
-                        <i class="menu-arrow"></i>
+                        <span class="menu-title">Discussion Forum</span>
                     </a>
-                    <div class="collapse" id="student">
-                        <ul class="nav flex-column sub-menu">
-                        <li class="nav-item"> <a class="nav-link" href="upload_students">Upload Students</a></li>
-                            <li class="nav-item"> <a class="nav-link" href="#">Manage Student</a></li>
-                        </ul>
-                    </div>
-                </li> -->
-                <!-- <li class="nav-item">
-                    <a class="nav-link" data-toggle="collapse" href="#streams" aria-expanded="false" aria-controls="streams">
-                        <i class="icon-grid-2 menu-icon"></i>
-                        <span class="menu-title">Streams</span>
-                        <i class="menu-arrow"></i>
-                    </a>
-                    <div class="collapse" id="streams">
-                        <ul class="nav flex-column sub-menu">
-                            <li class="nav-item"> <a class="nav-link" href="streams_team">Manage Streams</a></li>
-                        </ul>
-                    </div>
-                </li> -->
+                </li>
 
-
-                <!-- <li class="nav-item">
-                    <a class="nav-link" data-toggle="collapse" href="#icons" aria-expanded="false" aria-controls="icons">
-                        <i class="icon-contract menu-icon"></i>
-                        <span class="menu-title">Icons</span>
-                        <i class="menu-arrow"></i>
-                    </a>
-                    <div class="collapse" id="icons">
-                        <ul class="nav flex-column sub-menu">
-                            <li class="nav-item"> <a class="nav-link" href="pages/icons/mdi.html">Mdi icons</a></li>
-                        </ul>
-                    </div>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" data-toggle="collapse" href="#auth" aria-expanded="false" aria-controls="auth">
-                        <i class="icon-head menu-icon"></i>
-                        <span class="menu-title">User Pages</span>
-                        <i class="menu-arrow"></i>
-                    </a>
-                    <div class="collapse" id="auth">
-                        <ul class="nav flex-column sub-menu">
-                            <li class="nav-item"> <a class="nav-link" href="pages/samples/login.html"> Login </a></li>
-                            <li class="nav-item"> <a class="nav-link" href="pages/samples/register.html"> Register </a></li>
-                        </ul>
-                    </div>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" data-toggle="collapse" href="#error" aria-expanded="false" aria-controls="error">
-                        <i class="icon-ban menu-icon"></i>
-                        <span class="menu-title">Error pages</span>
-                        <i class="menu-arrow"></i>
-                    </a>
-                    <div class="collapse" id="error">
-                        <ul class="nav flex-column sub-menu">
-                            <li class="nav-item"> <a class="nav-link" href="pages/samples/error-404.html"> 404 </a></li>
-                            <li class="nav-item"> <a class="nav-link" href="pages/samples/error-500.html"> 500 </a></li>
-                        </ul>
-                    </div>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="../pages/documentation/documentation.html">
-                        <i class="icon-paper menu-icon"></i>
-                        <span class="menu-title">Documentation</span>
-                    </a>
-                </li> -->
-
-
-                <li class="nav-item"><hr></li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/student/profile">
-                        <i class="ti-user menu-icon"></i>
-                        <span class="menu-title">Profile</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/student/updatePassword">
-                        <i class="ti-settings menu-icon"></i>
-                        <span class="menu-title">Change Password</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/student/tickets">
-                        <i class="icon-paper menu-icon"></i>
-                        <span class="menu-title">Support Tickets</span>
-                    </a>
-                </li>
+                <!-- Miscellaneous -->
                 <li class="nav-item">
                     <a class="nav-link" href="/student/xp_status">
                         <i class="ti-star menu-icon"></i>
                         <span class="menu-title">XP & Levels</span>
                     </a>
                 </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" href="/student/tickets">
+                        <i class="icon-paper menu-icon"></i>
+                        <span class="menu-title">Support Tickets</span>
+                    </a>
+                </li>
+
+                <li class="nav-item"><hr></li>
+
+                <!-- Profile Section -->
+                <li class="nav-item">
+                    <a class="nav-link" href="/student/profile">
+                        <i class="ti-user menu-icon"></i>
+                        <span class="menu-title">Profile</span>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" href="/student/updatePassword">
+                        <i class="ti-settings menu-icon"></i>
+                        <span class="menu-title">Change Password</span>
+                    </a>
+                </li>
+
                 <li class="nav-item">
                     <a class="nav-link" href="/logout">
                         <i class="ti-power-off menu-icon"></i>
                         <span class="menu-title">Logout</span>
-                </a>
-            </li>
-            
+                    </a>
+                </li>
             </ul>
-
         </nav>
         <!-- partial -->
 
