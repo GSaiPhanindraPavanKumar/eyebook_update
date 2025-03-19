@@ -41,23 +41,13 @@
                                 <input type="datetime-local" class="form-control" id="due_date" name="due_date" required>
                             </div>
                             <div class="form-group">
-                                <label for="courses">Select Courses</label>
-                                <table class="table table-bordered">
-                                    <thead>
-                                        <tr>
-                                            <th>Select</th>
-                                            <th>Course Name</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <?php foreach ($courses as $course): ?>
-                                            <tr>
-                                                <td><input type="checkbox" name="course_id[]" value="<?php echo $course['id']; ?>"></td>
-                                                <td><?php echo htmlspecialchars($course['name']); ?></td>
-                                            </tr>
-                                        <?php endforeach; ?>
-                                    </tbody>
-                                </table>
+                                <label for="course_id">Select Course</label>
+                                <select class="form-control" id="course_id" name="course_id[]" required>
+                                    <option value="">Select a course</option>
+                                    <?php foreach ($courses as $course): ?>
+                                        <option value="<?php echo $course['id']; ?>"><?php echo htmlspecialchars($course['name']); ?></option>
+                                    <?php endforeach; ?>
+                                </select>
                             </div>
                             <div class="form-group">
                                 <div class="drag-drop-zone" id="assignmentDragZone">

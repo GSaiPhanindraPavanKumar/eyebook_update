@@ -702,4 +702,7 @@ $router->get('/faculty/export_assessment_results', 'FacultyController@exportAsse
 // Add this with other student routes
 $router->get('/student/check_in_history', 'StudentController@checkInHistory');
 
+// Add this with other student routes
+$router->post('/student/update_profile_field', 'StudentController@updateProfileField');
+
 $router->run();
