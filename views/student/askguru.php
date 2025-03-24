@@ -177,7 +177,8 @@ function askGemini($prompt) {
     $response = json_decode($result, true);
     error_log(print_r($response, true));
     $text = $response['candidates'][0]['content']['parts'][0]['text'];
-        
+    $text = str_replace('```html', '', $text);
+    $text = str_replace('```', '', $text);
     return $text;
 }
 
